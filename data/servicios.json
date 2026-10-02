@@ -1,0 +1,80 @@
+{
+  "updated_at": "2026-10-02",
+  "currency": "EUR",
+  "tax_included": true,
+  "tax_label": "IVA incluido",
+  "consultations": [
+    {
+      "id": "asesoria-migratoria-60",
+      "name": "Asesoría migratoria",
+      "duration_minutes": 60,
+      "duration_label": "1 hora",
+      "description": null,
+      "prices": [
+        { "modality": "online", "label": "Online", "amount": 60 },
+        { "modality": "presencial", "label": "Presencial", "amount": 80 }
+      ],
+      "bookable": true,
+      "lead_value": "Asesoría migratoria · 1 hora"
+    },
+    {
+      "id": "asesoria-migratoria-30",
+      "name": "Asesoría migratoria",
+      "duration_minutes": 30,
+      "duration_label": "30 min",
+      "description": null,
+      "prices": [
+        { "modality": "online", "label": "Online", "amount": 30 },
+        { "modality": "presencial", "label": "Presencial", "amount": 50 }
+      ],
+      "bookable": true,
+      "lead_value": "Asesoría migratoria · 30 min"
+    },
+    {
+      "id": "orientacion-academica-30",
+      "name": "Sesión de orientación académica",
+      "duration_minutes": 30,
+      "duration_label": "30 min",
+      "description": "Esta opción es para aquellos que necesitan el servicio de búsqueda del centro de estudios más la gestión de la matriculación con el proceso migratorio de visa o estancia de estudios.",
+      "prices": [
+        { "modality": "online", "label": "Online", "amount": 45 },
+        { "modality": "presencial", "label": "Presencial", "amount": 65 }
+      ],
+      "bookable": true,
+      "lead_value": "Sesión de orientación académica · 30 min"
+    }
+  ],
+  "programs": [
+    {
+      "id": "autogestiona",
+      "name": "Programa Autogestiona",
+      "procedures_title": "Trámites disponibles en",
+      "procedures": [
+        "Estudios (estancia inicial y prórroga)",
+        "Residencia y trabajo",
+        "Modificaciones",
+        "Reagrupación familiar",
+        "Residencia para familiares de españoles",
+        "Residencia en el régimen comunitario",
+        "Arraigos",
+        "Razones humanitarias",
+        "Renovaciones de residencia",
+        "Homologación y equivalencia de títulos universitarios"
+      ],
+      "includes_title": "Todos los planes incluyen",
+      "includes": [
+        "Formularios necesarios",
+        "Presentación del expediente",
+        "Acceso a las notificaciones de extranjería",
+        "Asesoría inicial con un experto en extranjería",
+        "Cumplimentación de los formularios",
+        "Resolución de dudas sobre los requerimientos"
+      ],
+      "plans": [
+        { "id": "basico", "name": "Plan Básico", "amount": 121, "featured": false, "form_key": "basico", "lead_value": "Programa Autogestiona · Plan Básico" },
+        { "id": "estandar", "name": "Plan Estándar", "amount": 200, "featured": true, "form_key": "estandar", "lead_value": "Programa Autogestiona · Plan Estándar" },
+        { "id": "premium", "name": "Plan Premium", "amount": 300, "featured": false, "form_key": "premium", "lead_value": "Programa Autogestiona · Plan Premium" }
+      ]
+    }
+  ]
+}
