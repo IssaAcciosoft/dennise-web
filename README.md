@@ -45,8 +45,13 @@ const WHATSAPP_NUMBER = '34670647593';     // sin «+» ni espacios
 
 Todos los botones abren `https://wa.me/34670647593?text=...` con un mensaje distinto para cada
 servicio o plan. El texto va codificado para URL (por ejemplo con `encodeURIComponent` en la
-consola del navegador). Si cambia el número, buscar y reemplazar `34670647593` en los `.html` y
-en `js/main.js`.
+consola del navegador). Si cambia el número:
+
+1. Buscar y reemplazar `34670647593` en los `.html` y en `js/main.js` (enlaces `wa.me` y `tel:`,
+   JSON-LD y `WHATSAPP_NUMBER`).
+2. Buscar también el número formateado para lectura, que no contiene esa cadena:
+   `670&nbsp;647&nbsp;593` (en `index.html`, `aviso-legal.html` y `politica-privacidad.html`) y
+   `670 647 593` (en `politica-privacidad.html`).
 
 ## Publicación
 
@@ -59,8 +64,11 @@ Antes de publicar:
 
 1. **Excluir `_originales/`** (y `docs/`): en GitHub Pages y Netlify todo lo que esté en el
    repositorio se publica. Moverlos fuera del repositorio o a otra rama.
-2. Con el dominio definitivo, cambiar a URL absoluta `og:image` / `twitter:image` y las rutas
-   `image` y `logo` del JSON-LD de `index.html`, y añadir `<link rel="canonical">`.
+2. Con el dominio definitivo (p. ej. `https://DOMINIO/`), en `index.html`:
+   - cambiar a URL absoluta `og:image` / `twitter:image` (WhatsApp y las redes no muestran la
+     imagen de vista previa con rutas relativas) y las rutas `image` y `logo` del JSON-LD;
+   - añadir `<meta property="og:url" content="https://DOMINIO/">`, la propiedad
+     `"url": "https://DOMINIO/"` en el JSON-LD y `<link rel="canonical" href="https://DOMINIO/">`.
 3. Completar los datos `[PENDIENTE: …]` de las páginas legales.
 
 ## Pendiente de la cliente
@@ -76,3 +84,9 @@ Antes de publicar:
 7. Logotipo: el original dice «Gonzalez» sin tilde y así se ha reproducido; confirmar si se
    prefiere «González».
 8. Valorar alojar las tipografías en el propio servidor en lugar de Google Fonts (privacidad/RGPD).
+9. Confirmar si los precios de las asesorías (60/80 €, 30/50 €, 45/65 €) incluyen IVA. Cuando lo
+   confirme, añadir «IVA incluido» bajo «Asesorías» y quitar la salvedad del aviso legal.
+10. Idiomas de atención (¿también inglés?) y zona en la que presta servicio, para añadirlos a los
+    datos estructurados (JSON-LD: `knowsLanguage`, `areaServed`). Hoy no se indican.
+11. Validar la transcripción del artículo «8 de marzo — Voces que se unen» (sección En medios),
+    copiada literalmente del cartel publicado.

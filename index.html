@@ -95,6 +95,9 @@
     <symbol id="i-heart-hand" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.79 0l2.96 2.66"/><path d="m18 15-2-2M15 18l-2-2"/></g></symbol>
     <symbol id="i-cap" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/><path d="M22 10v6"/></g></symbol>
     <symbol id="i-mic" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3"/></g></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path fill="currentColor" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" d="M8 5.2v13.6a.6.6 0 0 0 .9.5l10.6-6.8a.6.6 0 0 0 0-1L8.9 4.7a.6.6 0 0 0-.9.5Z"/></symbol>
     <symbol id="i-clock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 6.5V12l3.5 2"/></g></symbol>
   </svg>
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
@@ -641,13 +644,18 @@
 
     <!-- ============ EMPODERANDO VOCES ============ -->
     <section class="ev" id="empoderando-voces" aria-labelledby="ev-title">
-      <div class="ev-marquee" aria-hidden="true">
-        <div class="ev-marquee-track">
+      <div class="ev-marquee" data-marquee>
+        <div class="ev-marquee-track" aria-hidden="true">
           <span>Historias reales</span><span>Personas reales</span><span>Voces que merecen un espacio</span>
           <span>Historias reales</span><span>Personas reales</span><span>Voces que merecen un espacio</span>
           <span>Historias reales</span><span>Personas reales</span><span>Voces que merecen un espacio</span>
           <span>Historias reales</span><span>Personas reales</span><span>Voces que merecen un espacio</span>
         </div>
+        <button class="ev-marquee-toggle" type="button" aria-pressed="false" data-marquee-toggle>
+          <svg class="icon ev-marquee-icon-pause" aria-hidden="true"><use href="#i-pause"/></svg>
+          <svg class="icon ev-marquee-icon-play" aria-hidden="true"><use href="#i-play"/></svg>
+          <span class="visually-hidden">Pausar animación</span>
+        </button>
       </div>
 
       <div class="container">
@@ -731,9 +739,10 @@
             <span class="ev-cta-main">Cuéntame tu historia</span>
             <span class="ev-cta-sub">Quiero compartir mi historia <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span>
           </button>
-          <noscript>
-            <p class="ev-noscript">Para enviarme tu historia, <a href="https://wa.me/34670647593?text=Hola%20Denisse%2C%20quiero%20compartir%20mi%20historia%20(Empoderando%20Voces)." target="_blank" rel="noopener">escríbeme por WhatsApp</a>.</p>
-          </noscript>
+          <a class="ev-cta nojs-only" href="https://wa.me/34670647593?text=Hola%20Denisse%2C%20quiero%20compartir%20mi%20historia%20(Empoderando%20Voces)." target="_blank" rel="noopener">
+            <span class="ev-cta-main">Cuéntame tu historia</span>
+            <span class="ev-cta-sub">Escríbeme por WhatsApp <svg class="icon" aria-hidden="true"><use href="#i-whatsapp"/></svg></span>
+          </a>
           <p class="ev-after">Tu voz puede convertirse en el comienzo de otra historia.</p>
         </div>
 
@@ -753,10 +762,10 @@
         </div>
 
         <article class="article-card" data-reveal>
-          <a class="article-thumb" href="assets/img/cartel-8m-1131.jpg" data-lightbox aria-label="Ver el artículo «8 de marzo. Voces que se unen» a tamaño completo">
+          <a class="article-thumb" href="assets/img/cartel-8m-1131.jpg" data-lightbox aria-label="Ver el cartel del artículo «8 de marzo — Voces que se unen» a tamaño completo">
             <picture>
               <source type="image/webp" srcset="assets/img/cartel-8m-1131.webp">
-              <img src="assets/img/cartel-8m-1131.jpg" width="799" height="1131" alt="Cartel del artículo «8 de marzo. Voces que se unen», de Denisse González Barbosa, publicado por Construyendo un Mundo Mejor" loading="lazy" decoding="async">
+              <img src="assets/img/cartel-8m-1131.jpg" width="799" height="1131" alt="Cartel del artículo «8 de marzo — Voces que se unen», de Denisse González Barbosa, publicado por Construyendo un Mundo Mejor" loading="lazy" decoding="async">
             </picture>
             <span class="article-zoom" aria-hidden="true"><svg class="icon"><use href="#i-expand"/></svg></span>
           </a>
@@ -770,9 +779,24 @@
             <p class="article-topic">Un artículo sobre la violencia contra las mujeres y la revictimización.</p>
             <a class="btn btn--outline" href="assets/img/cartel-8m-1131.jpg" data-lightbox>
               <svg class="icon" aria-hidden="true"><use href="#i-expand"/></svg>
-              <span>Leer el artículo completo</span>
+              <span>Ver el cartel<span class="visually-hidden"> del artículo a tamaño completo</span></span>
             </a>
           </div>
+
+          <details class="article-text">
+            <summary>
+              <span>Leer el texto del artículo</span>
+              <svg class="icon" aria-hidden="true"><use href="#i-chevron"/></svg>
+            </summary>
+            <div class="article-text-body">
+              <p class="article-text-note">Transcripción del artículo publicado por Construyendo un Mundo Mejor.</p>
+              <p>El 8 de marzo de 2026, millones de mujeres de todo el mundo saldrán a las calles por la igualdad y la justicia. Pero muchas otras lo hacen porque solas no se han atrevido a levantar la voz, o porque cuando lo hicieron, no les creyeron.</p>
+              <p>En el mundo hay 840 millones de mujeres y niñas, y 1 de cada 3 mujeres mayores de 15 años ha sufrido violencia física o sexual. Solo en los últimos 12 meses, 316 millones han sufrido violencia de su pareja, y 263 millones violencia sexual de alguien que fue pareja.</p>
+              <p>Sin embargo, todavía hay muchas mujeres que no forman parte de estas estadísticas, por que viven violencia detrás de sonrisas forzadas, matrimonios impuestos, familias obligadas a callar, manos que controlan y decisiones extremas que llevan incluso al suicidio.</p>
+              <p>¿Por qué lo hacen?<br>Si tenemos derecho a decir lo que nos pasa, a denunciar e incluso hay organismos internacionales que protegen. Lo hacen por que callar es más sencillo. Decir “estoy bien” es más fácil que decir “tengo miedo”; confiar es difícil, y denunciar no siempre garantiza protección.</p>
+              <p>Hoy existe una violencia menos visible, pero más dura: la revictimización. Cuando una mujer decide hablar, enfrenta no solo a su agresor, sino cuestionamientos, difamaciones, indiferencia institucional y procesos que la obligan a repetir su dolor. Esto puede llevar a que la víctima parezca culpable o mentirosa y se vea obligada a abandonar el proceso legal.</p>
+            </div>
+          </details>
         </article>
       </div>
     </section>
@@ -820,6 +844,10 @@
               <span>Cuéntame tu historia</span>
               <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg>
             </button>
+            <a class="btn btn--link nojs-only" href="https://wa.me/34670647593?text=Hola%20Denisse%2C%20quiero%20compartir%20mi%20historia%20(Empoderando%20Voces)." target="_blank" rel="noopener">
+              <span>Cuéntame tu historia<span class="visually-hidden"> por WhatsApp</span></span>
+              <svg class="icon" aria-hidden="true"><use href="#i-whatsapp"/></svg>
+            </a>
           </div>
         </div>
       </div>
@@ -830,7 +858,7 @@
     <div class="container footer-grid">
       <div class="footer-brand">
         <a class="footer-logo" href="#inicio">
-          <img src="assets/logo/dg-logo.svg" width="656" height="506" alt="Denisse Gonzalez — logotipo con monograma DG y balanza" loading="lazy" decoding="async">
+          <img src="assets/logo/dg-logo.svg" width="656" height="506" alt="Denisse González — volver al inicio" loading="lazy" decoding="async">
         </a>
         <p class="footer-motto">Escuchar. Conectar. Actuar.</p>
       </div>
@@ -922,7 +950,7 @@
             <label for="sf-historia">Cuéntame brevemente tu historia <span class="req" aria-hidden="true">*</span></label>
             <textarea id="sf-historia" name="historia" rows="6" maxlength="1500" required aria-describedby="sf-historia-hint sf-historia-error"></textarea>
             <div class="field-meta">
-              <p class="field-hint" id="sf-historia-hint">Máximo 1500 caracteres.</p>
+              <p class="field-hint" id="sf-historia-hint">Mínimo 20 y máximo 1500 caracteres.</p>
               <p class="field-count" aria-hidden="true"><span data-count>0</span> / 1500</p>
             </div>
             <p class="field-error" id="sf-historia-error" data-error-for="historia"></p>
@@ -956,7 +984,7 @@
           <div class="field field--full field--consent">
             <label class="consent">
               <input id="sf-consentimiento" name="consentimiento" type="checkbox" value="Sí" required aria-describedby="sf-consentimiento-error">
-              <span>He leído y acepto la <a href="politica-privacidad.html" target="_blank" rel="noopener">política de privacidad</a> y consiento el tratamiento de mis datos para que Denisse González pueda leer mi historia y contactarme. <span class="req" aria-hidden="true">*</span></span>
+              <span>He leído y acepto la <a href="politica-privacidad.html" target="_blank" rel="noopener">política de privacidad</a> y consiento expresamente el tratamiento de los datos de mi historia, incluidos los datos sensibles que decida incluir, para que Denisse González pueda leerla, contactarme y, solo si lo he indicado, compartirla públicamente. <span class="req" aria-hidden="true">*</span></span>
             </label>
             <p class="field-error" id="sf-consentimiento-error" data-error-for="consentimiento"></p>
           </div>
@@ -980,8 +1008,8 @@
 
       <div class="story-result" data-story-result hidden>
         <div class="story-result-icon" aria-hidden="true"><svg class="icon"><use href="#i-check"/></svg></div>
-        <h3 class="story-result-title" tabindex="-1" data-result-title>¡Gracias!</h3>
-        <p class="story-result-text" data-result-text></p>
+        <h3 class="story-result-title" id="story-result-title" tabindex="-1" aria-describedby="story-result-text" data-result-title>¡Gracias!</h3>
+        <p class="story-result-text" id="story-result-text" data-result-text></p>
         <div class="story-result-actions">
           <a class="btn btn--ev" href="#" target="_blank" rel="noopener" data-result-link hidden>
             <svg class="icon" aria-hidden="true"><use href="#i-whatsapp"/></svg>
@@ -994,12 +1022,15 @@
   </dialog>
 
   <!-- ============ LIGHTBOX ============ -->
-  <dialog class="lightbox" id="lightbox" aria-label="Artículo «8 de marzo. Voces que se unen» a tamaño completo" data-lightbox-dialog>
+  <dialog class="lightbox" id="lightbox" aria-label="Cartel del artículo «8 de marzo — Voces que se unen» a tamaño completo" data-lightbox-dialog>
     <div class="lightbox-inner">
       <button class="dialog-close lightbox-close" type="button" data-dialog-close aria-label="Cerrar imagen">
         <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
       </button>
-      <img src="assets/img/cartel-8m-1131.jpg" width="799" height="1131" alt="Artículo «8 de marzo. Voces que se unen. Alzar la voz para vivir libres y felices», por Denisse González Barbosa, publicado por Construyendo un Mundo Mejor" loading="lazy" decoding="async">
+      <picture>
+        <source type="image/webp" srcset="assets/img/cartel-8m-1131.webp">
+        <img src="assets/img/cartel-8m-1131.jpg" width="799" height="1131" alt="Artículo «8 de marzo — Voces que se unen. Alzar la voz para vivir libres y felices», por Denisse González Barbosa, publicado por Construyendo un Mundo Mejor. El texto completo está transcrito en la sección En medios." loading="lazy" decoding="async">
+      </picture>
     </div>
   </dialog>
 </body>

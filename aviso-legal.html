@@ -5,7 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Aviso legal · Denisse González</title>
   <meta name="description" content="Aviso legal del sitio web de Denisse González, abogada: datos identificativos, condiciones de uso, propiedad intelectual y responsabilidad.">
-  <script>document.documentElement.classList.add('js');</script>
+  <script>
+    /* «js» activa las mejoras (menú, animaciones). Si js/main.js no llega a ejecutarse
+       por completo, se retira para mostrar la versión sin JavaScript. */
+    (function (d) {
+      d.classList.add('js');
+      setTimeout(function () { if (!window.__dgReady) d.classList.remove('js'); }, 4000);
+    })(document.documentElement);
+  </script>
   <meta name="theme-color" content="#6E1D7A">
   <link rel="icon" href="assets/logo/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="assets/logo/favicon-32.png" type="image/png" sizes="32x32">
@@ -14,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Barlow:ital,wght@0,400;0,500;0,600;1,400&amp;family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&amp;display=swap">
   <link rel="stylesheet" href="css/styles.css">
-  <script src="js/main.js" defer></script>
+  <script src="js/main.js" defer onerror="document.documentElement.classList.remove('js')"></script>
   <meta name="robots" content="noindex, follow">
 </head>
 <body class="legal-page">
@@ -92,7 +99,7 @@
     <div class="container legal-body">
       <div class="legal-content">
         <h2>1. Datos identificativos</h2>
-        <p>En cumplimiento del artículo 10 de la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y de Comercio Electrónico (LSSI-CE), se facilitan los datos identificativos del titular de este sitio web:</p>
+        <p>En cumplimiento del artículo 10 de la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y de Comercio Electrónico (LSSI-CE), se facilitan los datos identificativos de la titular de este sitio web:</p>
         <dl>
           <div><dt>Titular</dt><dd>Denisse González Barbosa</dd></div>
           <div><dt>NIF / NIE</dt><dd><span class="placeholder">[PENDIENTE: NIF]</span></dd></div>
@@ -111,17 +118,17 @@
 
         <h2>3. Información de carácter general</h2>
         <p>Los contenidos de este sitio web tienen carácter informativo y general. No constituyen asesoramiento jurídico para un caso concreto ni generan por sí mismos una relación profesional. Para analizar una situación particular es necesario solicitar una asesoría.</p>
-        <p>Los precios indicados en la web incluyen el IVA cuando así se señala. Las condiciones concretas de cada servicio se confirmarán antes de su contratación. <span class="placeholder">[PENDIENTE: condiciones de contratación, forma de pago y política de cancelación]</span></p>
+        <p>Los precios indicados en la web incluyen el IVA cuando así se señala. <span class="placeholder">[PENDIENTE: confirmar si los precios de las asesorías incluyen IVA]</span> Las condiciones concretas de cada servicio se confirmarán antes de su contratación. <span class="placeholder">[PENDIENTE: condiciones de contratación, forma de pago y política de cancelación]</span></p>
 
         <h2>4. Propiedad intelectual e industrial</h2>
         <p>Los textos, fotografías, logotipo, diseño y demás elementos de este sitio web son titularidad de Denisse González o se utilizan con autorización de sus titulares. Queda prohibida su reproducción, distribución, comunicación pública o transformación sin autorización expresa, salvo para uso personal y privado.</p>
         <p>El artículo «8 de marzo — Voces que se unen» fue publicado por Construyendo un Mundo Mejor; los derechos sobre su diseño corresponden a sus respectivos titulares.</p>
 
         <h2>5. Responsabilidad</h2>
-        <p>Se procura que la información publicada sea exacta y esté actualizada, pero no se garantiza la ausencia de errores ni la disponibilidad ininterrumpida del sitio web. El titular no se responsabiliza de los daños derivados de un uso indebido de los contenidos.</p>
+        <p>Se procura que la información publicada sea exacta y esté actualizada, pero no se garantiza la ausencia de errores ni la disponibilidad ininterrumpida del sitio web. La titular no se responsabiliza de los daños derivados de un uso indebido de los contenidos.</p>
 
         <h2>6. Enlaces a sitios de terceros</h2>
-        <p>Este sitio web contiene enlaces a servicios de terceros (WhatsApp, Facebook, Instagram y TikTok). El titular no controla dichos servicios ni es responsable de sus contenidos o de sus políticas de privacidad, que conviene consultar al acceder a ellos.</p>
+        <p>Este sitio web contiene enlaces a servicios de terceros (WhatsApp, Facebook, Instagram y TikTok). La titular no controla dichos servicios ni es responsable de sus contenidos o de sus políticas de privacidad, que conviene consultar al acceder a ellos.</p>
 
         <h2>7. Protección de datos</h2>
         <p>El tratamiento de los datos personales que se facilitan a través de este sitio web se describe en la <a href="politica-privacidad.html">política de privacidad</a>.</p>
@@ -138,7 +145,7 @@
     <div class="container footer-grid">
       <div class="footer-brand">
         <a class="footer-logo" href="index.html#inicio">
-          <img src="assets/logo/dg-logo.svg" width="656" height="506" alt="Denisse Gonzalez — logotipo con monograma DG y balanza" loading="lazy" decoding="async">
+          <img src="assets/logo/dg-logo.svg" width="656" height="506" alt="Denisse González — volver al inicio" loading="lazy" decoding="async">
         </a>
         <p class="footer-motto">Escuchar. Conectar. Actuar.</p>
       </div>

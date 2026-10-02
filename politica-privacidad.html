@@ -5,7 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Política de privacidad · Denisse González</title>
   <meta name="description" content="Política de privacidad del sitio web de Denisse González, abogada: qué datos se tratan, con qué finalidad y cómo ejercer tus derechos.">
-  <script>document.documentElement.classList.add('js');</script>
+  <script>
+    /* «js» activa las mejoras (menú, animaciones). Si js/main.js no llega a ejecutarse
+       por completo, se retira para mostrar la versión sin JavaScript. */
+    (function (d) {
+      d.classList.add('js');
+      setTimeout(function () { if (!window.__dgReady) d.classList.remove('js'); }, 4000);
+    })(document.documentElement);
+  </script>
   <meta name="theme-color" content="#6E1D7A">
   <link rel="icon" href="assets/logo/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="assets/logo/favicon-32.png" type="image/png" sizes="32x32">
@@ -14,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Barlow:ital,wght@0,400;0,500;0,600;1,400&amp;family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&amp;display=swap">
   <link rel="stylesheet" href="css/styles.css">
-  <script src="js/main.js" defer></script>
+  <script src="js/main.js" defer onerror="document.documentElement.classList.remove('js')"></script>
   <meta name="robots" content="noindex, follow">
 </head>
 <body class="legal-page">
@@ -110,7 +117,7 @@
         <h2>3. Finalidades</h2>
         <ul>
           <li>Atender tus consultas y gestionar la reserva y prestación de asesorías.</li>
-          <li>Leer las historias recibidas en Empoderando Voces y, si lo has indicado, contactarte en relación con ellas.</li>
+          <li>Leer las historias recibidas en Empoderando Voces y contactarte en relación con ellas a través del dato de contacto que indiques.</li>
           <li>Difundir tu historia públicamente únicamente si has marcado que puede compartirse, respetando el anonimato si así lo has pedido.</li>
         </ul>
 
@@ -158,7 +165,7 @@
     <div class="container footer-grid">
       <div class="footer-brand">
         <a class="footer-logo" href="index.html#inicio">
-          <img src="assets/logo/dg-logo.svg" width="656" height="506" alt="Denisse Gonzalez — logotipo con monograma DG y balanza" loading="lazy" decoding="async">
+          <img src="assets/logo/dg-logo.svg" width="656" height="506" alt="Denisse González — volver al inicio" loading="lazy" decoding="async">
         </a>
         <p class="footer-motto">Escuchar. Conectar. Actuar.</p>
       </div>

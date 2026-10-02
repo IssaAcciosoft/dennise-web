@@ -76,6 +76,15 @@ const WHATSAPP_NUMBER = '34670647593';
      ------------------------------------------------------------------ */
   const header = $('[data-header]');
   if (header) {
+    // Altura real de la cabecera: el panel del menú móvil y el desplazamiento a las
+    // anclas empiezan justo debajo, aunque la cabecera cambie de alto.
+    const setHeaderOffset = () => {
+      root.style.setProperty('--header-offset', Math.ceil(header.getBoundingClientRect().height) + 'px');
+    };
+    setHeaderOffset();
+    if ('ResizeObserver' in window) new ResizeObserver(setHeaderOffset).observe(header);
+    else window.addEventListener('resize', setHeaderOffset);
+
     let ticking = false;
     const update = () => {
       header.classList.toggle('is-scrolled', window.scrollY > 8);
@@ -241,6 +250,8 @@ const WHATSAPP_NUMBER = '34670647593';
     const useEndpoint = typeof STORY_FORM_ENDPOINT === 'string' && STORY_FORM_ENDPOINT.trim() !== '';
     let attempted = false;
     let completed = false;
+    let sending = false;
+    const SEND_TIMEOUT_MS = 15000;
 
     if (noteEl) {
       noteEl.textContent = useEndpoint
@@ -301,14 +312,26 @@ const WHATSAPP_NUMBER = '34670647593';
     }
     if (historia) historia.addEventListener('input', updateCount);
 
-    storyForm.addEventListener('input', (e) => {
+    function invalidSummary(count) {
+      return count === 1
+        ? 'Revisa el campo marcado antes de enviar.'
+        : 'Revisa los ' + count + ' campos marcados antes de enviar.';
+    }
+    // Tras un intento de envío, el aviso general se actualiza (o desaparece) al corregir.
+    function refreshSummary() {
+      if (sending || !statusEl.textContent || statusEl.dataset.tone) return;
+      const remaining = order.filter((name) => rules[name](valueOf(name))).length;
+      const text = remaining ? invalidSummary(remaining) : '';
+      if (statusEl.textContent !== text) setStatus(text);
+    }
+    function onFieldEdit(e) {
       const name = e.target.name;
-      if (attempted && rules[name]) validateField(name);
-    });
-    storyForm.addEventListener('change', (e) => {
-      const name = e.target.name;
-      if (attempted && rules[name]) validateField(name);
-    });
+      if (!attempted || !rules[name]) return;
+      validateField(name);
+      refreshSummary();
+    }
+    storyForm.addEventListener('input', onFieldEdit);
+    storyForm.addEventListener('change', onFieldEdit);
 
     function buildWhatsAppMessage() {
       const lines = [
@@ -317,14 +340,14 @@ const WHATSAPP_NUMBER = '34670647593';
         '*Nombre:* ' + valueOf('nombre'),
         '*País:* ' + valueOf('pais'),
         '*Tema:* ' + valueOf('tema'),
-        '*¿Puede compartirse públicamente?:* ' + valueOf('compartir'),
-        '*¿Quiero permanecer en el anonimato?:* ' + valueOf('anonimato'),
+        '*Compartir públicamente:* ' + valueOf('compartir'),
+        '*Permanecer en el anonimato:* ' + valueOf('anonimato'),
         '*Contacto:* ' + valueOf('contacto'),
         '',
         '*Mi historia:*',
         valueOf('historia'),
         '',
-        'He leído y acepto la política de privacidad.',
+        'He leído y acepto la política de privacidad y consiento expresamente el tratamiento de los datos de mi historia.',
       ];
       return 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(lines.join('\n'));
     }
@@ -366,20 +389,22 @@ const WHATSAPP_NUMBER = '34670647593';
       updateCount();
     }
 
+    // Mientras se envía, el botón se marca con aria-disabled (no «disabled») para que
+    // el foco del teclado no salga del diálogo; los envíos repetidos se ignoran.
     function setBusy(busy) {
-      submitBtn.disabled = busy;
+      sending = busy;
+      if (busy) submitBtn.setAttribute('aria-disabled', 'true'); else submitBtn.removeAttribute('aria-disabled');
       submitBtn.setAttribute('aria-busy', busy ? 'true' : 'false');
       submitLabel.textContent = busy ? 'Enviando…' : 'Enviar mi historia';
     }
 
     storyForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (sending) return;
       attempted = true;
       const invalid = order.filter((name) => !validateField(name));
       if (invalid.length) {
-        setStatus(invalid.length === 1
-          ? 'Revisa el campo marcado antes de enviar.'
-          : 'Revisa los ' + invalid.length + ' campos marcados antes de enviar.');
+        setStatus(invalidSummary(invalid.length));
         const first = controlsOf(invalid[0])[0];
         if (first) {
           first.focus({ preventScroll: true });
@@ -412,6 +437,9 @@ const WHATSAPP_NUMBER = '34670647593';
 
       setBusy(true);
       setStatus('Enviando tu historia…', 'info');
+      // Si el servicio no responde, se aborta y se ofrece WhatsApp como alternativa.
+      const controller = 'AbortController' in window ? new AbortController() : null;
+      const timer = controller ? setTimeout(() => controller.abort(), SEND_TIMEOUT_MS) : null;
       try {
         const data = new FormData(storyForm);
         data.append('_subject', 'Nueva historia — Empoderando Voces');
@@ -419,6 +447,7 @@ const WHATSAPP_NUMBER = '34670647593';
           method: 'POST',
           body: data,
           headers: { Accept: 'application/json' },
+          signal: controller ? controller.signal : undefined,
         });
         if (!response.ok) throw new Error('HTTP ' + response.status);
         completed = true;
@@ -426,7 +455,7 @@ const WHATSAPP_NUMBER = '34670647593';
         showResult({
           tone: 'success',
           title: '¡Gracias por compartir tu historia!',
-          text: 'Tu historia me ha llegado correctamente. La leeré con atención y, si me has dejado un contacto, te escribiré.',
+          text: 'Tu historia me ha llegado correctamente. La leeré con atención y te escribiré al contacto que me has indicado.',
         });
       } catch (err) {
         setStatus('');
@@ -438,6 +467,7 @@ const WHATSAPP_NUMBER = '34670647593';
           linkLabel: 'Enviar por WhatsApp',
         });
       } finally {
+        if (timer) clearTimeout(timer);
         setBusy(false);
       }
     });
@@ -476,4 +506,20 @@ const WHATSAPP_NUMBER = '34670647593';
       });
     });
   }
+
+  /* ------------------------------------------------------------------
+     Cinta animada de Empoderando Voces: botón para pausarla / reanudarla
+     ------------------------------------------------------------------ */
+  const marquee = $('[data-marquee]');
+  const marqueeToggle = $('[data-marquee-toggle]');
+  if (marquee && marqueeToggle) {
+    marqueeToggle.addEventListener('click', () => {
+      const paused = marqueeToggle.getAttribute('aria-pressed') !== 'true';
+      marqueeToggle.setAttribute('aria-pressed', String(paused));
+      marquee.classList.toggle('is-paused', paused);
+    });
+  }
+
+  // Todo inicializado: el script de <head> ya no retirará la clase «js».
+  window.__dgReady = true;
 })();
