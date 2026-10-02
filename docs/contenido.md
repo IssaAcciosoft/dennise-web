@@ -8,11 +8,17 @@ Este documento es la referencia de textos. Los textos de la cliente se usan **ta
 
 ## 1. Datos de contacto y marca
 
-- Nombre: **Denisse González** (nombre completo: Denisse González Barbosa)
+- Nombre: **Denisse González** (nombre completo: **Denisse Elena González Barbosa**, confirmado 02/10)
+- Nombre comercial del despacho: **DG Gestores y Abogados** (ella lo escribe "DG gestores y abogados")
+- Datos legales (solo para aviso legal / privacidad / condiciones; NO en JSON-LD ni en el resto de
+  la web): titular Denisse Elena González Barbosa · NIE **Z1195681P**
+- Domicilio del despacho (asesorías presenciales): **C/ Eraso 31, local A (Guindalera), 28028 Madrid**
+  (sustituye a la dirección de la web antigua)
+- Email: **lic.denissegb@icloud.com**
 - Profesión: Abogada. Mtra. en Derecho con especialización en Litigios Orales, Derecho
   Internacional, Relaciones Internacionales y Comercio Internacional.
-- Teléfono / WhatsApp: **+34 670 647 593** (en el anuncio aparece "+670 647 593"; asumimos
-  prefijo de España +34 — PENDIENTE DE CONFIRMAR)
+- Teléfono / WhatsApp: **+34 670 647 593** (confirmado por su web anterior; en el anuncio faltaba
+  el prefijo +34)
   - `tel:+34670647593`
   - `https://wa.me/34670647593`
 - Redes:
@@ -66,21 +72,33 @@ Originales sin tocar en `_originales/` (no se publican en la web).
 12. Contacto.
 13. Pie: redes, enlaces legales.
 
-PENDIENTE (no hay datos todavía, no inventar): equipo de trabajo / socios, "lo de Dubái",
-dirección de la oficina presencial, email.
+Equipo, Dubái, servicios de extranjería ampliados, FAQ y valores: ver `docs/web-anterior.md`.
 
 ---
 
 ## 4. Textos
 
-### HERO (composición nuestra a partir de sus textos)
+### HERO (texto de la cliente, recibido el 02/10 — sustituye a la composición anterior)
 
-- Antetítulo: Abogada · Extranjería · Derecho internacional · Derechos humanos
-- Título: Derecho con estrategia. Derecho con perspectiva internacional. Derecho con humanidad.
-- Subtítulo: Porque detrás de cada expediente hay una persona. Y detrás de cada trámite, una
-  historia, un proyecto de vida o una oportunidad que merece ser tomada en serio.
-- Botones: "Reserva tu asesoría" (WhatsApp) · "Conóceme"
-- Credenciales cortas (fila de confianza):
+DERECHO QUE CONECTA PERSONAS, OPORTUNIDADES Y DERECHOS
+
+Denisse González
+
+Derecho internacional · Movilidad internacional · Derechos humanos
+
+Entre personas, instituciones y fronteras existen caminos que no siempre son fáciles de recorrer.
+
+Mi trabajo consiste en ayudar a construir esos caminos con conocimiento jurídico, visión
+internacional y, sobre todo, con una mirada humana.
+
+Conocer el derecho es importante.
+Entender a las personas que necesitan de él lo es aún más.
+
+- Botones: "Reserva tu asesoría" · "Conóceme"
+- Las tres líneas "Derecho con estrategia. / Derecho con perspectiva internacional. / Derecho con
+  humanidad." siguen siendo suyas (final de "Más allá del expediente") y pueden seguir usándose
+  como frase destacada en esa sección.
+- Credenciales cortas (fila de confianza, datos suyos):
   - México · España · Nueva York
   - Ex Directora Legal México — Poplavsky International Law Offices
   - Asuntos Jurídicos — Embajada de México en España
@@ -405,10 +423,17 @@ revictimización.
 
 ## 7. Pendiente de la cliente
 
-1. Confirmar teléfono (+34 670 647 593).
-2. Qué diferencia los planes Básico / Estándar / Premium.
-3. Web anterior (URL) para recuperar: equipo de trabajo / socios, Dubái, contenido de
-   extranjería.
-4. Email de contacto y dirección de la oficina (asesorías presenciales).
-5. Datos para aviso legal y privacidad (titular, NIF, domicilio, nº de colegiada si aplica).
-6. Servicio de formularios (p. ej. Formspree) para recibir las historias por email.
+Resuelto el 02/10: teléfono (+34), email, domicilio, nombre completo, NIE, nombre comercial,
+web anterior (equipo, Dubái, extranjería: ver `docs/web-anterior.md`), integración de formularios
+(AccioGest).
+
+1. Qué diferencia los planes Básico / Estándar / Premium.
+2. Colegiación en España (colegio y nº de colegiada), si aplica: el aviso legal debe indicarlo
+   para profesiones reguladas (LSSI art. 10). Si no está colegiada en España, revisar cómo se
+   presenta el título de "abogada".
+3. Proceso después del pago (quién contacta, plazo, documentación, hoja de encargo) y política de
+   cancelación y reembolso.
+4. Plataforma de videollamada de las asesorías online.
+5. Alertas de `docs/web-anterior.md` §9: fiscalidad en Dubái, cifra "más de 1000", testimonio de
+   Jose, nacionalidad por matrimonio/descendencia.
+6. IDs de AccioGest (formularios, planes, plugin de reservas).

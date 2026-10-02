@@ -23,8 +23,8 @@ Imágenes originales en `_originales/web-anterior/`:
 ## 1. Datos de contacto (nuevos)
 
 - Email: **lic.denissegb@icloud.com**
-- Dirección: "Calle mayo 6, piso 2 oficina 10, Madrid." → casi seguro **Calle Mayor 6, 2.º, oficina 10,
-  Madrid** (PENDIENTE confirmar; "Calle mayo" parece errata).
+- Dirección antigua: "Calle mayo 6, piso 2 oficina 10, Madrid." → **YA NO SE USA**. La cliente
+  confirmó el 02/10 el domicilio actual: **C/ Eraso 31, local A (Guindalera), 28028 Madrid**.
 - Teléfono: +34 670 647 593 (confirma el prefijo +34).
 - Texto del formulario de contacto: "esperamos responder su consulta en menos de 24 horas".
 - Intro de contacto: "Ponte en contacto con nuestro despacho para consultas sobre extranjería,
@@ -192,11 +192,11 @@ honorífico, …").
    zonas francas") marcada como pendiente de revisión.
 2. **"Más de 1000 personas crearon sus empresas en Dubai y se regularizaron en España."** Cifra
    publicitaria: no se publica hasta que la cliente la confirme.
-3. **Nombre completo:** la web antigua dice "Denisse Elena González" y el cartel del 8M "Denisse
-   González Barbosa". Confirmar cómo quiere aparecer.
+3. ~~Nombre completo~~ — resuelto: **Denisse Elena González Barbosa** (nombre comercial: DG Gestores y
+   Abogados).
 4. **Testimonio de "Jose":** confirmar que es real y que tiene permiso para publicarlo (se publica sin
    la foto de stock).
-5. **Dirección:** confirmar "Calle Mayor 6, 2.º, oficina 10, Madrid".
+5. ~~Dirección~~ — resuelto: C/ Eraso 31, local A (Guindalera), 28028 Madrid.
 6. **Nacionalidad "por matrimonio" o "por descendencia":** en España, el matrimonio reduce el plazo de
    residencia a 1 año, y la descendencia corresponde a opción u origen. Se mantiene su texto, pero
    conviene que lo revise.
