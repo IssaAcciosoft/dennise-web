@@ -5,7 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Denisse González · Abogada de extranjería y derecho internacional</title>
   <meta name="description" content="Denisse González, abogada mexicana en España: asesoría migratoria y trámites de extranjería online y presenciales, derecho internacional y derechos humanos.">
-  <script>document.documentElement.classList.add('js');</script>
+  <script>
+    /* «js» activa las mejoras (menú, animaciones, formulario). Si js/main.js no llega
+       a ejecutarse por completo, se retira para mostrar la versión sin JavaScript. */
+    (function (d) {
+      d.classList.add('js');
+      setTimeout(function () { if (!window.__dgReady) d.classList.remove('js'); }, 4000);
+    })(document.documentElement);
+  </script>
   <meta name="theme-color" content="#6E1D7A">
   <link rel="icon" href="assets/logo/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="assets/logo/favicon-32.png" type="image/png" sizes="32x32">
@@ -14,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Barlow:ital,wght@0,400;0,500;0,600;1,400&amp;family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&amp;display=swap">
   <link rel="stylesheet" href="css/styles.css">
-  <script src="js/main.js" defer></script>
+  <script src="js/main.js" defer onerror="document.documentElement.classList.remove('js')"></script>
 
   <meta property="og:type" content="website">
   <meta property="og:locale" content="es_ES">
@@ -24,7 +31,7 @@
   <meta property="og:image" content="assets/img/og-image.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Denisse González, abogada, con el lema «Derecho con estrategia, perspectiva internacional y humanidad»">
+  <meta property="og:image:alt" content="Denisse González, abogada: «Derecho con estrategia. Derecho con perspectiva internacional. Derecho con humanidad.»">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Denisse González · Abogada de extranjería y derecho internacional">
   <meta name="twitter:description" content="Asesoría migratoria y trámites de extranjería online y presenciales, derecho internacional y derechos humanos.">
@@ -40,8 +47,6 @@
     "logo": "assets/logo/dg-logo.svg",
     "telephone": "+34670647593",
     "priceRange": "30 € – 300 €",
-    "areaServed": { "@type": "Country", "name": "España" },
-    "knowsLanguage": ["es", "en"],
     "sameAs": [
       "https://www.facebook.com/share/1GQdBrwuAy/",
       "https://www.instagram.com/lic.denisseg",
@@ -50,8 +55,7 @@
     "founder": {
       "@type": "Person",
       "name": "Denisse González Barbosa",
-      "jobTitle": "Abogada",
-      "knowsLanguage": ["es", "en"]
+      "jobTitle": "Abogada"
     },
     "hasOfferCatalog": {
       "@type": "OfferCatalog",
@@ -139,7 +143,7 @@
     <section class="hero" id="inicio" aria-labelledby="hero-title">
       <div class="container hero-grid">
         <div class="hero-copy">
-          <p class="eyebrow">Abogada · Extranjería · Derecho internacional · Derechos humanos</p>
+          <p class="eyebrow">Abogada&nbsp;· Extranjería&nbsp;· Derecho&nbsp;internacional&nbsp;· Derechos&nbsp;humanos</p>
           <h1 class="hero-title" id="hero-title">
             <span class="hero-line">Derecho con <em>estrategia.</em></span>
             <span class="hero-line">Derecho con <em>perspectiva internacional.</em></span>
@@ -176,7 +180,7 @@
         <ul class="trust-row" role="list" aria-label="Trayectoria en breve">
           <li class="trust-item trust-item--places">
             <svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg>
-            <span class="trust-title">México · España · Nueva York</span>
+            <span class="trust-title">México&nbsp;· España&nbsp;· Nueva&nbsp;York</span>
           </li>
           <li class="trust-item">
             <span class="trust-title">Ex Directora Legal México</span>
@@ -188,7 +192,7 @@
           </li>
           <li class="trust-item">
             <span class="trust-title">Delegada</span>
-            <span class="trust-sub">International Human Rights Summit 2026 (Nueva York)</span>
+            <span class="trust-sub">International Human Rights Summit 2026 (Nueva&nbsp;York)</span>
           </li>
         </ul>
       </div>
@@ -379,7 +383,7 @@
         <div class="services-block autogestiona" id="autogestiona">
           <div class="autogestiona-head">
             <div data-reveal>
-              <p class="eyebrow">Programa</p>
+              <p class="eyebrow">Planes&nbsp;· IVA incluido</p>
               <h3 class="block-title block-title--lg">Programa Autogestiona</h3>
             </div>
             <div class="tramites" data-reveal>
@@ -405,7 +409,7 @@
               <p class="plan-price"><span class="price">121</span><span class="currency">€</span></p>
               <p class="plan-vat">IVA incluido</p>
               <a class="btn btn--outline btn--block" href="https://wa.me/34670647593?text=Hola%20Denisse%2C%20me%20interesa%20el%20Plan%20B%C3%A1sico%20(121%20%E2%82%AC%2C%20IVA%20incluido)%20del%20Programa%20Autogestiona.%20Mi%20tr%C3%A1mite%20es%3A%20" target="_blank" rel="noopener">
-                <span>Elegir Plan Básico</span>
+                <span>Elegir plan<span class="visually-hidden"> Básico</span></span>
               </a>
             </article>
 
@@ -414,7 +418,7 @@
               <p class="plan-price"><span class="price">200</span><span class="currency">€</span></p>
               <p class="plan-vat">IVA incluido</p>
               <a class="btn btn--light btn--block" href="https://wa.me/34670647593?text=Hola%20Denisse%2C%20me%20interesa%20el%20Plan%20Est%C3%A1ndar%20(200%20%E2%82%AC%2C%20IVA%20incluido)%20del%20Programa%20Autogestiona.%20Mi%20tr%C3%A1mite%20es%3A%20" target="_blank" rel="noopener">
-                <span>Elegir Plan Estándar</span>
+                <span>Elegir plan<span class="visually-hidden"> Estándar</span></span>
               </a>
             </article>
 
@@ -423,7 +427,7 @@
               <p class="plan-price"><span class="price">300</span><span class="currency">€</span></p>
               <p class="plan-vat">IVA incluido</p>
               <a class="btn btn--outline btn--block" href="https://wa.me/34670647593?text=Hola%20Denisse%2C%20me%20interesa%20el%20Plan%20Premium%20(300%20%E2%82%AC%2C%20IVA%20incluido)%20del%20Programa%20Autogestiona.%20Mi%20tr%C3%A1mite%20es%3A%20" target="_blank" rel="noopener">
-                <span>Elegir Plan Premium</span>
+                <span>Elegir plan<span class="visually-hidden"> Premium</span></span>
               </a>
             </article>
           </div>
@@ -585,8 +589,8 @@
             <div class="summit-card" data-reveal>
               <h3 class="summit-card-title">20th International Human Rights Summit</h3>
               <dl class="summit-facts">
-                <div><dt>Lugar</dt><dd>Naciones Unidas, Nueva York</dd></div>
-                <div><dt>Fechas</dt><dd>30–31 de julio de 2026</dd></div>
+                <div><dt>Lugar</dt><dd>Naciones Unidas, Nueva&nbsp;York</dd></div>
+                <div><dt>Fechas</dt><dd>30–31 de julio&nbsp;de&nbsp;2026</dd></div>
                 <div><dt>Organiza</dt><dd>Youth for Human Rights International</dd></div>
                 <div><dt>Participación</dt><dd>Delegada</dd></div>
               </dl>
