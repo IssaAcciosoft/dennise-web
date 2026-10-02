@@ -1,92 +1,277 @@
 # Web de Denisse González · Abogada
 
-Web estática (HTML + CSS + JavaScript, sin dependencias ni paso de compilación).
+Web estática hecha con **Astro** (todo lo estático) e **islas de React** (solo para piezas
+interactivas ricas). Varias páginas, transiciones nativas entre páginas (View Transitions),
+tipografías e imágenes optimizadas en el propio sitio y objetivo de **Lighthouse ≥ 95/100/100/100**.
 
-```
-index.html                  Página principal (todas las secciones)
-aviso-legal.html            Aviso legal (borrador)
-politica-privacidad.html    Política de privacidad (borrador)
-css/styles.css              Estilos (tokens de diseño en :root)
-js/main.js                  Menú móvil, animaciones, formulario y visor de imagen
-assets/logo/                Logotipo DG en SVG, favicon e iconos
-assets/img/                 Fotografías optimizadas (.webp + .jpg) e imagen para redes (og-image.jpg)
-docs/contenido.md           Textos y briefing de la cliente (fuente de verdad)
-_originales/                Originales sin tocar: NO se enlazan desde la web
-```
+## Comandos
 
-## Vista previa local
+Requisitos: Node 22.12 o superior y npm.
 
 ```bash
-python3 -m http.server 8000
+npm install          # dependencias
+npm run dev          # servidor de desarrollo → http://localhost:4321
+npm run build        # compila la web estática en dist/
+npm run preview      # sirve dist/ para revisarla
+npm run check        # comprobación de tipos y de los componentes (astro check)
+npm run icons        # regenera los iconos PNG a partir del logotipo (revisar el resultado)
 ```
 
-Abrir <http://localhost:8000>. (Abrir `index.html` con doble clic también funciona, pero conviene usar un servidor.)
+Para probar la versión compilada «como en producción» (con gzip): `npx serve dist`.
 
-## Formulario «Cuéntame tu historia»
+## Estructura
 
-Al principio de `js/main.js`:
-
-```js
-const STORY_FORM_ENDPOINT = '';            // URL del servicio de formularios
-const WHATSAPP_NUMBER = '34670647593';     // sin «+» ni espacios
+```
+astro.config.mjs            Configuración (SITE_URL, BASE_PATH, React, sitemap)
+public/                     Archivos que se copian tal cual: favicon.svg, iconos PNG,
+                            site.webmanifest, og-image.jpg (imagen para redes)
+scripts/
+  generate-icons.mjs        Genera favicon-32, apple-touch-icon (180), icon-192/512 y maskable
+  icon-source.svg           Fuente de los iconos cuadrados
+src/
+  pages/                    Una página por archivo (la URL sale del nombre)
+    index.astro             Inicio
+    conoceme.astro          Conóceme · Experiencia · Mi trayectoria · (slot del globo 3D)
+    servicios.astro         Asesorías · Programa Autogestiona · #reservar (reservas AccioGest)
+    derechos-humanos.astro  Derechos humanos · Summit · cita · Mi compromiso · En medios
+    empoderando-voces.astro Empoderando Voces + formulario «Cuéntame tu historia»
+    contacto.astro          WhatsApp, teléfono, redes y formulario de contacto
+    gracias.astro           Agradecimiento tras pagar un plan o reservar (noindex, fuera del menú)
+    aviso-legal.astro, politica-privacidad.astro, condiciones-contratacion.astro, 404.astro
+    robots.txt.ts           robots.txt con la URL absoluta del sitemap
+  layouts/
+    BaseLayout.astro        <head> común (SEO, Open Graph, canonical, JSON-LD, fuentes),
+                            cabecera, pie y WhatsApp flotante
+    LegalLayout.astro       Páginas legales (borradores: completar los [PENDIENTE] antes de publicar)
+  components/
+    layout/                 Header (menú móvil con Popover API), Footer, WhatsAppFloat, LogoMark
+    seo/                    Fonts (tipografías autoalojadas + fallbacks), JsonLd
+    ui/                     Icon, Photo (imágenes optimizadas), SocialLinks
+    home/ about/ services/ media/ contact/ ev/   Secciones de cada página
+    forms/                  LeadForm, FormDialog, Field, ChoiceField (formularios de AccioGest)
+    islands/                Islas de React (hooks.ts: reducir movimiento / pausar fuera de pantalla)
+    react-bits/             Componentes copiados de React Bits (con su licencia): Aurora,
+                            CircularGallery, Magnet
+  data/
+    site.ts                 Teléfono, WhatsApp, redes, navegación  ← ÚNICA fuente de verdad
+    servicios.json          Catálogo de servicios y precios          ← precios aquí
+    medios.ts               Artículo «8 de marzo — Voces que se unen» y su transcripción
+    legal.ts                Textos de consentimiento (formularios = política de privacidad)
+  config/acciogest.ts       IDs de AccioGest, etiquetas de los campos, versión de la política
+  lib/                      Utilidades (rutas con base, catálogo de servicios)
+  scripts/                  JS del cliente: diálogos (dialog.ts), cliente de AccioGest
+                            (acciogest.ts) y controlador de formularios (lead-form.ts)
+  styles/global.css         Tokens de diseño (colores, tipografía, espaciado, radios,
+                            sombras, curvas y duraciones de animación) y estilos comunes
+  assets/                   Fotos originales (se optimizan al compilar), logotipo, póster del globo
+docs/                       Textos de la cliente (contenido.md) e integración con AccioGest
+_originales/                Originales sin tocar: NO se publican (no están en src/ ni public/)
 ```
 
-- **Vacío (por defecto):** al enviar, se redacta un mensaje con todos los campos y se abre
-  WhatsApp (`wa.me`) en una pestaña nueva; el diálogo explica que la historia continúa allí.
-- **Con un servicio de formularios (recomendado):** crear un formulario en
-  [Formspree](https://formspree.io) (u otro compatible), copiar su URL
-  (p. ej. `https://formspree.io/f/abcdwxyz`) y pegarla en `STORY_FORM_ENDPOINT`. El envío se
-  hace con `fetch` (POST, `Accept: application/json`) y el diálogo muestra éxito o error
-  (con opción de enviarlo por WhatsApp si falla). Campos enviados: `nombre`, `pais`, `tema`,
-  `historia`, `compartir`, `anonimato`, `contacto`, `consentimiento`, `_subject` y el campo
-  trampa anti-spam `_gotcha`.
+## Dónde se edita cada cosa
 
-## Enlaces de WhatsApp
+- **Precios y servicios:** `src/data/servicios.json`. Inicio y Servicios se generan desde aquí
+  al compilar (no hay precios escritos a mano en las páginas). JSON-LD también.
+- **Teléfono, WhatsApp y redes:** `src/data/site.ts` (si cambia el número, solo aquí).
+- **Textos:** en cada página de `src/pages/` o en su sección de `src/components/`. La fuente de
+  verdad de los textos es `docs/contenido.md` (textos de la cliente, tal cual).
+- **Colores, tipografías, espaciado y animación:** variables en `src/styles/global.css` (§1).
+- **Fotos:** `src/assets/img/`. Se usan con el componente `Photo` (AVIF + WebP + JPG, varios
+  anchos, `width`/`height`, `lazy` salvo la imagen principal con `priority`).
+- **Logotipo:** `src/assets/logo/` (SVG) y `src/components/layout/LogoMark.astro` (en línea en
+  la cabecera). Iconos: `public/favicon.svg` y `npm run icons`.
 
-Todos los botones abren `https://wa.me/34670647593?text=...` con un mensaje distinto para cada
-servicio o plan. El texto va codificado para URL (por ejemplo con `encodeURIComponent` en la
-consola del navegador). Si cambia el número:
+## AccioGest (formularios, planes y reservas)
 
-1. Buscar y reemplazar `34670647593` en los `.html` y en `js/main.js` (enlaces `wa.me` y `tel:`,
-   JSON-LD y `WHATSAPP_NUMBER`).
-2. Buscar también el número formateado para lectura, que no contiene esa cadena:
-   `670&nbsp;647&nbsp;593` (en `index.html`, `aviso-legal.html` y `politica-privacidad.html`) y
-   `670 647 593` (en `politica-privacidad.html`).
+Especificación: `docs/integracion-acciogest.md`. Todo se configura en
+**`src/config/acciogest.ts`**; no hace falta backend ni claves secretas.
+
+| Pieza | Dónde | ID |
+|---|---|---|
+| «Cuéntame tu historia» (diálogo en `/empoderando-voces/`, también `#cuentame`) | `components/ev/StoryDialog.astro` | `FORMS.historia` |
+| «Solicitar información» (diálogo en `/servicios/`: tarjetas, planes sin ID, «Solicitar cita») | `components/services/ServiceRequestDialog.astro` | `FORMS.servicio` |
+| Formulario de contacto (`/contacto/#formulario-contacto`) | `components/contact/ContactForm.astro` | `FORMS.contacto` |
+| «Contratar Plan X» → página de pago de AccioGest en pestaña nueva | `components/services/Autogestiona.astro` | `PLANES.basico/estandar/premium` |
+| Widget de reservas en `/servicios/#reservar` (carga diferida, 760 px reservados) | `components/services/BookingSlot.astro` | `BOOKING_PLUGIN_ID` |
+
+**Poner los IDs** — editando los valores de ejemplo de `src/config/acciogest.ts` o, mejor, con
+variables de entorno al compilar (en GitHub: Settings → Secrets and variables → Actions →
+Variables; el workflow ya las pasa):
+
+```
+PUBLIC_ACCIOGEST_FORM_SERVICIO   PUBLIC_ACCIOGEST_FORM_HISTORIA   PUBLIC_ACCIOGEST_FORM_CONTACTO
+PUBLIC_ACCIOGEST_PLAN_BASICO     PUBLIC_ACCIOGEST_PLAN_ESTANDAR   PUBLIC_ACCIOGEST_PLAN_PREMIUM
+PUBLIC_ACCIOGEST_BOOKING_PLUGIN_ID                                PUBLIC_ACCIOGEST_API (opcional)
+```
+
+Son IDs públicos (acaban en el HTML/JS), no secretos. Ejemplo local:
+`PUBLIC_ACCIOGEST_FORM_CONTACTO=abc123 npm run build`.
+
+**Modo simulado** — mientras un ID tenga su valor de ejemplo (`FORM_ID_…` / `PLUGIN_ID`):
+- formularios: no se envía nada; la respuesta se simula (~700 ms, misma forma que la API) y el
+  formulario muestra un aviso visible de «Modo de prueba» con WhatsApp como alternativa;
+- planes: «Contratar» abre el diálogo de solicitud con el plan elegido;
+- reservas: panel con lo que incluye la reserva, «Solicitar cita» y WhatsApp.
+
+Errores de prueba (solo en modo simulado), añadiendo a la URL: `?acciogest_mock=400`,
+`400-email`, `429` (o `429-5` para 5 s), `403`, `404`, `500`, `network`, `timeout`.
+
+**Comprobar etiquetas** (con IDs reales): `?acciogest_debug=1` → la consola compara las
+etiquetas de la web con `GET /form-builder/public/{FORM_ID}` y avisa de las que no existen, de
+las obligatorias que no se envían y de las obligatorias en AccioGest pero opcionales en la web.
+
+**Etiquetas** (`FIELD_LABELS` en `src/config/acciogest.ts`): claves de `response_data`
+exactamente iguales a las del formulario en AccioGest. Se envían también
+`Consentimiento RGPD` = `sí`, `Versión política` = `POLICY_VERSION` (`2026-10`, la que muestra
+la política de privacidad) y `utm_source` / `utm_medium` / `utm_campaign` (de la URL de
+llegada, guardadas en `sessionStorage` durante la visita). Los campos opcionales vacíos no se
+envían. Los textos de las casillas de consentimiento están en `src/data/legal.ts`.
+
+**Respuestas**: 201 → muestra el `message` de AccioGest y resetea · 400 → marca los campos
+(`missing_fields` o «El campo "X"…») · 403/404 → «no disponible» + WhatsApp · 429 → cuenta
+atrás con `Retry-After` (60 s si no se puede leer) y botón bloqueado · sin red o > 15 s →
+mensaje y se conservan los datos. Campo trampa `website`: si llega relleno se finge éxito.
+
+**Página `/gracias/`** (`?tipo=plan&plan=basico|estandar|premium` o `?tipo=reserva`): hay que
+configurarla en AccioGest como URL de redirección tras el pago/la reserva, si lo permite.
+
+## Sistema de movimiento
+
+Criterios de Emil Kowalski, con tokens en `src/styles/global.css` §1 (`--ease-*`, `--dur-*`,
+`--press-scale`, `--reveal-y`, `--stagger`). Elegante y nítido: nada de rebotes.
+
+- **Curvas:** `--ease-out` para entrar/salir, `--ease-in-out` para mover en pantalla,
+  `--ease-drawer` para el menú móvil, `ease` para hover/color, `linear` solo para movimiento
+  constante. Nunca `ease-in`.
+- **Duraciones:** la UI siempre < 300 ms; las salidas más rápidas que las entradas
+  (`--dur-exit` 150 ms). Solo se animan `transform`/`opacity` (y `clip-path` para fotos).
+- **Pulsar:** todo lo pulsable hace `scale(var(--press-scale))` (0,97) en `:active`, 160 ms.
+  El movimiento en hover solo bajo `@media (hover: hover) and (pointer: fine)`.
+- **Diálogos** (`FormDialog`, visor de la publicación): transiciones + `@starting-style`,
+  opacidad + escala 0,96 → 1 en 220 ms, fondo que se funde, salida en 150 ms.
+- **Menú móvil:** se despliega con `clip-path` y curva de cajón; los enlaces entran
+  escalonados 40 ms.
+- **Aparición al hacer scroll:** `data-reveal` (opacidad + 14 px) y `data-reveal="photo"`
+  (la foto se descubre con `clip-path: inset()` y se asienta). Una sola vez, con
+  IntersectionObserver (`src/scripts/reveal.ts`), escalonado 50 ms. Sin JavaScript todo se ve:
+  el script solo oculta lo que al cargar está por debajo de la pantalla; nunca el contenido
+  inicial ni el LCP, y lo que recibe el foco aparece al instante.
+- **Movimiento reducido:** nada se desplaza ni escala; quedan fundidos cortos de opacidad
+  (apariciones, diálogos, menú, transiciones entre páginas). WebGL no se monta.
+
+## Transiciones entre páginas
+
+View Transitions entre documentos **solo con CSS** (`@view-transition { navigation: auto; }`,
+`src/styles/global.css` §8), sin router en el cliente:
+
+- La cabecera y el botón de WhatsApp persisten (no se mueven; la cabecera se funde al cambiar
+  de tono, p. ej. al entrar en Empoderando Voces).
+- Transición por defecto: la página anterior se funde en 150 ms y la nueva entra con 10 px de
+  subida en 280 ms (`ease-out`).
+- La tarjeta de Empoderando Voces del inicio y la portada de su página comparten
+  `view-transition-name: ev-panel`: la tarjeta oscura se expande hasta ser la página
+  (440 ms, `ease-in-out`, con un leve desenfoque que disimula el fundido). Al llegar desde el
+  inicio, la página marca el tipo `ev-morph` (evento `pagereveal`) y el inicio se queda un
+  instante para que se vea crecer la tarjeta.
+- Con «reducir movimiento» no hay desplazamientos ni cambios de tamaño: solo fundidos.
+- Las páginas internas se precargan al pasar el ratón (Speculation Rules), así la transición es
+  casi instantánea.
+
+## Empoderando Voces (`/empoderando-voces/`)
+
+Página editorial e inmersiva, distinta del resto: ciruela profundo (`--ev-bg` #1F1024,
+derivado de la marca), oro antiguo `--ev-gold` usado con moderación (contraste AA/AAA),
+Cormorant en cursiva + Barlow Condensed. Cabecera en su variante oscura translúcida
+(`BaseLayout headerTone="dark"`) sobre la portada, sin corte claro/oscuro.
+
+- Portada: tipográfica en móvil (el título es el LCP y no se anima); en escritorio, con la foto
+  de *Education for Peace* (solo se descarga a partir de 960 px).
+- Islas de React Bits (`src/components/react-bits/`, ver `THIRD_PARTY_NOTICES.md`):
+  - **Aurora** (WebGL, ogl) tras la portada: `client:media="(min-width: 768px)"`, se crea en un
+    momento ocioso y tras la transición, se pausa fuera de pantalla, 30 fps a media
+    resolución; debajo, un póster CSS con el mismo ambiente (móvil, sin WebGL, movimiento
+    reducido).
+  - **CircularGallery** (WebGL, ogl) con las fotos de Nueva York: `client:visible`, sobre una
+    lista estática accesible (texto alternativo, desplazable, enfocable) que es la galería sin
+    JS / sin WebGL / con movimiento reducido. Botones anterior/siguiente y región `aria-live`.
+    No se mueve sola (sin bucle en reposo) ni secuestra la rueda de la página.
+  - **Magnet** en el gran botón «Cuéntame tu historia»: solo con ratón, desplazamiento ≤ 10 px.
+- El gran botón y el de la portada abren el formulario de AccioGest (`StoryDialog`, sin cambios
+  en su lógica); sin JavaScript, WhatsApp. `/empoderando-voces/#cuentame` lo abre directamente.
+
+## Islas de React
+
+- Hidratar **siempre** con `client:visible`, `client:idle` o `client:media` (nunca
+  `client:load` salvo que sea imprescindible). Inicio: ≤ ~60 KB de JS (gzip) en la carga inicial.
+- WebGL/3D solo diferido, pausado fuera de pantalla, desactivado con `prefers-reduced-motion`
+  y con un póster estático del mismo tamaño antes de hidratar (ver `GlobeSlot.astro`).
+- Componentes de React Bits: conservar la cabecera de licencia y anotarlos en
+  `THIRD_PARTY_NOTICES.md`.
+
+## Rendimiento (objetivos)
+
+| Métrica (Lighthouse móvil) | Objetivo |
+|---|---|
+| Performance | ≥ 95 en todas las páginas |
+| Accessibility / Best Practices / SEO | 100 |
+| CLS | < 0,05 |
+| JS inicial en el inicio | ≤ ~60 KB gzip (hoy < 1 KB) |
+
+Cómo se consigue: CSS en línea (sin hojas que bloqueen el renderizado), tipografías
+autoalojadas con precarga y *fallbacks* con métricas ajustadas (anchos de línea en `em`, nunca
+en `ch`, que cambia al cargar la fuente), imágenes AVIF/WebP con
+`srcset`, la imagen principal nunca oculta ni animada desde opacidad 0, apariciones al hacer
+scroll que nunca tocan el contenido inicial (script de ~1 KB), WebGL solo diferido y cero
+peticiones a terceros al cargar.
+
+### Tipografías
+
+`src/components/seo/Fonts.astro`: Cormorant Garamond (500, 600, cursiva 500/600), Barlow (400,
+cursiva 400, 500, 600) y Barlow Condensed (500, sobre todo Empoderando Voces), subconjuntos
+latin + latin-ext.
+Cada página elige qué archivos precargar (`preloadFonts` en `BaseLayout`). Las familias
+«Fallback» (Times New Roman / Arial ajustadas con `size-adjust` y `ascent/descent-override`)
+evitan saltos al cambiar de fuente; valores calculados con `@capsizecss/unpack`.
 
 ## Publicación
 
-**GitHub Pages:** Settings → Pages → *Deploy from a branch* → rama `main`, carpeta `/ (root)`.
+**GitHub Pages** (incluido): `.github/workflows/deploy.yml` compila con `withastro/action` y
+publica en cada push a `main` (o a mano desde Actions → «Run workflow»).
 
-**Netlify:** *Add new site* → importar el repositorio (sin comando de build, directorio de
-publicación `/`), o arrastrar la carpeta al panel de Netlify.
+1. Settings → Pages → Source: **GitHub Actions**.
+2. Settings → Secrets and variables → Actions → **Variables**:
+   - `SITE_URL` = dominio definitivo, p. ej. `https://www.dominio.es` (**obligatorio**: canonical,
+     Open Graph, JSON-LD, sitemap y robots.txt usan URLs absolutas). Mientras no exista se usa
+     el marcador `https://denissegonzalez.example`.
+   - `BASE_PATH` = solo si la web va en un subdirectorio (`/dennise-web` en
+     `usuario.github.io/dennise-web` sin dominio propio).
 
-Antes de publicar:
+**Otro alojamiento (Netlify, Vercel, servidor propio):** comando `npm run build`, carpeta
+`dist/`, con las mismas variables de entorno.
 
-1. **Excluir `_originales/`** (y `docs/`): en GitHub Pages y Netlify todo lo que esté en el
-   repositorio se publica. Moverlos fuera del repositorio o a otra rama.
-2. Con el dominio definitivo (p. ej. `https://DOMINIO/`), en `index.html`:
-   - cambiar a URL absoluta `og:image` / `twitter:image` (WhatsApp y las redes no muestran la
-     imagen de vista previa con rutas relativas) y las rutas `image` y `logo` del JSON-LD;
-   - añadir `<meta property="og:url" content="https://DOMINIO/">`, la propiedad
-     `"url": "https://DOMINIO/"` en el JSON-LD y `<link rel="canonical" href="https://DOMINIO/">`.
-3. Completar los datos `[PENDIENTE: …]` de las páginas legales.
+`docs/` y `_originales/` no se publican: solo se publica `dist/`.
 
-## Pendiente de la cliente
+## Pendiente
+
+De la cliente (ver `docs/contenido.md` §7):
 
 1. Confirmar el teléfono (+34 670 647 593).
-2. Qué diferencia los planes Básico, Estándar y Premium (hoy se muestra una lista común:
-   «Todos los planes incluyen»).
+2. Qué diferencia los planes Básico, Estándar y Premium (hoy: «Todos los planes incluyen»).
 3. Equipo de trabajo / socios, contenido de Dubái y de la web anterior (no se ha inventado nada).
 4. Email de contacto y dirección de la oficina (asesorías presenciales).
 5. Datos legales: titular, NIF, domicilio, colegio profesional y n.º de colegiada. Confirmar el
    uso del título «abogada» en España (requiere colegiación).
-6. Servicio de formularios (p. ej. Formspree) para recibir las historias por email.
-7. Logotipo: el original dice «Gonzalez» sin tilde y así se ha reproducido; confirmar si se
-   prefiere «González».
-8. Valorar alojar las tipografías en el propio servidor en lugar de Google Fonts (privacidad/RGPD).
-9. Confirmar si los precios de las asesorías (60/80 €, 30/50 €, 45/65 €) incluyen IVA. Cuando lo
-   confirme, añadir «IVA incluido» bajo «Asesorías» y quitar la salvedad del aviso legal.
-10. Idiomas de atención (¿también inglés?) y zona en la que presta servicio, para añadirlos a los
-    datos estructurados (JSON-LD: `knowsLanguage`, `areaServed`). Hoy no se indican.
-11. Validar la transcripción del artículo «8 de marzo — Voces que se unen» (sección En medios),
-    copiada literalmente del cartel publicado.
+6. AccioGest: faltan los 3 `FORM_ID` de formularios, los 3 de planes y el `PLUGIN_ID` de
+   reservas (README → AccioGest). Hasta entonces, modo simulado con aviso visible.
+   Revisar las páginas legales (`[PENDIENTE]`), en especial las condiciones de contratación
+   (borrador) y el proceso tras la compra de un plan.
+7. Logotipo: el original dice «Gonzalez» sin tilde y así se ha reproducido; confirmar.
+8. Confirmar si los precios de las asesorías (60/80 €, 30/50 €, 45/65 €) incluyen IVA. Hoy solo
+   se indica «IVA incluido» en los planes.
+9. Idiomas de atención y zona en la que presta servicio (JSON-LD `knowsLanguage`, `areaServed`).
+10. Validar la transcripción del artículo «8 de marzo — Voces que se unen».
+11. Dominio definitivo (`SITE_URL`).
+
+Técnico (siguientes desarrollos): globo 3D en Conóceme (`GlobeSlot.astro`), visita guiada y
+más detalles de React Bits. (Hecho: sistema de movimiento, rediseño de Empoderando Voces y su
+transición desde el inicio.)

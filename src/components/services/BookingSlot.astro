@@ -1,0 +1,293 @@
+---
+/**
+ * ============================================================================
+ *  #reservar — Reservas de asesorías (AccioGest, docs/integracion-acciogest.md §1)
+ * ============================================================================
+ *  Con BOOKING_PLUGIN_ID configurado (src/config/acciogest.ts):
+ *    <div id="acciogest-booking"> con min-height: 760px reservado ANTES de cargar (sin CLS) y
+ *    el script {API}/plugin-citas-embed.js?pluginId=… inyectado justo después del contenedor:
+ *      - al llegar con #reservar (o al pulsar un enlace a #reservar), en el acto;
+ *      - si no, cuando la sección se acerca a la pantalla (IntersectionObserver, 1200 px antes).
+ *    El widget (iframe) hace servicio, día y hora, modalidad, datos, RGPD y pago con Stripe:
+ *    la web NO implementa pagos ni disponibilidad.
+ *  Sin configurar (PLUGIN_ID de ejemplo): panel con lo que incluye la reserva, «Solicitar cita»
+ *  (diálogo de solicitud, ServiceRequestDialog) y WhatsApp. Cero peticiones a terceros.
+ * ============================================================================
+ */
+import { PHONE, TEL_LINK, WA_TEXT, waLink } from '~/data/site';
+import { bookingScriptUrl } from '~/config/acciogest';
+import { consultations } from '~/lib/services';
+import Icon, { type IconName } from '../ui/Icon.astro';
+
+const scriptSrc = bookingScriptUrl();
+
+// «Asesoría migratoria (1 hora o 30 min) o sesión de orientación académica», desde servicios.json
+const byName = new Map<string, string[]>();
+for (const c of consultations) byName.set(c.name, [...(byName.get(c.name) ?? []), c.duration_label]);
+const serviceList = [...byName].map(([name, durations], i) => {
+  const label = i === 0 ? name : name.charAt(0).toLowerCase() + name.slice(1);
+  return durations.length > 1 ? `${label} (${durations.join(' o ')})` : label;
+});
+const servicesText = serviceList.length > 1 ? `${serviceList.slice(0, -1).join(', ')} o ${serviceList.at(-1)}.` : `${serviceList[0]}.`;
+
+const includes: { icon: IconName; title: string; text: string }[] = [
+  { icon: 'list', title: 'Servicio', text: servicesText },
+  { icon: 'calendar', title: 'Día y hora', text: 'Eliges el día y la hora de tu asesoría.' },
+  { icon: 'monitor', title: 'Modalidad', text: 'Online o presencial.' },
+  { icon: 'lock', title: 'Pago seguro con tarjeta', text: 'La asesoría se paga al reservar.' },
+];
+const requestWa = waLink(WA_TEXT.reserva);
+---
+
+<section class="section section--white booking" id="reservar" aria-labelledby="booking-title" data-wa-hide>
+  <div class="container">
+    <div class="booking-head">
+      <p class="eyebrow eyebrow--center" data-reveal>Asesorías online y presenciales</p>
+      <h2 class="section-title" id="booking-title" data-reveal>Reserva tu asesoría</h2>
+    </div>
+
+    {
+      scriptSrc ? (
+        <>
+          <div class="booking-widget" id="acciogest-booking" data-booking-src={scriptSrc} />
+          <div class="booking-error" data-booking-error hidden>
+            <p>No se ha podido cargar el sistema de reservas. Puedes solicitar tu cita o escribirme por WhatsApp.</p>
+            <div class="btn-row">
+              <a class="btn btn--primary" href={requestWa} target="_blank" rel="noopener" data-service-request="">
+                <Icon name="calendar" />
+                <span>Solicitar cita</span>
+              </a>
+              <a class="btn btn--ghost" href={requestWa} target="_blank" rel="noopener">
+                <Icon name="whatsapp" />
+                <span>Reservar por WhatsApp</span>
+              </a>
+            </div>
+          </div>
+          <noscript>
+            <p class="booking-noscript">
+              Para reservar online necesitas activar JavaScript. También puedes <a href={requestWa}>reservar por WhatsApp</a> o llamar al{' '}
+              <a href={TEL_LINK}>{PHONE.display}</a>.
+            </p>
+          </noscript>
+          <p class="booking-alt">
+            ¿Tienes dudas antes de reservar?{' '}
+            <a href={requestWa} target="_blank" rel="noopener">Escríbeme por WhatsApp</a>.
+          </p>
+        </>
+      ) : (
+        <div class="booking-card" data-booking-placeholder>
+          <div class="booking-info">
+            <h3 class="booking-info-title">Qué incluye la reserva</h3>
+            <ul class="booking-includes" role="list">
+              {includes.map((item) => (
+                <li>
+                  <span class="booking-includes-icon">
+                    <Icon name={item.icon} />
+                  </span>
+                  <span>
+                    <strong>{item.title}</strong>
+                    <span class="booking-includes-text">{item.text}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div class="booking-cta">
+            <span class="booking-cta-icon">
+              <Icon name="calendar" />
+            </span>
+            <p class="booking-cta-text">Solicita tu cita indicando la asesoría que te interesa y si la prefieres online o presencial.</p>
+            <div class="booking-cta-actions">
+              <a class="btn btn--primary btn--lg btn--block" href={requestWa} target="_blank" rel="noopener" data-service-request="" data-booking-request>
+                <Icon name="calendar" />
+                <span>Solicitar cita</span>
+              </a>
+              <a class="btn btn--ghost btn--lg btn--block" href={requestWa} target="_blank" rel="noopener">
+                <Icon name="whatsapp" />
+                <span>Reservar por WhatsApp</span>
+              </a>
+              <a class="booking-phone" href={TEL_LINK}>
+                <Icon name="phone" />
+                <span>{PHONE.display}</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      )
+    }
+  </div>
+</section>
+
+<script>
+  // «Reservar» en una tarjeta → el «Solicitar cita» del panel queda con ese servicio elegido.
+  const request = document.querySelector<HTMLElement>('[data-booking-request]');
+  if (request) {
+    document.addEventListener('click', (e) => {
+      const card = (e.target as Element | null)?.closest<HTMLElement>('[data-book-service]');
+      if (card?.dataset.leadValue) request.dataset.serviceRequest = card.dataset.leadValue;
+    });
+  }
+
+  // Widget de AccioGest: carga diferida (solo si hay BOOKING_PLUGIN_ID).
+  const host = document.getElementById('acciogest-booking');
+  const src = host?.dataset.bookingSrc;
+  if (host && src) {
+    let io: IntersectionObserver | undefined;
+    let injected = false;
+    const inject = () => {
+      if (injected) return;
+      injected = true;
+      io?.disconnect();
+      host.dataset.state = 'loading';
+      const script = document.createElement('script');
+      script.src = src;
+      script.async = true;
+      script.onload = () => window.setTimeout(() => (host.dataset.state = 'ready'), 4000);
+      script.onerror = () => {
+        host.dataset.state = 'error';
+        const box = document.querySelector<HTMLElement>('[data-booking-error]');
+        if (box) box.hidden = false;
+      };
+      host.after(script); // mismo sitio que en el código de AccioGest: justo después del contenedor
+    };
+    const wantsBooking = () => location.hash === '#reservar';
+
+    if (wantsBooking()) inject();
+    else if ('IntersectionObserver' in window) {
+      io = new IntersectionObserver((entries) => entries.some((en) => en.isIntersecting) && inject(), {
+        rootMargin: '1200px 0px',
+      });
+      io.observe(host);
+    } else inject();
+
+    window.addEventListener('hashchange', () => wantsBooking() && inject());
+    document.addEventListener('click', (e) => {
+      if ((e.target as Element | null)?.closest('a[href$="#reservar"]')) inject();
+    });
+  }
+</script>
+
+<style>
+  .booking { scroll-margin-top: var(--header-h); }
+  .booking-head { text-align: center; margin-bottom: clamp(2rem, 4vw, 3rem); }
+  .booking-head .section-title { margin-inline: auto; }
+
+  /* ---------- Widget ---------- */
+  .booking-widget {
+    position: relative;
+    min-height: 760px; /* reservado antes de cargar el iframe: sin saltos (CLS) */
+    max-width: 960px;
+    margin-inline: auto;
+    border-radius: var(--radius-l);
+    background: var(--c-ivory);
+  }
+  .booking-widget :global(iframe) { display: block; width: 100%; min-height: 760px; border: 0; }
+  .booking-widget:empty {
+    border: 1px solid var(--c-line);
+    background:
+      radial-gradient(30rem 18rem at 100% 0%, rgba(232, 221, 236, .8), transparent 70%),
+      var(--c-ivory);
+  }
+  .booking-widget[data-state="loading"]:empty::before {
+    content: "Cargando el calendario de reservas…";
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--c-muted);
+    font-size: var(--fs-small);
+  }
+  .booking-error {
+    max-width: 960px;
+    margin: 1.5rem auto 0;
+    padding: 1.25rem 1.5rem;
+    border-radius: var(--radius);
+    background: var(--c-error-bg);
+    color: var(--c-ink);
+  }
+  .booking-error .btn-row { margin-top: 1rem; }
+  .booking-alt,
+  .booking-noscript { max-width: 960px; margin: 1.25rem auto 0; color: var(--c-muted); font-size: var(--fs-small); text-align: center; }
+
+  /* ---------- Panel sin configurar ---------- */
+  .booking-card {
+    display: grid;
+    max-width: 1040px;
+    margin-inline: auto;
+    overflow: hidden;
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius-l);
+    background: var(--c-white);
+    box-shadow: var(--shadow-s);
+  }
+  .booking-info {
+    padding: clamp(1.5rem, 1rem + 2.5vw, 3rem);
+    background:
+      radial-gradient(30rem 18rem at 0% 0%, rgba(232, 221, 236, .8), transparent 70%),
+      var(--c-ivory);
+  }
+  .booking-info-title {
+    margin-bottom: 1.5rem;
+    font-family: var(--ff-serif);
+    font-size: var(--fs-h4);
+    font-weight: 600;
+    line-height: 1.15;
+  }
+  .booking-includes { display: grid; gap: 1.25rem; }
+  .booking-includes li { display: grid; grid-template-columns: auto 1fr; gap: 1rem; align-items: start; }
+  .booking-includes strong { display: block; color: var(--c-ink); font-weight: 600; line-height: 1.35; }
+  .booking-includes-text { display: block; margin-top: .15rem; color: var(--c-ink-soft); font-size: var(--fs-small); line-height: 1.5; }
+  .booking-includes-icon {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    background: var(--c-white);
+    border: 1px solid rgba(110, 29, 122, .16);
+    color: var(--c-plum);
+  }
+  .booking-includes-icon :global(.icon) { width: 1.3rem; height: 1.3rem; }
+
+  .booking-cta {
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 1.25rem;
+    padding: clamp(1.5rem, 1rem + 2.5vw, 3rem);
+    text-align: center;
+  }
+  .booking-cta-icon {
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background: var(--c-lavender);
+    color: var(--c-plum);
+  }
+  .booking-cta-icon :global(.icon) { width: 1.6rem; height: 1.6rem; }
+  .booking-cta-text { max-width: 26rem; color: var(--c-ink-soft); font-size: var(--fs-lead); line-height: 1.5; text-wrap: pretty; }
+  .booking-cta-actions { display: grid; gap: .75rem; width: min(100%, 22rem); }
+  .booking-phone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .6rem;
+    min-height: 48px;
+    color: var(--c-ink);
+    font-family: var(--ff-serif);
+    font-size: 1.35rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .booking-phone :global(.icon) { color: var(--c-plum); }
+  @media (hover: hover) {
+    .booking-phone:hover { color: var(--c-plum); }
+  }
+
+  @media (min-width: 860px) {
+    .booking-card { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); }
+    .booking-info { border-right: 1px solid var(--c-line); }
+  }
+</style>

@@ -1,0 +1,74 @@
+---
+/**
+ * Botón flotante de WhatsApp. Se oculta sobre los elementos con [data-wa-hide]
+ * (hero, bloques de contacto, pie), mientras hay un diálogo abierto o el menú móvil.
+ */
+import { WA_TEXT, waLink } from '~/data/site';
+import Icon from '../ui/Icon.astro';
+---
+
+<a class="wa-float" href={waLink(WA_TEXT.general)} target="_blank" rel="noopener" aria-label="Escríbeme por WhatsApp" data-wa-float>
+  <Icon name="whatsapp" />
+</a>
+
+<script>
+  const fab = document.querySelector<HTMLElement>('[data-wa-float]');
+  const zones = document.querySelectorAll<HTMLElement>('[data-wa-hide]');
+  if (fab && zones.length && 'IntersectionObserver' in window) {
+    const visible = new Set<Element>();
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) visible.add(entry.target);
+          else visible.delete(entry.target);
+        }
+        const hide = visible.size > 0;
+        fab.classList.toggle('is-hidden', hide);
+        if (hide) fab.setAttribute('tabindex', '-1');
+        else fab.removeAttribute('tabindex');
+      },
+      { threshold: 0.15 },
+    );
+    zones.forEach((z) => io.observe(z));
+  }
+</script>
+
+<style>
+  .wa-float {
+    position: fixed;
+    right: max(1rem, env(safe-area-inset-right));
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    z-index: var(--z-float);
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--c-plum);
+    color: #fff;
+    box-shadow: 0 12px 28px -8px rgba(44, 10, 50, .55), 0 0 0 4px rgba(255, 255, 255, .7);
+    transition:
+      transform var(--dur) var(--ease-out),
+      opacity var(--dur) var(--ease-out),
+      visibility 0s,
+      background-color var(--dur-fast) var(--ease-hover);
+  }
+  .wa-float :global(.icon) { width: 28px; height: 28px; }
+  .wa-float:active { transform: scale(.95); }
+  .wa-float:focus-visible { border-radius: 50%; }
+  @media (hover: hover) and (pointer: fine) {
+    .wa-float:hover { background: var(--c-plum-700); color: #fff; transform: translateY(-2px); }
+  }
+  .wa-float.is-hidden,
+  :global(html:has(dialog[open])) .wa-float,
+  :global(html:has(#site-nav:popover-open)) .wa-float {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(16px) scale(.9);
+    transition: transform var(--dur) var(--ease-out), opacity var(--dur) var(--ease-out), visibility 0s linear var(--dur);
+  }
+  @media (max-width: 599.98px) {
+    .wa-float { width: 52px; height: 52px; }
+    .wa-float :global(.icon) { width: 26px; height: 26px; }
+  }
+</style>

@@ -1,0 +1,167 @@
+---
+/**
+ * Tarjeta oscura de Empoderando Voces en el inicio: una miniatura de la portada de su página
+ * (mismo ciruela, misma tipografía). Comparte view-transition-name «ev-panel» con la portada
+ * de /empoderando-voces/: al navegar, la tarjeta se expande hasta ser la página.
+ */
+import { url } from '~/lib/url';
+import Photo from '../ui/Photo.astro';
+import Icon from '../ui/Icon.astro';
+import educationPeace from '~/assets/img/education-peace.jpg';
+import yhri from '~/assets/img/yhri-asamblea.jpg';
+---
+
+<section class="section section--white ev-teaser-wrap" aria-labelledby="ev-teaser-title">
+  <div class="container">
+    <article class="ev-teaser" data-reveal>
+      <div class="ev-teaser-copy">
+        <p class="ev-teaser-kicker">
+          <span class="ev-teaser-kicker-icon"><Icon name="mic" /></span>
+          <span>Porque cada historia merece ser escuchada.</span>
+        </p>
+        <h2 class="ev-teaser-title" id="ev-teaser-title">
+          <span class="ev-teaser-title-a">Empoderando</span>
+          <span class="ev-teaser-title-b">Voces</span>
+        </h2>
+        <p class="ev-teaser-text">
+          Empoderando Voces nace de una convicción: <strong>cuando una persona se atreve a contar su historia, deja de cargarla sola.</strong>
+        </p>
+        <a class="ev-teaser-link" href={url('/empoderando-voces/')}>
+          <span>Ir a Empoderando Voces</span>
+          <Icon name="arrow" />
+        </a>
+      </div>
+      <div class="ev-teaser-media" aria-hidden="true">
+        <figure class="ev-teaser-photo ev-teaser-photo--1">
+          <Photo src={educationPeace} alt="" widths={[360, 540, 720]} sizes="(min-width: 900px) 22vw, 45vw" position="55% 30%" />
+        </figure>
+        <figure class="ev-teaser-photo ev-teaser-photo--2">
+          <Photo src={yhri} alt="" widths={[360, 540]} sizes="(min-width: 900px) 17vw, 38vw" position="60% 35%" />
+        </figure>
+      </div>
+    </article>
+  </div>
+</section>
+
+<style>
+  .ev-teaser {
+    --focus: var(--ev-gold);
+    view-transition-name: ev-panel;
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    gap: 2.75rem;
+    padding: clamp(1.75rem, 1rem + 4vw, 4.5rem);
+    border-radius: clamp(20px, 3vw, 36px);
+    overflow: clip;
+    background:
+      radial-gradient(60% 70% at 10% 0%, rgba(122, 44, 134, .6), transparent 70%),
+      radial-gradient(40% 50% at 95% 0%, rgba(217, 174, 99, .16), transparent 72%),
+      radial-gradient(60% 60% at 70% 110%, rgba(94, 36, 112, .45), transparent 72%),
+      var(--ev-bg);
+    color: var(--ev-text);
+  }
+  .ev-teaser-kicker {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    margin-bottom: 1.5rem;
+    color: var(--ev-muted);
+    font-size: clamp(1.02rem, .95rem + .3vw, 1.2rem);
+    line-height: 1.35;
+  }
+  .ev-teaser-kicker-icon {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    flex: none;
+    border: 1px solid rgba(221, 181, 108, .5);
+    border-radius: 50%;
+    color: var(--ev-gold);
+  }
+  .ev-teaser-kicker-icon :global(.icon) { width: 1.15rem; height: 1.15rem; }
+  .ev-teaser-title { display: flex; flex-direction: column; font-weight: 400; }
+  .ev-teaser-title-a {
+    font-family: var(--ff-serif);
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(3.1rem, 1.4rem + 6.4vw, 6.4rem);
+    line-height: .95;
+    letter-spacing: -.02em;
+    color: var(--ev-text);
+  }
+  .ev-teaser-title-b {
+    display: flex;
+    align-items: center;
+    gap: .3em;
+    margin-top: .14em;
+    font-family: var(--ff-cond);
+    font-weight: 500;
+    font-size: clamp(1.9rem, 1rem + 3.6vw, 3.9rem);
+    line-height: 1;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ev-gold);
+  }
+  .ev-teaser-title-b::before { content: ""; width: clamp(2rem, 1rem + 4vw, 4.5rem); height: 1px; background: currentColor; opacity: .7; flex: none; }
+  .ev-teaser-text {
+    max-width: 32rem;
+    margin-top: 1.75rem;
+    color: var(--ev-muted);
+    font-size: var(--fs-lead);
+    line-height: 1.5;
+  }
+  .ev-teaser-text strong { color: var(--ev-text); font-weight: 600; }
+  .ev-teaser-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .85rem;
+    min-height: 52px;
+    margin-top: 2.25rem;
+    padding: .8rem 1.5rem .8rem 1.65rem;
+    border: 1px solid rgba(221, 181, 108, .75);
+    border-radius: var(--radius-pill);
+    color: var(--ev-text);
+    font-family: var(--ff-cond);
+    font-size: 1.08rem;
+    font-weight: 500;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color var(--dur-fast) var(--ease-hover),
+      color var(--dur-fast) var(--ease-hover),
+      border-color var(--dur-fast) var(--ease-hover),
+      transform var(--dur-press) var(--ease-out);
+  }
+  .ev-teaser-link :global(.icon) { color: var(--ev-gold); transition: transform var(--dur) var(--ease-out), color var(--dur-fast) var(--ease-hover); }
+  .ev-teaser-link:focus-visible { border-radius: var(--radius-pill); }
+  .ev-teaser-link:active { transform: scale(var(--press-scale)); }
+  @media (hover: hover) and (pointer: fine) {
+    .ev-teaser-link:hover { background: var(--ev-gold); border-color: var(--ev-gold); color: var(--ev-bg); }
+    .ev-teaser-link:hover :global(.icon) { color: var(--ev-bg); transform: translateX(3px); }
+  }
+
+  .ev-teaser-media { position: relative; display: grid; grid-template-columns: 1.15fr 1fr; gap: 1rem; align-items: start; }
+  .ev-teaser-photo { position: relative; margin: 0; }
+  .ev-teaser-photo :global(img) { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 4px; box-shadow: 0 30px 60px -28px rgba(0, 0, 0, .75); }
+  .ev-teaser-photo--1::after {
+    content: "";
+    position: absolute;
+    inset: -.75rem .75rem .75rem -.75rem;
+    z-index: -1;
+    border: 1px solid rgba(221, 181, 108, .4);
+    border-radius: 4px;
+  }
+  .ev-teaser-photo--2 { margin-top: 3rem; }
+
+  .ev-teaser-copy { min-width: 0; }
+  @media (max-width: 479.98px) {
+    .ev-teaser-link { letter-spacing: .08em; padding-inline: 1.2rem; }
+  }
+  @media (min-width: 900px) {
+    .ev-teaser { grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); align-items: center; gap: 4rem; }
+  }
+</style>

@@ -1,0 +1,101 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import Photo from '~/components/ui/Photo.astro';
+import Icon from '~/components/ui/Icon.astro';
+import Consultations from '~/components/services/Consultations.astro';
+import Autogestiona from '~/components/services/Autogestiona.astro';
+import BookingSlot from '~/components/services/BookingSlot.astro';
+import ServiceRequestDialog from '~/components/services/ServiceRequestDialog.astro';
+import despacho from '~/assets/img/despacho.jpg';
+---
+
+<BaseLayout
+  title="Servicios de extranjería y precios · Denisse González, abogada"
+  description="Asesoría migratoria online y presencial, orientación académica y Programa Autogestiona para trámites de extranjería: precios y reserva de asesorías."
+  preloadFonts={['serif-600', 'sans-400']}
+>
+  <section class="services-hero" aria-labelledby="services-title">
+    <div class="container services-intro">
+      <div class="services-intro-copy">
+        <p class="eyebrow">Servicios de extranjería</p>
+        <h1 class="page-title" id="services-title">Un trámite puede cambiar tu vida.</h1>
+        <p class="lead services-lead">Expertos en extranjería. Tu tranquilidad y confianza son nuestra prioridad. Contáctanos hoy y deja tu caso en manos profesionales.</p>
+        <ul class="pill-row" role="list">
+          <li class="pill"><Icon name="monitor" />Online</li>
+          <li class="pill"><Icon name="handshake" />Presencial</li>
+        </ul>
+      </div>
+      <figure class="services-media">
+        <div class="frame frame--offset">
+          <Photo src={despacho} alt="Denisse González firmando documentos en su escritorio" widths={[320, 400]} sizes="(min-width: 700px) 340px, 300px" priority />
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section section--ivory services-block" id="asesorias" aria-labelledby="asesorias-title">
+    <div class="container">
+      <div class="block-head" data-reveal>
+        <h2 class="block-title" id="asesorias-title">Asesorías</h2>
+        <p class="block-sub">Precios por sesión, online o presencial.</p>
+      </div>
+      <Consultations />
+    </div>
+  </section>
+
+  <section class="section section--ivory services-program" aria-labelledby="autogestiona-title">
+    <div class="container">
+      <Autogestiona />
+    </div>
+  </section>
+
+  <BookingSlot />
+
+  <ServiceRequestDialog slot="after" />
+</BaseLayout>
+
+<style>
+  .services-hero {
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5.5rem) clamp(1.5rem, 1rem + 2vw, 3rem);
+    background:
+      radial-gradient(60rem 40rem at 100% 0%, rgba(232, 221, 236, .85), transparent 62%),
+      var(--c-ivory);
+  }
+  .services-intro { display: grid; gap: 3rem; align-items: center; }
+  .services-intro-copy .page-title { margin-bottom: 1.5rem; max-width: 8em; }
+  .services-lead { max-width: 34rem; margin-bottom: 1.75rem; }
+  .services-media { position: relative; isolation: isolate; width: min(100% - 1.5rem, 320px); justify-self: center; }
+  .services-media :global(img) { width: 100%; border-radius: var(--radius); }
+  .frame--offset::before {
+    content: "";
+    position: absolute;
+    inset: 2rem -1.5rem -1.5rem 2rem;
+    background: var(--c-lavender-200);
+    border-radius: var(--radius);
+    z-index: -1;
+  }
+  @media (min-width: 700px) {
+    .services-intro { grid-template-columns: minmax(0, 1.3fr) minmax(0, .7fr); }
+    .services-media { width: min(100% - 1.5rem, 340px); justify-self: end; margin-right: 1.5rem; }
+  }
+
+  .services-block { padding-top: clamp(2rem, 4vw, 3.5rem); padding-bottom: clamp(2rem, 4vw, 3rem); }
+  .services-program { padding-top: clamp(2rem, 4vw, 3rem); }
+  .block-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .5rem 2rem;
+    padding-bottom: 1.25rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--c-line);
+  }
+  .block-title {
+    font-family: var(--ff-serif);
+    font-size: var(--fs-h3);
+    font-weight: 600;
+    line-height: 1.1;
+  }
+  .block-sub { color: var(--c-muted); font-size: var(--fs-small); }
+</style>

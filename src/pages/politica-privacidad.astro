@@ -1,0 +1,103 @@
+---
+/**
+ * Borrador pendiente de revisión: completar los datos [PENDIENTE] antes de publicar.
+ * La versión (POLICY_VERSION, src/config/acciogest.ts) se envía con cada formulario como
+ * «Versión política»: si cambia el contenido de esta política, cambiar también la versión.
+ * Los textos de consentimiento de los formularios salen de src/data/legal.ts (los mismos).
+ */
+import LegalLayout from '~/layouts/LegalLayout.astro';
+import { PHONE, TEL_LINK } from '~/data/site';
+import { POLICY_VERSION } from '~/config/acciogest';
+import { CONSENT, FORM_NAMES } from '~/data/legal';
+import { url } from '~/lib/url';
+
+/** Texto de la casilla, tal cual aparece en el formulario (sin el punto final para citarlo). */
+const consentLabel = (key: keyof typeof CONSENT) => `He leído y acepto la política de privacidad y ${CONSENT[key].replace(/\.$/, '')}`;
+---
+
+<LegalLayout title="Política de privacidad · Denisse González" heading="Política de privacidad" description="Política de privacidad del sitio web de Denisse González, abogada: qué datos se tratan, con qué finalidad y cómo ejercer tus derechos.">
+  <Fragment slot="intro">
+    <p class="legal-updated">Versión {POLICY_VERSION} · Última actualización: <span class="placeholder">[PENDIENTE: fecha de publicación]</span></p>
+    <p class="legal-notice"><strong>Borrador pendiente de revisión.</strong> Redactado conforme al Reglamento (UE) 2016/679 (RGPD) y a la Ley Orgánica 3/2018 (LOPDGDD). Los datos marcados como <span class="placeholder">[PENDIENTE]</span> deben completarse antes de publicar la web.</p>
+  </Fragment>
+
+  <h2>1. Responsable del tratamiento</h2>
+  <dl>
+    <div><dt>Responsable</dt><dd>Denisse González Barbosa</dd></div>
+    <div><dt>NIF / NIE</dt><dd><span class="placeholder">[PENDIENTE: NIF]</span></dd></div>
+    <div><dt>Domicilio</dt><dd><span class="placeholder">[PENDIENTE: domicilio]</span></dd></div>
+    <div><dt>Teléfono</dt><dd><a href={TEL_LINK}>{PHONE.display}</a></dd></div>
+    <div><dt>Correo electrónico</dt><dd><span class="placeholder">[PENDIENTE: email de contacto]</span></dd></div>
+  </dl>
+
+  <h2>2. Qué datos se tratan y para qué</h2>
+
+  <h3>{FORM_NAMES.historia}</h3>
+  <p><strong>Datos:</strong> nombre, email, teléfono (opcional), país, el tema elegido, el relato de tu historia y tus preferencias sobre su difusión pública, el anonimato y la forma de contacto (email, teléfono o WhatsApp).</p>
+  <p><strong>Finalidad:</strong> al marcar la casilla «{consentLabel('historia')}», tus datos se tratan para esa finalidad. El email y el teléfono nunca se publican. Si has marcado que quieres permanecer en el anonimato, tu nombre tampoco se publicará.</p>
+  <p>Una historia personal puede contener datos especialmente protegidos (por ejemplo, sobre salud, origen étnico, creencias u orientación sexual). Te pedimos que incluyas solo la información que quieras compartir; su tratamiento se basa en tu consentimiento explícito.</p>
+
+  <h3>{FORM_NAMES.servicio}</h3>
+  <p><strong>Datos:</strong> nombre, email, teléfono (opcional), el servicio o plan que te interesa y tu mensaje (opcional).</p>
+  <p><strong>Finalidad:</strong> al marcar la casilla «{consentLabel('servicio')}», tus datos se tratan para esa finalidad: responder a tu solicitud, informarte sobre el servicio y, si lo pides, concertar una cita.</p>
+
+  <h3>{FORM_NAMES.contacto}</h3>
+  <p><strong>Datos:</strong> nombre, email, teléfono (opcional) y tu mensaje.</p>
+  <p><strong>Finalidad:</strong> al marcar la casilla «{consentLabel('contacto')}», tus datos se tratan para esa finalidad.</p>
+
+  <h3>Reservas de asesorías y contratación de planes</h3>
+  <p><strong>Datos:</strong> los datos que indiques al reservar o contratar (como nombre, email y teléfono), el servicio o plan, el día, la hora y la modalidad (online o presencial) de la asesoría, y los datos del pago.</p>
+  <p><strong>Finalidad:</strong> gestionar la reserva o la contratación, cobrar el servicio, prestarlo, emitir la factura y atender tus consultas sobre él. La reserva y el pago se realizan en el sistema de AccioGest integrado en la web (y en sus páginas de pago); el pago con tarjeta lo procesa Stripe. Esta web no recibe ni guarda los datos de tu tarjeta.</p>
+
+  <h3>Datos que acompañan a los formularios</h3>
+  <ul>
+    <li>La confirmación de tu consentimiento y la versión de esta política que has aceptado (versión {POLICY_VERSION}), para poder acreditarlo.</li>
+    <li>Si has llegado a la web desde un enlace de una campaña o red social, el origen de la visita (parámetros <code>utm_source</code>, <code>utm_medium</code> y <code>utm_campaign</code> del enlace), para saber por qué canal llegan las consultas. Este dato se guarda temporalmente en tu navegador (<code>sessionStorage</code>), no se envía a nadie hasta que mandas un formulario y se borra al cerrar la pestaña. <span class="placeholder">[PENDIENTE: valorar con la asesoría legal si este almacenamiento requiere consentimiento previo según el art. 22.2 LSSI]</span></li>
+    <li>Un campo oculto antispam: si se rellena (lo hacen los programas automáticos), el formulario no se envía.</li>
+  </ul>
+
+  <h3>Consultas por WhatsApp o teléfono</h3>
+  <p>Nombre, número de teléfono y el contenido de los mensajes o llamadas que decidas enviar para solicitar información o reservar una asesoría.</p>
+
+  <h2>3. Base jurídica</h2>
+  <ul>
+    <li><strong>Consentimiento</strong> (art. 6.1.a RGPD y, para categorías especiales de datos de las historias, art. 9.2.a RGPD): formularios de historia, solicitud de información y contacto. Puedes retirarlo en cualquier momento, sin que ello afecte a la licitud del tratamiento anterior.</li>
+    <li><strong>Medidas precontractuales y ejecución de un contrato</strong> (art. 6.1.b RGPD): cuando solicitas información sobre un servicio para contratarlo, reservas una asesoría o contratas un plan.</li>
+    <li><strong>Obligación legal</strong> (art. 6.1.c RGPD): facturación y obligaciones fiscales y contables.</li>
+    <li><strong>Interés legítimo</strong> (art. 6.1.f RGPD): conocer el canal por el que llegan las consultas (origen de la visita) y proteger los formularios frente al spam.</li>
+  </ul>
+
+  <h2>4. Plazo de conservación</h2>
+  <ul>
+    <li><strong>Solicitudes y mensajes</strong> (formularios de solicitud de información y contacto): el tiempo necesario para atenderlos y, después, <span class="placeholder">[PENDIENTE: plazo, p. ej. 1 año]</span>, salvo que se convierta en una relación profesional.</li>
+    <li><strong>Historias</strong> (Empoderando Voces): hasta que retires tu consentimiento o solicites su supresión.</li>
+    <li><strong>Reservas, contrataciones y facturas</strong>: mientras dure la relación profesional y, después, durante los plazos legales (por ejemplo, seis años para la documentación contable según el Código de Comercio y los plazos de prescripción fiscales). <span class="placeholder">[PENDIENTE: confirmar plazos con la asesoría]</span></li>
+  </ul>
+
+  <h2>5. Destinatarios y encargados del tratamiento</h2>
+  <p>No se ceden datos a terceros salvo obligación legal. Para el funcionamiento de la web intervienen los siguientes proveedores:</p>
+  <ul>
+    <li><strong>AccioGest</strong>, como <strong>encargado del tratamiento</strong>: recibe y almacena los formularios de la web (historias, solicitudes y contacto) y gestiona el sistema de reservas y las páginas de contratación de los planes. <span class="placeholder">[PENDIENTE: razón social, domicilio y país de AccioGest, y firma del contrato de encargo del tratamiento (art. 28 RGPD)]</span></li>
+    <li><strong>Stripe</strong>, para el cobro con tarjeta de las reservas y los planes a través de las páginas y el sistema de reservas de AccioGest. Stripe trata los datos del pago conforme a su propia política de privacidad. <span class="placeholder">[PENDIENTE: confirmar la entidad de Stripe y su condición (encargado o responsable independiente)]</span></li>
+    <li><strong>WhatsApp (Meta):</strong> cuando eliges escribir por WhatsApp, el mensaje se transmite a través de ese servicio, sujeto a su propia política de privacidad.</li>
+    <li><strong>Alojamiento web:</strong> <span class="placeholder">[PENDIENTE: proveedor de alojamiento]</span>.</li>
+  </ul>
+  <p>Las tipografías de la web se sirven desde el propio sitio: no se realizan peticiones a servidores de terceros (como Google Fonts) al visitarla. La web solo se comunica con AccioGest cuando envías un formulario o cuando se carga el sistema de reservas.</p>
+
+  <h2>6. Transferencias internacionales</h2>
+  <p>Algunos de estos proveedores pueden tratar datos fuera del Espacio Económico Europeo. En tal caso, las transferencias se amparan en el Marco de Privacidad de Datos UE-EE. UU. o en cláusulas contractuales tipo aprobadas por la Comisión Europea. <span class="placeholder">[PENDIENTE: verificar para cada proveedor]</span></p>
+
+  <h2>7. Tus derechos</h2>
+  <p>Puedes ejercer tus derechos de acceso, rectificación, supresión, oposición, limitación del tratamiento y portabilidad, así como retirar tu consentimiento en cualquier momento, escribiendo a <span class="placeholder">[PENDIENTE: email de contacto]</span> o por WhatsApp al {PHONE.display}, indicando el derecho que deseas ejercer.</p>
+  <p>Si consideras que tus datos no se han tratado correctamente, puedes presentar una reclamación ante la Agencia Española de Protección de Datos (<a href="https://www.aepd.es" target="_blank" rel="noopener">www.aepd.es</a>).</p>
+
+  <h2>8. Menores de edad</h2>
+  <p>Las personas menores de 14 años no deben enviar datos personales a través de esta web sin el consentimiento de sus madres, padres o personas tutoras.</p>
+
+  <h2>9. Cookies y almacenamiento local</h2>
+  <p>Este sitio web no utiliza cookies propias ni herramientas de analítica. Solo guarda temporalmente el origen de la visita descrito en el apartado 2 (<code>sessionStorage</code>, se borra al cerrar la pestaña). El sistema de reservas de AccioGest y las páginas de pago de Stripe pueden usar sus propias cookies técnicas, necesarias para la reserva y el pago. Los servicios de terceros enlazados (WhatsApp y redes sociales) pueden instalar sus propias cookies cuando accedes a ellos.</p>
+
+  <h2>10. Seguridad y cambios</h2>
+  <p>Se aplican medidas técnicas y organizativas razonables para proteger tus datos; los formularios se envían cifrados (HTTPS). Esta política puede actualizarse para adaptarse a cambios normativos o del servicio: cada versión se identifica con un código (la actual es la <strong>{POLICY_VERSION}</strong>), que se guarda junto a cada formulario enviado.</p>
+  <p>Las condiciones de la contratación de servicios están en las <a href={url('/condiciones-contratacion/')}>condiciones de contratación</a>.</p>
+</LegalLayout>

@@ -1,0 +1,283 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import Photo from '~/components/ui/Photo.astro';
+import ArticleCard from '~/components/media/ArticleCard.astro';
+import ContactCta from '~/components/contact/ContactCta.astro';
+import onuNegro from '~/assets/img/onu-negro.jpg';
+import yhri from '~/assets/img/yhri-asamblea.jpg';
+import summitAtril from '~/assets/img/summit-atril.jpg';
+---
+
+<BaseLayout
+  title="Derechos humanos · Denisse González, abogada"
+  description="El compromiso de Denisse González con los derechos humanos: educación y sensibilización, delegada en el 20th International Human Rights Summit (Nueva York, 2026) y publicaciones."
+  preloadFonts={['serif-600', 'serif-500i', 'sans-400']}
+>
+  <section class="rights-hero" aria-labelledby="rights-title">
+    <div class="container rights-grid">
+      <div class="rights-copy">
+        <p class="eyebrow">Derechos humanos</p>
+        <h1 class="page-title" id="rights-title">Los derechos humanos no pertenecen únicamente a los tratados. <em>Pertenecen a las personas.</em></h1>
+        <div class="prose rights-prose">
+          <p class="prose-lead">Mi compromiso con los derechos humanos nace de una convicción sencilla: conocer nuestros derechos es el primer paso para poder ejercerlos, defenderlos y exigir que sean respetados.</p>
+          <p>A través de mi participación en iniciativas de educación y promoción de los derechos humanos, he trabajado para acercar estos principios a distintos públicos y convertir conceptos jurídicos en herramientas comprensibles para la sociedad.</p>
+        </div>
+      </div>
+      <figure class="rights-photo">
+        <div class="frame frame--arch">
+          <Photo
+            src={onuNegro}
+            alt="Denisse González con blazer negro junto a la bandera y el emblema de las Naciones Unidas"
+            widths={[360, 540, 720, 900]}
+            sizes="(min-width: 960px) 36vw, calc(100vw - 3rem)"
+            position="70% 50%"
+            priority
+          />
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section section--white summit" aria-labelledby="summit-title">
+    <div class="container summit-grid">
+      <figure class="summit-photo" data-reveal="photo">
+        <div class="frame frame--tall">
+          <Photo
+            src={yhri}
+            alt="Denisse González sonriendo en su asiento de una sala de la ONU, frente a un micrófono y un rótulo «YHRI Summit»"
+            widths={[360, 540, 720, 900]}
+            sizes="(min-width: 960px) 34vw, calc(100vw - 3rem)"
+            position="60% 35%"
+          />
+        </div>
+      </figure>
+      <div class="summit-copy">
+        <h2 class="subhead" id="summit-title" data-reveal>Una mirada internacional</h2>
+        <div class="prose" data-reveal>
+          <p>En 2026 participé como delegada en el International Human Rights Summit en Nueva York, una experiencia que me permitió compartir espacio con jóvenes, defensores y organizaciones vinculadas a la promoción internacional de los derechos humanos.</p>
+          <p>También desarrollo actividades de sensibilización y educación en derechos humanos, participando en conferencias, encuentros y proyectos destinados a generar mayor conocimiento sobre los derechos fundamentales.</p>
+          <p>Mi objetivo es llevar los derechos humanos fuera de los textos jurídicos y acercarlos a las personas.</p>
+        </div>
+        <div class="summit-card" data-reveal>
+          <h3 class="summit-card-title">20th International Human Rights Summit</h3>
+          <dl class="summit-facts">
+            <div><dt>Lugar</dt><dd>Naciones Unidas, Nueva&nbsp;York</dd></div>
+            <div><dt>Fechas</dt><dd>30–31 de <span class="nowrap">julio de 2026</span></dd></div>
+            <div><dt>Organiza</dt><dd>Youth for Human Rights International</dd></div>
+            <div><dt>Participación</dt><dd>Delegada</dd></div>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--ivory voices" aria-labelledby="motto-title">
+    <div class="container">
+      <div class="quote-band" data-reveal>
+        <figure class="quote-photo">
+          <Photo
+            src={summitAtril}
+            alt="Denisse González en un atril con micrófono frente al cartel del 20th International Human Rights Summit 2026"
+            widths={[360, 490]}
+            sizes="(min-width: 600px) 40vw, calc(100vw - 2rem)"
+            position="70% 40%"
+          />
+        </figure>
+        <figure class="quote">
+          <blockquote>
+            <p>«La paz no sólo consiste en poner fin a la violencia o a la guerra, sino a todos los demás factores que amenazan la paz, como la discriminación, la desigualdad, la pobreza.»</p>
+          </blockquote>
+          <figcaption>— Aung San Suu Kyi</figcaption>
+        </figure>
+      </div>
+
+      <div class="motto">
+        <h2 class="motto-words" id="motto-title" data-reveal><span>Escuchar.</span> <span>Conectar.</span> <span>Actuar.</span></h2>
+        <p class="motto-sub" data-reveal>Tres palabras que resumen la manera en la que entiendo este trabajo.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--white pledge" id="compromiso" aria-labelledby="pledge-title">
+    <div class="container pledge-inner">
+      <h2 class="eyebrow eyebrow--center pledge-eyebrow" id="pledge-title" data-reveal>Mi compromiso</h2>
+      <ul class="pledge-list" role="list">
+        <li data-reveal>Que el derecho sea <em>comprensible.</em></li>
+        <li data-reveal>Que las oportunidades no se pierdan por <em>desconocimiento.</em></li>
+        <li data-reveal>Que las personas sepan que <em>tienen derechos.</em></li>
+      </ul>
+      <div class="pledge-body" data-reveal>
+        <p class="prose-lead">Mi compromiso profesional va más allá de resolver un procedimiento.</p>
+        <p>Creo en un ejercicio del derecho que escucha, explica y acompaña.</p>
+        <p>En un mundo donde las personas cruzan fronteras para estudiar, trabajar, emprender, formar una familia o comenzar nuevamente, el acceso a una orientación jurídica clara puede marcar una diferencia.</p>
+        <p>Por eso quiero construir un espacio donde el conocimiento jurídico pueda convertirse en una herramienta accesible para las personas y las organizaciones que lo necesitan.</p>
+      </div>
+      <p class="pledge-close" data-reveal><span>El derecho puede ser complejo.</span> <span>La explicación no tiene por qué serlo.</span></p>
+    </div>
+  </section>
+
+  <section class="section section--ivory media" id="en-medios" aria-labelledby="media-title">
+    <div class="container">
+      <div class="media-head">
+        <p class="eyebrow" data-reveal>Publicaciones</p>
+        <h2 class="section-title" id="media-title" data-reveal>En medios</h2>
+      </div>
+      <ArticleCard />
+    </div>
+  </section>
+
+  <ContactCta />
+</BaseLayout>
+
+<style>
+  .rights-hero {
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5.5rem) var(--section-pad);
+    background:
+      linear-gradient(to bottom, var(--c-lavender), rgba(243, 237, 245, 0) 40rem),
+      var(--c-ivory);
+  }
+  .rights-grid { display: grid; gap: 3rem; align-items: center; }
+  .rights-copy .page-title { margin-bottom: 2rem; max-width: 9.6em; }
+  .rights-photo { width: min(100% - .75rem, 440px); justify-self: center; }
+  .rights-photo .frame { box-shadow: var(--shadow); }
+  .rights-photo :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  @media (min-width: 960px) {
+    .rights-grid { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: 5rem; }
+    .rights-photo { justify-self: end; width: 100%; max-width: 440px; }
+  }
+
+  .summit-grid { display: grid; gap: clamp(2.5rem, 6vw, 5rem); align-items: center; }
+  .summit-photo { position: relative; isolation: isolate; width: min(100% - .75rem, 460px); justify-self: center; }
+  .summit-photo :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  .summit-copy .prose { margin-bottom: 2rem; }
+  .summit-card {
+    padding: 1.6rem 1.5rem;
+    background: var(--c-ivory);
+    border: 1px solid var(--c-line);
+    border-top: 3px solid var(--c-plum);
+    border-radius: var(--radius);
+  }
+  .summit-card-title {
+    margin-bottom: 1rem;
+    font-family: var(--ff-serif);
+    font-size: 1.45rem;
+    font-weight: 600;
+    line-height: 1.15;
+  }
+  .summit-facts { display: grid; gap: .8rem; }
+  .summit-facts div { display: grid; grid-template-columns: 6.5rem 1fr; gap: 1rem; padding-top: .8rem; border-top: 1px solid var(--c-line); }
+  .summit-facts dt {
+    padding-top: .2rem;
+    color: var(--c-muted);
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .summit-facts dd { color: var(--c-ink); font-weight: 500; line-height: 1.4; }
+  @media (min-width: 960px) {
+    .summit-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+    .summit-photo { justify-self: stretch; width: 100%; }
+  }
+
+  .quote-band {
+    display: grid;
+    background: var(--c-sand);
+    border-radius: var(--radius-l);
+    overflow: hidden;
+    border: 1px solid rgba(184, 101, 63, .18);
+  }
+  .quote-photo { max-height: 26rem; overflow: hidden; }
+  .quote-photo :global(picture),
+  .quote-photo :global(img) { width: 100%; height: 100%; }
+  .quote-photo :global(img) { object-fit: cover; }
+  .quote {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(2rem, 1.2rem + 3.5vw, 4.5rem);
+  }
+  .quote::before {
+    content: "“";
+    display: block;
+    height: .55em;
+    font-family: var(--ff-serif);
+    font-size: 7rem;
+    line-height: 1;
+    color: var(--c-terracotta);
+  }
+  .quote blockquote p {
+    font-family: var(--ff-serif);
+    font-size: var(--fs-quote);
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1.32;
+    color: var(--c-ink);
+    text-wrap: pretty;
+  }
+  .quote figcaption {
+    margin-top: 1.5rem;
+    color: var(--c-terracotta-700);
+    font-size: .85rem;
+    font-weight: 600;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+  /* Dos columnas desde 600 px: la foto (490 px de origen) no se amplía (v1: V15) */
+  @media (min-width: 600px) {
+    .quote-band { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+    .quote-photo { max-height: none; }
+  }
+
+  .motto { margin-top: clamp(4rem, 8vw, 6rem); text-align: center; }
+  .motto-words {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0 .45em;
+    font-family: var(--ff-serif);
+    font-size: clamp(2.4rem, 1.6rem + 3.6vw, 4.6rem);
+    font-weight: 600;
+    line-height: 1.05;
+    color: var(--c-plum);
+  }
+  .motto-words span:nth-child(2) { font-style: italic; font-weight: 500; color: var(--c-ink); }
+  .motto-sub { margin-top: 1rem; color: var(--c-muted); font-size: var(--fs-lead); }
+
+  .pledge-inner { position: relative; max-width: calc(980px + 2 * var(--gutter)); text-align: center; }
+  .pledge-eyebrow { margin-bottom: 2.25rem; }
+  .pledge-list { display: grid; }
+  .pledge-list li {
+    padding: 1.35rem 0;
+    border-top: 1px solid var(--c-line);
+    font-family: var(--ff-serif);
+    font-size: clamp(1.8rem, 1.3rem + 2.4vw, 3.35rem);
+    font-weight: 600;
+    line-height: 1.08;
+    letter-spacing: -.01em;
+    text-wrap: balance;
+  }
+  .pledge-list li:last-child { border-bottom: 1px solid var(--c-line); }
+  .pledge-list em { font-style: italic; font-weight: 500; color: var(--c-plum); }
+  .pledge-body { max-width: 44rem; margin: clamp(2.5rem, 5vw, 3.5rem) auto 0; color: var(--c-ink-soft); }
+  .pledge-body p + p { margin-top: 1rem; }
+  .pledge-close {
+    display: inline-flex;
+    flex-direction: column;
+    gap: .1rem;
+    margin-top: clamp(2.5rem, 5vw, 3.5rem);
+    padding: 1.5rem 2.25rem;
+    border-radius: var(--radius);
+    background: var(--c-lavender);
+    font-family: var(--ff-serif);
+    font-size: clamp(1.35rem, 1.15rem + 1vw, 1.9rem);
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1.3;
+    color: var(--c-plum-800);
+  }
+  .pledge-close span:last-child { color: var(--c-plum); font-weight: 600; }
+
+  .media-head { margin-bottom: 2.5rem; }
+</style>

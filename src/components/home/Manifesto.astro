@@ -1,0 +1,116 @@
+---
+/** «Más allá del expediente» (docs/contenido.md). Banda oscura ciruela. */
+---
+
+<section class="section manifesto" id="mas-alla" aria-labelledby="manifesto-title">
+  <div class="container">
+    <div class="manifesto-head">
+      <p class="eyebrow eyebrow--light" data-reveal>Más allá del expediente</p>
+      <h2 class="section-title manifesto-title" id="manifesto-title" data-reveal>Porque un expediente nunca cuenta toda la historia.</h2>
+    </div>
+
+    <div class="manifesto-statements">
+      <p class="statement" data-reveal><span class="statement-num" aria-hidden="true">01</span>Una persona que migra no es solamente un número de expediente.</p>
+      <p class="statement" data-reveal><span class="statement-num" aria-hidden="true">02</span>Una familia que busca regularizar su situación no está simplemente realizando un trámite.</p>
+      <p class="statement" data-reveal><span class="statement-num" aria-hidden="true">03</span>Una organización que necesita orientación jurídica está intentando construir algo.</p>
+      <p class="statement" data-reveal><span class="statement-num" aria-hidden="true">04</span>Y detrás de cada procedimiento existe una realidad que merece ser comprendida.</p>
+    </div>
+
+    <div class="manifesto-body" data-reveal>
+      <p>Por eso mi forma de trabajar combina conocimiento jurídico, visión internacional y acompañamiento cercano.</p>
+      <p>Me interesa explicar lo complejo de manera clara, identificar las alternativas disponibles y ayudar a cada persona a comprender el camino que tiene delante.</p>
+    </div>
+
+    <ul class="triad" role="list" data-reveal>
+      <li>Derecho con estrategia.</li>
+      <li>Derecho con perspectiva internacional.</li>
+      <li>Derecho con humanidad.</li>
+    </ul>
+  </div>
+</section>
+
+<style>
+  .manifesto {
+    --focus: #fff;
+    color: var(--c-lavender);
+    background:
+      radial-gradient(50rem 30rem at 90% 10%, rgba(146, 58, 160, .45), transparent 65%),
+      linear-gradient(160deg, #3A0E42 0%, var(--c-plum-800) 55%, #2A0930 100%);
+    overflow: clip;
+  }
+  .manifesto::after {
+    content: "";
+    position: absolute;
+    inset: auto -10% -40% auto;
+    width: 46rem;
+    height: 46rem;
+    border-radius: 50%;
+    border: 1px solid rgba(243, 237, 245, .1);
+    pointer-events: none;
+  }
+  .manifesto-head { max-width: 52rem; margin-bottom: clamp(3rem, 6vw, 4.5rem); }
+  .manifesto-title { color: #fff; }
+
+  .manifesto-statements { display: grid; border-top: 1px solid rgba(243, 237, 245, .18); }
+  .statement {
+    position: relative;
+    padding: 1.75rem 0 1.9rem;
+    border-bottom: 1px solid rgba(243, 237, 245, .18);
+    font-family: var(--ff-serif);
+    font-size: clamp(1.45rem, 1.15rem + 1.3vw, 2.15rem);
+    font-weight: 500;
+    line-height: 1.22;
+    color: #fff;
+    text-wrap: pretty;
+  }
+  .statement-num {
+    display: block;
+    margin-bottom: .75rem;
+    font-family: var(--ff-sans);
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .2em;
+    color: var(--c-lavender-300);
+  }
+  .manifesto-body {
+    display: grid;
+    gap: 1.25rem 3rem;
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+    max-width: 62rem;
+    color: rgba(243, 237, 245, .88);
+    font-size: var(--fs-lead);
+    line-height: 1.55;
+  }
+  .triad {
+    display: grid;
+    gap: .5rem;
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+    padding-top: 2rem;
+    border-top: 1px solid rgba(243, 237, 245, .18);
+  }
+  .triad li {
+    font-family: var(--ff-serif);
+    font-style: italic;
+    font-size: clamp(1.4rem, 1.2rem + .9vw, 1.9rem);
+    font-weight: 500;
+    color: #fff;
+    line-height: 1.25;
+  }
+  .triad li::before {
+    content: "";
+    display: inline-block;
+    width: .45em;
+    height: .45em;
+    margin-right: .7em;
+    vertical-align: .15em;
+    border: 1px solid var(--c-lavender-300);
+    rotate: 45deg;
+  }
+  @media (min-width: 760px) {
+    .manifesto-statements { grid-template-columns: 1fr 1fr; column-gap: 3.5rem; }
+    .manifesto-body { grid-template-columns: 1fr 1fr; }
+  }
+  @media (min-width: 1024px) {
+    .triad { grid-template-columns: repeat(3, auto); justify-content: space-between; }
+  }
+</style>

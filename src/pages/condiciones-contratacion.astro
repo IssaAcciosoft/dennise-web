@@ -1,0 +1,97 @@
+---
+/**
+ * BORRADOR de condiciones de contratación (asesorías y Programa Autogestiona).
+ * Completar los [PENDIENTE] y revisarlo con la titular / asesoría legal antes de publicar.
+ * Precios y servicios desde src/data/servicios.json (siempre coinciden con la web).
+ */
+import LegalLayout from '~/layouts/LegalLayout.astro';
+import { PHONE, TEL_LINK, WA_TEXT, waLink } from '~/data/site';
+import { consultations, autogestiona, formatAmount } from '~/lib/services';
+import { url } from '~/lib/url';
+---
+
+<LegalLayout
+  title="Condiciones de contratación · Denisse González"
+  heading="Condiciones de contratación"
+  description="Condiciones de contratación de las asesorías y del Programa Autogestiona de Denisse González: precios, pago, prestación del servicio y derecho de desistimiento."
+>
+  <Fragment slot="intro">
+    <p class="legal-updated">Última actualización: <span class="placeholder">[PENDIENTE: fecha de publicación]</span></p>
+    <p class="legal-notice">
+      <strong>BORRADOR — no publicar sin revisar.</strong> Estas condiciones están pendientes de revisión por la titular y su asesoría legal. Los datos marcados como <span class="placeholder">[PENDIENTE]</span> deben completarse antes de publicar la web.
+    </p>
+  </Fragment>
+
+  <h2>1. Prestadora del servicio</h2>
+  <dl>
+    <div><dt>Titular</dt><dd>Denisse González Barbosa</dd></div>
+    <div><dt>NIF / NIE</dt><dd><span class="placeholder">[PENDIENTE: NIF]</span></dd></div>
+    <div><dt>Domicilio profesional</dt><dd><span class="placeholder">[PENDIENTE: domicilio]</span></dd></div>
+    <div><dt>Teléfono</dt><dd><a href={TEL_LINK}>{PHONE.display}</a></dd></div>
+    <div><dt>Correo electrónico</dt><dd><span class="placeholder">[PENDIENTE: email de contacto]</span></dd></div>
+    <div><dt>Colegio profesional y n.º de colegiada</dt><dd><span class="placeholder">[PENDIENTE: si aplica]</span></dd></div>
+  </dl>
+
+  <h2>2. Objeto</h2>
+  <p>Estas condiciones regulan la contratación, a través de esta web, de los servicios de asesoría y del {autogestiona.name}. Al reservar una asesoría o contratar un plan aceptas estas condiciones, que podrás consultar y guardar en esta página.</p>
+
+  <h2>3. Servicios y precios</h2>
+  <h3>Asesorías (online o presenciales)</h3>
+  <ul>
+    {
+      consultations.map((c) => (
+        <li>
+          {c.name} · {c.duration_label}: {c.prices.map((p) => `${p.label.toLowerCase()} ${formatAmount(p.amount)} €`).join(' · ')}.
+        </li>
+      ))
+    }
+  </ul>
+  <h3>{autogestiona.name}</h3>
+  <ul>
+    {autogestiona.plans.map((p) => <li>{p.name}: {formatAmount(p.amount)} €.</li>)}
+  </ul>
+  <p>{autogestiona.includes_title}: {autogestiona.includes.map((i) => i.charAt(0).toLowerCase() + i.slice(1)).join('; ')}. <span class="placeholder">[PENDIENTE: qué diferencia a cada plan]</span></p>
+  <p>Los precios se indican en euros e incluyen el IVA. <span class="placeholder">[PENDIENTE: confirmar que los precios de las asesorías incluyen IVA]</span></p>
+
+  <h2>4. Contratación y pago</h2>
+  <ul>
+    <li><strong>Asesorías:</strong> se reservan en el sistema de reservas de la web, eligiendo el servicio, el día y la hora y la modalidad (online o presencial).</li>
+    <li><strong>{autogestiona.name}:</strong> cada plan se contrata en su página de pago, que se abre en una pestaña nueva.</li>
+    <li>El pago se realiza <strong>por adelantado</strong>, con tarjeta, a través de la plataforma de pago <strong>Stripe</strong> integrada en el sistema de reservas y en las páginas de pago de AccioGest. Esta web no recibe ni guarda los datos de tu tarjeta.</li>
+    <li>Confirmación de la contratación: <span class="placeholder">[PENDIENTE: confirmar con AccioGest si se envía un email de confirmación y con qué contenido]</span></li>
+  </ul>
+
+  <h2>5. Prestación del servicio</h2>
+  <ul>
+    <li><strong>Asesorías:</strong> se prestan el día y a la hora reservados, en la modalidad elegida. Online: <span class="placeholder">[PENDIENTE: herramienta de videollamada y cómo se envía el enlace]</span>. Presencial: <span class="placeholder">[PENDIENTE: dirección de la oficina]</span>.</li>
+    <li><strong>{autogestiona.name}:</strong> incluye los servicios indicados en el apartado 3 para el trámite contratado. <span class="placeholder">[PENDIENTE: proceso tras la compra (quién contacta, cómo se agenda la asesoría inicial y cómo se entrega la documentación)]</span></li>
+    <li>La persona usuaria se compromete a facilitar información veraz, completa y actualizada y la documentación necesaria para el trámite.</li>
+  </ul>
+
+  <h2>6. Derecho de desistimiento</h2>
+  <p>Si contratas como persona consumidora, tienes derecho a desistir del contrato en un plazo de <strong>14 días naturales</strong> desde su celebración, sin necesidad de justificación, conforme a los artículos 102 y siguientes del Texto Refundido de la Ley General para la Defensa de los Consumidores y Usuarios (Real Decreto Legislativo 1/2007).</p>
+  <ul>
+    <li><strong>Inicio del servicio dentro del plazo:</strong> si solicitas expresamente que el servicio comience durante esos 14 días (por ejemplo, al reservar una asesoría para una fecha dentro de ese plazo o al empezar el {autogestiona.name}), y después desistes, deberás abonar la parte proporcional del servicio ya prestado (art. 108.3).</li>
+    <li><strong>Servicio completamente prestado:</strong> no podrás desistir una vez que el servicio se haya prestado por completo, si su ejecución comenzó con tu consentimiento expreso previo y con tu reconocimiento de que, en ese caso, pierdes el derecho de desistimiento (art. 103.a).</li>
+    <li><strong>Cómo desistir:</strong> comunícalo de forma inequívoca a <span class="placeholder">[PENDIENTE: email de contacto]</span> o por WhatsApp al <a href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">{PHONE.display}</a>. Puedes usar este modelo (no es obligatorio): «Por la presente le comunico que desisto de mi contrato de prestación del siguiente servicio: […], contratado el […]. Nombre: […]. Domicilio: […]. Fecha: […]».</li>
+    <li><strong>Devolución:</strong> se reembolsarán los importes que correspondan en un plazo máximo de 14 días naturales desde la comunicación, por el mismo medio de pago utilizado.</li>
+  </ul>
+  <p><span class="placeholder">[PENDIENTE: confirmar con AccioGest cómo recoge el sistema de reservas y la página de pago la solicitud expresa de inicio del servicio y el reconocimiento de pérdida del derecho (casilla en el momento de la compra)]</span></p>
+
+  <h2>7. Cancelación y cambio de cita</h2>
+  <p><span class="placeholder">[PENDIENTE: plazo para cancelar una asesoría con reembolso, posibilidad y forma de cambiar la cita, y qué ocurre si no se asiste]</span></p>
+
+  <h2>8. Facturación</h2>
+  <p>Se emitirá la factura correspondiente a cada servicio contratado. <span class="placeholder">[PENDIENTE: quién y cómo la emite (AccioGest o la titular), cómo se envía y qué datos fiscales hay que facilitar]</span></p>
+
+  <h2>9. Responsabilidad</h2>
+  <p>Los servicios se prestan con la diligencia profesional exigible. La resolución de los procedimientos corresponde a la Administración competente, por lo que no puede garantizarse un resultado concreto. La prestadora no responde de los retrasos o resoluciones que dependan de la Administración ni de los perjuicios derivados de información o documentación incompleta, inexacta o facilitada fuera de plazo por la persona usuaria. Nada de lo anterior limita los derechos que la normativa de consumo reconoce a las personas consumidoras. <span class="placeholder">[PENDIENTE: revisar con la titular]</span></p>
+
+  <h2>10. Protección de datos</h2>
+  <p>El tratamiento de los datos personales se describe en la <a href={url('/politica-privacidad/')}>política de privacidad</a>.</p>
+
+  <h2>11. Ley aplicable y jurisdicción</h2>
+  <p>Estas condiciones se rigen por la legislación española. Si contratas como persona consumidora, podrás acudir a los juzgados y tribunales de tu domicilio. <span class="placeholder">[PENDIENTE: revisar con la titular; hojas de reclamaciones y sistemas de resolución extrajudicial aplicables]</span></p>
+
+  <p>Más información: <a href={url('/aviso-legal/')}>aviso legal</a>.</p>
+</LegalLayout>

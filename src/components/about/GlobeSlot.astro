@@ -1,0 +1,47 @@
+---
+/**
+ * ============================================================================
+ *  SLOT DEL GLOBO 3D (México · España · Nueva York)
+ * ============================================================================
+ *  Hoy muestra un póster estático (SVG). Un agente posterior añadirá aquí una isla de
+ *  React con WebGL, p. ej.:
+ *
+ *    <Globe client:visible />   ← dentro de [data-globe-slot], encima del póster
+ *
+ *  Requisitos (README → Rendimiento): cargar solo con client:visible, pausar fuera de
+ *  pantalla, NO montar con prefers-reduced-motion (se queda el póster), y mantener este
+ *  póster como estado previo a la hidratación (mismo tamaño → sin CLS).
+ * ============================================================================
+ */
+import poster from '~/assets/globe-poster.svg?raw';
+
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<div class:list={['globe-slot', className]} data-globe-slot>
+  <div class="globe-poster-wrap" set:html={poster} />
+  <slot />
+</div>
+
+<style>
+  .globe-slot {
+    position: relative;
+    width: min(100%, 480px);
+    aspect-ratio: 1;
+    margin-inline: auto;
+  }
+  .globe-poster-wrap,
+  .globe-poster-wrap :global(svg) { width: 100%; height: 100%; }
+  .globe-slot::after {
+    content: "";
+    position: absolute;
+    inset: 8% 8% -4% 8%;
+    z-index: -1;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(110, 29, 122, .18), transparent);
+    filter: blur(24px);
+  }
+</style>

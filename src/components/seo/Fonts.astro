@@ -1,0 +1,80 @@
+---
+/**
+ * Tipografías autoalojadas (@fontsource): Cormorant Garamond, Barlow y Barlow Condensed (500:
+ * etiquetas y titulares de Empoderando Voces; sustituye a Anton, demasiado pesada).
+ * - Solo los pesos/estilos usados, subconjuntos latin + latin-ext (unicode-range: el navegador
+ *   descarga latin-ext solo si una página lo necesita).
+ * - Familias «Fallback» con métricas ajustadas (size-adjust, ascent/descent-override) para que
+ *   el cambio de fuente no mueva el contenido (CLS). Valores calculados con @capsizecss/unpack
+ *   contra Times New Roman / Arial (ver README → Tipografías).
+ * - `preload`: archivos críticos de cada página (solo el subconjunto latin).
+ * Cero peticiones a Google.
+ */
+import cg500 from '@fontsource/cormorant-garamond/files/cormorant-garamond-latin-500-normal.woff2?url';
+import cg500x from '@fontsource/cormorant-garamond/files/cormorant-garamond-latin-ext-500-normal.woff2?url';
+import cg600 from '@fontsource/cormorant-garamond/files/cormorant-garamond-latin-600-normal.woff2?url';
+import cg600x from '@fontsource/cormorant-garamond/files/cormorant-garamond-latin-ext-600-normal.woff2?url';
+import cg500i from '@fontsource/cormorant-garamond/files/cormorant-garamond-latin-500-italic.woff2?url';
+import cg500ix from '@fontsource/cormorant-garamond/files/cormorant-garamond-latin-ext-500-italic.woff2?url';
+import cg600i from '@fontsource/cormorant-garamond/files/cormorant-garamond-latin-600-italic.woff2?url';
+import cg600ix from '@fontsource/cormorant-garamond/files/cormorant-garamond-latin-ext-600-italic.woff2?url';
+import b400 from '@fontsource/barlow/files/barlow-latin-400-normal.woff2?url';
+import b400x from '@fontsource/barlow/files/barlow-latin-ext-400-normal.woff2?url';
+import b400i from '@fontsource/barlow/files/barlow-latin-400-italic.woff2?url';
+import b400ix from '@fontsource/barlow/files/barlow-latin-ext-400-italic.woff2?url';
+import b500 from '@fontsource/barlow/files/barlow-latin-500-normal.woff2?url';
+import b500x from '@fontsource/barlow/files/barlow-latin-ext-500-normal.woff2?url';
+import b600 from '@fontsource/barlow/files/barlow-latin-600-normal.woff2?url';
+import b600x from '@fontsource/barlow/files/barlow-latin-ext-600-normal.woff2?url';
+import bc500 from '@fontsource/barlow-condensed/files/barlow-condensed-latin-500-normal.woff2?url';
+import bc500x from '@fontsource/barlow-condensed/files/barlow-condensed-latin-ext-500-normal.woff2?url';
+
+export type FontKey = 'serif-500' | 'serif-600' | 'serif-500i' | 'serif-600i' | 'sans-400' | 'sans-400i' | 'sans-500' | 'sans-600' | 'cond-500';
+
+interface Props {
+  /** Archivos a precargar (subconjunto latin). Máximo 2-3 por página. */
+  preload?: FontKey[];
+}
+const { preload = ['serif-600', 'sans-400'] } = Astro.props;
+
+const LATIN =
+  'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD';
+const LATIN_EXT =
+  'U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF';
+
+type Face = { key: FontKey; family: string; weight: number; style: 'normal' | 'italic'; latin: string; ext: string };
+const faces: Face[] = [
+  { key: 'serif-500', family: 'Cormorant Garamond', weight: 500, style: 'normal', latin: cg500, ext: cg500x },
+  { key: 'serif-600', family: 'Cormorant Garamond', weight: 600, style: 'normal', latin: cg600, ext: cg600x },
+  { key: 'serif-500i', family: 'Cormorant Garamond', weight: 500, style: 'italic', latin: cg500i, ext: cg500ix },
+  { key: 'serif-600i', family: 'Cormorant Garamond', weight: 600, style: 'italic', latin: cg600i, ext: cg600ix },
+  { key: 'sans-400', family: 'Barlow', weight: 400, style: 'normal', latin: b400, ext: b400x },
+  { key: 'sans-400i', family: 'Barlow', weight: 400, style: 'italic', latin: b400i, ext: b400ix },
+  { key: 'sans-500', family: 'Barlow', weight: 500, style: 'normal', latin: b500, ext: b500x },
+  { key: 'sans-600', family: 'Barlow', weight: 600, style: 'normal', latin: b600, ext: b600x },
+  { key: 'cond-500', family: 'Barlow Condensed', weight: 500, style: 'normal', latin: bc500, ext: bc500x },
+];
+
+const face = (f: Face, src: string, range: string) =>
+  `@font-face{font-family:"${f.family}";font-style:${f.style};font-weight:${f.weight};font-display:swap;src:url(${src}) format("woff2");unicode-range:${range}}`;
+
+// Fallbacks con métricas ajustadas (ver comentario superior).
+const serif = 'local("Times New Roman"),local("TimesNewRomanPSMT"),local("Liberation Serif"),local("LiberationSerif"),local("Tinos"),local("Times")';
+const serifItalic = 'local("Times New Roman Italic"),local("TimesNewRomanPS-ItalicMT"),local("Liberation Serif Italic"),local("LiberationSerif-Italic"),local("Tinos Italic"),local("Times Italic")';
+const sans = 'local("Arial"),local("ArialMT"),local("Liberation Sans"),local("LiberationSans"),local("Arimo"),local("Helvetica")';
+const sansBold = 'local("Arial Bold"),local("Arial-BoldMT"),local("Liberation Sans Bold"),local("LiberationSans-Bold"),local("Arimo Bold"),local("Helvetica Bold")';
+const fallbacks = [
+  `@font-face{font-family:"Cormorant Fallback";font-style:normal;font-weight:100 900;src:${serif};size-adjust:97.3%;ascent-override:95%;descent-override:29.5%;line-gap-override:0%}`,
+  `@font-face{font-family:"Cormorant Fallback";font-style:italic;font-weight:100 900;src:${serifItalic};size-adjust:88.4%;ascent-override:104.6%;descent-override:32.5%;line-gap-override:0%}`,
+  `@font-face{font-family:"Barlow Fallback";font-style:normal;font-weight:100 549;src:${sans};size-adjust:96.7%;ascent-override:103.4%;descent-override:20.7%;line-gap-override:0%}`,
+  `@font-face{font-family:"Barlow Fallback";font-style:normal;font-weight:550 900;src:${sansBold};size-adjust:91.5%;ascent-override:109.3%;descent-override:21.9%;line-gap-override:0%}`,
+  // Barlow Condensed 500 frente a Arial (@capsizecss/unpack: xWidthAvg 349/1000 → 78,3 %).
+  `@font-face{font-family:"Barlow Condensed Fallback";font-style:normal;font-weight:100 900;src:${sans};size-adjust:78.3%;ascent-override:127.7%;descent-override:25.5%;line-gap-override:0%}`,
+];
+
+const css = [...faces.flatMap((f) => [face(f, f.latin, LATIN), face(f, f.ext, LATIN_EXT)]), ...fallbacks].join('');
+const preloads = faces.filter((f) => preload.includes(f.key)).map((f) => f.latin);
+---
+
+{preloads.map((href) => <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />)}
+<style is:inline set:html={css}></style>

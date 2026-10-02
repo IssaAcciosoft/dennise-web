@@ -1,0 +1,104 @@
+---
+/**
+ * Datos estructurados (schema.org) con URLs absolutas: WebSite, Attorney/LegalService,
+ * Person y WebPage. Solo hechos de docs/contenido.md: sin idiomas (knowsLanguage), sin zona
+ * de servicio (areaServed) ni dirección hasta que la cliente los confirme.
+ */
+import { getImage } from 'astro:assets';
+import { SITE, PHONE, SOCIALS } from '~/data/site';
+import { consultations, autogestiona, minAmount, maxAmount, formatAmount, CATALOG } from '~/lib/services';
+import { absoluteUrl } from '~/lib/url';
+import retrato from '~/assets/img/retrato.jpg';
+
+interface Props {
+  title: string;
+  description: string;
+  path: string;
+}
+const { title, description, path } = Astro.props;
+const site = Astro.site;
+const home = absoluteUrl('/', site);
+const pageUrl = absoluteUrl(path, site);
+const portrait = await getImage({ src: retrato, format: 'jpg', width: 732 });
+const portraitUrl = absoluteUrl(portrait.src, site);
+const sameAs = SOCIALS.map((s) => s.href);
+const currency = CATALOG.currency;
+
+const offers = [
+  ...consultations.flatMap((c) =>
+    c.prices.map((p) => ({
+      '@type': 'Offer',
+      name: `${c.name} · ${c.duration_label} (${p.label.toLowerCase()})`,
+      price: String(p.amount),
+      priceCurrency: currency,
+    })),
+  ),
+  ...autogestiona.plans.map((p) => ({
+    '@type': 'Offer',
+    name: `${autogestiona.name} · ${p.name}`,
+    price: String(p.amount),
+    priceCurrency: currency,
+  })),
+];
+
+const graph = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${home}#website`,
+      url: home,
+      name: SITE.title,
+      inLanguage: 'es',
+      publisher: { '@id': `${home}#despacho` },
+    },
+    {
+      '@type': ['Attorney', 'LegalService'],
+      '@id': `${home}#despacho`,
+      name: SITE.title,
+      url: home,
+      description: 'Asesoría migratoria y trámites de extranjería online y presenciales, derecho internacional y derechos humanos.',
+      image: portraitUrl,
+      logo: absoluteUrl('/icon-512.png', site),
+      telephone: PHONE.e164,
+      priceRange: `${formatAmount(minAmount)} € – ${formatAmount(maxAmount)} €`,
+      sameAs,
+      founder: { '@id': `${home}#denisse` },
+      hasOfferCatalog: {
+        '@type': 'OfferCatalog',
+        name: 'Servicios de extranjería',
+        itemListElement: offers,
+      },
+    },
+    {
+      '@type': 'Person',
+      '@id': `${home}#denisse`,
+      name: SITE.legalName,
+      alternateName: SITE.name,
+      jobTitle: SITE.role,
+      url: absoluteUrl('/conoceme/', site),
+      image: portraitUrl,
+      sameAs,
+      alumniOf: [
+        { '@type': 'CollegeOrUniversity', name: 'Universidad TecMilenio' },
+        { '@type': 'CollegeOrUniversity', name: 'California Western School of Law' },
+        { '@type': 'CollegeOrUniversity', name: 'NYU School of Professional Studies' },
+        { '@type': 'CollegeOrUniversity', name: 'ISDE' },
+        { '@type': 'CollegeOrUniversity', name: 'UAX' },
+      ],
+    },
+    {
+      '@type': 'WebPage',
+      '@id': `${pageUrl}#webpage`,
+      url: pageUrl,
+      name: title,
+      description,
+      inLanguage: 'es',
+      isPartOf: { '@id': `${home}#website` },
+      about: { '@id': `${home}#despacho` },
+    },
+  ],
+};
+---
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(graph)} />

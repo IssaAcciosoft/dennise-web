@@ -1,0 +1,199 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import Photo from '~/components/ui/Photo.astro';
+import Icon from '~/components/ui/Icon.astro';
+import Experience from '~/components/about/Experience.astro';
+import Timeline from '~/components/about/Timeline.astro';
+import GlobeSlot from '~/components/about/GlobeSlot.astro';
+import ContactCta from '~/components/contact/ContactCta.astro';
+import { BOOKING_PATH } from '~/data/site';
+import { url } from '~/lib/url';
+import onuBlanco from '~/assets/img/onu-blanco.jpg';
+---
+
+<BaseLayout
+  title="Conóceme · Denisse González, abogada"
+  description="Denisse González, abogada mexicana con formación jurídica internacional y experiencia profesional entre México y España: trayectoria, experiencia y propósito."
+  preloadFonts={['serif-600', 'sans-400']}
+>
+  <section class="about-hero" aria-labelledby="about-title">
+    <div class="container about-grid">
+      <header class="about-head">
+        <p class="eyebrow">Conóceme</p>
+        <h1 class="page-title" id="about-title">Una trayectoria entre el derecho, las fronteras y las personas.</h1>
+      </header>
+
+      <figure class="about-media">
+        <div class="frame frame--tall">
+          <Photo
+            src={onuBlanco}
+            alt="Denisse González con blazer blanco junto a la bandera y el emblema de las Naciones Unidas"
+            widths={[360, 540, 720, 900]}
+            sizes="(min-width: 960px) 40vw, calc(100vw - 3rem)"
+            position="50% 55%"
+            priority
+          />
+        </div>
+        <figcaption class="about-caption">
+          <span class="about-caption-name">Denisse González</span>
+          <span>Naciones Unidas · Nueva York, 2026</span>
+        </figcaption>
+      </figure>
+
+      <div class="about-body">
+        <div class="prose">
+          <p class="prose-lead">Soy Denisse González, abogada mexicana con formación jurídica internacional y experiencia profesional desarrollada entre México y España.</p>
+          <p>Mi trayectoria comenzó en la práctica jurídica y la litigación, y con el tiempo fue incorporando nuevas dimensiones: el derecho internacional, la movilidad internacional, la gestión administrativa, las relaciones institucionales y la defensa y promoción de los derechos humanos.</p>
+          <p>He trabajado en despachos jurídicos, en asesoría migratoria y en instituciones como la Embajada de México en España, donde colaboré en el área de Asuntos Jurídicos. También he ejercido como abogada litigante en materias civil, penal y de amparo, y como Directora Legal México en Poplavsky International Law Offices, participando en la representación de demandas internacionales.</p>
+          <p class="prose-turn">Pero mi trayectoria no se ha construido únicamente dentro de un despacho.</p>
+          <p>Una parte esencial de mi camino ha estado vinculada al trabajo con personas y comunidades. Desde mis primeras prácticas en el Centro de Justicia para la Mujer, donde participé en la asesoría legal a mujeres víctimas de violencia de género, hasta mi actual participación en iniciativas de derechos humanos.</p>
+          <p>Hoy entiendo el derecho como una herramienta para conectar personas con oportunidades, instituciones con comunidades y derechos con realidades concretas.</p>
+          <p>Mi formación también refleja esa visión: Derecho, una Maestría en Derecho con especialización en Litigación Oral, un Máster en Derecho Internacional, Comercio y Relaciones Internacionales, formación en Negociación en NYU y un Máster en Gestión Administrativa.</p>
+        </div>
+
+        <aside class="purpose" aria-labelledby="purpose-title" data-reveal>
+          <h2 class="purpose-title" id="purpose-title">Mi propósito</h2>
+          <p class="purpose-text">Trabajar en la intersección entre derecho, movilidad internacional y derechos humanos, acompañando a personas, organizaciones e instituciones que necesitan comprender, gestionar o defender sus derechos dentro de contextos cada vez más internacionales.</p>
+          <div class="purpose-close">
+            <p>Porque detrás de cada expediente hay una persona.</p>
+            <p>Y detrás de cada trámite, una historia, un proyecto de vida o una oportunidad que merece ser tomada en serio.</p>
+          </div>
+        </aside>
+
+        <div class="btn-row">
+          <a class="btn btn--primary" href={url(BOOKING_PATH)}>
+            <Icon name="calendar" />
+            <span>Reserva tu asesoría</span>
+          </a>
+          <a class="btn btn--link" href="#trayectoria">
+            <span>Ver mi trayectoria</span>
+            <Icon name="arrow" />
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Experience />
+  <Timeline />
+
+  <section class="section section--white crossing" aria-labelledby="crossing-title">
+    <div class="container crossing-grid">
+      <div class="crossing-copy">
+        <p class="eyebrow" data-reveal>México · España · Nueva York</p>
+        <h2 class="section-title" id="crossing-title" data-reveal>Una carrera que continúa cruzando fronteras.</h2>
+        <p class="lead" data-reveal>Mi experiencia profesional se ha desarrollado en distintos espacios jurídicos e institucionales, pero existe un hilo conductor: las personas que necesitan encontrar una solución dentro de sistemas que muchas veces pueden resultar complejos.</p>
+      </div>
+      <!-- Slot del globo 3D: ver src/components/about/GlobeSlot.astro -->
+      <GlobeSlot class="crossing-globe" />
+    </div>
+  </section>
+
+  <ContactCta />
+</BaseLayout>
+
+<style>
+  .about-hero {
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5.5rem) var(--section-pad);
+    background:
+      radial-gradient(60rem 40rem at 100% 0%, rgba(232, 221, 236, .85), transparent 62%),
+      var(--c-ivory);
+  }
+  .about-grid {
+    display: grid;
+    grid-template-areas: "head" "media" "body";
+    gap: clamp(2rem, 5vw, 3rem);
+  }
+  .about-head { grid-area: head; }
+  .about-head .page-title { max-width: 8.6em; }
+  .about-media {
+    grid-area: media;
+    position: relative;
+    isolation: isolate;
+    width: min(100% - .75rem, 520px);
+    justify-self: center;
+  }
+  .about-body { grid-area: body; }
+  .about-caption {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: .25rem 1rem;
+    margin-top: 2rem;
+    padding-top: .85rem;
+    border-top: 1px solid var(--c-line);
+    color: var(--c-muted);
+    font-size: .85rem;
+    letter-spacing: .04em;
+  }
+  .about-caption-name { font-family: var(--ff-serif); font-size: 1.15rem; font-weight: 600; color: var(--c-ink); letter-spacing: 0; }
+  .about-body .prose { margin-bottom: 2.75rem; }
+
+  .purpose {
+    position: relative;
+    margin-bottom: 2.5rem;
+    padding: clamp(2rem, 1.5rem + 2vw, 3rem);
+    padding-top: clamp(2.6rem, 2rem + 2vw, 3.4rem);
+    background: var(--c-lavender);
+    border-radius: var(--radius-l);
+    overflow: hidden;
+  }
+  .purpose::before {
+    content: "“";
+    position: absolute;
+    top: -.15em;
+    right: .1em;
+    font-family: var(--ff-serif);
+    font-size: 12rem;
+    line-height: 1;
+    color: rgba(110, 29, 122, .12);
+    pointer-events: none;
+  }
+  .purpose-title {
+    display: inline-flex;
+    align-items: center;
+    gap: .85em;
+    margin-bottom: 1rem;
+    color: var(--c-plum);
+    font-size: .8rem;
+    font-weight: 600;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+  }
+  .purpose-title::before { content: ""; width: 2rem; height: 1px; background: currentColor; }
+  .purpose-text {
+    position: relative;
+    font-family: var(--ff-serif);
+    font-size: clamp(1.45rem, 1.2rem + 1.1vw, 2rem);
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1.32;
+    color: var(--c-plum-800);
+  }
+  .purpose-close {
+    margin-top: 1.75rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--c-line-strong);
+    color: var(--c-ink);
+    font-weight: 500;
+  }
+  .purpose-close p + p { margin-top: .35rem; color: var(--c-ink-soft); font-weight: 400; }
+
+  @media (min-width: 960px) {
+    .about-grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      grid-template-areas: "media head" "media body";
+      grid-template-rows: auto 1fr;
+      column-gap: clamp(3rem, 6vw, 6rem);
+      row-gap: 2.5rem;
+    }
+    .about-media { position: sticky; top: calc(var(--header-h) + 2rem); align-self: start; justify-self: stretch; width: 100%; }
+  }
+
+  .crossing-grid { display: grid; gap: clamp(2.5rem, 6vw, 5rem); align-items: center; }
+  .crossing-copy .section-title { margin-bottom: 1.5rem; max-width: 7.7em; }
+  .crossing-copy .lead { max-width: 36rem; }
+  @media (min-width: 960px) {
+    .crossing-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  }
+</style>

@@ -1,0 +1,139 @@
+---
+/**
+ * /gracias/ — página de agradecimiento tras contratar un plan o reservar una asesoría en
+ * AccioGest. No se indexa, no está en el menú ni en el sitemap (astro.config.mjs → NOINDEX).
+ *
+ *   /gracias/?tipo=plan&plan=basico|estandar|premium
+ *   /gracias/?tipo=reserva
+ *   /gracias/                       (genérica)
+ *
+ * PENDIENTE (AccioGest): configurar estas URLs (con el dominio definitivo) como redirección
+ * tras el pago de cada plan y tras la reserva, SI AccioGest lo permite. Mientras tanto la
+ * página existe pero nadie llega a ella.
+ * PENDIENTE (cliente): el proceso tras la compra no está confirmado; aquí solo figura lo que
+ * incluyen los planes (servicios.json), sin plazos.
+ */
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import Icon from '~/components/ui/Icon.astro';
+import { autogestiona } from '~/lib/services';
+import { WA_TEXT, waLink } from '~/data/site';
+import { url } from '~/lib/url';
+
+// Solo nombres conocidos (nunca se muestra texto de la URL).
+const planNames = Object.fromEntries(autogestiona.plans.flatMap((p) => [[p.form_key, p.name], [p.id, p.name]]));
+const nextSteps = [
+  'Asesoría inicial con un experto en extranjería',
+  'Cumplimentación de los formularios',
+  'Presentación del expediente',
+  'Acceso a las notificaciones de extranjería y resolución de dudas sobre los requerimientos',
+];
+const variantScript = `(function(){try{var q=new URLSearchParams(location.search),t=q.get('tipo'),v=t==='plan'||t==='reserva'?t:'';if(v){document.querySelectorAll('[data-thanks]').forEach(function(el){el.hidden=el.getAttribute('data-thanks')!==v})}var n=${JSON.stringify(planNames)}[q.get('plan')||''];if(n){document.querySelectorAll('[data-plan-name]').forEach(function(el){el.textContent=n})}}catch(e){}})();`;
+---
+
+<BaseLayout
+  title="Gracias · Denisse González"
+  description="Gracias por confiar en Denisse González, abogada."
+  noindex
+  preloadFonts={['serif-600', 'sans-400']}
+>
+  <section class="thanks" data-wa-hide>
+    <div class="container container--narrow thanks-inner">
+      <span class="thanks-icon" aria-hidden="true"><Icon name="check" /></span>
+
+      <div class="thanks-block" data-thanks="default">
+        <h1 class="page-title">Gracias.</h1>
+        <p class="lead">He recibido tu solicitud.</p>
+      </div>
+
+      <div class="thanks-block" data-thanks="plan" hidden>
+        <p class="eyebrow eyebrow--center">{autogestiona.name}</p>
+        <h1 class="page-title">Gracias por contratar el <span data-plan-name>plan</span>.</h1>
+        <div class="thanks-steps">
+          <h2 class="thanks-steps-title">Lo que incluye tu plan</h2>
+          <ol class="thanks-list" role="list">
+            {
+              nextSteps.map((step, i) => (
+                <li>
+                  <span class="thanks-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                  <span>{step}</span>
+                </li>
+              ))
+            }
+          </ol>
+        </div>
+      </div>
+
+      <div class="thanks-block" data-thanks="reserva" hidden>
+        <p class="eyebrow eyebrow--center">Asesorías</p>
+        <h1 class="page-title">Gracias por reservar tu asesoría.</h1>
+        <p class="lead">Tu reserva se ha completado.</p>
+      </div>
+
+      <p class="thanks-help">¿Tienes cualquier duda?</p>
+      <div class="btn-row thanks-actions">
+        <a class="btn btn--primary" href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">
+          <Icon name="whatsapp" />
+          <span>Escríbeme por WhatsApp</span>
+        </a>
+        <a class="btn btn--ghost" href={url('/servicios/')}>
+          <span>Volver a servicios</span>
+        </a>
+        <a class="btn btn--link" href={url('/')}>
+          <span>Ir al inicio</span>
+          <Icon name="arrow" />
+        </a>
+      </div>
+    </div>
+  </section>
+  <script is:inline set:html={variantScript} />
+</BaseLayout>
+
+<style>
+  .thanks {
+    padding-block: clamp(3rem, 2rem + 6vw, 7rem);
+    background:
+      radial-gradient(50rem 30rem at 100% 0%, rgba(232, 221, 236, .85), transparent 62%),
+      var(--c-ivory);
+  }
+  .thanks-inner { display: grid; justify-items: center; text-align: center; }
+  .thanks-icon {
+    display: grid;
+    place-items: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    margin-bottom: 1.75rem;
+    border-radius: 50%;
+    background: var(--c-plum);
+    color: #fff;
+    box-shadow: 0 14px 30px -14px rgba(110, 29, 122, .7);
+  }
+  .thanks-icon :global(.icon) { width: 2.2rem; height: 2.2rem; }
+  .thanks-block:not([hidden]) { display: grid; justify-items: center; gap: 1.25rem; }
+  .thanks-block .page-title { max-width: 14em; }
+  .thanks-block .lead { max-width: 34rem; }
+  .thanks-steps {
+    width: 100%;
+    margin-top: 1.25rem;
+    padding: clamp(1.25rem, 1rem + 2vw, 2.25rem);
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius-l);
+    background: var(--c-white);
+    text-align: left;
+  }
+  .thanks-steps-title { margin-bottom: 1rem; font-family: var(--ff-serif); font-size: var(--fs-h4); font-weight: 600; }
+  .thanks-list { display: grid; gap: .9rem; }
+  .thanks-list li { display: grid; grid-template-columns: 2.5rem 1fr; gap: .9rem; align-items: center; color: var(--c-ink); font-weight: 500; line-height: 1.45; }
+  .thanks-num {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: var(--c-lavender);
+    color: var(--c-plum);
+    font-family: var(--ff-serif);
+    font-weight: 600;
+  }
+  .thanks-help { margin-top: 2rem; color: var(--c-ink-soft); }
+  .thanks-actions { justify-content: center; margin-top: 1.25rem; }
+</style>

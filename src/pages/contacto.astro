@@ -1,0 +1,174 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import Icon from '~/components/ui/Icon.astro';
+import SocialLinks from '~/components/ui/SocialLinks.astro';
+import ContactForm from '~/components/contact/ContactForm.astro';
+import { BOOKING_PATH, PHONE, SITE, TEL_LINK, WA_TEXT, waLink } from '~/data/site';
+import { url } from '~/lib/url';
+---
+
+<BaseLayout
+  title="Contacto · Denisse González, abogada"
+  description="Contacta con Denisse González, abogada: WhatsApp y teléfono +34 670 647 593, redes sociales y reserva de asesorías online y presenciales."
+  preloadFonts={['serif-600', 'sans-400']}
+>
+  <section class="contact-page" aria-labelledby="contact-title" data-wa-hide>
+    <div class="container contact-grid">
+      <div class="contact-intro">
+        <p class="eyebrow">Contacto</p>
+        <h1 class="page-title" id="contact-title">Hablemos de tu caso.</h1>
+        <p class="lead contact-lead">Asesorías online y presenciales.</p>
+        <p class="contact-tagline">{SITE.tagline}</p>
+      </div>
+
+      <div class="contact-panel">
+        <a class="contact-card contact-card--wa" href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">
+          <span class="contact-card-icon"><Icon name="whatsapp" /></span>
+          <span class="contact-card-text">
+            <span class="contact-card-label">WhatsApp</span>
+            <span class="contact-card-value">Escríbeme por WhatsApp</span>
+          </span>
+          <Icon name="arrow" class="contact-card-arrow" />
+        </a>
+        <a class="contact-card" href={TEL_LINK}>
+          <span class="contact-card-icon"><Icon name="phone" /></span>
+          <span class="contact-card-text">
+            <span class="contact-card-label">Teléfono</span>
+            <span class="contact-card-value">{PHONE.display}</span>
+          </span>
+          <Icon name="arrow" class="contact-card-arrow" />
+        </a>
+        <a class="contact-card" href="#formulario-contacto">
+          <span class="contact-card-icon"><Icon name="message" /></span>
+          <span class="contact-card-text">
+            <span class="contact-card-label">Formulario</span>
+            <span class="contact-card-value">Envíame un mensaje</span>
+          </span>
+          <Icon name="arrow" class="contact-card-arrow" />
+        </a>
+        <a class="contact-card" href={url(BOOKING_PATH)}>
+          <span class="contact-card-icon"><Icon name="calendar" /></span>
+          <span class="contact-card-text">
+            <span class="contact-card-label">Asesorías</span>
+            <span class="contact-card-value">Reserva tu asesoría</span>
+          </span>
+          <Icon name="arrow" class="contact-card-arrow" />
+        </a>
+
+        <div class="contact-social">
+          <p class="contact-social-title">Sígueme en redes</p>
+          <SocialLinks />
+        </div>
+
+        <div class="contact-story">
+          <p><strong>¿Tienes una historia que merece ser escuchada?</strong> Empoderando Voces</p>
+          <a class="btn btn--link" href={url('/empoderando-voces/#cuentame')}>
+            <span>Cuéntame tu historia</span>
+            <Icon name="arrow" />
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Formulario «contacto» de AccioGest (docs/integracion-acciogest.md §4) -->
+  <ContactForm />
+</BaseLayout>
+
+<style>
+  .contact-page {
+    position: relative;
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5.5rem) var(--section-pad);
+    background:
+      radial-gradient(40rem 30rem at 0% 100%, rgba(213, 193, 220, .6), transparent 70%),
+      var(--c-lavender);
+    overflow: clip;
+  }
+  .contact-grid { position: relative; z-index: 1; display: grid; gap: 3rem; }
+  .contact-intro .page-title { margin-bottom: 1.25rem; }
+  .contact-tagline {
+    margin-top: 2rem;
+    font-family: var(--ff-serif);
+    font-style: italic;
+    font-size: clamp(1.4rem, 1.2rem + .8vw, 1.8rem);
+    color: var(--c-plum);
+  }
+  .contact-panel {
+    display: grid;
+    gap: .9rem;
+    padding: clamp(1.25rem, .8rem + 2vw, 2.25rem);
+    background: var(--c-white);
+    border-radius: var(--radius-l);
+    box-shadow: var(--shadow);
+  }
+  .contact-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius);
+    color: var(--c-ink);
+    text-decoration: none;
+    transition: border-color var(--dur-fast) var(--ease-hover), background-color var(--dur-fast) var(--ease-hover), transform var(--dur-press) var(--ease-out);
+  }
+  .contact-card:active { transform: scale(.99); }
+  .contact-card-icon {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    flex: none;
+    border-radius: 50%;
+    background: var(--c-lavender);
+    color: var(--c-plum);
+  }
+  .contact-card--wa .contact-card-icon { background: var(--c-plum); color: #fff; }
+  .contact-card-text { display: flex; flex-direction: column; min-width: 0; }
+  .contact-card-label {
+    color: var(--c-muted);
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+  .contact-card-value {
+    font-family: var(--ff-serif);
+    font-size: clamp(1.3rem, 1.15rem + .6vw, 1.6rem);
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  .contact-card :global(.contact-card-arrow) { margin-left: auto; color: var(--c-muted); transition: transform var(--dur) var(--ease-out), color var(--dur-fast) var(--ease-hover); }
+  @media (hover: hover) and (pointer: fine) {
+    .contact-card:hover { border-color: var(--c-plum); background: var(--c-lavender); color: var(--c-ink); }
+    .contact-card:hover :global(.contact-card-arrow) { transform: translateX(4px); color: var(--c-plum); }
+  }
+  .contact-social { padding: 1.25rem .25rem .25rem; }
+  .contact-social-title {
+    margin-bottom: .75rem;
+    color: var(--c-muted);
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+  .contact-story {
+    --focus: var(--ev-gold);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem 1.5rem;
+    margin-top: .5rem;
+    padding: 1.1rem 1.25rem;
+    border-radius: var(--radius);
+    background: var(--ev-bg);
+    color: var(--ev-muted);
+    font-size: .95rem;
+  }
+  .contact-story strong { display: block; color: var(--ev-text); font-weight: 600; }
+  .contact-story .btn--link { color: var(--ev-gold); text-decoration-color: rgba(242, 179, 61, .5); }
+  @media (min-width: 900px) {
+    .contact-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); align-items: center; column-gap: 5rem; }
+  }
+</style>

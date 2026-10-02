@@ -1,0 +1,188 @@
+---
+/**
+ * Diálogo modal nativo para formularios (<dialog> + showModal): foco atrapado, Esc, fondo
+ * inerte y bloqueo de scroll sin librerías. Dos tonos: «brand» (ciruela) y «ev» (Empoderando
+ * Voces). Lo abre src/scripts/dialog.ts (setupDialog / bindTriggers).
+ */
+import Icon from '../ui/Icon.astro';
+
+interface Props {
+  id: string;
+  kicker: string;
+  title: string;
+  /** Texto bajo el título (además de la nota de campos obligatorios). */
+  intro?: string;
+  tone?: 'brand' | 'ev';
+  /** Atributo de datos para localizar el diálogo (p. ej. data-story-dialog). */
+  dataAttr?: string;
+}
+const { id, kicker, title, intro, tone = 'brand', dataAttr } = Astro.props;
+const extra = dataAttr ? { [dataAttr]: '' } : {};
+---
+
+<dialog
+  class:list={['form-dialog', `form-dialog--${tone}`]}
+  id={id}
+  aria-labelledby={`${id}-title`}
+  aria-describedby={`${id}-desc`}
+  data-form-dialog
+  {...extra}
+>
+  <div class="form-dialog-scroll" data-dialog-scroll>
+    <div class="form-dialog-head">
+      <p class="form-dialog-kicker">{kicker}</p>
+      <h2 class="form-dialog-title" id={`${id}-title`} tabindex="-1" data-dialog-title>{title}</h2>
+      <p class="form-dialog-intro" id={`${id}-desc`}>
+        {intro && <span>{intro} </span>}
+        <span>Los campos marcados con <span aria-hidden="true">*</span><span class="visually-hidden">asterisco</span> son obligatorios.</span>
+      </p>
+      <button class="dialog-close" type="button" data-dialog-close aria-label="Cerrar formulario">
+        <Icon name="close" />
+      </button>
+    </div>
+    <div class="form-dialog-body">
+      <slot />
+    </div>
+  </div>
+</dialog>
+
+<style>
+  .form-dialog {
+    width: min(720px, calc(100% - 2rem));
+    max-width: none;
+    max-height: calc(100dvh - 2rem);
+    padding: 0;
+    border: 0;
+    border-radius: 20px;
+    background: var(--c-ivory);
+    color: var(--c-ink);
+    box-shadow: var(--shadow-l);
+    overflow: hidden;
+    /* Entrada/salida con transiciones + @starting-style (interrumpibles, sin JS):
+       opacidad + escala .96 → 1 en 220 ms ease-out; la salida, más rápida (150 ms).
+       Modal centrado: transform-origin en el centro (no se ancla al botón). */
+    opacity: 0;
+    transform: scale(.96);
+    transition:
+      opacity var(--dur-exit) var(--ease-out),
+      transform var(--dur-exit) var(--ease-out),
+      overlay var(--dur-exit) allow-discrete,
+      display var(--dur-exit) allow-discrete;
+  }
+  .form-dialog[open] {
+    display: flex;
+    flex-direction: column;
+    opacity: 1;
+    transform: none;
+    transition-duration: var(--dur-dialog);
+  }
+  @starting-style {
+    .form-dialog[open] { opacity: 0; transform: scale(.96); }
+  }
+  .form-dialog::backdrop {
+    background: rgba(18, 9, 20, .74);
+    opacity: 0;
+    transition:
+      opacity var(--dur-exit) var(--ease-out),
+      overlay var(--dur-exit) allow-discrete,
+      display var(--dur-exit) allow-discrete;
+  }
+  .form-dialog[open]::backdrop {
+    opacity: 1;
+    transition-duration: var(--dur-dialog);
+  }
+  @starting-style {
+    .form-dialog[open]::backdrop { opacity: 0; }
+  }
+  .form-dialog--ev::backdrop { background: rgba(20, 9, 24, .78); }
+
+  .form-dialog-scroll { overflow-y: auto; overscroll-behavior: contain; max-height: calc(100dvh - 2rem); }
+  .form-dialog-head {
+    position: relative;
+    padding: 2rem 4.5rem 1.75rem 2rem;
+  }
+  .form-dialog-kicker {
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+  }
+  .form-dialog-title { margin-top: .4rem; line-height: 1; text-wrap: balance; }
+  .form-dialog-title:focus { outline: none; }
+  .form-dialog-title:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
+  .form-dialog-intro { margin-top: .9rem; font-size: .98rem; line-height: 1.55; max-width: 34rem; }
+  .form-dialog:has(:global(.lead-box.is-done)) .form-dialog-intro { display: none; }
+  .form-dialog-body { padding: 1.75rem 2rem 2rem; }
+
+  /* Tono Empoderando Voces: ciruela profundo, serif cursiva y etiqueta estrecha en oro */
+  .form-dialog--ev .form-dialog-head {
+    --focus: var(--ev-gold);
+    background:
+      radial-gradient(30rem 14rem at 100% 0%, rgba(221, 181, 108, .16), transparent 70%),
+      radial-gradient(30rem 16rem at 0% 100%, rgba(122, 44, 134, .5), transparent 70%),
+      var(--ev-bg);
+    color: var(--ev-text);
+  }
+  .form-dialog--ev .form-dialog-kicker {
+    color: var(--ev-gold);
+    font-family: var(--ff-cond);
+    font-size: .95rem;
+    font-weight: 500;
+    letter-spacing: .24em;
+  }
+  .form-dialog--ev .form-dialog-title {
+    font-family: var(--ff-serif);
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(2.3rem, 1.7rem + 2.6vw, 3.4rem);
+    line-height: 1;
+    letter-spacing: -.01em;
+  }
+  .form-dialog--ev .form-dialog-intro { color: var(--ev-muted); }
+
+  /* Tono de marca */
+  .form-dialog--brand .form-dialog-head {
+    --focus: #fff;
+    background:
+      radial-gradient(28rem 14rem at 100% 0%, rgba(165, 80, 180, .5), transparent 70%),
+      linear-gradient(160deg, var(--c-plum) 0%, var(--c-plum-800) 100%);
+    color: #fff;
+  }
+  .form-dialog--brand .form-dialog-kicker { color: var(--c-lavender-300); }
+  .form-dialog--brand .form-dialog-title {
+    font-family: var(--ff-serif);
+    font-weight: 600;
+    font-size: clamp(1.9rem, 1.5rem + 1.8vw, 2.6rem);
+    line-height: 1.05;
+  }
+  .form-dialog--brand .form-dialog-intro { color: rgba(243, 237, 245, .88); }
+  .form-dialog--brand .dialog-close {
+    --focus: #fff;
+    border-color: rgba(255, 255, 255, .4);
+    background: rgba(44, 10, 50, .25);
+    color: #fff;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .form-dialog--brand .dialog-close:hover { background: #fff; color: var(--c-plum); border-color: #fff; }
+  }
+
+  /* Movimiento reducido: solo fundido de opacidad, sin escala. */
+  @media (prefers-reduced-motion: reduce) {
+    .form-dialog,
+    .form-dialog[open] { transform: none; }
+    @starting-style {
+      .form-dialog[open] { transform: none; }
+    }
+    .form-dialog,
+    .form-dialog::backdrop { transition-duration: var(--dur-exit) !important; }
+    .form-dialog[open],
+    .form-dialog[open]::backdrop { transition-duration: var(--dur-dialog) !important; }
+  }
+
+  @media (max-width: 599.98px) {
+    .form-dialog { width: 100%; height: 100%; max-height: 100dvh; margin: 0; border-radius: 0; }
+    .form-dialog-scroll { max-height: 100dvh; }
+    .form-dialog-head { padding: 1.5rem 4.25rem 1.5rem 1.25rem; }
+    .form-dialog-body { padding: 1.5rem 1.25rem calc(2rem + env(safe-area-inset-bottom)); }
+  }
+</style>

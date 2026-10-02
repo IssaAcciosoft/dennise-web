@@ -1,0 +1,66 @@
+---
+/** «En medios» compacto para el inicio: enlaza a la versión completa en Derechos humanos. */
+import { ARTICLE_8M as A } from '~/data/medios';
+import { url } from '~/lib/url';
+import Photo from '../ui/Photo.astro';
+import Icon from '../ui/Icon.astro';
+import cartel from '~/assets/img/cartel-8m.jpg';
+---
+
+<section class="section section--ivory media-teaser" aria-labelledby="media-teaser-title">
+  <div class="container media-grid">
+    <div class="media-head">
+      <p class="eyebrow" data-reveal>Publicaciones</p>
+      <h2 class="section-title" id="media-teaser-title" data-reveal>En medios</h2>
+    </div>
+    <a class="media-card" href={url('/derechos-humanos/#en-medios')} data-reveal>
+      <span class="media-thumb">
+        <Photo src={cartel} alt="" widths={[240, 360, 480]} sizes="(min-width: 600px) 180px, 120px" />
+      </span>
+      <span class="media-body">
+        <span class="media-meta">{A.publisher}</span>
+        <span class="media-title">{A.title}</span>
+        <span class="media-standfirst">«{A.standfirst}»</span>
+        <span class="media-more">Leer el artículo <Icon name="arrow" /></span>
+      </span>
+    </a>
+  </div>
+</section>
+
+<style>
+  .media-grid { display: grid; gap: 2rem; align-items: center; }
+  .media-head .section-title { margin-bottom: 0; }
+  .media-card {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: 1.25rem;
+    align-items: center;
+    padding: clamp(1rem, .75rem + 1vw, 1.75rem);
+    background: var(--c-white);
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius-l);
+    box-shadow: var(--shadow-s);
+    color: var(--c-ink);
+    text-decoration: none;
+    transition: border-color var(--dur-fast) var(--ease-hover), box-shadow var(--dur) var(--ease-out);
+  }
+  .media-thumb { display: block; border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-s); }
+  .media-thumb :global(img) { width: 100%; }
+  .media-body { display: flex; flex-direction: column; gap: .45rem; min-width: 0; }
+  .media-meta { color: var(--c-terracotta-700); font-size: .74rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+  .media-title { font-family: var(--ff-serif); font-size: clamp(1.3rem, 1.1rem + .9vw, 1.9rem); font-weight: 600; line-height: 1.12; text-wrap: balance; }
+  .media-standfirst { display: none; color: var(--c-ink-soft); font-family: var(--ff-serif); font-style: italic; font-size: 1.15rem; line-height: 1.4; }
+  .media-more { display: inline-flex; align-items: center; gap: .5rem; margin-top: .25rem; color: var(--c-plum); font-weight: 600; }
+  .media-more :global(.icon) { transition: transform var(--dur) var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) {
+    .media-card:hover { border-color: var(--c-line-strong); box-shadow: var(--shadow); color: var(--c-ink); }
+    .media-card:hover .media-more :global(.icon) { transform: translateX(4px); }
+  }
+  @media (min-width: 600px) {
+    .media-card { grid-template-columns: 180px minmax(0, 1fr); gap: 2rem; }
+    .media-standfirst { display: block; }
+  }
+  @media (min-width: 960px) {
+    .media-grid { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 4rem; }
+  }
+</style>

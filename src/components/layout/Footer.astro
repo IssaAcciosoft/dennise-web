@@ -1,0 +1,114 @@
+---
+import { NAV, LEGAL_NAV, SITE, PHONE, TEL_LINK, WA_TEXT, waLink } from '~/data/site';
+import { url } from '~/lib/url';
+import logo from '~/assets/logo/dg-logo.svg?url';
+import SocialLinks from '../ui/SocialLinks.astro';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer" data-wa-hide>
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <a class="footer-logo" href={url('/')}>
+        <img src={logo} width="656" height="494" alt="Denisse González — volver al inicio" loading="lazy" decoding="async" />
+      </a>
+      <p class="footer-motto">{SITE.motto}</p>
+    </div>
+
+    <nav class="footer-nav" aria-label="Pie de página">
+      <h2 class="footer-title">Navegación</h2>
+      <ul role="list">
+        <li><a href={url('/')}>Inicio</a></li>
+        {NAV.map((item) => <li><a href={url(item.path)}>{item.label}</a></li>)}
+      </ul>
+    </nav>
+
+    <div class="footer-contact">
+      <h2 class="footer-title">Contacto</h2>
+      <ul class="footer-contact-list" role="list">
+        <li><a href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">WhatsApp</a></li>
+        <li><a href={TEL_LINK}>{PHONE.display}</a></li>
+        <li>Asesorías online y presenciales</li>
+      </ul>
+      <SocialLinks variant="icons" class="footer-social" />
+    </div>
+  </div>
+
+  <div class="container footer-bottom">
+    <p>© {year} {SITE.name}. Todos los derechos reservados.</p>
+    <ul class="footer-legal" role="list">
+      {LEGAL_NAV.map((item) => <li><a href={url(item.path)}>{item.label}</a></li>)}
+    </ul>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    padding-top: clamp(3.5rem, 6vw, 5rem);
+    padding-bottom: calc(2rem + env(safe-area-inset-bottom));
+    background: var(--c-lavender-200);
+    color: var(--c-ink-soft);
+    font-size: var(--fs-small);
+  }
+  .footer-grid {
+    display: grid;
+    gap: 2.5rem;
+    padding-bottom: 3rem;
+  }
+  .footer-logo { display: inline-block; }
+  .footer-logo img { width: 180px; }
+  .footer-motto {
+    margin-top: 1.25rem;
+    font-family: var(--ff-serif);
+    font-style: italic;
+    font-size: 1.35rem;
+    color: var(--c-plum);
+  }
+  .footer-title {
+    margin-bottom: 1rem;
+    color: var(--c-ink);
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+  .footer-nav ul,
+  .footer-contact-list { display: grid; gap: .2rem; }
+  .site-footer a { color: var(--c-ink-soft); text-decoration: none; }
+  .footer-nav a,
+  .footer-contact-list a { display: inline-block; padding-block: .3rem; }
+  @media (hover: hover) {
+    .site-footer a:hover { color: var(--c-plum); text-decoration: underline; }
+  }
+  .footer-contact :global(.footer-social) { margin-top: 1.25rem; }
+
+  .footer-bottom {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: .75rem 2rem;
+    padding-top: 1.5rem;
+    font-size: .875rem;
+  }
+  .footer-bottom::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: var(--gutter);
+    right: var(--gutter);
+    height: 1px;
+    background: var(--c-line);
+  }
+  .footer-legal { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; }
+  .footer-legal a { display: inline-block; padding-block: .25rem; text-decoration: underline; text-decoration-color: var(--c-line-strong); }
+
+  @media (min-width: 700px) {
+    .footer-grid { grid-template-columns: 1.3fr 1fr 1fr; }
+  }
+  @media (max-width: 699.98px) {
+    /* Espacio para el botón flotante de WhatsApp */
+    .site-footer { padding-bottom: calc(6rem + env(safe-area-inset-bottom)); }
+  }
+</style>

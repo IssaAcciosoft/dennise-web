@@ -1,0 +1,56 @@
+---
+/** Enlaces a redes sociales. `pills`: icono + usuario; `icons`: solo icono (44 × 44). */
+import { SOCIALS, SITE } from '~/data/site';
+import Icon from './Icon.astro';
+
+interface Props {
+  variant?: 'pills' | 'icons';
+  tone?: 'light' | 'dark';
+  class?: string;
+}
+const { variant = 'pills', tone = 'light', class: className } = Astro.props;
+---
+
+<ul class:list={['social-list', `social-list--${variant}`, `social-list--${tone}`, className]} role="list">
+  {
+    SOCIALS.map((s) => (
+      <li>
+        <a
+          href={s.href}
+          target="_blank"
+          rel="noopener"
+          aria-label={`${s.label} de ${SITE.name}${s.handle.startsWith('@') ? ` (${s.handle})` : ''}`}
+        >
+          <Icon name={s.id} />
+          {variant === 'pills' && <span aria-hidden="true">{s.handle}</span>}
+        </a>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .social-list { display: flex; flex-wrap: wrap; gap: .6rem; }
+  .social-list a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    min-height: 44px;
+    padding: .5rem 1rem .5rem .75rem;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--radius-pill);
+    color: var(--c-plum-800);
+    font-size: .92rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color var(--dur-fast) var(--ease-hover), color var(--dur-fast) var(--ease-hover), border-color var(--dur-fast) var(--ease-hover), transform var(--dur-press) var(--ease-out);
+  }
+  .social-list a:active { transform: scale(.97); }
+  .social-list--icons a { width: 44px; height: 44px; padding: 0; }
+  .social-list--dark a { border-color: rgba(246, 239, 231, .3); color: var(--ev-text); --focus: var(--ev-gold); }
+  @media (hover: hover) and (pointer: fine) {
+    .social-list a:hover { background: var(--c-plum); border-color: var(--c-plum); color: #fff; text-decoration: none; }
+    .social-list--dark a:hover { background: var(--ev-gold); border-color: var(--ev-gold); color: var(--ev-bg); }
+  }
+</style>

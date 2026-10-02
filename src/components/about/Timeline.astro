@@ -1,0 +1,151 @@
+---
+/**
+ * Mi trayectoria: línea de tiempo accesible (<ol> con años en <time>).
+ * Fuente: docs/contenido.md → MI TRAYECTORIA.
+ */
+type Item = { from: string; to?: string; title: string; text?: string; list?: string[]; now?: boolean };
+const items: Item[] = [
+  {
+    from: '2015',
+    to: '2026',
+    title: 'Formación jurídica',
+    list: [
+      'Licenciatura en Derecho, Universidad TecMilenio.',
+      'Maestría en Derecho con especialización en Litigios Orales, California Western School of Law.',
+      'NYU School of Professional Studies, programa en Negociación.',
+      'Máster en Derecho Internacional, Comercio y Relaciones Internacionales, ISDE.',
+      'Máster en Gestión Administrativa, UAX.',
+    ],
+  },
+  { from: '2018', to: '2019', title: 'Centro de Justicia para la Mujer', text: 'Asesoría legal a mujeres víctimas de violencia de género.' },
+  { from: '2019', to: '2020', title: 'Práctica litigiosa', text: 'Abogada litigante en materias Civil, Amparo y Penal.' },
+  { from: '2020', to: '2023', title: 'Derecho transnacional', text: 'Directora Legal México en Poplavsky International Law Offices, participando en representación legal de demandas internacionales.' },
+  { from: '2024', title: 'Embajada de México en España', text: 'Prácticas profesionales en el área de Asuntos Jurídicos.' },
+  { from: '2024', to: '2026', title: 'Movilidad internacional', text: 'Asesoría legal en materia migratoria y acompañamiento de procedimientos relacionados con movilidad internacional.' },
+  { from: '2026', title: 'Derechos humanos', text: 'Directora Ejecutiva de Jóvenes por los Derechos Humanos y participación en iniciativas de educación y promoción de los derechos humanos.', now: true },
+];
+---
+
+<section class="section section--ivory journey" id="trayectoria" aria-labelledby="journey-title">
+  <div class="container journey-grid">
+    <div class="journey-head">
+      <p class="eyebrow" data-reveal>Mi trayectoria</p>
+      <h2 class="section-title" id="journey-title" data-reveal>Del litigio a una visión internacional del derecho.</h2>
+      <p class="journey-places" aria-hidden="true" data-reveal>
+        <span>México</span><span>España</span><span>Nueva York</span>
+      </p>
+    </div>
+
+    <ol class="timeline">
+      {
+        items.map((item) => (
+          <li class:list={['tl-item', { 'tl-item--now': item.now }]} data-reveal>
+            <p class="tl-years">
+              <time datetime={item.from}>{item.from}</time>
+              {item.to && (
+                <>
+                  {' — '}
+                  <time datetime={item.to}>{item.to}</time>
+                </>
+              )}
+            </p>
+            <h3 class="tl-title">{item.title}</h3>
+            {item.text && <p class="tl-text">{item.text}</p>}
+            {item.list && (
+              <ul class="tl-list" role="list">
+                {item.list.map((li) => (
+                  <li>{li}</li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .journey-grid { display: grid; gap: 3rem; }
+  .journey-head .section-title { max-width: 7.2em; }
+  .journey-places {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+    margin-top: 2.5rem;
+    font-family: var(--ff-serif);
+    font-style: italic;
+    font-size: clamp(1.4rem, 1.2rem + 1vw, 2rem);
+    color: var(--c-plum);
+    line-height: 1.25;
+  }
+  .journey-places span { display: flex; align-items: center; gap: .75rem; }
+  .journey-places span::before { content: ""; width: 1.5rem; height: 1px; background: var(--c-line-strong); }
+
+  .timeline { position: relative; list-style: none; margin: 0; padding: 0 0 0 2.25rem; }
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 6px;
+    top: .6rem;
+    bottom: .6rem;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--c-plum), var(--c-lavender-300) 85%, transparent);
+  }
+  .tl-item { position: relative; padding-bottom: 2.6rem; }
+  .tl-item:last-child { padding-bottom: 0; }
+  .tl-item::before {
+    content: "";
+    position: absolute;
+    left: calc(-2.25rem + 1px);
+    top: .45rem;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--c-ivory);
+    border: 2px solid var(--c-plum);
+  }
+  .tl-item--now::before { background: var(--c-plum); box-shadow: 0 0 0 5px rgba(110, 29, 122, .15); }
+  .tl-years {
+    margin-bottom: .2rem;
+    color: var(--c-plum);
+    font-size: .82rem;
+    font-weight: 600;
+    letter-spacing: .16em;
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+  .tl-title {
+    margin-bottom: .45rem;
+    font-family: var(--ff-serif);
+    font-size: var(--fs-h4);
+    font-weight: 600;
+    line-height: 1.15;
+  }
+  .tl-text { color: var(--c-ink-soft); max-width: 40rem; }
+  .tl-list { display: grid; gap: .55rem; margin-top: .75rem; }
+  .tl-list li {
+    position: relative;
+    padding: .7rem 1rem .7rem 1.1rem;
+    background: var(--c-white);
+    border: 1px solid var(--c-line);
+    border-radius: 10px;
+    color: var(--c-ink-soft);
+    font-size: var(--fs-small);
+    line-height: 1.5;
+  }
+  .tl-list li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: .9rem;
+    bottom: .9rem;
+    width: 2px;
+    background: var(--c-plum);
+    border-radius: 2px;
+  }
+  @media (min-width: 960px) {
+    .journey-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: 5rem; }
+    .journey-head { position: sticky; top: calc(var(--header-h) + 2.5rem); align-self: start; }
+    .tl-item { padding-bottom: 3rem; }
+  }
+</style>

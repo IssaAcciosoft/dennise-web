@@ -1,0 +1,226 @@
+---
+/**
+ * «En medios»: artículo del 8M con miniatura, transcripción (texto accesible) y visor
+ * de imagen a tamaño completo (<dialog>). Sin JS, la miniatura abre el JPG en la misma pestaña.
+ */
+import { getImage } from 'astro:assets';
+import { ARTICLE_8M as A } from '~/data/medios';
+import Photo from '../ui/Photo.astro';
+import Icon from '../ui/Icon.astro';
+import cartel from '~/assets/img/cartel-8m.jpg';
+
+const full = await getImage({ src: cartel, format: 'jpg', width: cartel.width });
+const altThumb = `Cartel del artículo «8 de marzo — Voces que se unen», de ${A.author}, publicado por ${A.publisher}`;
+---
+
+<article class="article-card" data-reveal>
+  <a class="article-thumb" href={full.src} data-lightbox aria-label="Ver el cartel del artículo «8 de marzo — Voces que se unen» a tamaño completo">
+    <Photo src={cartel} alt={altThumb} widths={[360, 540, 720, 799]} sizes="(min-width: 820px) 360px, calc(100vw - 4.5rem)" />
+    <span class="article-zoom" aria-hidden="true"><Icon name="expand" /></span>
+  </a>
+  <div class="article-body">
+    <p class="article-meta"><span>{A.publisher}</span><span>{A.section}</span></p>
+    <h3 class="article-title">{A.title}</h3>
+    <p class="article-author">Por {A.author}</p>
+    <blockquote class="article-standfirst">
+      <p>«{A.standfirst}»</p>
+    </blockquote>
+    <p class="article-topic">{A.topic}</p>
+    <a class="btn btn--outline" href={full.src} data-lightbox>
+      <Icon name="expand" />
+      <span>Ver el cartel<span class="visually-hidden"> del artículo a tamaño completo</span></span>
+    </a>
+  </div>
+
+  <details class="article-text">
+    <summary>
+      <span>Leer el texto del artículo</span>
+      <Icon name="chevron" />
+    </summary>
+    <div class="article-text-body">
+      <p class="article-text-note">Transcripción del artículo publicado por {A.publisher}.</p>
+      {A.transcript.map((p) => <p set:html={p} />)}
+    </div>
+  </details>
+</article>
+
+<dialog class="lightbox" id="lightbox" aria-label="Cartel del artículo «8 de marzo — Voces que se unen» a tamaño completo" data-lightbox-dialog>
+  <div class="lightbox-inner">
+    <button class="dialog-close lightbox-close" type="button" data-dialog-close aria-label="Cerrar imagen">
+      <Icon name="close" />
+    </button>
+    <Photo
+      src={cartel}
+      alt={`Artículo «${A.title}», por ${A.author}, publicado por ${A.publisher}. El texto completo está transcrito en «Leer el texto del artículo».`}
+      widths={[540, 799]}
+      sizes="min(799px, 100vw - 2rem)"
+    />
+  </div>
+</dialog>
+
+<script>
+  import { setupDialog, bindTriggers } from '~/scripts/dialog';
+  const dialog = document.querySelector<HTMLDialogElement>('[data-lightbox-dialog]');
+  if (dialog && typeof dialog.showModal === 'function') {
+    const closeBtn = dialog.querySelector<HTMLElement>('.lightbox-close');
+    const lb = setupDialog(dialog, { initialFocus: () => closeBtn });
+    bindTriggers('[data-lightbox]', lb);
+  }
+</script>
+
+<style>
+  .article-card {
+    display: grid;
+    gap: 2rem;
+    padding: clamp(1.25rem, .8rem + 2vw, 2.5rem);
+    background: var(--c-white);
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius-l);
+    box-shadow: var(--shadow-s);
+  }
+  .article-thumb {
+    position: relative;
+    display: block;
+    max-width: 360px;
+    width: 100%;
+    justify-self: center;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .article-thumb :global(img) { width: 100%; transition: transform var(--dur-slow) var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) {
+    .article-thumb:hover :global(img) { transform: scale(1.03); }
+  }
+  .article-zoom {
+    position: absolute;
+    right: .75rem;
+    bottom: .75rem;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .92);
+    color: var(--c-plum);
+    box-shadow: var(--shadow-s);
+  }
+  .article-body { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
+  .article-meta {
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+    margin-bottom: 1rem;
+    color: var(--c-terracotta-700);
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+  @media (min-width: 600px) {
+    .article-meta { flex-direction: row; flex-wrap: wrap; gap: .35rem .9rem; }
+    .article-meta span + span::before { content: "·"; margin-right: .9rem; }
+  }
+  .article-title {
+    font-family: var(--ff-serif);
+    font-size: clamp(1.75rem, 1.4rem + 1.6vw, 2.75rem);
+    font-weight: 600;
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+  .article-author { margin-top: .9rem; color: var(--c-muted); font-weight: 500; }
+  .article-standfirst {
+    margin-block: 1.75rem;
+    padding-left: 1.25rem;
+    border-left: 2px solid var(--c-terracotta);
+    font-family: var(--ff-serif);
+    font-size: clamp(1.25rem, 1.1rem + .6vw, 1.55rem);
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--c-ink);
+  }
+  .article-topic { margin-bottom: 1.75rem; color: var(--c-ink-soft); }
+
+  .article-text { border-top: 1px solid var(--c-line); }
+  .article-text summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 56px;
+    padding: 1rem 0 .25rem;
+    color: var(--c-plum);
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+  }
+  .article-text summary::-webkit-details-marker { display: none; }
+  .article-text summary :global(.icon) { transition: transform var(--dur) var(--ease-out); }
+  .article-text[open] summary :global(.icon) { transform: rotate(180deg); }
+  .article-text-body { max-width: 46rem; padding-top: 1rem; color: var(--c-ink-soft); }
+  .article-text-body p + p { margin-top: 1rem; }
+  .article-text-note { color: var(--c-muted); font-size: var(--fs-small); font-style: italic; }
+
+  @media (min-width: 820px) {
+    .article-card { grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
+    .article-thumb { justify-self: stretch; }
+    .article-text { grid-column: 1 / -1; }
+  }
+
+  /* Visor */
+  .lightbox {
+    padding: 0;
+    border: 0;
+    max-width: none;
+    max-height: none;
+    background: transparent;
+    width: fit-content;
+    height: fit-content;
+    overflow: visible;
+  }
+  /* Entrada/salida con transiciones + @starting-style (interrumpibles): escala .96 → 1 y
+     opacidad; la salida es más rápida que la entrada. Modal: origen centrado. */
+  .lightbox {
+    opacity: 0;
+    transform: scale(.96);
+    transition:
+      opacity var(--dur-exit) var(--ease-out),
+      transform var(--dur-exit) var(--ease-out),
+      overlay var(--dur-exit) allow-discrete,
+      display var(--dur-exit) allow-discrete;
+  }
+  .lightbox[open] { opacity: 1; transform: none; transition-duration: var(--dur-dialog); }
+  @starting-style {
+    .lightbox[open] { opacity: 0; transform: scale(.96); }
+  }
+  .lightbox::backdrop {
+    background: rgba(18, 9, 20, .88);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    transition:
+      opacity var(--dur-exit) var(--ease-out),
+      overlay var(--dur-exit) allow-discrete,
+      display var(--dur-exit) allow-discrete;
+  }
+  .lightbox[open]::backdrop { opacity: 1; transition-duration: var(--dur-dialog); }
+  @starting-style {
+    .lightbox[open]::backdrop { opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lightbox, .lightbox[open] { transform: none; }
+    @starting-style { .lightbox[open] { transform: none; } }
+    .lightbox, .lightbox::backdrop { transition-duration: var(--dur-exit) !important; }
+    .lightbox[open], .lightbox[open]::backdrop { transition-duration: var(--dur-dialog) !important; }
+  }
+  .lightbox-inner { position: relative; padding-top: 3.5rem; }
+  .lightbox :global(img) {
+    width: auto;
+    max-width: calc(100vw - 2rem);
+    max-height: calc(100dvh - 5.5rem);
+    border-radius: 8px;
+    box-shadow: 0 30px 80px -10px rgba(0, 0, 0, .7);
+  }
+  .lightbox-close { top: 0; right: 0; background: rgba(18, 9, 20, .75); }
+</style>

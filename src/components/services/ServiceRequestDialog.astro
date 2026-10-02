@@ -1,0 +1,102 @@
+---
+/**
+ * Diálogo «Solicitar información» → formulario «servicio» de AccioGest
+ * (docs/integracion-acciogest.md §4: el servicio o plan elegido va con la etiqueta «Servicio»).
+ *
+ * Disparadores: cualquier elemento con data-service-request="<lead_value>" (el servicio queda
+ * preseleccionado). Usar un <a href="https://wa.me/…"> para que sin JavaScript abra WhatsApp.
+ * Opciones del selector: lead_value de src/data/servicios.json + «Otro trámite / no lo sé».
+ */
+import { consultations, autogestiona } from '~/lib/services';
+import { WA_TEXT } from '~/data/site';
+import FormDialog from '../forms/FormDialog.astro';
+import LeadForm from '../forms/LeadForm.astro';
+import Field from '../forms/Field.astro';
+
+const OTHER_SERVICE = 'Otro trámite / no lo sé';
+
+const options = [
+  { label: 'Asesorías', options: consultations.map((c) => ({ value: c.lead_value })) },
+  { label: autogestiona.name, options: autogestiona.plans.map((p) => ({ value: p.lead_value })) },
+  { value: OTHER_SERVICE },
+];
+const p = 'sr';
+---
+
+<FormDialog
+  id="service-dialog"
+  tone="brand"
+  kicker="Servicios de extranjería"
+  title="Solicitar información"
+  intro="Cuéntame qué necesitas y me pondré en contacto contigo."
+  dataAttr="data-service-dialog"
+>
+  <LeadForm
+    formKey="servicio"
+    idPrefix={p}
+    inDialog
+    submitLabel="Enviar solicitud"
+    successTitle="¡Solicitud enviada!"
+    successText="He recibido tu solicitud correctamente."
+    againLabel="Enviar otra solicitud"
+    waText={WA_TEXT.general}
+  >
+    <Field name="nombre" id={`${p}-nombre`} label="Nombre" required autocomplete="name" maxlength={120} msgRequired="Escribe tu nombre." />
+    <Field
+      name="email"
+      id={`${p}-email`}
+      label="Email"
+      type="email"
+      required
+      autocomplete="email"
+      inputmode="email"
+      maxlength={160}
+      msgRequired="Escribe tu email para que pueda responderte."
+    />
+    <Field name="telefono" id={`${p}-telefono`} label="Teléfono" type="tel" autocomplete="tel" inputmode="tel" maxlength={25} />
+    <Field
+      name="servicio"
+      id={`${p}-servicio`}
+      label="Servicio"
+      type="select"
+      required
+      options={options}
+      emptyOption="Elige un servicio…"
+      msgRequired="Elige el servicio que te interesa."
+    />
+    <Field
+      name="mensaje"
+      id={`${p}-mensaje`}
+      label="Mensaje"
+      type="textarea"
+      full
+      rows={4}
+      maxlength={1500}
+      counter
+      hint="Por ejemplo, tu situación actual o el trámite que te interesa."
+    />
+  </LeadForm>
+</FormDialog>
+
+<script>
+  import { setupDialog, bindTriggers } from '~/scripts/dialog';
+  import { initLeadForm } from '~/scripts/lead-form';
+
+  const dialog = document.querySelector<HTMLDialogElement>('[data-service-dialog]');
+  if (dialog && typeof dialog.showModal === 'function') {
+    const lead = initLeadForm(dialog.querySelector<HTMLElement>('[data-lead]'));
+    const title = dialog.querySelector<HTMLElement>('[data-dialog-title]');
+    const modal = setupDialog(dialog, {
+      initialFocus: () => lead?.focusTarget() ?? title,
+      onClose: () => lead?.resetIfDone(),
+    });
+    bindTriggers('[data-service-request]', {
+      open(trigger) {
+        const service = trigger?.dataset.serviceRequest;
+        if (service) lead?.preset({ servicio: service });
+        modal.open(trigger);
+      },
+      close: modal.close,
+    });
+  }
+</script>

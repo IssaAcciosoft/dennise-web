@@ -1,0 +1,870 @@
+---
+/**
+ * Empoderando Voces — la página «distinta» de la web (docs/contenido.md §4 y §5).
+ *
+ * Editorial e inmersiva: ciruela profundo derivado de la marca, oro antiguo usado con
+ * moderación, serif de marca en cursiva (Cormorant) + sans estrecha y fina (Barlow Condensed).
+ * Cabecera oscura translúcida sobre la portada (sin corte claro/oscuro) y la portada
+ * (.ev-hero) comparte view-transition-name «ev-panel» con la tarjeta del inicio: al llegar
+ * desde allí, la tarjeta oscura se expande hasta ser esta página.
+ *
+ * Islas de React (React Bits, ver THIRD_PARTY_NOTICES.md), todas diferidas y con alternativa:
+ * - EvAurora (client:media ≥ 768 px): aurora WebGL tras la portada; póster CSS antes/sin ella.
+ *   En móvil no se carga (batería y datos; el póster da el mismo ambiente en pantalla pequeña).
+ * - EvGallery (client:visible): galería curva WebGL sobre una lista estática accesible.
+ * - Magnet (client:media, solo ratón): atracción sutil del gran botón (sin movimiento reducido).
+ *
+ * El gran botón «Cuéntame tu historia» abre el formulario (StoryDialog → AccioGest); sin JS,
+ * WhatsApp. Lógica del formulario: src/components/ev/StoryDialog.astro (sin cambios).
+ */
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import Photo from '~/components/ui/Photo.astro';
+import Icon from '~/components/ui/Icon.astro';
+import StoryDialog from '~/components/ev/StoryDialog.astro';
+import EvAurora from '~/components/ev/EvAurora';
+import EvGallery from '~/components/ev/EvGallery';
+import Magnet from '~/components/react-bits/Magnet/Magnet';
+import { WA_TEXT, waLink, SITE } from '~/data/site';
+import educationPeace from '~/assets/img/education-peace.jpg';
+import yhri from '~/assets/img/yhri-asamblea.jpg';
+import hilton from '~/assets/img/hilton-spain.jpg';
+import summitAtril from '~/assets/img/summit-atril.jpg';
+import kit from '~/assets/img/kit-delegada.jpg';
+import onuBlanco from '~/assets/img/onu-blanco.jpg';
+
+const storyLink = waLink(WA_TEXT.historia);
+const homePath = import.meta.env.BASE_URL;
+
+const ALT = {
+  educationPeace:
+    'Denisse González en un atril con micrófono, con gorra y camiseta de Youth for Human Rights, junto al cartel «Education for Peace 2026»',
+  yhri: 'Denisse González sonriendo en su asiento de una sala de la ONU, frente a un micrófono y un rótulo «YHRI Summit»',
+  hilton: 'Denisse González con una banda «Spain» en el vestíbulo de One UN Plaza, en Nueva York, entre banderas',
+  summitAtril: 'Denisse González en un atril con micrófono frente al cartel del 20th International Human Rights Summit 2026',
+  kit: 'Kit de delegada del International Human Rights Summit: acreditación de la ONU, camiseta y gorra de Youth for Human Rights',
+  onuBlanco: 'Denisse González con blazer blanco junto a la bandera y el emblema de las Naciones Unidas',
+};
+
+// Galería: recortes 3:4 en WebP (los mismos archivos para la lista estática y para las
+// texturas WebGL → una sola descarga por foto).
+type GalleryPhoto = { src: ImageMetadata; text: string; alt: string; position?: string };
+const galleryPhotos: GalleryPhoto[] = [
+  { src: educationPeace, text: 'Education for Peace 2026', alt: ALT.educationPeace },
+  { src: yhri, text: 'YHRI Summit · Naciones Unidas', alt: ALT.yhri },
+  { src: hilton, text: 'One UN Plaza · Nueva York', alt: ALT.hilton },
+  { src: summitAtril, text: 'International Human Rights Summit', alt: ALT.summitAtril },
+  { src: kit, text: 'Kit de delegada', alt: ALT.kit, position: 'right' },
+  { src: onuBlanco, text: 'Naciones Unidas', alt: ALT.onuBlanco },
+];
+const gallery = await Promise.all(
+  galleryPhotos.map(async (p) => {
+    const img = await getImage({ src: p.src, width: 600, height: 800, fit: 'cover', position: p.position ?? 'centre', format: 'webp', quality: 74 });
+    return { ...p, url: img.src };
+  }),
+);
+const glItems = gallery.map((g) => ({ image: g.url, text: g.text }));
+
+// Foto de la portada (solo escritorio, ≥ 960 px, donde es el LCP: eager + fetchpriority high).
+// En pantallas estrechas la portada es tipográfica: la primera <source> (imagen vacía en
+// data:, sin petición) evita descargarla, y la foto aparece en la galería.
+const HERO_WIDTHS = [360, 480, 640, 800, 960];
+const HERO_SIZES = 'min(36vw, 480px)';
+const [heroAvif, heroWebp, heroJpg] = await Promise.all([
+  getImage({ src: educationPeace, widths: HERO_WIDTHS, format: 'avif' }),
+  getImage({ src: educationPeace, widths: HERO_WIDTHS, format: 'webp' }),
+  getImage({ src: educationPeace, width: 640, format: 'jpg' }),
+]);
+const EMPTY_GIF = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
+const memories = [
+  'Las experiencias que transformaron tu vida.',
+  'Las injusticias que te hicieron alzar la voz.',
+  'Los obstáculos que lograste superar.',
+  'Las decisiones que cambiaron tu camino.',
+  'Las historias que quizá nunca has tenido la oportunidad de contar.',
+];
+---
+
+<BaseLayout
+  title="Empoderando Voces · Cuéntame tu historia · Denisse González"
+  description="Empoderando Voces: historias reales, personas reales, voces que merecen un espacio. Si tienes una historia que merece ser escuchada, cuéntamela."
+  preloadFonts={['serif-500i', 'cond-500', 'sans-400']}
+  bodyClass="theme-ev"
+  themeColor="#1F1024"
+  headerTone="dark"
+>
+  <script is:inline slot="head" define:vars={{ homePath }}>
+    // Al llegar con View Transition. Desde el inicio: tipo «ev-morph» (global.css §8), para que
+    // la tarjeta se vea crecer sobre el inicio antes del fundido.
+    addEventListener('pagereveal', function (e) {
+      if (!e.viewTransition) return;
+      // La aurora (WebGL) espera a que termine la transición: no le roba fotogramas.
+      window.__evTransition = e.viewTransition.finished.catch(function () {});
+      try {
+        var from = (window.navigation && navigation.activation && navigation.activation.from) || null;
+        var prev = from && from.url ? new URL(from.url).pathname : document.referrer ? new URL(document.referrer).pathname : '';
+        if (prev === homePath) e.viewTransition.types.add('ev-morph');
+      } catch (err) {}
+    });
+  </script>
+  <div class="ev">
+    <!-- Portada: comparte view-transition-name con la tarjeta del inicio -->
+    <section class="ev-hero" aria-labelledby="ev-title">
+      <div class="ev-hero-bg" aria-hidden="true">
+        <EvAurora client:media="(min-width: 768px)" />
+      </div>
+      <div class="container ev-hero-grid">
+        <div class="ev-hero-copy">
+          <p class="ev-kicker ev-enter" style="--enter:0">
+            <span class="ev-kicker-icon"><Icon name="mic" /></span>
+            <span>Historias reales. Personas reales.</span>
+          </p>
+          <h1 class="ev-title" id="ev-title">
+            <span class="ev-title-a">Empoderando</span>
+            <span class="ev-title-b">Voces</span>
+          </h1>
+          <p class="ev-sub ev-enter" style="--enter:1">Porque cada historia merece ser escuchada.</p>
+          <div class="ev-hero-actions ev-enter" style="--enter:2">
+            <a class="ev-pill" href={storyLink} target="_blank" rel="noopener" aria-controls="story-dialog" data-story-open>
+              <span>Cuéntame tu historia</span>
+              <Icon name="arrow" />
+            </a>
+          </div>
+        </div>
+        <figure class="ev-hero-photo">
+          <div class="ev-hero-frame">
+            <picture>
+              <source media="(max-width: 959.98px)" srcset={EMPTY_GIF} />
+              <source type="image/avif" srcset={heroAvif.srcSet.attribute} sizes={HERO_SIZES} />
+              <source type="image/webp" srcset={heroWebp.srcSet.attribute} sizes={HERO_SIZES} />
+              <img
+                src={heroJpg.src}
+                width={educationPeace.width}
+                height={educationPeace.height}
+                alt={ALT.educationPeace}
+                loading="eager"
+                fetchpriority="high"
+                decoding="async"
+                style="object-position:55% 30%"
+              />
+            </picture>
+          </div>
+          <figcaption class="ev-caption ev-enter" style="--enter:3">Education for Peace 2026</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- Introducción -->
+    <div class="ev-intro">
+      <div class="container ev-intro-grid">
+        <p class="ev-statement" data-reveal>Hay historias que cambian nuestra manera de mirar el mundo.</p>
+        <div class="ev-intro-body">
+          <p data-reveal>Historias de personas que atravesaron fronteras, que tuvieron que empezar de nuevo, que enfrentaron injusticias, que defendieron a sus familias, que sobrevivieron a momentos difíciles o que simplemente decidieron no permanecer en silencio.</p>
+          <p class="ev-conviction" data-reveal>Empoderando Voces nace de una convicción: <strong>cuando una persona se atreve a contar su historia, deja de cargarla sola.</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Galería: Nueva York · Naciones Unidas -->
+    <section class="ev-gallery-section" aria-labelledby="ev-gallery-title">
+      <div class="container ev-gallery-head">
+        <h2 class="ev-label" id="ev-gallery-title" data-reveal>Nueva York · 2026</h2>
+        <p class="ev-gallery-note" data-reveal>20th International Human Rights Summit · Naciones Unidas</p>
+      </div>
+      <div class="ev-gallery" data-ev-gallery>
+        <ul class="ev-strip" role="list" tabindex="0" aria-label="Fotografías en Nueva York y en las Naciones Unidas" data-ev-strip>
+          {
+            gallery.map((g) => (
+              <li>
+                <figure>
+                  <img src={g.url} width="600" height="800" alt={g.alt} loading="lazy" decoding="async" />
+                  <figcaption>{g.text}</figcaption>
+                </figure>
+              </li>
+            ))
+          }
+        </ul>
+        <EvGallery client:visible={{ rootMargin: '600px' }} items={glItems} />
+      </div>
+    </section>
+
+    <!-- Lo que quiero conocer -->
+    <section class="ev-memories" aria-labelledby="ev-memories-title">
+      <div class="container ev-memories-grid">
+        <figure class="ev-memories-photo" data-reveal="photo">
+          <div class="ev-frame">
+            <Photo src={yhri} alt={ALT.yhri} widths={[360, 540, 720, 900]} sizes="(min-width: 960px) 34vw, calc(100vw - 2rem)" position="60% 35%" />
+          </div>
+          <figcaption class="ev-caption">YHRI Summit · Naciones Unidas</figcaption>
+        </figure>
+        <div class="ev-memories-copy">
+          <h2 class="ev-h2" id="ev-memories-title" data-reveal>Quiero conocer las historias <em>que te han marcado.</em></h2>
+          <ol class="ev-list" role="list">
+            {
+              memories.map((m, i) => (
+                <li data-reveal>
+                  <span class="ev-list-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                  <span>{m}</span>
+                </li>
+              ))
+            }
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- Declaración -->
+    <div class="container">
+      <div class="ev-quiet">
+        <p class="ev-quiet-small" data-reveal>No necesitas tener una historia perfecta.<br />No necesitas tener todas las respuestas.</p>
+        <p class="ev-quiet-big" data-reveal>Solo necesitas tener algo que decir.</p>
+      </div>
+    </div>
+
+    <!-- Tu voz importa + gran botón -->
+    <section class="ev-voice" aria-labelledby="ev-voice-title">
+      <div class="container ev-voice-grid">
+        <div class="ev-voice-copy">
+          <h2 class="ev-voice-title" id="ev-voice-title" data-reveal>Tu voz importa</h2>
+          <p class="ev-lead" data-reveal>Si tienes una historia que merece ser escuchada, quiero conocerte.</p>
+          <div class="ev-voice-body" data-reveal>
+            <p>Puede ser una historia de migración, de superación, de derechos humanos, de lucha, de transformación, de justicia o simplemente una experiencia que haya dejado una huella en tu vida.</p>
+            <p>Tu historia puede inspirar a alguien que hoy está atravesando algo parecido.</p>
+          </div>
+          <p class="ev-voice-invite" data-reveal>Si quieres compartirla conmigo, escríbeme.</p>
+        </div>
+        <figure class="ev-voice-photo" data-reveal="photo">
+          <div class="ev-frame">
+            <Photo src={summitAtril} alt={ALT.summitAtril} widths={[360, 490]} sizes="(min-width: 960px) 30vw, calc(100vw - 2rem)" position="60% 40%" />
+          </div>
+          <figcaption class="ev-caption">International Human Rights Summit</figcaption>
+        </figure>
+      </div>
+
+      <div class="container ev-cta-wrap" id="cuentame" data-wa-hide>
+        <Magnet client:media="(hover: hover) and (pointer: fine)" wrapperClassName="ev-magnet" innerClassName="ev-magnet-inner" padding={90} magnetStrength={14} maxOffset={10}>
+          <a class="ev-cta" href={storyLink} target="_blank" rel="noopener" aria-controls="story-dialog" data-story-open>
+            <span class="ev-cta-text">
+              <span class="ev-cta-main">Cuéntame tu historia</span>
+              <span class="ev-cta-sub">Quiero compartir mi historia</span>
+            </span>
+            <span class="ev-cta-arrow" aria-hidden="true"><Icon name="arrow" /></span>
+          </a>
+        </Magnet>
+        <p class="ev-after" data-reveal>Tu voz puede convertirse en el comienzo de otra historia.</p>
+      </div>
+    </section>
+
+    <!-- Firma -->
+    <div class="container">
+      <div class="ev-signoff">
+        <p class="ev-motto" data-reveal>{SITE.motto}</p>
+        <p class="ev-sign" data-reveal><span class="ev-sign-name">Empoderando Voces</span> — Historias reales. Personas reales. Voces que merecen un espacio.</p>
+      </div>
+    </div>
+  </div>
+
+  <StoryDialog slot="after" />
+</BaseLayout>
+
+<style>
+  :global(body.theme-ev) { background: var(--ev-bg); }
+  :global(html:has(body.theme-ev)) { scrollbar-color: var(--ev-bg-3) var(--ev-bg); }
+  /* Botón flotante de WhatsApp: anillo oscuro sobre esta página */
+  :global(body.theme-ev .wa-float) { box-shadow: 0 12px 28px -8px rgba(0, 0, 0, .6), 0 0 0 4px rgba(247, 239, 243, .14); }
+
+  .ev {
+    --focus: var(--ev-gold);
+    position: relative;
+    isolation: isolate;
+    display: flow-root;
+    overflow: clip;
+    /* La página empieza bajo la cabecera translúcida: la portada se ve a través de ella
+       (sin corte claro/oscuro); la portada compensa con su padding-top. */
+    margin-top: calc(-1 * var(--header-h) - 1px); /* + borde inferior de la cabecera */
+    padding-bottom: clamp(3rem, 6vw, 5rem);
+    background: var(--ev-bg);
+    color: var(--ev-text);
+  }
+  /* Grano de película muy sutil (textura editorial) */
+  .ev::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    opacity: .07;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .ev ::selection { background: var(--ev-gold); color: var(--ev-bg); }
+  .ev a { color: var(--ev-gold-2); }
+
+  /* Utilidades tipográficas de la página */
+  .ev-kicker,
+  .ev-label,
+  .ev-caption,
+  .ev-gallery-note,
+  .ev-sign,
+  .ev-cta-sub {
+    font-family: var(--ff-cond);
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+  .ev-caption {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-top: 1rem;
+    color: var(--ev-faint);
+    font-size: .9rem;
+    letter-spacing: .2em;
+    line-height: 1.3;
+  }
+  .ev-caption::before { content: ""; width: 1.75rem; height: 1px; background: var(--ev-gold); flex: none; }
+
+  .ev-frame { position: relative; }
+  .ev-frame :global(picture),
+  .ev-frame :global(img) { width: 100%; height: 100%; }
+  .ev-frame :global(img) { object-fit: cover; border-radius: 4px; }
+  .ev-frame::after {
+    content: "";
+    position: absolute;
+    inset: .9rem -.9rem -.9rem .9rem;
+    z-index: -1;
+    border: 1px solid rgba(221, 181, 108, .38);
+    border-radius: 4px;
+    pointer-events: none;
+  }
+
+  /* ---------- Portada ---------- */
+  .ev-hero {
+    view-transition-name: ev-panel;
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+    padding-top: calc(var(--header-h) + clamp(2.25rem, 1rem + 5vw, 5.5rem));
+    padding-bottom: clamp(3.5rem, 2rem + 6vw, 7rem);
+    background: var(--ev-bg);
+  }
+  /* Póster estático (antes de la aurora, sin JS, sin WebGL o con movimiento reducido) */
+  .ev-hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      linear-gradient(180deg, transparent 72%, var(--ev-bg) 100%),
+      radial-gradient(75% 60% at 15% -5%, rgba(122, 44, 134, .62), transparent 70%),
+      radial-gradient(45% 45% at 92% 4%, rgba(217, 174, 99, .17), transparent 72%),
+      radial-gradient(60% 45% at 65% 88%, rgba(94, 36, 112, .38), transparent 72%),
+      linear-gradient(180deg, #2A1331 0%, var(--ev-bg) 55%);
+  }
+  .ev-hero-bg :global(.ev-aurora) {
+    position: absolute;
+    inset: 0 0 30% 0;
+    opacity: 0;
+    mix-blend-mode: screen;
+    -webkit-mask-image: linear-gradient(to bottom, #000 35%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 35%, transparent 100%);
+    transition: opacity 1400ms var(--ease-out);
+  }
+  .ev-hero-bg :global(.ev-aurora[data-ready]) { opacity: .75; }
+  .ev-hero-bg :global(.aurora-container),
+  .ev-hero-bg :global(.aurora-container canvas) { display: block; width: 100% !important; height: 100% !important; }
+
+  .ev-hero-grid { display: grid; gap: clamp(2.75rem, 6vw, 4rem); align-items: end; }
+  /* Móvil y tableta: la primera pantalla es una portada tipográfica (título, frase y botón);
+     la foto llega al deslizar, con su revelado. El título es el LCP (pinta con la fuente de
+     respaldo ajustada y no se anima). */
+  @media (max-width: 959.98px) {
+    .ev-hero-copy {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: calc(88svh - var(--header-h) - clamp(2.25rem, 1rem + 5vw, 5.5rem));
+    }
+  }
+
+  .ev-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: .85rem;
+    margin-bottom: clamp(1.5rem, 3vw, 2.25rem);
+    color: var(--ev-gold);
+    font-size: .95rem;
+    letter-spacing: .26em;
+    line-height: 1.3;
+  }
+  .ev-kicker-icon {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid rgba(221, 181, 108, .5);
+    border-radius: 50%;
+    flex: none;
+  }
+  .ev-kicker-icon :global(.icon) { width: 1.15rem; height: 1.15rem; }
+  @media (max-width: 479.98px) {
+    .ev-kicker { gap: .7rem; font-size: .88rem; letter-spacing: .18em; }
+  }
+
+  .ev-title { display: flex; flex-direction: column; margin: 0; font-weight: 400; }
+  .ev-title-a {
+    font-family: var(--ff-serif);
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(3.9rem, 1.3rem + 9.6vw, 10rem);
+    line-height: .92;
+    letter-spacing: -.025em;
+    color: var(--ev-text);
+    margin-left: -.04em;
+  }
+  .ev-title-b {
+    display: flex;
+    align-items: center;
+    gap: .3em;
+    margin-top: .12em;
+    font-family: var(--ff-cond);
+    font-weight: 500;
+    font-size: clamp(2.5rem, .9rem + 6.6vw, 7rem);
+    line-height: 1;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ev-gold);
+  }
+  .ev-title-b::before {
+    content: "";
+    width: clamp(2.25rem, 1rem + 6vw, 7.5rem);
+    height: 1px;
+    background: currentColor;
+    opacity: .7;
+    flex: none;
+  }
+  .ev-sub {
+    max-width: 22em;
+    margin-top: clamp(1.5rem, 3vw, 2.25rem);
+    color: var(--ev-muted);
+    font-size: clamp(1.2rem, 1.05rem + .7vw, 1.6rem);
+    line-height: 1.45;
+    text-wrap: balance;
+  }
+  .ev-hero-actions { margin-top: clamp(2rem, 4vw, 2.75rem); }
+
+  .ev .ev-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .85rem;
+    min-height: 54px;
+    padding: .85rem 1.6rem .85rem 1.75rem;
+    border: 1px solid rgba(221, 181, 108, .75);
+    border-radius: var(--radius-pill);
+    color: var(--ev-text);
+    font-family: var(--ff-cond);
+    font-size: 1.1rem;
+    font-weight: 500;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color var(--dur-fast) var(--ease-hover),
+      color var(--dur-fast) var(--ease-hover),
+      border-color var(--dur-fast) var(--ease-hover),
+      transform var(--dur-press) var(--ease-out);
+  }
+  .ev-pill :global(.icon) { width: 1.2rem; height: 1.2rem; color: var(--ev-gold); transition: transform var(--dur) var(--ease-out), color var(--dur-fast) var(--ease-hover); }
+  .ev-pill:active { transform: scale(var(--press-scale)); }
+  .ev-pill:focus-visible { border-radius: var(--radius-pill); }
+  @media (hover: hover) and (pointer: fine) {
+    .ev .ev-pill:hover { background: var(--ev-gold); border-color: var(--ev-gold); color: var(--ev-bg); }
+    .ev-pill:hover :global(.icon) { color: var(--ev-bg); transform: translateX(3px); }
+  }
+
+  .ev-hero-photo { display: none; position: relative; margin: 0; }
+  .ev-hero-frame { position: relative; aspect-ratio: 4 / 5; }
+  .ev-hero-frame :global(picture),
+  .ev-hero-frame :global(img) { width: 100%; height: 100%; }
+  .ev-hero-frame :global(img) { object-fit: cover; border-radius: 4px; }
+  .ev-hero-frame::after {
+    content: "";
+    position: absolute;
+    inset: -.75rem -.75rem .75rem .75rem;
+    z-index: -1;
+    border: 1px solid rgba(221, 181, 108, .4);
+    border-radius: 4px;
+  }
+
+  @media (min-width: 960px) {
+    .ev-hero-frame::after { inset: -1rem 1rem 1rem -1rem; }
+    .ev-hero { min-height: min(100svh, 62rem); display: flex; align-items: center; }
+    .ev-hero > .container { width: 100%; }
+    .ev-hero-grid { grid-template-columns: minmax(0, 1.4fr) minmax(0, .6fr); gap: clamp(2rem, 4vw, 4.5rem); }
+    .ev-hero-photo { display: block; width: 100%; max-width: 30rem; justify-self: end; }
+    .ev-hero-frame { aspect-ratio: 3 / 4; }
+  }
+
+  /* Entrada de la portada (también para quien llega directamente): todo lo secundario sube
+     y aparece escalonado (60 ms). El título (LCP) no se anima nunca; la foto solo se asienta
+     con una escala sutil (sin opacidad), así nunca retrasa el LCP. */
+  @media (prefers-reduced-motion: no-preference) {
+    .ev-enter { animation: ev-enter 640ms var(--ease-out) calc(120ms + var(--enter, 0) * 60ms) backwards; }
+    .ev-hero-frame :global(img) { animation: ev-settle 1400ms var(--ease-out) backwards; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ev-enter { animation: ev-fade 320ms var(--ease-out) backwards !important; animation-duration: 320ms !important; }
+  }
+  @keyframes ev-enter { from { opacity: 0; translate: 0 14px; } }
+  @keyframes ev-fade { from { opacity: 0; } }
+  @keyframes ev-settle { from { scale: 1.06; } }
+  .ev-hero-frame :global(picture) { overflow: clip; border-radius: 4px; box-shadow: 0 40px 80px -30px rgba(0, 0, 0, .7); }
+
+  /* ---------- Introducción ---------- */
+  .ev-intro { padding-block: var(--section-pad) clamp(3rem, 2rem + 4vw, 6rem); }
+  .ev-intro-grid { display: grid; gap: clamp(2rem, 5vw, 3rem); }
+  .ev-statement {
+    font-family: var(--ff-serif);
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(2.15rem, 1.4rem + 3vw, 4.25rem);
+    line-height: 1.06;
+    letter-spacing: -.012em;
+    color: var(--ev-text);
+    text-wrap: balance;
+  }
+  .ev-intro-body p { max-width: 34em; color: var(--ev-muted); font-size: 1.14rem; line-height: 1.75; text-wrap: pretty; }
+  .ev-conviction {
+    margin-top: 2.25rem;
+    padding-left: 1.4rem;
+    border-left: 1px solid var(--ev-gold);
+  }
+  .ev-conviction strong {
+    display: block;
+    margin-top: .6rem;
+    font-family: var(--ff-serif);
+    font-size: clamp(1.55rem, 1.25rem + 1.1vw, 2.15rem);
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1.22;
+    color: var(--ev-text);
+    text-wrap: balance;
+  }
+  @media (min-width: 960px) {
+    .ev-intro-grid { grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); column-gap: clamp(3rem, 7vw, 7rem); align-items: start; }
+    .ev-intro-body { padding-top: .75rem; }
+  }
+
+  /* ---------- Galería ---------- */
+  .ev-gallery-section {
+    --gallery-h: clamp(26rem, 18rem + 20vw, 40rem);
+    padding-bottom: var(--section-pad);
+    background: linear-gradient(180deg, transparent, rgba(43, 21, 51, .75) 18%, rgba(43, 21, 51, .75) 82%, transparent);
+  }
+  .ev-gallery-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .5rem 2rem;
+    margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+  }
+  .ev-label { color: var(--ev-gold); font-size: 1rem; letter-spacing: .28em; line-height: 1.3; }
+  .ev-gallery-note { color: var(--ev-faint); font-size: .9rem; letter-spacing: .18em; line-height: 1.4; }
+
+  .ev-gallery { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .ev-strip {
+    grid-area: 1 / 1;
+    display: flex;
+    gap: 1rem;
+    height: var(--gallery-h);
+    margin: 0;
+    padding: 0 var(--gutter) .75rem;
+    list-style: none;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(221, 181, 108, .45) transparent;
+    transition: opacity 500ms var(--ease-out);
+  }
+  .ev-strip:focus-visible { outline-offset: -3px; }
+  .ev-strip li { flex: none; height: 100%; scroll-snap-align: start; }
+  .ev-strip figure { display: flex; flex-direction: column; height: 100%; margin: 0; }
+  .ev-strip img {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: auto;
+    height: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    border-radius: 4px;
+    background: var(--ev-bg-3);
+  }
+  .ev-strip figcaption {
+    margin-top: .8rem;
+    color: var(--ev-muted);
+    font-family: var(--ff-serif);
+    font-style: italic;
+    font-size: 1.15rem;
+    line-height: 1.2;
+  }
+
+  .ev-gallery :global(.ev-gallery-gl) {
+    grid-area: 1 / 1;
+    position: relative;
+    height: var(--gallery-h);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 700ms var(--ease-out);
+  }
+  .ev-gallery :global(.circular-gallery) {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    cursor: grab;
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .ev-gallery :global(.circular-gallery[data-dragging]) { cursor: grabbing; }
+  .ev-gallery[data-gl] :global(.ev-gallery-gl) { opacity: 1; pointer-events: auto; }
+  /* Con la galería WebGL activa, la lista sigue en el árbol de accesibilidad (texto alternativo)
+     pero ya no se ve ni se enfoca. */
+  .ev-gallery[data-gl] .ev-strip { opacity: 0; pointer-events: none; }
+
+  .ev-gallery :global(.ev-gallery-controls) {
+    grid-area: 2 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    max-width: var(--container);
+    margin: 1.25rem auto 0;
+    padding-inline: var(--gutter);
+  }
+  .ev-gallery :global(.ev-gallery-hint) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: .25rem 1rem;
+    color: var(--ev-faint);
+    font-family: var(--ff-cond);
+    font-size: .9rem;
+    font-weight: 500;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+  .ev-gallery :global(.ev-gallery-count) { color: var(--ev-gold); font-variant-numeric: tabular-nums; }
+  .ev-gallery :global(.ev-gallery-buttons) { display: flex; gap: .6rem; }
+  .ev-gallery :global(.ev-gallery-btn) {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border: 1px solid rgba(221, 181, 108, .55);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ev-text);
+    transition:
+      background-color var(--dur-fast) var(--ease-hover),
+      color var(--dur-fast) var(--ease-hover),
+      border-color var(--dur-fast) var(--ease-hover),
+      transform var(--dur-press) var(--ease-out);
+  }
+  .ev-gallery :global(.ev-gallery-btn:active) { transform: scale(.95); }
+  .ev-gallery :global(.ev-gallery-btn:focus-visible) { border-radius: 50%; }
+  @media (hover: hover) and (pointer: fine) {
+    .ev-gallery :global(.ev-gallery-btn:hover) { background: var(--ev-gold); border-color: var(--ev-gold); color: var(--ev-bg); }
+  }
+
+  /* ---------- Lo que quiero conocer ---------- */
+  .ev-memories { padding-block: clamp(2.5rem, 1rem + 5vw, 5rem) var(--section-pad); }
+  .ev-memories-grid { display: grid; gap: clamp(3rem, 6vw, 4rem); }
+  .ev-memories-photo { width: min(100% - 1rem, 26rem); margin: 0; }
+  .ev-memories-photo .ev-frame { aspect-ratio: 4 / 5; }
+  .ev-h2 {
+    margin-bottom: clamp(1.75rem, 3vw, 2.5rem);
+    font-family: var(--ff-serif);
+    font-weight: 500;
+    font-size: clamp(2.1rem, 1.5rem + 2.4vw, 3.6rem);
+    line-height: 1.06;
+    letter-spacing: -.01em;
+    color: var(--ev-text);
+    text-wrap: balance;
+  }
+  .ev-h2 em { font-style: italic; color: var(--ev-gold-2); }
+  .ev-list { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--ev-line); }
+  .ev-list li {
+    display: grid;
+    grid-template-columns: 3.25rem 1fr;
+    align-items: baseline;
+    padding-block: 1.3rem;
+    border-bottom: 1px solid var(--ev-line);
+    font-family: var(--ff-serif);
+    font-size: clamp(1.35rem, 1.15rem + .8vw, 1.85rem);
+    font-weight: 500;
+    line-height: 1.25;
+    color: var(--ev-text);
+  }
+  .ev-list-num {
+    color: var(--ev-gold);
+    font-family: var(--ff-cond);
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: .14em;
+    font-variant-numeric: tabular-nums;
+  }
+  @media (min-width: 960px) {
+    .ev-memories-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: clamp(3rem, 7vw, 7rem); align-items: start; }
+    .ev-memories-photo { position: sticky; top: calc(var(--header-h) + 2.5rem); width: 100%; }
+    .ev-memories-photo .ev-frame { aspect-ratio: 3 / 4; }
+  }
+
+  /* ---------- Declaración ---------- */
+  .ev-quiet {
+    padding-block: clamp(3.5rem, 2rem + 6vw, 7rem);
+    border-block: 1px solid var(--ev-line);
+    text-align: center;
+  }
+  .ev-quiet-small { color: var(--ev-muted); font-size: clamp(1.15rem, 1rem + .6vw, 1.5rem); line-height: 1.6; }
+  .ev-quiet-big {
+    max-width: 14em;
+    margin: 1.5rem auto 0;
+    font-family: var(--ff-serif);
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(2.6rem, 1.1rem + 6.2vw, 7.25rem);
+    line-height: 1;
+    letter-spacing: -.02em;
+    color: var(--ev-text);
+    text-wrap: balance;
+  }
+
+  /* ---------- Tu voz importa ---------- */
+  .ev-voice { padding-top: var(--section-pad); }
+  .ev-voice-grid { display: grid; gap: clamp(3rem, 6vw, 4rem); align-items: center; }
+  .ev-voice-title {
+    margin-bottom: clamp(1.5rem, 3vw, 2rem);
+    font-family: var(--ff-cond);
+    font-weight: 500;
+    font-size: clamp(3.1rem, 1.2rem + 7.2vw, 7.75rem);
+    line-height: .92;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--ev-text);
+  }
+  .ev-voice-title::after {
+    content: "";
+    display: block;
+    width: 4.5rem;
+    height: 1px;
+    margin-top: 1.5rem;
+    background: var(--ev-gold);
+  }
+  .ev .ev-lead {
+    margin-bottom: 1.4rem;
+    font-family: var(--ff-serif);
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(1.55rem, 1.25rem + 1.2vw, 2.2rem);
+    line-height: 1.22;
+    color: var(--ev-text);
+    text-wrap: balance;
+  }
+  .ev-voice-body p { max-width: 34em; color: var(--ev-muted); font-size: 1.14rem; line-height: 1.75; text-wrap: pretty; }
+  .ev-voice-body p + p { margin-top: 1rem; }
+  .ev-voice-invite { margin-top: 1.5rem; color: var(--ev-text); font-size: 1.14rem; font-weight: 600; }
+  .ev-voice-photo { width: min(100% - 1rem, 24rem); margin: 0; justify-self: end; }
+  .ev-voice-photo .ev-frame { aspect-ratio: 7 / 8; }
+  @media (min-width: 960px) {
+    .ev-voice-grid { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: clamp(3rem, 7vw, 7rem); }
+    .ev-voice-photo { width: 100%; max-width: 26rem; }
+  }
+
+  /* ---------- El gran botón ---------- */
+  .ev-cta-wrap { margin-top: clamp(4rem, 2rem + 6vw, 7rem); }
+  .ev-cta-wrap :global(.ev-magnet) { display: block; }
+  .ev .ev-cta {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: clamp(1rem, 3vw, 2.5rem);
+    width: 100%;
+    padding: clamp(1.75rem, 1rem + 3vw, 3.75rem) clamp(1.5rem, .75rem + 3.5vw, 4.5rem);
+    border-radius: clamp(20px, 1rem + 1.5vw, 40px);
+    background: var(--ev-gold);
+    color: var(--ev-bg);
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 30px 70px -45px rgba(221, 181, 108, .4);
+    transition:
+      background-color var(--dur-fast) var(--ease-hover),
+      transform var(--dur-press) var(--ease-out);
+  }
+  .ev-cta:active { transform: scale(.985); }
+  .ev-cta:focus-visible { outline: 3px solid var(--ev-text); outline-offset: 6px; border-radius: clamp(20px, 1rem + 1.5vw, 40px); }
+  .ev-cta-text { display: flex; flex-direction: column; gap: clamp(.6rem, 1.5vw, 1rem); min-width: 0; }
+  .ev-cta-main {
+    font-family: var(--ff-serif);
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(2.5rem, .9rem + 6.6vw, 7.75rem);
+    line-height: .95;
+    letter-spacing: -.02em;
+    text-wrap: balance;
+  }
+  .ev-cta-sub { font-size: clamp(.95rem, .85rem + .4vw, 1.2rem); letter-spacing: .22em; line-height: 1.3; }
+  .ev-cta-arrow {
+    display: grid;
+    place-items: center;
+    width: clamp(3.5rem, 2rem + 5vw, 7.5rem);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--ev-bg);
+    color: var(--ev-gold);
+    transition: transform var(--dur) var(--ease-out);
+  }
+  .ev-cta-arrow :global(.icon) { width: 42%; height: 42%; }
+  @media (hover: hover) and (pointer: fine) {
+    .ev .ev-cta:hover { background: var(--ev-gold-2); color: var(--ev-bg); }
+    .ev-cta:hover .ev-cta-arrow { transform: translateX(6px); }
+  }
+  .ev-after {
+    margin-top: clamp(1.75rem, 3vw, 2.5rem);
+    color: var(--ev-muted);
+    font-family: var(--ff-serif);
+    font-style: italic;
+    font-size: clamp(1.35rem, 1.15rem + .8vw, 1.85rem);
+    line-height: 1.3;
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  /* ---------- Firma ---------- */
+  .ev-signoff {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem 2.5rem;
+    margin-top: var(--section-pad);
+    padding-top: 2rem;
+    border-top: 1px solid var(--ev-line);
+  }
+  .ev-motto {
+    font-family: var(--ff-serif);
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(1.9rem, 1.4rem + 2vw, 3.1rem);
+    line-height: 1.1;
+    color: var(--ev-text);
+  }
+  .ev-sign { max-width: 34rem; color: var(--ev-faint); font-size: .95rem; letter-spacing: .14em; line-height: 1.6; }
+  .ev-sign-name { color: var(--ev-gold); }
+</style>

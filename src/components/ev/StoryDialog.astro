@@ -1,0 +1,151 @@
+---
+/**
+ * Diálogo «Cuéntame tu historia» (Empoderando Voces) → formulario «historia» de AccioGest
+ * (docs/integracion-acciogest.md §4). Campos pedidos por la cliente (docs/contenido.md) +
+ * Email (obligatorio, nunca se publica) y Teléfono.
+ * Disparadores: <a data-story-open href="https://wa.me/…">: sin JavaScript abren WhatsApp.
+ * /empoderando-voces/#cuentame abre el diálogo directamente.
+ */
+import { WA_TEXT } from '~/data/site';
+import FormDialog from '../forms/FormDialog.astro';
+import LeadForm from '../forms/LeadForm.astro';
+import Field from '../forms/Field.astro';
+import ChoiceField from '../forms/ChoiceField.astro';
+
+const temas = ['Migración', 'Superación', 'Derechos humanos', 'Lucha', 'Transformación', 'Justicia', 'Otra'].map((value) => ({ value }));
+const siNo = [
+  { value: 'sí', label: 'Sí' },
+  { value: 'no', label: 'No' },
+];
+const p = 'sf';
+---
+
+<FormDialog
+  id="story-dialog"
+  tone="ev"
+  kicker="Empoderando Voces"
+  title="Cuéntame tu historia"
+  intro="Tu voz puede convertirse en el comienzo de otra historia."
+  dataAttr="data-story-dialog"
+>
+  <LeadForm
+    formKey="historia"
+    idPrefix={p}
+    variant="ev"
+    inDialog
+    submitLabel="Enviar mi historia"
+    successTitle="¡Gracias por compartir tu historia!"
+    successText="Tu historia me ha llegado correctamente."
+    againLabel="Compartir otra historia"
+    waText={WA_TEXT.historia}
+  >
+    <Field name="nombre" id={`${p}-nombre`} label="Tu nombre" required autocomplete="name" maxlength={120} msgRequired="Escribe tu nombre." />
+    <Field
+      name="email"
+      id={`${p}-email`}
+      label="Tu email"
+      type="email"
+      required
+      autocomplete="email"
+      inputmode="email"
+      maxlength={160}
+      hint="Solo para contactarte: nunca se publicará."
+      msgRequired="Escribe tu email para que pueda contactarte."
+    />
+    <Field
+      name="telefono"
+      id={`${p}-telefono`}
+      label="Teléfono"
+      type="tel"
+      autocomplete="tel"
+      inputmode="tel"
+      maxlength={25}
+      hint="Necesario si prefieres que te contacte por teléfono o WhatsApp."
+      requiredWhen="contacto=Teléfono|WhatsApp"
+      msgRequiredWhen="Indica tu teléfono para que pueda contactarte por teléfono o WhatsApp."
+    />
+    <Field name="pais" id={`${p}-pais`} label="País" required autocomplete="country-name" maxlength={80} msgRequired="Indica tu país." />
+    <Field
+      name="tema"
+      id={`${p}-tema`}
+      label="¿De qué quieres hablar?"
+      type="select"
+      required
+      full
+      options={temas}
+      emptyOption="Elige un tema…"
+      msgRequired="Elige de qué quieres hablar."
+    />
+    <Field
+      name="historia"
+      id={`${p}-historia`}
+      label="Cuéntame brevemente tu historia"
+      type="textarea"
+      required
+      full
+      rows={6}
+      minlength={20}
+      maxlength={1500}
+      counter
+      hint="Mínimo 20 y máximo 1500 caracteres."
+      msgRequired="Cuéntame brevemente tu historia."
+      msgMinlength="Tu historia es muy breve: escribe al menos 20 caracteres."
+    />
+    <ChoiceField
+      name="compartir"
+      id={`${p}-compartir`}
+      legend="¿Quieres que tu historia pueda ser compartida públicamente?"
+      options={siNo}
+      required
+      msgRequired="Indica si tu historia puede compartirse públicamente."
+    />
+    <ChoiceField
+      name="anonimato"
+      id={`${p}-anonimato`}
+      legend="¿Quieres permanecer en el anonimato?"
+      options={siNo}
+      required
+      msgRequired="Indica si quieres permanecer en el anonimato."
+    />
+    <ChoiceField
+      name="contacto"
+      id={`${p}-contacto`}
+      legend="¿Cómo puedo contactarte?"
+      options={[
+        { value: 'Email', label: 'Email' },
+        { value: 'Teléfono', label: 'Teléfono' },
+        { value: 'WhatsApp', label: 'WhatsApp' },
+      ]}
+      required
+      msgRequired="Elige cómo prefieres que te contacte."
+    />
+    <p slot="note" class="form-note">Tu historia me llegará de forma privada y solo se compartirá si lo autorizas.</p>
+  </LeadForm>
+</FormDialog>
+
+<script>
+  import { setupDialog, bindTriggers } from '~/scripts/dialog';
+  import { initLeadForm } from '~/scripts/lead-form';
+
+  const dialog = document.querySelector<HTMLDialogElement>('[data-story-dialog]');
+  if (dialog && typeof dialog.showModal === 'function') {
+    const lead = initLeadForm(dialog.querySelector<HTMLElement>('[data-lead]'));
+    const title = dialog.querySelector<HTMLElement>('[data-dialog-title]');
+    const modal = setupDialog(dialog, {
+      initialFocus: () => lead?.focusTarget() ?? title,
+      onClose: () => lead?.resetIfDone(),
+    });
+    bindTriggers('[data-story-open]', modal);
+
+    // /empoderando-voces/#cuentame abre el formulario directamente (si la página se está
+    // prerenderizando por las Speculation Rules, espera a que se muestre).
+    if (location.hash === '#cuentame') {
+      const openFromHash = () => modal.open(document.querySelector<HTMLElement>('[data-story-open]'));
+      if ((document as Document & { prerendering?: boolean }).prerendering) {
+        document.addEventListener('prerenderingchange', openFromHash, { once: true });
+      } else {
+        openFromHash();
+      }
+    }
+  }
+</script>

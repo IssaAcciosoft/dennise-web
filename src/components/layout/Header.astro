@@ -1,0 +1,420 @@
+---
+/**
+ * Cabecera fija y persistente entre páginas (view-transition-name: site-header).
+ * Menú móvil con la Popover API: funciona sin JavaScript (abrir/cerrar, Esc, clic fuera).
+ * Una sola fila a cualquier anchura (alto fijo = --header-h), así el panel del menú
+ * siempre empieza justo debajo y nunca tapa el botón (v1: V1/A1/T2).
+ */
+import { NAV, BOOKING_PATH, SITE } from '~/data/site';
+import { url, normalizePath } from '~/lib/url';
+import LogoMark from './LogoMark.astro';
+import Icon from '../ui/Icon.astro';
+
+interface Props {
+  /** «dark»: cabecera translúcida oscura sobre páginas oscuras (Empoderando Voces). */
+  tone?: 'light' | 'dark';
+}
+const { tone = 'light' } = Astro.props;
+const current = normalizePath(Astro.url.pathname);
+const isHome = current === '/';
+const isCurrent = (path: string) => current === path;
+---
+
+<header class="site-header" data-tone={tone}>
+  <div class="container header-inner">
+    <a class="brand" href={url('/')} aria-current={isHome ? 'page' : undefined}>
+      <LogoMark class="brand-mark" idPrefix="hdr" />
+      <span class="brand-text">
+        <span class="brand-name">{SITE.name}</span>
+        <span class="brand-role">{SITE.role}</span>
+      </span>
+    </a>
+
+    <a class="btn btn--primary btn--sm header-cta header-cta--compact" href={url(BOOKING_PATH)}>
+      <Icon name="calendar" />
+      <span>Reserva tu asesoría</span>
+    </a>
+
+    <button class="nav-toggle" type="button" popovertarget="site-nav" aria-controls="site-nav">
+      <span class="nav-toggle-box" aria-hidden="true"><span></span><span></span><span></span></span>
+      <span class="nav-toggle-label">Menú</span>
+    </button>
+
+    <nav class="site-nav" id="site-nav" aria-label="Principal" popover>
+      <ul class="nav-list" role="list">
+        {
+          NAV.map((item, i) => (
+            <li style={`--i:${i}`}>
+              <a href={url(item.path)} aria-current={isCurrent(item.path) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <a class="btn btn--primary header-cta header-cta--nav" href={url(BOOKING_PATH)}>
+        <Icon name="calendar" />
+        <span>Reserva tu asesoría</span>
+      </a>
+      <p class="nav-meta">{SITE.motto}</p>
+    </nav>
+  </div>
+</header>
+
+<script>
+  // Mejora progresiva del menú (la apertura/cierre ya funciona sin JS con popover).
+  const nav = document.getElementById('site-nav') as (HTMLElement & { hidePopover?: () => void }) | null;
+  if (nav && typeof nav.hidePopover === 'function') {
+    const close = () => {
+      try {
+        if (nav.matches(':popover-open')) nav.hidePopover!();
+      } catch {
+        /* navegador sin :popover-open */
+      }
+    };
+    // Enlaces a la misma página (#ancla): cerrar el panel al pulsarlos.
+    nav.addEventListener('click', (e) => {
+      if ((e.target as Element).closest('a')) close();
+    });
+    // Al pasar a escritorio, el panel nunca debe quedarse abierto.
+    window.matchMedia('(min-width: 1160px)').addEventListener('change', (e) => {
+      if (e.matches) close();
+    });
+    // Al volver con el botón «atrás» (bfcache), el panel aparece cerrado.
+    window.addEventListener('pageshow', close);
+  }
+</script>
+
+<style>
+  .site-header {
+    /* Tono claro (por defecto) */
+    --hdr-bg: rgba(251, 248, 245, .92);
+    --hdr-bg-blur: rgba(251, 248, 245, .82);
+    --hdr-line: var(--c-line);
+    --hdr-shadow: 0 8px 24px -18px rgba(44, 10, 50, .35);
+    --hdr-fg: var(--c-ink);
+    --hdr-fg-muted: var(--c-muted);
+    --hdr-accent: var(--c-plum);
+    --hdr-toggle-bd: var(--c-line-strong);
+    --hdr-toggle-fg: var(--c-plum-800);
+    --hdr-toggle-open: var(--c-lavender);
+    --hdr-panel-bg: var(--c-ivory);
+    --logo-a: #7A1F86;
+    --logo-b: #9B9B9F;
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header);
+    border-bottom: 1px solid transparent;
+    background: var(--hdr-bg);
+    color: var(--hdr-fg);
+  }
+  @supports (backdrop-filter: blur(1px)) {
+    .site-header {
+      background: var(--hdr-bg-blur);
+      -webkit-backdrop-filter: saturate(1.4) blur(14px);
+      backdrop-filter: saturate(1.4) blur(14px);
+    }
+  }
+  /* Tono oscuro: ciruela translúcido sobre la página oscura (sin corte claro/oscuro). */
+  .site-header[data-tone="dark"] {
+    --hdr-bg: rgba(31, 16, 36, .94);
+    --hdr-bg-blur: rgba(31, 16, 36, .62);
+    --hdr-line: var(--ev-line);
+    --hdr-shadow: 0 10px 30px -20px rgba(0, 0, 0, .7);
+    --hdr-fg: var(--ev-text);
+    --hdr-fg-muted: var(--ev-muted);
+    --hdr-accent: var(--ev-gold);
+    --hdr-toggle-bd: rgba(247, 239, 243, .3);
+    --hdr-toggle-fg: var(--ev-text);
+    --hdr-toggle-open: rgba(247, 239, 243, .1);
+    --hdr-panel-bg: var(--ev-bg);
+    --logo-a: #E7D3EC;
+    --logo-b: #A992AF;
+    --focus: var(--ev-gold);
+  }
+  .site-header :global(.brand-mark) :global([fill="#7A1F86"]) { fill: var(--logo-a); }
+  .site-header :global(.brand-mark) :global([stroke="#7A1F86"]) { stroke: var(--logo-a); }
+  .site-header :global(.brand-mark) :global([fill="#9B9B9F"]) { fill: var(--logo-b); }
+  .site-header[data-tone="dark"] :global(.header-cta) {
+    --btn-bg: transparent;
+    --btn-fg: var(--ev-text);
+    --btn-bd: rgba(221, 181, 108, .7);
+    box-shadow: none;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .site-header[data-tone="dark"] :global(.header-cta:hover) { --btn-bg: var(--ev-gold); --btn-fg: var(--ev-bg); --btn-bd: var(--ev-gold); box-shadow: none; }
+  }
+  /* Sombra al hacer scroll: CSS puro (scroll-driven animation) */
+  @supports (animation-timeline: scroll()) {
+    .site-header {
+      animation: header-elevate linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 48px;
+    }
+  }
+  @keyframes header-elevate {
+    to {
+      border-bottom-color: var(--hdr-line);
+      box-shadow: var(--hdr-shadow);
+    }
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: .75rem;
+    height: var(--header-h);
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: .7rem;
+    min-width: 0;
+    margin-right: auto;
+    color: var(--hdr-fg);
+    text-decoration: none;
+  }
+  .brand:hover { color: var(--hdr-fg); }
+  .brand :global(.brand-mark) { width: 56px; height: auto; flex: none; }
+  .brand-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.05; }
+  .brand-name {
+    font-family: var(--ff-serif);
+    font-size: 1.3rem;
+    font-weight: 600;
+    letter-spacing: .005em;
+    white-space: nowrap;
+  }
+  .brand-role {
+    margin-top: .28rem;
+    color: var(--hdr-fg-muted);
+    font-size: .66rem;
+    font-weight: 600;
+    letter-spacing: .26em;
+    text-transform: uppercase;
+  }
+
+  .header-cta { white-space: nowrap; }
+  .header-cta--compact { display: none; }
+
+  /* Botón «Menú» */
+  .nav-toggle {
+    position: relative;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: .6rem;
+    min-height: 44px;
+    padding: .5rem .9rem .5rem .75rem;
+    border: 1px solid var(--hdr-toggle-bd);
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--hdr-toggle-fg);
+    font-size: .88rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    transition: background-color var(--dur-fast) var(--ease-hover), transform var(--dur-press) var(--ease-out);
+  }
+  .nav-toggle:active { transform: scale(var(--press-scale)); }
+  .nav-toggle-box { position: relative; width: 18px; height: 12px; }
+  .nav-toggle-box span {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 1.5px;
+    background: currentColor;
+    border-radius: 2px;
+    transition: transform var(--dur) var(--ease-out), opacity var(--dur-fast) var(--ease-out), top var(--dur) var(--ease-out);
+  }
+  .nav-toggle-box span:nth-child(1) { top: 0; }
+  .nav-toggle-box span:nth-child(2) { top: 5.25px; }
+  .nav-toggle-box span:nth-child(3) { top: 10.5px; }
+  .site-header:has(.site-nav:popover-open) .nav-toggle { background: var(--hdr-toggle-open); }
+  .site-header:has(.site-nav:popover-open) .nav-toggle-box span:nth-child(1) { top: 5.25px; transform: rotate(45deg); }
+  .site-header:has(.site-nav:popover-open) .nav-toggle-box span:nth-child(2) { opacity: 0; }
+  .site-header:has(.site-nav:popover-open) .nav-toggle-box span:nth-child(3) { top: 5.25px; transform: rotate(-45deg); }
+
+  .nav-list { margin: 0; padding: 0; list-style: none; }
+  .nav-list a {
+    position: relative;
+    display: block;
+    color: var(--hdr-fg);
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .nav-list a[aria-current="page"] { color: var(--hdr-accent); }
+
+  /* ---------- Móvil y tableta (< 1160 px): panel desplegable (popover) ---------- */
+  @media (max-width: 1159.98px) {
+    .site-nav {
+      position: fixed;
+      inset: calc(var(--header-h) + 1px) 0 0 0;
+      width: auto;
+      height: auto;
+      max-width: none;
+      max-height: none;
+      margin: 0;
+      border: 0;
+      border-top: 1px solid var(--hdr-line);
+      padding: 1.25rem var(--gutter) calc(2rem + env(safe-area-inset-bottom));
+      background: var(--hdr-panel-bg);
+      color: var(--hdr-fg);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      flex-direction: column;
+      gap: 2rem;
+      /* Panel: se despliega desde la cabecera con clip-path y curva de cajón (drawer);
+         se recoge más rápido de lo que se abre. Transiciones (interrumpibles), sin JS. */
+      clip-path: inset(0 0 100% 0);
+      transition:
+        clip-path var(--dur-exit) var(--ease-out),
+        display var(--dur-exit) allow-discrete,
+        overlay var(--dur-exit) allow-discrete;
+    }
+    .site-nav:popover-open {
+      display: flex;
+      clip-path: inset(0 0 0 0);
+      transition-duration: var(--dur-slow);
+      transition-timing-function: var(--ease-drawer);
+    }
+    @starting-style {
+      .site-nav:popover-open { clip-path: inset(0 0 100% 0); }
+    }
+    /* Enlaces: entran escalonados (40 ms) mientras el panel se despliega */
+    .nav-list li,
+    .nav-meta {
+      transition: opacity var(--dur) var(--ease-out), translate var(--dur) var(--ease-out);
+      transition-delay: calc(40ms + var(--i, 5) * 40ms);
+    }
+    @starting-style {
+      .site-nav:popover-open :is(.nav-list li, .nav-meta) { opacity: 0; translate: 0 -10px; }
+    }
+    .nav-list li { border-bottom: 1px solid var(--hdr-line); }
+    .nav-list a {
+      padding: 1rem 0;
+      font-family: var(--ff-serif);
+      font-size: clamp(1.6rem, 1.3rem + 1.5vw, 2.1rem);
+      font-weight: 600;
+      line-height: 1.15;
+    }
+    .nav-list a[aria-current="page"]::before {
+      content: "";
+      display: inline-block;
+      width: .45rem;
+      height: .45rem;
+      margin-right: .75rem;
+      vertical-align: .3rem;
+      background: var(--hdr-accent);
+      rotate: 45deg;
+    }
+    .header-cta--nav { align-self: flex-start; min-height: 52px; padding-inline: 1.6rem; }
+    .nav-meta {
+      margin-top: auto;
+      color: var(--hdr-fg-muted);
+      font-family: var(--ff-serif);
+      font-style: italic;
+      font-size: 1.25rem;
+    }
+  }
+
+  /* Movimiento reducido: el panel solo se funde (sin desplegarse ni desplazar enlaces). */
+  @media (max-width: 1159.98px) and (prefers-reduced-motion: reduce) {
+    .site-nav {
+      clip-path: none;
+      opacity: 0;
+      transition:
+        opacity var(--dur-exit) var(--ease-hover),
+        display var(--dur-exit) allow-discrete,
+        overlay var(--dur-exit) allow-discrete;
+      transition-duration: var(--dur-exit) !important;
+    }
+    .site-nav:popover-open { opacity: 1; transition-duration: var(--dur) !important; }
+    @starting-style {
+      .site-nav:popover-open { opacity: 0; }
+      .site-nav:popover-open :is(.nav-list li, .nav-meta) { opacity: 1; translate: none; }
+    }
+  }
+
+  @media (min-width: 600px) and (max-width: 1159.98px) {
+    .header-cta--compact { display: inline-flex; }
+    .header-cta--nav { display: none; }
+  }
+
+  /* Móviles estrechos (≤ 389 px, 320 px o zoom 400 %): marca y botón compactos */
+  @media (max-width: 389.98px) {
+    .brand { gap: .5rem; }
+    .brand :global(.brand-mark) { width: 46px; }
+    .brand-name { font-size: 1.12rem; }
+    .brand-role { font-size: .6rem; letter-spacing: .22em; }
+    .nav-toggle { gap: .5rem; padding: .5rem .7rem .5rem .65rem; }
+  }
+  @media (max-width: 349.98px) {
+    .nav-toggle-label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+    .nav-toggle { width: 44px; padding: 0; justify-content: center; }
+  }
+
+  /* ---------- Escritorio (≥ 1160 px): navegación en línea ---------- */
+  @media (min-width: 1160px) {
+    .header-inner { gap: 1.5rem; }
+    .brand :global(.brand-mark) { width: 66px; }
+    .brand-name { font-size: 1.42rem; }
+    .nav-toggle { display: none; }
+    .site-nav,
+    .site-nav:popover-open {
+      position: static;
+      display: flex;
+      align-items: center;
+      gap: 1.75rem;
+      inset: auto;
+      width: auto;
+      height: auto;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: inherit;
+      overflow: visible;
+      opacity: 1;
+      translate: none;
+    }
+    .nav-list { display: flex; gap: 1.2rem; }
+    .nav-list a {
+      padding: .45rem 0;
+      font-size: .92rem;
+      white-space: nowrap;
+    }
+    .nav-list a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: .2rem;
+      height: 1px;
+      background: var(--hdr-accent);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform var(--dur) var(--ease-out);
+    }
+    .nav-list a[aria-current="page"]::after { transform: scaleX(1); }
+    .nav-meta { display: none; }
+  }
+  @media (min-width: 1160px) and (hover: hover) and (pointer: fine) {
+    .nav-list a:hover { color: var(--hdr-accent); }
+    .nav-list a:hover::after { transform: scaleX(1); }
+  }
+  @media (min-width: 1320px) {
+    .site-nav { gap: 2.25rem; }
+    .nav-list { gap: 1.9rem; }
+  }
+</style>

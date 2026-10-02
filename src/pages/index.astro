@@ -1,0 +1,80 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import Hero from '~/components/home/Hero.astro';
+import Credentials from '~/components/home/Credentials.astro';
+import FeatureTeaser from '~/components/home/FeatureTeaser.astro';
+import Manifesto from '~/components/home/Manifesto.astro';
+import ServicesSnapshot from '~/components/home/ServicesSnapshot.astro';
+import EvTeaser from '~/components/home/EvTeaser.astro';
+import MediaTeaser from '~/components/media/MediaTeaser.astro';
+import ContactCta from '~/components/contact/ContactCta.astro';
+import Icon from '~/components/ui/Icon.astro';
+import { url } from '~/lib/url';
+import onuBlanco from '~/assets/img/onu-blanco.jpg';
+import onuNegro from '~/assets/img/onu-negro.jpg';
+---
+
+<BaseLayout
+  title="Denisse González · Abogada de extranjería y derecho internacional"
+  description="Denisse González, abogada mexicana en España: asesoría migratoria y trámites de extranjería online y presenciales, derecho internacional y derechos humanos."
+  preloadFonts={['serif-600', 'serif-500i', 'sans-400']}
+>
+  <Hero>
+    <div class="home-credentials">
+      <Credentials />
+    </div>
+  </Hero>
+
+  <FeatureTeaser
+    id="conoceme"
+    eyebrow="Conóceme"
+    title="Una trayectoria entre el derecho, las fronteras y las personas."
+    image={onuBlanco}
+    imageAlt="Denisse González con blazer blanco junto a la bandera y el emblema de las Naciones Unidas"
+    imagePosition="50% 55%"
+  >
+    <p class="prose-lead">Soy Denisse González, abogada mexicana con formación jurídica internacional y experiencia profesional desarrollada entre México y España.</p>
+    <p>Hoy entiendo el derecho como una herramienta para conectar personas con oportunidades, instituciones con comunidades y derechos con realidades concretas.</p>
+    <Fragment slot="actions">
+      <a class="btn btn--primary" href={url('/conoceme/')}>
+        <span>Conóceme</span>
+        <Icon name="arrow" />
+      </a>
+      <a class="btn btn--link" href={url('/conoceme/#trayectoria')}>
+        <span>Ver mi trayectoria</span>
+        <Icon name="arrow" />
+      </a>
+    </Fragment>
+  </FeatureTeaser>
+
+  <Manifesto />
+  <ServicesSnapshot />
+
+  <FeatureTeaser
+    id="derechos-humanos"
+    eyebrow="Derechos humanos"
+    title="Los derechos humanos no pertenecen únicamente a los tratados. <em>Pertenecen a las personas.</em>"
+    image={onuNegro}
+    imageAlt="Denisse González con blazer negro junto a la bandera y el emblema de las Naciones Unidas"
+    imagePosition="70% 50%"
+    side="right"
+    frame="arch"
+  >
+    <p class="prose-lead">Mi compromiso con los derechos humanos nace de una convicción sencilla: conocer nuestros derechos es el primer paso para poder ejercerlos, defenderlos y exigir que sean respetados.</p>
+    <p>Mi objetivo es llevar los derechos humanos fuera de los textos jurídicos y acercarlos a las personas.</p>
+    <Fragment slot="actions">
+      <a class="btn btn--primary" href={url('/derechos-humanos/')}>
+        <span>Derechos humanos</span>
+        <Icon name="arrow" />
+      </a>
+    </Fragment>
+  </FeatureTeaser>
+
+  <EvTeaser />
+  <MediaTeaser />
+  <ContactCta />
+</BaseLayout>
+
+<style>
+  .home-credentials { margin-top: clamp(3rem, 6vw, 5rem); }
+</style>

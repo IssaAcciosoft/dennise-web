@@ -1,0 +1,31 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import Icon from '~/components/ui/Icon.astro';
+import { NAV } from '~/data/site';
+import { url } from '~/lib/url';
+---
+
+<BaseLayout title="Página no encontrada · Denisse González" description="La página que buscas no existe o ha cambiado de dirección." noindex>
+  <section class="not-found" aria-labelledby="nf-title">
+    <div class="container container--narrow">
+      <p class="eyebrow">Error 404</p>
+      <h1 class="page-title" id="nf-title">Esta página no existe.</h1>
+      <p class="lead">Puede que la dirección haya cambiado. Estas son las secciones de la web:</p>
+      <ul class="nf-links" role="list">
+        <li><a href={url('/')}>Inicio</a></li>
+        {NAV.map((item) => <li><a href={url(item.path)}>{item.label}</a></li>)}
+      </ul>
+      <a class="btn btn--primary" href={url('/')}>
+        <span>Volver al inicio</span>
+        <Icon name="arrow" />
+      </a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .not-found { padding-block: clamp(3rem, 2rem + 6vw, 7rem); }
+  .not-found .page-title { margin-bottom: 1.25rem; }
+  .nf-links { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; margin: 2rem 0 2.5rem; }
+  .nf-links a { display: inline-block; padding-block: .4rem; font-weight: 600; }
+</style>

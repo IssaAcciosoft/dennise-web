@@ -1,0 +1,135 @@
+---
+/**
+ * Campo de formulario accesible (label, pista, error con aria-describedby).
+ * La validación la hace src/scripts/lead-form.ts a partir de estos atributos
+ * (required, type, minlength, data-required-when, data-msg-*).
+ */
+type Option = { value: string; label?: string };
+type Group = { label: string; options: Option[] };
+
+interface Props {
+  /** Nombre interno (= clave de FIELD_LABELS en src/config/acciogest.ts). */
+  name: string;
+  label: string;
+  id: string;
+  type?: 'text' | 'email' | 'tel' | 'textarea' | 'select';
+  required?: boolean;
+  autocomplete?: string;
+  inputmode?: 'text' | 'email' | 'tel' | 'numeric';
+  hint?: string;
+  maxlength?: number;
+  minlength?: number;
+  rows?: number;
+  options?: (Option | Group)[];
+  emptyOption?: string;
+  /** Ocupa las dos columnas. */
+  full?: boolean;
+  /** Contador de caracteres (requiere maxlength). */
+  counter?: boolean;
+  /** Obligatorio solo si otro campo tiene ciertos valores: «contacto=Teléfono|WhatsApp». */
+  requiredWhen?: string;
+  msgRequired?: string;
+  msgRequiredWhen?: string;
+  msgEmail?: string;
+  msgTel?: string;
+  msgMinlength?: string;
+}
+
+const {
+  name,
+  label,
+  id,
+  type = 'text',
+  required = false,
+  autocomplete,
+  inputmode,
+  hint,
+  maxlength,
+  minlength,
+  rows = 5,
+  options = [],
+  emptyOption = 'Elige una opción…',
+  full = false,
+  counter = false,
+  requiredWhen,
+  msgRequired,
+  msgRequiredWhen,
+  msgEmail,
+  msgTel,
+  msgMinlength,
+} = Astro.props;
+
+const hintId = hint ? `${id}-hint` : undefined;
+const errorId = `${id}-error`;
+const describedBy = [hintId, errorId].filter(Boolean).join(' ');
+const isGroup = (o: Option | Group): o is Group => 'options' in o;
+const common = {
+  id,
+  name,
+  required,
+  'aria-describedby': describedBy,
+  'data-required-when': requiredWhen,
+  'data-msg-required': msgRequired,
+  'data-msg-required-when': msgRequiredWhen,
+  'data-msg-email': msgEmail,
+  'data-msg-tel': msgTel,
+  'data-msg-minlength': msgMinlength,
+};
+---
+
+<div class:list={['field', { 'field--full': full }]}>
+  <label for={id}>
+    {label}
+    {required ? <span class="req" aria-hidden="true">*</span> : !requiredWhen && <span class="opt">(opcional)</span>}
+  </label>
+  {
+    type === 'textarea' ? (
+      <textarea {...common} rows={rows} maxlength={maxlength} minlength={minlength} autocomplete={autocomplete} />
+    ) : type === 'select' ? (
+      <div class="select-wrap">
+        <select {...common} autocomplete={autocomplete}>
+          <option value="">{emptyOption}</option>
+          {options.map((o) =>
+            isGroup(o) ? (
+              <optgroup label={o.label}>
+                {o.options.map((opt) => (
+                  <option value={opt.value}>{opt.label ?? opt.value}</option>
+                ))}
+              </optgroup>
+            ) : (
+              <option value={o.value}>{o.label ?? o.value}</option>
+            ),
+          )}
+        </select>
+      </div>
+    ) : (
+      <input
+        {...common}
+        type={type}
+        autocomplete={autocomplete}
+        inputmode={inputmode}
+        maxlength={maxlength}
+        minlength={minlength}
+        spellcheck={type === 'email' || type === 'tel' ? 'false' : undefined}
+        autocapitalize={type === 'email' ? 'off' : undefined}
+      />
+    )
+  }
+  {
+    (hint || counter) && (
+      <div class="field-meta">
+        {hint ? <p class="field-hint" id={hintId}>{hint}</p> : <span />}
+        {counter && maxlength && (
+          <p class="field-count" aria-hidden="true">
+            <span data-count-for={name}>0</span> / {maxlength}
+          </p>
+        )}
+      </div>
+    )
+  }
+  <p class="field-error" id={errorId} data-error-for={name}></p>
+</div>
+
+<style>
+  .opt { margin-left: .4rem; color: var(--c-muted); font-size: .88em; font-weight: 400; }
+</style>

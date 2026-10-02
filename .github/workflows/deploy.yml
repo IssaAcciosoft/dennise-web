@@ -1,0 +1,55 @@
+# Publica la web en GitHub Pages con cada push a main (o a mano desde la pestaña Actions).
+# Requisitos (una sola vez): Settings → Pages → Source: «GitHub Actions».
+# Variables de repositorio (Settings → Secrets and variables → Actions → Variables):
+#   SITE_URL   URL pública definitiva, p. ej. https://www.dominio.es  (obligatoria al publicar)
+#   BASE_PATH  solo si se sirve en un subdirectorio, p. ej. /dennise-web (sin dominio propio)
+#   PUBLIC_ACCIOGEST_*  IDs de AccioGest (opcionales; si no se definen se usan los de
+#              src/config/acciogest.ts). Ver README → «AccioGest».
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Build with Astro
+        uses: withastro/action@v6
+        with:
+          node-version: 22
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+          BASE_PATH: ${{ vars.BASE_PATH }}
+          PUBLIC_ACCIOGEST_API: ${{ vars.PUBLIC_ACCIOGEST_API }}
+          PUBLIC_ACCIOGEST_FORM_SERVICIO: ${{ vars.PUBLIC_ACCIOGEST_FORM_SERVICIO }}
+          PUBLIC_ACCIOGEST_FORM_HISTORIA: ${{ vars.PUBLIC_ACCIOGEST_FORM_HISTORIA }}
+          PUBLIC_ACCIOGEST_FORM_CONTACTO: ${{ vars.PUBLIC_ACCIOGEST_FORM_CONTACTO }}
+          PUBLIC_ACCIOGEST_PLAN_BASICO: ${{ vars.PUBLIC_ACCIOGEST_PLAN_BASICO }}
+          PUBLIC_ACCIOGEST_PLAN_ESTANDAR: ${{ vars.PUBLIC_ACCIOGEST_PLAN_ESTANDAR }}
+          PUBLIC_ACCIOGEST_PLAN_PREMIUM: ${{ vars.PUBLIC_ACCIOGEST_PLAN_PREMIUM }}
+          PUBLIC_ACCIOGEST_BOOKING_PLUGIN_ID: ${{ vars.PUBLIC_ACCIOGEST_BOOKING_PLUGIN_ID }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

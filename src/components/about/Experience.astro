@@ -1,0 +1,91 @@
+---
+/** Experiencia profesional (docs/contenido.md → EXPERIENCIA PROFESIONAL). */
+import Icon, { type IconName } from '../ui/Icon.astro';
+
+const areas: { icon: IconName; title: string; text: string }[] = [
+  { icon: 'gavel', title: 'Litigación', text: 'Experiencia en materias civil, penal y de amparo, desarrollando estrategias jurídicas y representación de clientes.' },
+  { icon: 'globe', title: 'Derecho transnacional', text: 'Participación en asuntos y demandas internacionales durante mi etapa como Directora Legal México en Poplavsky International Law Offices.' },
+  { icon: 'plane', title: 'Movilidad internacional', text: 'Experiencia en asesoría legal relacionada con procedimientos migratorios y acompañamiento de personas extranjeras.' },
+  { icon: 'landmark', title: 'Asuntos institucionales', text: 'Experiencia en el área de Asuntos Jurídicos de la Embajada de México en España.' },
+  { icon: 'heart-hand', title: 'Derechos humanos', text: 'Participación en proyectos de educación, promoción y sensibilización en materia de derechos humanos.' },
+];
+---
+
+<section class="section section--white experience" id="experiencia" aria-labelledby="experience-title">
+  <div class="container">
+    <div class="experience-head">
+      <div>
+        <p class="eyebrow" data-reveal>Experiencia profesional</p>
+        <h2 class="section-title" id="experience-title" data-reveal>Experiencia jurídica construida desde la práctica.</h2>
+      </div>
+      <p class="lead" data-reveal>Mi experiencia profesional abarca diferentes áreas del ejercicio jurídico, desde litigación y representación legal hasta movilidad internacional y asesoría institucional.</p>
+    </div>
+
+    <ul class="experience-grid" role="list">
+      {
+        areas.map((a) => (
+          <li class="area-card" data-reveal>
+            <span class="area-icon"><Icon name={a.icon} /></span>
+            <h3 class="area-title">{a.title}</h3>
+            <p>{a.text}</p>
+          </li>
+        ))
+      }
+    </ul>
+
+    <p class="closing-line experience-close" data-reveal>Mi práctica parte de una idea: cada asunto necesita una estrategia jurídica, pero también una comprensión real del contexto de la persona que está detrás de él.</p>
+  </div>
+</section>
+
+<style>
+  .experience-head { display: grid; gap: 1.25rem; margin-bottom: clamp(2.5rem, 5vw, 4rem); }
+  .experience-head .section-title { max-width: 7.7em; }
+  .experience-head .lead { max-width: 34rem; }
+  .experience-grid { display: grid; gap: 1.25rem; }
+  .area-card {
+    position: relative;
+    padding: 2rem 1.75rem 2.1rem;
+    background: var(--c-ivory);
+    border-radius: var(--radius);
+    border: 1px solid var(--c-line);
+    transition: background-color var(--dur) var(--ease-hover), border-color var(--dur) var(--ease-hover);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .area-card:hover { background: var(--c-lavender); border-color: var(--c-line-strong); }
+  }
+  .area-icon {
+    display: grid;
+    place-items: center;
+    width: 3.4rem;
+    height: 3.4rem;
+    margin-bottom: 1.4rem;
+    border-radius: 50%;
+    border: 1px solid var(--c-line-strong);
+    color: var(--c-plum);
+    background: var(--c-white);
+  }
+  .area-icon :global(.icon) { width: 1.6rem; height: 1.6rem; }
+  .area-title {
+    margin-bottom: .6rem;
+    font-family: var(--ff-serif);
+    font-size: var(--fs-h4);
+    font-weight: 600;
+    line-height: 1.15;
+  }
+  .area-card p { color: var(--c-ink-soft); font-size: var(--fs-small); line-height: 1.6; }
+  .experience-close { margin-top: clamp(3rem, 6vw, 5rem); }
+
+  @media (min-width: 640px) {
+    .experience-grid { grid-template-columns: 1fr 1fr; }
+    .area-card:last-child { grid-column: 1 / -1; }
+  }
+  @media (min-width: 960px) {
+    .experience-head { grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); column-gap: 5rem; align-items: end; }
+  }
+  @media (min-width: 1024px) {
+    .experience-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1.5rem; }
+    .area-card,
+    .area-card:last-child { grid-column: span 2; }
+    .area-card:nth-child(n + 4) { grid-column: span 3; }
+  }
+</style>

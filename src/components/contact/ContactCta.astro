@@ -1,0 +1,81 @@
+---
+/** Banda final de contacto (inicio y páginas internas). */
+import { BOOKING_PATH, SITE, WA_TEXT, waLink, PHONE, TEL_LINK } from '~/data/site';
+import { url } from '~/lib/url';
+import Icon from '../ui/Icon.astro';
+
+interface Props {
+  title?: string;
+}
+const { title = 'Hablemos de tu caso.' } = Astro.props;
+---
+
+<section class="section contact-cta" aria-labelledby="contact-cta-title" data-wa-hide>
+  <div class="container contact-cta-grid">
+    <div>
+      <p class="eyebrow" data-reveal>Contacto</p>
+      <h2 class="section-title" id="contact-cta-title" data-reveal>{title}</h2>
+      <p class="lead contact-cta-lead" data-reveal>Asesorías online y presenciales.</p>
+      <p class="contact-cta-tagline" data-reveal>{SITE.tagline}</p>
+    </div>
+    <div class="contact-cta-actions" data-reveal>
+      <a class="btn btn--primary btn--lg btn--block" href={url(BOOKING_PATH)}>
+        <Icon name="calendar" />
+        <span>Reserva tu asesoría</span>
+      </a>
+      <a class="btn btn--ghost btn--lg btn--block" href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">
+        <Icon name="whatsapp" />
+        <span>Escríbeme por WhatsApp</span>
+      </a>
+      <a class="contact-cta-phone" href={TEL_LINK}>
+        <Icon name="phone" />
+        <span>{PHONE.display}</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact-cta {
+    background:
+      radial-gradient(40rem 30rem at 0% 100%, rgba(213, 193, 220, .6), transparent 70%),
+      var(--c-lavender);
+    overflow: clip;
+  }
+  .contact-cta-grid { display: grid; gap: 2.5rem; align-items: center; }
+  .contact-cta .section-title { margin-bottom: 1.25rem; }
+  .contact-cta-tagline {
+    margin-top: 1.5rem;
+    font-family: var(--ff-serif);
+    font-style: italic;
+    font-size: clamp(1.4rem, 1.2rem + .8vw, 1.8rem);
+    color: var(--c-plum);
+  }
+  .contact-cta-actions {
+    display: grid;
+    gap: .9rem;
+    padding: clamp(1.25rem, .8rem + 2vw, 2.25rem);
+    background: var(--c-white);
+    border-radius: var(--radius-l);
+    box-shadow: var(--shadow);
+  }
+  .contact-cta-phone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .6rem;
+    min-height: 48px;
+    color: var(--c-ink);
+    font-family: var(--ff-serif);
+    font-size: 1.45rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .contact-cta-phone :global(.icon) { color: var(--c-plum); }
+  @media (hover: hover) {
+    .contact-cta-phone:hover { color: var(--c-plum); }
+  }
+  @media (min-width: 900px) {
+    .contact-cta-grid { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); column-gap: 5rem; }
+  }
+</style>

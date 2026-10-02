@@ -1,0 +1,150 @@
+---
+/**
+ * Asesorías (precios online y presencial) desde src/data/servicios.json.
+ * - «Reservar» lleva a #reservar (widget de reservas, docs/integracion-acciogest.md §1).
+ * - «Solicitar información» abre el diálogo de solicitud (ServiceRequestDialog) con el servicio
+ *   preseleccionado (data-service-request = lead_value). Sin JavaScript abre WhatsApp.
+ */
+import { consultations, formatAmount } from '~/lib/services';
+import { waLink } from '~/data/site';
+import Icon, { type IconName } from '../ui/Icon.astro';
+
+const askText = (leadValue: string) => `Hola Denisse, me gustaría recibir información sobre: ${leadValue}.`;
+
+const modalityIcon: Record<string, IconName> = { online: 'monitor', presencial: 'handshake' };
+---
+
+<div class="consult-grid">
+  {
+    consultations.map((c) => (
+      <article class:list={['consult-card', { 'consult-card--wide': Boolean(c.description) }]} data-service-id={c.id} data-reveal>
+        <div class="consult-main">
+          <div class="consult-top">
+            <span class="consult-icon">
+              <Icon name={c.id.startsWith('orientacion') ? 'cap' : 'clock'} />
+            </span>
+            <h3 class="consult-title">{c.name}</h3>
+            <p class="consult-duration">{c.duration_label}</p>
+          </div>
+          {c.description && <p class="consult-desc">{c.description}</p>}
+        </div>
+        <div class="consult-side">
+          <dl class="price-pair">
+            {c.prices.map((p) => (
+              <div class="price-item">
+                <dt>
+                  <Icon name={modalityIcon[p.modality] ?? 'check'} />
+                  {p.label}
+                </dt>
+                <dd>
+                  <span class="price">{formatAmount(p.amount)}</span>
+                  <span class="currency">€</span>
+                </dd>
+              </div>
+            ))}
+          </dl>
+          <div class="consult-actions">
+            {c.bookable && (
+              <a class="btn btn--outline btn--block" href="#reservar" data-book-service={c.id} data-lead-value={c.lead_value}>
+                <Icon name="calendar" />
+                <span>
+                  Reservar <span class="visually-hidden">{`${c.name.toLowerCase()} de ${c.duration_label}`}</span>
+                </span>
+              </a>
+            )}
+            <a class="btn btn--link consult-ask" href={waLink(askText(c.lead_value))} target="_blank" rel="noopener" data-service-request={c.lead_value}>
+              <span>
+                Solicitar información<span class="visually-hidden">{` sobre ${c.name.toLowerCase()} de ${c.duration_label}`}</span>
+              </span>
+              <Icon name="arrow" />
+            </a>
+          </div>
+        </div>
+      </article>
+    ))
+  }
+</div>
+
+<style>
+  .consult-grid { display: grid; gap: 1.5rem; }
+  .consult-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: clamp(1.5rem, 1.2rem + 1vw, 2.1rem);
+    background: var(--c-white);
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius-l);
+    box-shadow: var(--shadow-s);
+    transition: box-shadow var(--dur) var(--ease-out), border-color var(--dur) var(--ease-hover);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .consult-card:hover { box-shadow: var(--shadow); border-color: var(--c-line-strong); }
+  }
+  .consult-main { display: grid; gap: 1.25rem; }
+  .consult-side { display: grid; gap: 1.5rem; margin-top: auto; }
+  .consult-actions { display: grid; justify-items: center; gap: .35rem; }
+  .consult-ask { font-size: .95rem; }
+  .consult-top { display: grid; grid-template-columns: auto 1fr; column-gap: 1rem; align-items: center; }
+  .consult-icon {
+    grid-row: span 2;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: var(--c-lavender);
+    color: var(--c-plum);
+  }
+  .consult-icon :global(.icon) { width: 1.5rem; height: 1.5rem; }
+  .consult-title {
+    font-family: var(--ff-serif);
+    font-size: var(--fs-h4);
+    font-weight: 600;
+    line-height: 1.12;
+  }
+  .consult-duration {
+    color: var(--c-plum);
+    font-size: .8rem;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+  .consult-desc { color: var(--c-ink-soft); font-size: var(--fs-small); line-height: 1.6; max-width: 26em; }
+
+  .price-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-top: 1px solid var(--c-line);
+    border-bottom: 1px solid var(--c-line);
+  }
+  .price-item { padding: 1rem 0 1.1rem; }
+  .price-item + .price-item { padding-left: 1.25rem; border-left: 1px solid var(--c-line); }
+  .price-item dt {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    color: var(--c-muted);
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+  .price-item dt :global(.icon) { width: 1rem; height: 1rem; color: var(--c-plum); }
+  .price-item dd { margin-top: .3rem; color: var(--c-plum); line-height: 1; }
+
+  /* Dos tarjetas por fila + la de orientación académica a lo ancho (v1: V3) */
+  @media (min-width: 640px) {
+    .consult-grid { grid-template-columns: 1fr 1fr; }
+    .consult-card--wide { grid-column: 1 / -1; }
+  }
+  @media (min-width: 1024px) {
+    .consult-card--wide {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      column-gap: 3rem;
+      align-items: center;
+    }
+    .consult-card--wide .consult-side { margin-top: 0; }
+  }
+</style>

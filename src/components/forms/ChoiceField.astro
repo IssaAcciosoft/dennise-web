@@ -1,0 +1,47 @@
+---
+/** Grupo de opciones (radio) accesible: fieldset + legend + error. */
+interface Props {
+  name: string;
+  legend: string;
+  id: string;
+  options: { value: string; label: string }[];
+  required?: boolean;
+  hint?: string;
+  msgRequired?: string;
+  full?: boolean;
+}
+const { name, legend, id, options, required = false, hint, msgRequired, full = true } = Astro.props;
+const hintId = hint ? `${id}-hint` : undefined;
+const errorId = `${id}-error`;
+const describedBy = [hintId, errorId].filter(Boolean).join(' ');
+---
+
+<fieldset class:list={['field', 'field--choice', { 'field--full': full }]}>
+  <legend>
+    {legend}
+    {required && <span class="req" aria-hidden="true">*</span>}
+  </legend>
+  {hint && <p class="field-hint field-hint--legend" id={hintId}>{hint}</p>}
+  <div class="choice-row">
+    {
+      options.map((o, i) => (
+        <label class="choice">
+          <input
+            type="radio"
+            name={name}
+            value={o.value}
+            required={required}
+            aria-describedby={describedBy}
+            data-msg-required={i === 0 ? msgRequired : undefined}
+          />
+          <span>{o.label}</span>
+        </label>
+      ))
+    }
+  </div>
+  <p class="field-error" id={errorId} data-error-for={name}></p>
+</fieldset>
+
+<style>
+  .field-hint--legend { margin-top: -.25rem; margin-bottom: .5rem; }
+</style>
