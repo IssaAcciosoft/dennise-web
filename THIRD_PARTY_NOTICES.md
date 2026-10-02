@@ -7,6 +7,8 @@ Componentes y recursos de terceros incluidos en la web, con su licencia.
 | Librería | Uso | Licencia |
 |---|---|---|
 | `ogl` | WebGL de la aurora y la galería (Empoderando Voces) | MIT |
+| `cobe` (Shu Ding) | Globo 3D de Conóceme (`src/components/about/Globe.tsx`) y su póster | MIT |
+| `driver.js` (Kamran Ahmed) | Visita guiada de Servicios (`src/scripts/tour.ts`, carga diferida) | MIT |
 
 ## Tipografías (autoalojadas con @fontsource)
 
@@ -26,6 +28,7 @@ componentes como tales. Cada archivo copiado conserva su cabecera de copyright/l
 | Aurora (adaptado: pausa fuera de pantalla, media resolución, 30 fps) | Backgrounds | `src/components/react-bits/Aurora/Aurora.tsx` |
 | CircularGallery (adaptado: sin Google Fonts, sin secuestrar rueda/toques, sin bucle en reposo) | Components | `src/components/react-bits/CircularGallery/CircularGallery.tsx` |
 | Magnet (adaptado: solo ratón, desplazamiento acotado, sin re-render por movimiento) | Animations | `src/components/react-bits/Magnet/Magnet.tsx` |
+| SpotlightCard (adaptado sin React: capa propia movida con transform, solo ratón, sin «reducir movimiento») | Components | `src/scripts/spotlight.ts` + `src/styles/global.css` §6 |
 
 Texto completo de la licencia: `src/components/react-bits/LICENSE.md`.
 

@@ -6,6 +6,7 @@ import Consultations from '~/components/services/Consultations.astro';
 import Autogestiona from '~/components/services/Autogestiona.astro';
 import BookingSlot from '~/components/services/BookingSlot.astro';
 import ServiceRequestDialog from '~/components/services/ServiceRequestDialog.astro';
+import ServicesTour from '~/components/services/ServicesTour.astro';
 import despacho from '~/assets/img/despacho.jpg';
 ---
 
@@ -20,10 +21,13 @@ import despacho from '~/assets/img/despacho.jpg';
         <p class="eyebrow">Servicios de extranjería</p>
         <h1 class="page-title" id="services-title">Un trámite puede cambiar tu vida.</h1>
         <p class="lead services-lead">Expertos en extranjería. Tu tranquilidad y confianza son nuestra prioridad. Contáctanos hoy y deja tu caso en manos profesionales.</p>
-        <ul class="pill-row" role="list">
-          <li class="pill"><Icon name="monitor" />Online</li>
-          <li class="pill"><Icon name="handshake" />Presencial</li>
-        </ul>
+        <div class="services-meta">
+          <ul class="pill-row" role="list">
+            <li class="pill"><Icon name="monitor" />Online</li>
+            <li class="pill"><Icon name="handshake" />Presencial</li>
+          </ul>
+          <ServicesTour />
+        </div>
       </div>
       <figure class="services-media">
         <div class="frame frame--offset">
@@ -54,6 +58,12 @@ import despacho from '~/assets/img/despacho.jpg';
   <ServiceRequestDialog slot="after" />
 </BaseLayout>
 
+<script>
+  // Foco de luz en las tarjetas de servicios y planes (solo ratón; global.css §6).
+  import { initSpotlight } from '~/scripts/spotlight';
+  initSpotlight();
+</script>
+
 <style>
   .services-hero {
     padding-block: clamp(2.5rem, 1.5rem + 4vw, 5.5rem) clamp(1.5rem, 1rem + 2vw, 3rem);
@@ -64,6 +74,7 @@ import despacho from '~/assets/img/despacho.jpg';
   .services-intro { display: grid; gap: 3rem; align-items: center; }
   .services-intro-copy .page-title { margin-bottom: 1.5rem; max-width: 8em; }
   .services-lead { max-width: 34rem; margin-bottom: 1.75rem; }
+  .services-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.25rem; }
   .services-media { position: relative; isolation: isolate; width: min(100% - 1.5rem, 320px); justify-self: center; }
   .services-media :global(img) { width: 100%; border-radius: var(--radius); }
   .frame--offset::before {

@@ -17,7 +17,7 @@ const modalityIcon: Record<string, IconName> = { online: 'monitor', presencial: 
 <div class="consult-grid">
   {
     consultations.map((c) => (
-      <article class:list={['consult-card', { 'consult-card--wide': Boolean(c.description) }]} data-service-id={c.id} data-reveal>
+      <article class:list={['consult-card', { 'consult-card--wide': Boolean(c.description) }]} data-service-id={c.id} data-reveal data-spotlight>
         <div class="consult-main">
           <div class="consult-top">
             <span class="consult-icon">

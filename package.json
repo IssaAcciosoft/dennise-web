@@ -13,7 +13,8 @@
     "preview": "astro preview",
     "check": "astro check",
     "icons": "node scripts/generate-icons.mjs",
-    "astro": "astro"
+    "astro": "astro",
+    "globe-poster": "node scripts/render-globe-poster.mjs"
   },
   "dependencies": {
     "@astrojs/react": "^7.0.0",

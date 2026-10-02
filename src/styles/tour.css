@@ -1,0 +1,149 @@
+/* Visita guiada de /servicios/ (driver.js): estilos de marca. Se carga solo al pulsar
+   «¿Te guío?» (src/scripts/tour.ts), junto con driver.css. Usa los tokens de global.css.
+   Movimiento (Emil Kowalski): la tarjeta entra en 200 ms con ease-out desde scale(.97), con
+   el origen en el lado del elemento resaltado; el velo, 200 ms; nada de ease-in. */
+
+.driver-popover.dg-tour {
+  --driver-popover-font-family: var(--ff-sans);
+  box-sizing: border-box;
+  min-width: min(17.5rem, calc(100vw - 2rem));
+  max-width: min(23rem, calc(100vw - 2rem));
+  padding: 1.25rem 1.25rem 1rem;
+  border-radius: 18px;
+  background: var(--c-white);
+  color: var(--c-ink);
+  font-family: var(--ff-sans);
+  box-shadow: 0 0 0 1px rgba(110, 29, 122, .1), 0 2px 6px rgba(44, 10, 50, .08), 0 28px 60px -20px rgba(44, 10, 50, .45);
+  transform-origin: 50% 0;
+}
+
+/* Entrada (la clase driver-fade la pone driver.js cuando hay animación) */
+.driver-fade .driver-popover.dg-tour {
+  animation: dg-tour-in 200ms var(--ease-out) both;
+}
+.driver-fade .driver-overlay {
+  animation: dg-tour-fade 200ms var(--ease-out) both;
+}
+@keyframes dg-tour-in { from { opacity: 0; transform: translateY(4px) scale(.97); } }
+@keyframes dg-tour-fade { from { opacity: 0; } }
+
+/* Origen según el lado: la flecha en el borde de arriba = tarjeta debajo del elemento, etc. */
+.dg-tour:has(.driver-popover-arrow-side-bottom) { transform-origin: 50% 0; }
+.dg-tour:has(.driver-popover-arrow-side-top) { transform-origin: 50% 100%; }
+.dg-tour:has(.driver-popover-arrow-side-left) { transform-origin: 100% 50%; }
+.dg-tour:has(.driver-popover-arrow-side-right) { transform-origin: 0 50%; }
+.dg-tour:has(.driver-popover-arrow-side-over),
+.dg-tour:has(.driver-popover-arrow-none) { transform-origin: 50% 50%; }
+
+
+.dg-tour .driver-popover-title {
+  padding-right: 2.25rem;
+  color: var(--c-ink);
+  font-family: var(--ff-serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.12;
+  text-wrap: balance;
+}
+.dg-tour .driver-popover-description {
+  margin-top: .55rem;
+  color: var(--c-ink-soft);
+  font-size: .98rem;
+  line-height: 1.55;
+  font-variant-numeric: lining-nums;
+  text-wrap: pretty;
+}
+.dg-tour .driver-popover-title[style*="block"] + .driver-popover-description { margin-top: .55rem; }
+
+.dg-tour .driver-popover-close-btn {
+  top: .4rem;
+  right: .4rem;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: var(--c-muted);
+  transition: background-color var(--dur-fast) var(--ease-hover), color var(--dur-fast) var(--ease-hover), transform var(--dur-press) var(--ease-out);
+}
+.dg-tour .driver-popover-close-btn:active { transform: scale(var(--press-scale)); }
+.dg-tour .driver-popover-close-btn:focus-visible { outline: 3px solid var(--c-plum); outline-offset: 0; }
+@media (hover: hover) and (pointer: fine) {
+  .dg-tour .driver-popover-close-btn:hover { background: var(--c-lavender); color: var(--c-plum-800); }
+}
+
+.dg-tour .driver-popover-footer {
+  flex-wrap: wrap;
+  gap: .6rem .75rem;
+  margin-top: 1.15rem;
+}
+.dg-tour .driver-popover-progress-text {
+  color: var(--c-plum);
+  font-size: .74rem;
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+.dg-tour .driver-popover-navigation-btns { gap: .5rem; }
+.dg-tour .driver-popover-navigation-btns button + button { margin-left: 0; }
+
+.dg-tour .driver-popover-footer-btn,
+.dg-tour .dg-tour-cta {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: .55rem 1.1rem;
+  border: 1.5px solid rgba(110, 29, 122, .35);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--c-plum);
+  font-family: var(--ff-sans);
+  font-size: .92rem;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: .02em;
+  text-shadow: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--dur-fast) var(--ease-hover),
+    border-color var(--dur-fast) var(--ease-hover),
+    color var(--dur-fast) var(--ease-hover),
+    transform var(--dur-press) var(--ease-out);
+}
+.dg-tour .driver-popover-next-btn,
+.dg-tour .dg-tour-cta {
+  border-color: var(--c-plum);
+  background: var(--c-plum);
+  color: #fff;
+}
+/* En el último paso la acción principal es «Solicitar información»: «Terminar» pasa a secundario */
+.dg-tour:has(.dg-tour-cta) .driver-popover-next-btn {
+  border-color: rgba(110, 29, 122, .35);
+  background: transparent;
+  color: var(--c-plum);
+}
+.dg-tour .dg-tour-cta { margin-top: 1rem; width: 100%; }
+.dg-tour .driver-popover-footer-btn:active,
+.dg-tour .dg-tour-cta:active { transform: scale(var(--press-scale)); }
+.dg-tour .driver-popover-footer-btn:focus-visible,
+.dg-tour .dg-tour-cta:focus-visible { outline: 3px solid var(--c-plum); outline-offset: 3px; }
+.dg-tour .driver-popover-footer .driver-popover-btn-disabled { opacity: .4; }
+@media (hover: hover) and (pointer: fine) {
+  .dg-tour .driver-popover-prev-btn:hover,
+  .dg-tour:has(.dg-tour-cta) .driver-popover-next-btn:hover { background: var(--c-lavender); border-color: var(--c-plum); }
+  .dg-tour .driver-popover-next-btn:hover,
+  .dg-tour .dg-tour-cta:hover { background: var(--c-plum-700); border-color: var(--c-plum-700); color: #fff; }
+}
+
+/* Movimiento reducido: sin escala ni desplazamiento, solo un fundido corto. */
+@media (prefers-reduced-motion: reduce) {
+  .driver-popover.dg-tour { animation: dg-tour-fade 150ms var(--ease-out) both; }
+}
+
+/* Durante la visita, el botón flotante de WhatsApp se aparta (menos ruido sobre el velo). */
+html[data-tour-active] .wa-float { visibility: hidden; }

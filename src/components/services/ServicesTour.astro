@@ -1,0 +1,88 @@
+---
+/**
+ * «¿Te guío?» — botón discreto que abre la visita guiada de /servicios/ (src/scripts/tour.ts).
+ * - Está en el HTML desde el principio (sin saltos de diseño) y nunca arranca solo.
+ * - Sin JavaScript es un enlace a #asesorias. Con JavaScript, botón: al pulsarlo se descargan
+ *   driver.js y su CSS (import() dinámico); al pasar el ratón o enfocarlo se precargan, para
+ *   que la visita empiece al instante.
+ */
+import Icon from '../ui/Icon.astro';
+---
+
+<a class="tour-btn" href="#asesorias" data-tour-start>
+  <span class="tour-btn-icon"><Icon name="route" /></span>
+  <span>¿Te guío?</span>
+</a>
+
+<script>
+  const btn = document.querySelector<HTMLElement>('[data-tour-start]');
+  if (btn) {
+    btn.setAttribute('role', 'button');
+    btn.setAttribute('aria-haspopup', 'dialog');
+    btn.setAttribute('aria-label', '¿Te guío? Visita guiada por los servicios');
+    let loader: Promise<typeof import('~/scripts/tour')> | null = null;
+    const load = () => (loader ??= import('~/scripts/tour'));
+    const start = async (e: Event) => {
+      const me = e as MouseEvent;
+      if (me.metaKey || me.ctrlKey || me.shiftKey || me.button === 1) return;
+      e.preventDefault();
+      btn.setAttribute('aria-busy', 'true');
+      try {
+        (await load()).startTour(btn);
+      } catch {
+        loader = null;
+        document.getElementById('asesorias')?.scrollIntoView(); // sin red: al menos lleva a las asesorías
+      } finally {
+        btn.removeAttribute('aria-busy');
+      }
+    };
+    btn.addEventListener('click', start);
+    btn.addEventListener('keydown', (e) => {
+      if (e.key === ' ') start(e);
+    });
+    btn.addEventListener('pointerenter', () => void load().catch(() => (loader = null)), { once: true });
+    btn.addEventListener('focus', () => void load().catch(() => (loader = null)), { once: true });
+  }
+</script>
+
+<style>
+  .tour-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    min-height: 44px;
+    padding: .45rem 1.05rem .45rem .5rem;
+    border-radius: var(--radius-pill);
+    background: var(--c-lavender);
+    color: var(--c-plum-800);
+    font-size: .9rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color var(--dur-fast) var(--ease-hover),
+      color var(--dur-fast) var(--ease-hover),
+      transform var(--dur-press) var(--ease-out);
+  }
+  .tour-btn:hover { color: var(--c-plum-800); }
+  .tour-btn:active { transform: scale(var(--press-scale)); }
+  .tour-btn:focus-visible { border-radius: var(--radius-pill); }
+  .tour-btn[aria-busy="true"] { cursor: progress; }
+  .tour-btn-icon {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--c-white);
+    color: var(--c-plum);
+    box-shadow: 0 1px 2px rgba(44, 10, 50, .08);
+  }
+  .tour-btn-icon :global(.icon) { width: 1.05rem; height: 1.05rem; }
+  @media (hover: hover) and (pointer: fine) {
+    .tour-btn:hover { background: var(--c-lavender-200); }
+    .tour-btn:hover .tour-btn-icon :global(.icon) { transform: translateX(1px); }
+    .tour-btn-icon :global(.icon) { transition: transform var(--dur) var(--ease-out); }
+  }
+</style>

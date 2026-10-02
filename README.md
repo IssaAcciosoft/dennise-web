@@ -15,6 +15,7 @@ npm run build        # compila la web estática en dist/
 npm run preview      # sirve dist/ para revisarla
 npm run check        # comprobación de tipos y de los componentes (astro check)
 npm run icons        # regenera los iconos PNG a partir del logotipo (revisar el resultado)
+npm run globe-poster # regenera el póster del globo de Conóceme (necesita Playwright + Chromium)
 ```
 
 Para probar la versión compilada «como en producción» (con gzip): `npx serve dist`.
@@ -28,11 +29,12 @@ public/                     Archivos que se copian tal cual: favicon.svg, iconos
 scripts/
   generate-icons.mjs        Genera favicon-32, apple-touch-icon (180), icon-192/512 y maskable
   icon-source.svg           Fuente de los iconos cuadrados
+  render-globe-poster.mjs   Póster del globo (src/assets/globe-poster.png) con cobe y la misma vista
 src/
   pages/                    Una página por archivo (la URL sale del nombre)
     index.astro             Inicio
-    conoceme.astro          Conóceme · Experiencia · Mi trayectoria · (slot del globo 3D)
-    servicios.astro         Asesorías · Programa Autogestiona · #reservar (reservas AccioGest)
+    conoceme.astro          Conóceme · Experiencia · Mi trayectoria · globo 3D
+    servicios.astro         Asesorías · Programa Autogestiona · #reservar · visita guiada
     derechos-humanos.astro  Derechos humanos · Summit · cita · Mi compromiso · En medios
     empoderando-voces.astro Empoderando Voces + formulario «Cuéntame tu historia»
     contacto.astro          WhatsApp, teléfono, redes y formulario de contacto
@@ -48,6 +50,8 @@ src/
     seo/                    Fonts (tipografías autoalojadas + fallbacks), JsonLd
     ui/                     Icon, Photo (imágenes optimizadas), SocialLinks
     home/ about/ services/ media/ contact/ ev/   Secciones de cada página
+                            (about/Globe.tsx + globe-config.ts + GlobeSlot.astro: globo 3D;
+                            services/ServicesTour.astro: botón «¿Te guío?»)
     forms/                  LeadForm, FormDialog, Field, ChoiceField (formularios de AccioGest)
     islands/                Islas de React (hooks.ts: reducir movimiento / pausar fuera de pantalla)
     react-bits/             Componentes copiados de React Bits (con su licencia): Aurora,
@@ -60,9 +64,12 @@ src/
   config/acciogest.ts       IDs de AccioGest, etiquetas de los campos, versión de la política
   lib/                      Utilidades (rutas con base, catálogo de servicios)
   scripts/                  JS del cliente: diálogos (dialog.ts), cliente de AccioGest
-                            (acciogest.ts) y controlador de formularios (lead-form.ts)
+                            (acciogest.ts), controlador de formularios (lead-form.ts),
+                            apariciones (reveal.ts), visita guiada (tour.ts, diferida) y
+                            foco de luz de las tarjetas (spotlight.ts)
   styles/global.css         Tokens de diseño (colores, tipografía, espaciado, radios,
                             sombras, curvas y duraciones de animación) y estilos comunes
+  styles/tour.css           Estilos de marca de la visita guiada (se cargan solo al abrirla)
   assets/                   Fotos originales (se optimizan al compilar), logotipo, póster del globo
 docs/                       Textos de la cliente (contenido.md) e integración con AccioGest
 _originales/                Originales sin tocar: NO se publican (no están en src/ ni public/)
@@ -156,6 +163,13 @@ Criterios de Emil Kowalski, con tokens en `src/styles/global.css` §1 (`--ease-*
   IntersectionObserver (`src/scripts/reveal.ts`), escalonado 50 ms. Sin JavaScript todo se ve:
   el script solo oculta lo que al cargar está por debajo de la pantalla; nunca el contenido
   inicial ni el LCP, y lo que recibe el foco aparece al instante.
+- **Títulos de sección** (inspirado en React Bits · BlurText, solo CSS): los `.section-title`
+  con `data-reveal` suben 0,3 em y se enfocan desde un desenfoque leve (760 ms, `ease-out`).
+  Mismas reglas: solo los que estaban bajo la pantalla; nunca el título principal ni el LCP.
+- **Foco de luz en tarjetas** (React Bits · SpotlightCard, sin React: `src/scripts/spotlight.ts`):
+  en `/servicios/`, una luz ciruela muy tenue sigue al ratón dentro de las tarjetas de asesorías
+  y planes (`data-spotlight`, blanca en el plan destacado). Capa propia movida con `transform`,
+  un cálculo por fotograma, solo con ratón fino y sin «reducir movimiento».
 - **Movimiento reducido:** nada se desplaza ni escala; quedan fundidos cortos de opacidad
   (apariciones, diálogos, menú, transiciones entre páginas). WebGL no se monta.
 
@@ -173,7 +187,18 @@ View Transitions entre documentos **solo con CSS** (`@view-transition { navigati
   (440 ms, `ease-in-out`, con un leve desenfoque que disimula el fundido). Al llegar desde el
   inicio, la página marca el tipo `ev-morph` (evento `pagereveal`) y el inicio se queda un
   instante para que se vea crecer la tarjeta.
-- Con «reducir movimiento» no hay desplazamientos ni cambios de tamaño: solo fundidos.
+- **Retrato compartido inicio ↔ Conóceme** (`view-transition-name: portrait`, 420 ms,
+  `ease-in-out`): la foto viaja y cambia de tamaño hasta su sitio en la otra página. El nombre
+  lo pone un script diminuto de `BaseLayout` (`pageswap` / `pagereveal`) solo en la foto
+  `.vt-portrait` que más se ve en pantalla en cada lado (el retrato del hero o la foto de la
+  tarjeta «Conóceme» del inicio ↔ la foto de la cabecera de Conóceme) y solo entre esas dos
+  páginas; si no se ve, transición normal. Si es la misma foto (tarjeta → Conóceme), fundido
+  cruzado sincronizado (tipo `portrait-same`: parece una sola imagen); si son distintas, la
+  anterior se desenfoca un poco mientras aparece la nueva.
+- **Página actual en la navegación** (escritorio): la línea bajo el enlace activo
+  (`.nav-current`, `view-transition-name: nav-current`) se desliza al enlace de la nueva página.
+- Con «reducir movimiento» no hay desplazamientos ni cambios de tamaño (el retrato no se nombra):
+  solo fundidos. Navegadores sin View Transitions: navegación normal, sin errores.
 - Las páginas internas se precargan al pasar el ratón (Speculation Rules), así la transición es
   casi instantánea.
 
@@ -199,6 +224,46 @@ Cormorant en cursiva + Barlow Condensed. Cabecera en su variante oscura translú
 - El gran botón y el de la portada abren el formulario de AccioGest (`StoryDialog`, sin cambios
   en su lógica); sin JavaScript, WhatsApp. `/empoderando-voces/#cuentame` lo abre directamente.
 
+## Globo 3D (Conóceme, tras «Mi trayectoria»)
+
+`src/components/about/GlobeSlot.astro` + isla `Globe.tsx` (cobe 2, WebGL, ~8 KB gzip con el
+componente) + `globe-config.ts` (lugares, vista, colores y proyección compartidos).
+
+- México (Ciudad de México), España (Madrid) y Nueva York en ciruela sobre un globo marfil y
+  lavanda, unidos por dos arcos; etiquetas HTML que siguen a los puntos; pie
+  «México · España · Nueva York».
+- **Póster** (`src/assets/globe-poster.png`, AVIF/WebP diferido): el mismo globo renderizado
+  con cobe y la misma vista (`npm run globe-poster`), así que al hidratar no hay salto. Es lo
+  que se ve antes de hidratar, sin JavaScript, sin WebGL y con «reducir movimiento».
+- Caja cuadrada reservada (sin CLS); `client:visible` con 240 px de margen; contexto WebGL en
+  un momento ocioso; ≤ 2× de densidad; ~30 fps en reposo; se detiene fuera de pantalla y con
+  la pestaña oculta. cobe reescribe una `<style>` en cada fotograma (para CSS Anchor
+  Positioning, que no usamos): se retira del documento para no recalcular estilos.
+- Movimiento: vaivén lento (±14°, 28 s) que mantiene los tres lugares a la vista; se puede
+  girar arrastrando en horizontal (inercia con rozamiento) y vuelve solo a su vista; en táctil
+  el gesto vertical sigue desplazando la página.
+- Accesibilidad: la caja es `role="img"` con texto alternativo; lienzo y etiquetas, decorativos.
+- Si cambias `globe-config.ts`, regenera el póster y revísalo.
+
+## Visita guiada (`/servicios/`, «¿Te guío?»)
+
+Botón discreto en la cabecera de Servicios (`ServicesTour.astro`). Nunca arranca sola; sin
+JavaScript es un enlace a `#asesorias`. Al pulsarlo se descarga `src/scripts/tour.ts` con
+driver.js y su CSS (≈ 11,5 KB gzip, todo en ese chunk diferido; se precarga al pasar el ratón o
+enfocar el botón).
+
+- Pasos, en el orden de la página: asesorías → online o presencial → orientación académica →
+  Programa Autogestiona (trámites, planes, «¿Cómo funciona?», «Todos los planes incluyen») →
+  Reserva tu asesoría → «¿Tienes dudas?» con el botón «Solicitar información» (abre el diálogo
+  de solicitud con el evento `dg:service-request`).
+- Textos solo con hechos de `docs/contenido.md` y de la página (precios desde
+  `servicios.json`). Si cambian los pasos de «¿Cómo funciona?» (`Autogestiona.astro`),
+  revisar el texto de ese paso en `tour.ts`.
+- Teclado: el foco va a «Siguiente», Tab se queda en el paso, ← → navegan, Esc cierra y el foco
+  vuelve a «¿Te guío?». Estilos de marca en `src/styles/tour.css` (tarjeta 200 ms `ease-out`
+  desde 0,97 con origen en el lado del elemento; foco del escenario 300 ms; con «reducir
+  movimiento», sin desplazamiento suave ni animación).
+
 ## Islas de React
 
 - Hidratar **siempre** con `client:visible`, `client:idle` o `client:media` (nunca
@@ -215,7 +280,7 @@ Cormorant en cursiva + Barlow Condensed. Cabecera en su variante oscura translú
 | Performance | ≥ 95 en todas las páginas |
 | Accessibility / Best Practices / SEO | 100 |
 | CLS | < 0,05 |
-| JS inicial en el inicio | ≤ ~60 KB gzip (hoy < 1 KB) |
+| JS inicial en el inicio | ≤ ~60 KB gzip (hoy ~1,6 KB; Conóceme ~3,3 KB; Servicios ~9,7 KB) |
 
 Cómo se consigue: CSS en línea (sin hojas que bloqueen el renderizado), tipografías
 autoalojadas con precarga y *fallbacks* con métricas ajustadas (anchos de línea en `em`, nunca
@@ -272,6 +337,6 @@ De la cliente (ver `docs/contenido.md` §7):
 10. Validar la transcripción del artículo «8 de marzo — Voces que se unen».
 11. Dominio definitivo (`SITE_URL`).
 
-Técnico (siguientes desarrollos): globo 3D en Conóceme (`GlobeSlot.astro`), visita guiada y
-más detalles de React Bits. (Hecho: sistema de movimiento, rediseño de Empoderando Voces y su
-transición desde el inicio.)
+Técnico: hecho el sistema de movimiento, el rediseño de Empoderando Voces y su transición desde
+el inicio, el globo 3D de Conóceme, el retrato compartido inicio ↔ Conóceme, la visita guiada
+de Servicios y los detalles de React Bits (foco de luz en tarjetas, títulos que se enfocan).

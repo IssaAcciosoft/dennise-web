@@ -37,7 +37,7 @@ const steps = [
       <p class="eyebrow">Planes&nbsp;· {CATALOG.tax_label}</p>
       <h2 class="block-title" id="autogestiona-title">{program.name}</h2>
     </div>
-    <div class="tramites" data-reveal>
+    <div class="tramites" data-reveal data-tour="tramites">
       <h3 class="tramites-title">{program.procedures_title}:</h3>
       <ul class="chip-list" role="list">
         {program.procedures.map((p) => <li>{p}</li>)}
@@ -45,10 +45,10 @@ const steps = [
     </div>
   </div>
 
-  <ul class="plan-grid" role="list">
+  <ul class="plan-grid" role="list" data-tour="planes">
     {
       program.plans.map((plan) => (
-        <li class:list={['plan-card', { 'plan-card--featured': plan.featured }]} data-plan-key={plan.form_key} data-reveal>
+        <li class:list={['plan-card', { 'plan-card--featured': plan.featured }]} data-plan-key={plan.form_key} data-reveal data-spotlight={plan.featured ? 'dark' : ''}>
           <h3 class="plan-name">{plan.name}</h3>
           <p class="plan-price">
             <span class="price">{formatAmount(plan.amount)}</span>
@@ -88,7 +88,7 @@ const steps = [
     <a href={url('/condiciones-contratacion/')}>condiciones de contratación</a>.
   </p>
 
-  <div class="plan-steps" data-reveal>
+  <div class="plan-steps" data-reveal data-tour="como-funciona">
     <h3 class="plan-steps-title">¿Cómo funciona?</h3>
     <ol class="steps" role="list">
       {
@@ -102,7 +102,7 @@ const steps = [
     </ol>
   </div>
 
-  <div class="plan-includes" data-reveal>
+  <div class="plan-includes" data-reveal data-tour="incluye">
     <h3 class="plan-includes-title">{program.includes_title}</h3>
     <ul class="check-list" role="list">
       {

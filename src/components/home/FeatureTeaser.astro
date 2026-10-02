@@ -17,8 +17,10 @@ interface Props {
   side?: 'left' | 'right';
   frame?: 'tall' | 'arch';
   tone?: 'white' | 'ivory';
+  /** Foto compartida con la página de destino en la transición entre páginas (global.css §8). */
+  portrait?: boolean;
 }
-const { id, eyebrow, title, image, imageAlt, imagePosition, side = 'left', frame = 'tall', tone = 'white' } = Astro.props;
+const { id, eyebrow, title, image, imageAlt, imagePosition, side = 'left', frame = 'tall', tone = 'white', portrait = false } = Astro.props;
 const headingId = `${id ?? 'teaser'}-title`;
 ---
 
@@ -26,7 +28,14 @@ const headingId = `${id ?? 'teaser'}-title`;
   <div class="container teaser-grid">
     <figure class="teaser-media" data-reveal="photo">
       <div class:list={['frame', `frame--${frame}`]}>
-        <Photo src={image} alt={imageAlt} widths={[360, 540, 720, 900]} sizes="(min-width: 960px) 40vw, (min-width: 600px) 60vw, 90vw" position={imagePosition} />
+        <Photo
+          src={image}
+          alt={imageAlt}
+          widths={[360, 540, 720, 900]}
+          sizes="(min-width: 960px) 40vw, (min-width: 600px) 60vw, 90vw"
+          position={imagePosition}
+          pictureClass={portrait ? 'vt-portrait' : undefined}
+        />
       </div>
     </figure>
     <div class="teaser-copy">

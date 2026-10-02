@@ -118,8 +118,10 @@
   --dur-exit: 150ms;        /* salidas */
   --dur-page: 280ms;        /* transición entre páginas */
   --dur-morph: 440ms;       /* tarjeta de Empoderando Voces → cabecera de su página */
+  --dur-portrait: 420ms;    /* retrato del inicio ↔ foto de Conóceme (elemento compartido) */
   --dur-reveal: 560ms;      /* aparición al hacer scroll (contenido, no UI) */
   --dur-reveal-photo: 820ms;/* fotos: clip-path inset (entrada → ease-out) */
+  --dur-reveal-title: 760ms;/* títulos de sección: se enfocan desde un leve desenfoque */
   --press-scale: .97;
   --reveal-y: 14px;
   --stagger: 50ms;
@@ -506,6 +508,32 @@ main:focus { outline: none; }
   color: #fff;
 }
 
+/* Tarjetas con foco de luz (React Bits · SpotlightCard, sin React: src/scripts/spotlight.ts).
+   Una luz ciruela muy tenue sigue al ratón dentro de la tarjeta; solo con ratón fino y sin
+   «reducir movimiento» (sin script no hay capa). Se mueve con transform en su propia capa. */
+[data-spotlight] {
+  --spotlight-color: rgba(110, 29, 122, .085);
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+}
+[data-spotlight="dark"] { --spotlight-color: rgba(255, 255, 255, .13); }
+.spotlight {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: -1;
+  width: 30rem;
+  height: 30rem;
+  margin: -15rem 0 0 -15rem;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--spotlight-color), transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms var(--ease-hover);
+}
+[data-spotlight]:hover > .spotlight { opacity: 1; transition-duration: 320ms; }
+
 /* 7. Formularios y diálogos (compartidos) ================================= */
 dialog { color: inherit; }
 
@@ -740,12 +768,62 @@ html:active-view-transition-type(ev-morph)::view-transition-group(site-header) {
   animation-delay: calc(var(--dur-morph) * .3);
 }
 
+/* Retrato compartido entre el inicio y Conóceme («portrait»). El nombre lo pone el script de
+   BaseLayout (pageswap/pagereveal) SOLO en la foto que se ve en pantalla en cada lado: la
+   del hero o la de «Conóceme» del inicio ↔ la foto de la cabecera de Conóceme. La foto se
+   desplaza y cambia de tamaño hasta su sitio (movimiento en pantalla → ease-in-out).
+   - Misma foto (tarjeta «Conóceme» del inicio): fundido cruzado sincronizado (plus-lighter),
+     se percibe como una sola imagen que viaja (tipo «portrait-same»).
+   - Fotos distintas (retrato del hero → foto de la ONU): la anterior se desenfoca un poco y se
+     funde mientras la nueva aparece (Emil: el desenfoque disimula el fundido). */
+::view-transition-group(portrait) {
+  animation-duration: var(--dur-portrait);
+  animation-timing-function: var(--ease-in-out);
+}
+::view-transition-old(portrait),
+::view-transition-new(portrait) {
+  height: 100%;
+  object-fit: cover;
+  mix-blend-mode: normal;
+}
+::view-transition-old(portrait) {
+  animation: vt-portrait-out calc(var(--dur-portrait) * .6) var(--ease-out) both;
+}
+::view-transition-new(portrait) {
+  animation: vt-fade-in calc(var(--dur-portrait) * .55) var(--ease-out) calc(var(--dur-portrait) * .18) both;
+}
+@keyframes vt-portrait-out { to { opacity: 0; filter: blur(4px); } }
+html:active-view-transition-type(portrait-same)::view-transition-old(portrait),
+html:active-view-transition-type(portrait-same)::view-transition-new(portrait) {
+  mix-blend-mode: plus-lighter;
+  animation-duration: var(--dur-portrait);
+  animation-delay: 0s;
+  animation-timing-function: linear;
+}
+html:active-view-transition-type(portrait-same)::view-transition-old(portrait) { animation-name: vt-out; }
+html:active-view-transition-type(portrait-same)::view-transition-new(portrait) { animation-name: vt-fade-in; }
+::view-transition-old(portrait):only-child { animation: vt-out var(--dur-exit) var(--ease-out) both; }
+::view-transition-new(portrait):only-child { animation: vt-in var(--dur-page) var(--ease-out) both; }
+
+/* Indicador de la página actual en la navegación de escritorio (Header: .nav-current): la
+   línea se desliza de un enlace al siguiente en lugar de apagarse y encenderse. */
+::view-transition-group(nav-current) {
+  animation-duration: var(--dur-page);
+  animation-timing-function: var(--ease-in-out);
+}
+::view-transition-old(nav-current),
+::view-transition-new(nav-current) { height: 100%; }
+::view-transition-old(nav-current):only-child { animation: vt-out var(--dur-exit) var(--ease-out) both; }
+::view-transition-new(nav-current):only-child { animation: vt-fade-in var(--dur-page) var(--ease-out) both; }
+
 /* Movimiento reducido: nada se desplaza ni cambia de tamaño; solo fundidos de opacidad. */
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*) { animation-name: none !important; }
   ::view-transition-new(root) { animation-name: vt-fade-in !important; }
   ::view-transition-old(ev-panel) { animation: vt-out var(--dur-exit) var(--ease-out) both !important; }
   ::view-transition-new(ev-panel) { animation: vt-fade-in var(--dur-page) var(--ease-out) both !important; }
+  ::view-transition-old(portrait) { animation: vt-out var(--dur-exit) var(--ease-out) both !important; }
+  ::view-transition-new(portrait) { animation: vt-fade-in var(--dur-page) var(--ease-out) both !important; }
 }
 
 /* 9. Aparición al hacer scroll y movimiento reducido ====================== */
@@ -771,7 +849,14 @@ html:active-view-transition-type(ev-morph)::view-transition-group(site-header) {
 [data-reveal="photo"][data-reveal-state="in"] img {
   animation: reveal-settle var(--dur-reveal-photo) var(--ease-out) var(--reveal-delay, 0ms) backwards;
 }
+/* Títulos de sección (inspirado en React Bits · BlurText, solo CSS): suben un poco menos y se
+   enfocan desde un desenfoque leve (< 8 px). Mismo sistema: solo los que estaban bajo la
+   pantalla al cargar; nunca el título principal ni el LCP. */
+:is(.section-title, .block-title)[data-reveal-state="in"] {
+  animation: reveal-title var(--dur-reveal-title) var(--ease-out) var(--reveal-delay, 0ms) backwards;
+}
 @keyframes reveal-up { from { opacity: 0; translate: 0 var(--reveal-y); } }
+@keyframes reveal-title { from { opacity: 0; translate: 0 .3em; filter: blur(7px); } }
 @keyframes reveal-fade { from { opacity: 0; } }
 @keyframes reveal-clip { from { clip-path: inset(100% 0 0 0); } }
 @keyframes reveal-settle { from { scale: 1.08; } }

@@ -32,6 +32,7 @@ import onuBlanco from '~/assets/img/onu-blanco.jpg';
             sizes="(min-width: 960px) 40vw, calc(100vw - 3rem)"
             position="50% 55%"
             priority
+            pictureClass="vt-portrait"
           />
         </div>
         <figcaption class="about-caption">
@@ -80,11 +81,10 @@ import onuBlanco from '~/assets/img/onu-blanco.jpg';
   <section class="section section--white crossing" aria-labelledby="crossing-title">
     <div class="container crossing-grid">
       <div class="crossing-copy">
-        <p class="eyebrow" data-reveal>México · España · Nueva York</p>
         <h2 class="section-title" id="crossing-title" data-reveal>Una carrera que continúa cruzando fronteras.</h2>
         <p class="lead" data-reveal>Mi experiencia profesional se ha desarrollado en distintos espacios jurídicos e institucionales, pero existe un hilo conductor: las personas que necesitan encontrar una solución dentro de sistemas que muchas veces pueden resultar complejos.</p>
       </div>
-      <!-- Slot del globo 3D: ver src/components/about/GlobeSlot.astro -->
+      <!-- Globo 3D (México · España · Nueva York): src/components/about/GlobeSlot.astro -->
       <GlobeSlot class="crossing-globe" />
     </div>
   </section>

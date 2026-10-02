@@ -47,6 +47,7 @@ const isCurrent = (path: string) => current === path;
             <li style={`--i:${i}`}>
               <a href={url(item.path)} aria-current={isCurrent(item.path) ? 'page' : undefined}>
                 {item.label}
+                {isCurrent(item.path) && <span class="nav-current" aria-hidden="true" />}
               </a>
             </li>
           ))
@@ -245,6 +246,7 @@ const isCurrent = (path: string) => current === path;
     text-decoration: none;
   }
   .nav-list a[aria-current="page"] { color: var(--hdr-accent); }
+  .nav-current { display: none; }
 
   /* ---------- Móvil y tableta (< 1160 px): panel desplegable (popover) ---------- */
   @media (max-width: 1159.98px) {
@@ -406,7 +408,20 @@ const isCurrent = (path: string) => current === path;
       transform-origin: left;
       transition: transform var(--dur) var(--ease-out);
     }
-    .nav-list a[aria-current="page"]::after { transform: scaleX(1); }
+    /* Página actual: una línea propia (.nav-current) con view-transition-name, que se desliza
+       de un enlace a otro al cambiar de página (global.css §8). */
+    .nav-list a[aria-current="page"]::after { content: none; }
+    .nav-current {
+      display: block;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: .2rem;
+      height: 1px;
+      background: var(--hdr-accent);
+      view-transition-name: nav-current;
+      pointer-events: none;
+    }
     .nav-meta { display: none; }
   }
   @media (min-width: 1160px) and (hover: hover) and (pointer: fine) {

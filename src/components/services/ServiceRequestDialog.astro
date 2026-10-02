@@ -98,5 +98,11 @@ const p = 'sr';
       },
       close: modal.close,
     });
+    // Desde otros scripts (p. ej. el final de la visita guiada): el foco vuelve a `trigger`.
+    document.addEventListener('dg:service-request', (e) => {
+      const detail = (e as CustomEvent<{ trigger?: HTMLElement; service?: string }>).detail ?? {};
+      if (detail.service) lead?.preset({ servicio: detail.service });
+      modal.open(detail.trigger ?? null);
+    });
   }
 </script>
