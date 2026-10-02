@@ -1,0 +1,94 @@
+---
+/**
+ * «Escuchar · Conectar · Actuar» (inicio, tras «Más allá del expediente»). Estructura de
+ * «Formas de trabajar juntos» de bread-communion.com, adaptada a la marca: tres tarjetas
+ * numeradas con fondo tintado y filete superior de color. Cada texto es una frase suya, tal
+ * cual (docs/contenido.md):
+ *   Escuchar → MI COMPROMISO · Conectar → CONÓCEME · Actuar → MI COMPROMISO.
+ * («Me interesa explicar lo complejo…» no se repite aquí: está en el manifiesto, justo encima.)
+ * Aparición con el sistema de movimiento (data-reveal, escalonado de 50 ms).
+ */
+const ways = [
+  { num: '01', word: 'Escuchar', text: 'Creo en un ejercicio del derecho que escucha, explica y acompaña.', tone: 'sand' },
+  {
+    num: '02',
+    word: 'Conectar',
+    text: 'Hoy entiendo el derecho como una herramienta para conectar personas con oportunidades, instituciones con comunidades y derechos con realidades concretas.',
+    tone: 'lavender',
+  },
+  {
+    num: '03',
+    word: 'Actuar',
+    text: 'Por eso quiero construir un espacio donde el conocimiento jurídico pueda convertirse en una herramienta accesible para las personas y las organizaciones que lo necesitan.',
+    tone: 'mist',
+  },
+];
+---
+
+<section class="section section--white ways" aria-labelledby="ways-title">
+  <div class="container">
+    <div class="ways-head">
+      <p class="eyebrow" data-reveal>Mi forma de trabajar</p>
+      <h2 class="ways-title" id="ways-title" data-reveal>Tres palabras que resumen la manera en la que entiendo este trabajo.</h2>
+    </div>
+    <ol class="ways-list" role="list">
+      {
+        ways.map((w) => (
+          <li class:list={['way', `way--${w.tone}`]} data-reveal>
+            <h3 class="way-label">
+              <span class="way-num">{w.num}</span> / {w.word}
+            </h3>
+            <p class="way-text">{w.text}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .ways-head { max-width: 46rem; margin-bottom: clamp(2.25rem, 4vw, 3.25rem); }
+  .ways-title {
+    font-family: var(--ff-serif);
+    font-size: clamp(1.9rem, 1.45rem + 1.7vw, 2.75rem);
+    font-weight: 500;
+    line-height: 1.12;
+    letter-spacing: -.01em;
+    color: var(--c-ink);
+    text-wrap: balance;
+  }
+  .ways-list { display: grid; gap: 1.25rem; }
+  .way {
+    --way-bg: var(--c-lavender);
+    --way-line: var(--c-plum);
+    padding: clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem) clamp(1.35rem, 1rem + 1.2vw, 2rem) clamp(1.75rem, 1.2rem + 1.6vw, 2.5rem);
+    border-top: 2px solid var(--way-line);
+    border-radius: 2px 2px var(--radius-s) var(--radius-s);
+    background: var(--way-bg);
+  }
+  .way--sand { --way-bg: var(--c-sand); --way-line: var(--c-terracotta); }
+  .way--lavender { --way-bg: var(--c-lavender); --way-line: var(--c-plum); }
+  .way--mist { --way-bg: #EFEFF1; --way-line: var(--c-grey); }
+  .way-label {
+    margin-bottom: 1rem;
+    color: var(--c-ink);
+    font-family: var(--ff-sans);
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .2em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+  .way-num { font-variant-numeric: lining-nums tabular-nums; }
+  .way-text {
+    font-family: var(--ff-serif);
+    font-size: clamp(1.25rem, 1.1rem + .45vw, 1.5rem);
+    font-weight: 500;
+    line-height: 1.32;
+    color: var(--c-ink);
+    text-wrap: pretty;
+  }
+  @media (min-width: 900px) {
+    .ways-list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; }
+  }
+</style>

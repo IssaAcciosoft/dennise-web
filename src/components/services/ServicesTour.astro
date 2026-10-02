@@ -2,14 +2,14 @@
 /**
  * «¿Te guío?» — botón discreto que abre la visita guiada de /servicios/ (src/scripts/tour.ts).
  * - Está en el HTML desde el principio (sin saltos de diseño) y nunca arranca solo.
- * - Sin JavaScript es un enlace a #asesorias. Con JavaScript, botón: al pulsarlo se descargan
- *   driver.js y su CSS (import() dinámico); al pasar el ratón o enfocarlo se precargan, para
- *   que la visita empiece al instante.
+ * - Sin JavaScript es un enlace a #extranjeria (primer paso de la visita). Con JavaScript,
+ *   botón: al pulsarlo se descargan driver.js y su CSS (import() dinámico); al pasar el ratón
+ *   o enfocarlo se precargan, para que la visita empiece al instante.
  */
 import Icon from '../ui/Icon.astro';
 ---
 
-<a class="tour-btn" href="#asesorias" data-tour-start>
+<a class="tour-btn" href="#extranjeria" data-tour-start>
   <span class="tour-btn-icon"><Icon name="route" /></span>
   <span>¿Te guío?</span>
 </a>
@@ -31,7 +31,7 @@ import Icon from '../ui/Icon.astro';
         (await load()).startTour(btn);
       } catch {
         loader = null;
-        document.getElementById('asesorias')?.scrollIntoView(); // sin red: al menos lleva a las asesorías
+        document.getElementById('extranjeria')?.scrollIntoView(); // sin red: al menos lleva a los servicios
       } finally {
         btn.removeAttribute('aria-busy');
       }

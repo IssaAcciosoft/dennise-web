@@ -3,7 +3,13 @@
  * Tarjeta oscura de Empoderando Voces en el inicio: una miniatura de la portada de su página
  * (mismo ciruela, misma tipografía). Comparte view-transition-name «ev-panel» con la portada
  * de /empoderando-voces/: al navegar, la tarjeta se expande hasta ser la página.
+ * Solo si la tarjeta está a la vista al cambiar de página (en los dos sentidos): si no (p. ej.
+ * «Empoderando Voces» en el menú con el inicio arriba del todo), se le quita el nombre y la
+ * transición es el fundido normal; nada vuela desde fuera de la pantalla (Emil: coherencia
+ * espacial). Al volver con pareja marca el tipo «ev-return» (radio de la tarjeta, global.css §8).
+ * Sin soporte de View Transitions entre documentos, el script no hace nada.
  */
+const vtScript = `(function(){if(!('onpagereveal' in window))return;function card(){return document.querySelector('.ev-teaser')}function seen(el){var r=el.getBoundingClientRect(),h=Math.min(r.bottom,innerHeight)-Math.max(r.top,0);return h>Math.min(r.height,innerHeight)*.25}function gate(e){var c=card();if(!c||!e.viewTransition)return;if(!seen(c)){c.style.viewTransitionName='none';e.viewTransition.finished.finally(function(){c.style.viewTransitionName=''})}}addEventListener('pageswap',gate);addEventListener('pagereveal',function(e){gate(e);var vt=e.viewTransition;if(!vt)return;vt.ready.then(function(){if(document.getAnimations().some(function(a){return a.effect&&a.effect.pseudoElement==='::view-transition-old(ev-panel)'})&&document.getAnimations().some(function(a){return a.effect&&a.effect.pseudoElement==='::view-transition-new(ev-panel)'}))vt.types.add('ev-return')}).catch(function(){})});addEventListener('pageshow',function(){var c=card();if(c)c.style.viewTransitionName=''})})();`;
 import { url } from '~/lib/url';
 import Photo from '../ui/Photo.astro';
 import Icon from '../ui/Icon.astro';
@@ -11,6 +17,7 @@ import educationPeace from '~/assets/img/education-peace.jpg';
 import yhri from '~/assets/img/yhri-asamblea.jpg';
 ---
 
+<script is:inline set:html={vtScript} />
 <section class="section section--white ev-teaser-wrap" aria-labelledby="ev-teaser-title">
   <div class="container">
     <article class="ev-teaser" data-reveal>
@@ -44,6 +51,9 @@ import yhri from '~/assets/img/yhri-asamblea.jpg';
 </section>
 
 <style>
+  /* La tarjeta oscura ya tiene su propio relleno y mucho peso visual: alrededor, algo menos de
+     aire que una sección normal (si no, quedan dos vacíos de ~300 px arriba y abajo). */
+  .ev-teaser-wrap { padding-block: clamp(3.5rem, 2rem + 5vw, 7.5rem); }
   .ev-teaser {
     --focus: var(--ev-gold);
     view-transition-name: ev-panel;

@@ -1,6 +1,9 @@
 ---
-/** Resumen de servicios y precios (inicio), generado desde src/data/servicios.json. */
-import { consultations, autogestiona, formatAmount, CATALOG } from '~/lib/services';
+/**
+ * Resumen de servicios y precios (inicio), generado desde src/data/servicios.json, y tarjeta de
+ * «Abre tu empresa en Dubái» (→ /dubai/; texto del bloque Dubái de la web anterior, §2).
+ */
+import { consultations, autogestiona, dubai, formatAmount, CATALOG } from '~/lib/services';
 import { BOOKING_PATH } from '~/data/site';
 import { url } from '~/lib/url';
 import Icon from '../ui/Icon.astro';
@@ -63,6 +66,25 @@ const modalities = consultations[0]?.prices.map((p) => ({ modality: p.modality, 
         <p class="snapshot-note">{CATALOG.tax_label}</p>
       </div>
     </div>
+
+    <article class="snapshot-dubai" data-reveal aria-labelledby="snapshot-dubai-title">
+      <div class="snapshot-dubai-copy">
+        <p class="snapshot-dubai-kicker">Empresas en Dubái</p>
+        <h3 class="snapshot-dubai-title" id="snapshot-dubai-title">
+          <a href={url('/dubai/')}>Abre tu empresa en Dubái</a>
+        </h3>
+        <p class="snapshot-dubai-text">Te ayudamos a crear tu negocio con estructura legal sólida. Constitución, apertura bancaria, fiscalidad y acompañamiento jurídico desde el primer paso.</p>
+      </div>
+      <div class="snapshot-dubai-side">
+        <ul class="snapshot-dubai-list" role="list" aria-label="Estructuras">
+          {dubai.structures.map((item) => <li>{item}</li>)}
+        </ul>
+        <span class="snapshot-dubai-cta" aria-hidden="true">
+          <span>Ver Dubái</span>
+          <Icon name="arrow" />
+        </span>
+      </div>
+    </article>
 
     <div class="btn-row snapshot-actions" data-reveal>
       <a class="btn btn--primary" href={url('/servicios/')}>
@@ -164,4 +186,87 @@ const modalities = consultations[0]?.prices.map((p) => ({ modality: p.modality, 
     text-transform: uppercase;
   }
   .snapshot-actions { margin-top: clamp(2rem, 4vw, 3rem); }
+
+  /* Tarjeta de Dubái: ciruela profundo con la celosía en oro (motivo de /dubai/). Toda la
+     tarjeta es pulsable (el enlace del título se extiende con ::after). */
+  .snapshot-dubai {
+    --focus: var(--ev-gold);
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    gap: 1.75rem;
+    margin-top: 1.25rem;
+    padding: clamp(1.5rem, 1rem + 2vw, 2.5rem) clamp(1.25rem, 1rem + 2vw, 2.75rem);
+    border-radius: var(--radius-l);
+    overflow: clip;
+    color: var(--ev-text);
+    background:
+      linear-gradient(100deg, var(--c-plum-900) 32%, rgba(44, 10, 50, .78) 62%, rgba(44, 10, 50, .5)),
+      var(--lattice-gold) 0 0 / 60px 60px,
+      linear-gradient(160deg, #3A0E42, var(--ev-bg));
+    box-shadow: var(--shadow-s);
+    transition: box-shadow var(--dur) var(--ease-out), transform var(--dur-press) var(--ease-out);
+  }
+  .snapshot-dubai:active { transform: scale(.99); }
+  .snapshot-dubai-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: .75em;
+    margin-bottom: .75rem;
+    color: var(--ev-gold);
+    font-size: .76rem;
+    font-weight: 600;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+  }
+  .snapshot-dubai-kicker::before { content: ""; width: 1.5rem; height: 1px; background: currentColor; }
+  .snapshot-dubai-title {
+    font-family: var(--ff-serif);
+    font-size: clamp(1.7rem, 1.4rem + 1.2vw, 2.3rem);
+    font-weight: 600;
+    line-height: 1.1;
+  }
+  .snapshot-dubai-title a { color: #fff; text-decoration: none; }
+  .snapshot-dubai-title a::after { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: inherit; }
+  .snapshot-dubai-title a:focus-visible { outline: none; }
+  .snapshot-dubai:has(a:focus-visible) { outline: 3px solid var(--ev-gold); outline-offset: 3px; }
+  .snapshot-dubai-text { max-width: 34rem; margin-top: .85rem; color: var(--ev-muted); line-height: 1.6; }
+  .snapshot-dubai-side { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem 2rem; }
+  .snapshot-dubai-list { display: flex; flex-wrap: wrap; gap: .25rem 1.1rem; }
+  .snapshot-dubai-list li {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.1rem;
+    font-family: var(--ff-serif);
+    font-style: italic;
+    font-size: clamp(1.2rem, 1.1rem + .4vw, 1.45rem);
+    font-weight: 500;
+    color: #fff;
+  }
+  .snapshot-dubai-list li + li::before { content: ""; width: .35rem; height: .35rem; background: var(--ev-gold); rotate: 45deg; }
+  .snapshot-dubai-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: .6rem;
+    min-height: 44px;
+    padding: .55rem 1.2rem;
+    border: 1px solid rgba(221, 181, 108, .7);
+    border-radius: var(--radius-pill);
+    color: var(--ev-text);
+    font-size: .95rem;
+    font-weight: 600;
+    letter-spacing: .02em;
+    transition: background-color var(--dur-fast) var(--ease-hover), color var(--dur-fast) var(--ease-hover), border-color var(--dur-fast) var(--ease-hover);
+  }
+  .snapshot-dubai-cta :global(.icon) { color: var(--ev-gold); transition: transform var(--dur) var(--ease-out), color var(--dur-fast) var(--ease-hover); }
+  @media (hover: hover) and (pointer: fine) {
+    .snapshot-dubai:hover { box-shadow: var(--shadow); }
+    .snapshot-dubai:hover .snapshot-dubai-cta { background: var(--ev-gold); border-color: var(--ev-gold); color: var(--ev-bg); }
+    .snapshot-dubai:hover .snapshot-dubai-cta :global(.icon) { color: var(--ev-bg); transform: translateX(3px); }
+  }
+  @media (min-width: 900px) {
+    .snapshot-dubai { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: end; gap: 3rem; }
+    .snapshot-dubai-side { flex-direction: column; align-items: flex-end; justify-content: flex-end; }
+    .snapshot-dubai-list { justify-content: flex-end; }
+  }
 </style>

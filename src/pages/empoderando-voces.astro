@@ -8,11 +8,15 @@
  * (.ev-hero) comparte view-transition-name «ev-panel» con la tarjeta del inicio: al llegar
  * desde allí, la tarjeta oscura se expande hasta ser esta página.
  *
- * Islas de React (React Bits, ver THIRD_PARTY_NOTICES.md), todas diferidas y con alternativa:
- * - EvAurora (client:media ≥ 768 px): aurora WebGL tras la portada; póster CSS antes/sin ella.
- *   En móvil no se carga (batería y datos; el póster da el mismo ambiente en pantalla pequeña).
- * - EvGallery (client:visible): galería curva WebGL sobre una lista estática accesible.
- * - Magnet (client:media, solo ratón): atracción sutil del gran botón (sin movimiento reducido).
+ * Islas de React (React Bits, ver THIRD_PARTY_NOTICES.md), todas diferidas y con alternativa
+ * (client:deferred, src/directives/deferred.ts: decide ANTES de descargar React):
+ * - EvAurora (≥ 768 px, tras load y en un momento ocioso, nunca con «reducir movimiento»): aurora
+ *   WebGL tras la portada; póster CSS antes/sin ella. En móvil no se carga. Se detiene sola a
+ *   los 5 s (WCAG 2.2.2) y fuera de pantalla.
+ * - EvGallery (client:visible): galería curva WebGL sobre una lista estática accesible. ogl se
+ *   descarga solo si no hay «reducir movimiento» (import() diferido).
+ * - Magnet (solo ratón, al acercarse a la pantalla, sin «reducir movimiento»): atracción sutil
+ *   del gran botón.
  *
  * El gran botón «Cuéntame tu historia» abre el formulario (StoryDialog → AccioGest); sin JS,
  * WhatsApp. Lógica del formulario: src/components/ev/StoryDialog.astro (sin cambios).
@@ -35,7 +39,6 @@ import kit from '~/assets/img/kit-delegada.jpg';
 import onuBlanco from '~/assets/img/onu-blanco.jpg';
 
 const storyLink = waLink(WA_TEXT.historia);
-const homePath = import.meta.env.BASE_URL;
 
 const ALT = {
   educationPeace:
@@ -47,8 +50,9 @@ const ALT = {
   onuBlanco: 'Denisse González con blazer blanco junto a la bandera y el emblema de las Naciones Unidas',
 };
 
-// Galería: recortes 3:4 en WebP (los mismos archivos para la lista estática y para las
-// texturas WebGL → una sola descarga por foto).
+// Galería: recortes 3:4 en AVIF y WebP, a 450 y 600 px de ancho (la lista estática los elige con
+// srcset/sizes). La galería WebGL usa como textura el archivo que el navegador ya eligió para
+// cada <img> (currentSrc) → una sola descarga por foto.
 type GalleryPhoto = { src: ImageMetadata; text: string; alt: string; position?: string };
 const galleryPhotos: GalleryPhoto[] = [
   { src: educationPeace, text: 'Education for Peace 2026', alt: ALT.educationPeace },
@@ -58,10 +62,26 @@ const galleryPhotos: GalleryPhoto[] = [
   { src: kit, text: 'Kit de delegada', alt: ALT.kit, position: 'right' },
   { src: onuBlanco, text: 'Naciones Unidas', alt: ALT.onuBlanco },
 ];
+const GALLERY_WIDTHS = [450, 600];
+// Ancho de cada foto de la lista = alto de la galería (--gallery-h) × 3/4.
+const GALLERY_SIZES = '(min-width: 1760px) 480px, (min-width: 640px) calc(13.5rem + 15vw), 312px';
 const gallery = await Promise.all(
   galleryPhotos.map(async (p) => {
-    const img = await getImage({ src: p.src, width: 600, height: 800, fit: 'cover', position: p.position ?? 'centre', format: 'webp', quality: 74 });
-    return { ...p, url: img.src };
+    const crop = (width: number, format: 'avif' | 'webp') =>
+      getImage({
+        src: p.src,
+        width,
+        height: Math.round((width * 4) / 3),
+        fit: 'cover',
+        position: p.position ?? 'centre',
+        format,
+        quality: format === 'avif' ? 52 : 74,
+      });
+    const [avif, webp] = await Promise.all(
+      (['avif', 'webp'] as const).map((format) => Promise.all(GALLERY_WIDTHS.map((w) => crop(w, format)))),
+    );
+    const srcset = (list: { src: string }[]) => list.map((img, i) => `${img.src} ${GALLERY_WIDTHS[i]}w`).join(', ');
+    return { ...p, url: webp[webp.length - 1].src, avifSet: srcset(avif), webpSet: srcset(webp) };
   }),
 );
 const glItems = gallery.map((g) => ({ image: g.url, text: g.text }));
@@ -90,30 +110,49 @@ const memories = [
 <BaseLayout
   title="Empoderando Voces · Cuéntame tu historia · Denisse González"
   description="Empoderando Voces: historias reales, personas reales, voces que merecen un espacio. Si tienes una historia que merece ser escuchada, cuéntamela."
-  preloadFonts={['serif-500i', 'cond-500', 'sans-400']}
+  preloadFonts={['serif-500i', 'cond-500', 'sans-400', 'sans-600']}
   bodyClass="theme-ev"
   themeColor="#1F1024"
   headerTone="dark"
 >
-  <script is:inline slot="head" define:vars={{ homePath }}>
-    // Al llegar con View Transition. Desde el inicio: tipo «ev-morph» (global.css §8), para que
-    // la tarjeta se vea crecer sobre el inicio antes del fundido.
-    addEventListener('pagereveal', function (e) {
-      if (!e.viewTransition) return;
-      // La aurora (WebGL) espera a que termine la transición: no le roba fotogramas.
-      window.__evTransition = e.viewTransition.finished.catch(function () {});
-      try {
-        var from = (window.navigation && navigation.activation && navigation.activation.from) || null;
-        var prev = from && from.url ? new URL(from.url).pathname : document.referrer ? new URL(document.referrer).pathname : '';
-        if (prev === homePath) e.viewTransition.types.add('ev-morph');
-      } catch (err) {}
-    });
+  <script is:inline slot="head">
+    // View Transitions con la tarjeta del inicio (global.css §8, «ev-panel»):
+    // - La portada solo comparte nombre si está a la vista al irse de la página (al volver al
+    //   inicio desde abajo del todo, nada vuela desde fuera de la pantalla).
+    // - Al llegar: tipo «ev-morph» (el inicio se queda un instante bajo la tarjeta que crece)
+    //   SOLO si la tarjeta del inicio participa de verdad (hay instantánea antigua de ev-panel).
+    // - La aurora (WebGL) espera a que termine la transición: no le roba fotogramas.
+    (function () {
+      function hero() { return document.querySelector('.ev-hero'); }
+      function seen(el) {
+        var r = el.getBoundingClientRect(), h = Math.min(r.bottom, innerHeight) - Math.max(r.top, 0);
+        return h > Math.min(r.height, innerHeight) * 0.25;
+      }
+      addEventListener('pageswap', function (e) {
+        var el = hero();
+        if (!el || !e.viewTransition || seen(el)) return;
+        el.style.viewTransitionName = 'none';
+        e.viewTransition.finished.finally(function () { el.style.viewTransitionName = ''; });
+      });
+      addEventListener('pageshow', function () { var el = hero(); if (el) el.style.viewTransitionName = ''; });
+      addEventListener('pagereveal', function (e) {
+        var vt = e.viewTransition;
+        if (!vt) return;
+        window.__evTransition = vt.finished.catch(function () {});
+        vt.ready.then(function () {
+          var paired = document.getAnimations().some(function (a) {
+            return a.effect && a.effect.pseudoElement === '::view-transition-old(ev-panel)';
+          });
+          if (paired) vt.types.add('ev-morph');
+        }).catch(function () {});
+      });
+    })();
   </script>
   <div class="ev">
     <!-- Portada: comparte view-transition-name con la tarjeta del inicio -->
     <section class="ev-hero" aria-labelledby="ev-title">
       <div class="ev-hero-bg" aria-hidden="true">
-        <EvAurora client:media="(min-width: 768px)" />
+        <EvAurora client:deferred={{ media: '(min-width: 768px)', on: 'idle', motion: true }} />
       </div>
       <div class="container ev-hero-grid">
         <div class="ev-hero-copy">
@@ -179,14 +218,18 @@ const memories = [
             gallery.map((g) => (
               <li>
                 <figure>
-                  <img src={g.url} width="600" height="800" alt={g.alt} loading="lazy" decoding="async" />
+                  <picture>
+                    <source type="image/avif" srcset={g.avifSet} sizes={GALLERY_SIZES} />
+                    <source type="image/webp" srcset={g.webpSet} sizes={GALLERY_SIZES} />
+                    <img src={g.url} width="600" height="800" alt={g.alt} loading="lazy" decoding="async" />
+                  </picture>
                   <figcaption>{g.text}</figcaption>
                 </figure>
               </li>
             ))
           }
         </ul>
-        <EvGallery client:visible={{ rootMargin: '600px' }} items={glItems} />
+        <EvGallery client:visible={{ rootMargin: '200px' }} items={glItems} />
       </div>
     </section>
 
@@ -244,7 +287,7 @@ const memories = [
       </div>
 
       <div class="container ev-cta-wrap" id="cuentame" data-wa-hide>
-        <Magnet client:media="(hover: hover) and (pointer: fine)" wrapperClassName="ev-magnet" innerClassName="ev-magnet-inner" padding={90} magnetStrength={14} maxOffset={10}>
+        <Magnet client:deferred={{ media: '(hover: hover) and (pointer: fine)', on: 'visible', rootMargin: '200px', motion: true }} wrapperClassName="ev-magnet" innerClassName="ev-magnet-inner" padding={90} magnetStrength={14} maxOffset={10}>
           <a class="ev-cta" href={storyLink} target="_blank" rel="noopener" aria-controls="story-dialog" data-story-open>
             <span class="ev-cta-text">
               <span class="ev-cta-main">Cuéntame tu historia</span>
@@ -345,8 +388,9 @@ const memories = [
     position: relative;
     isolation: isolate;
     overflow: clip;
-    padding-top: calc(var(--header-h) + clamp(2.25rem, 1rem + 5vw, 5.5rem));
-    padding-bottom: clamp(3.5rem, 2rem + 6vw, 7rem);
+    --hero-pad-top: clamp(1.5rem, .75rem + 4vw, 5.5rem);
+    padding-top: calc(var(--header-h) + var(--hero-pad-top));
+    padding-bottom: clamp(2.25rem, 1.5rem + 3vw, 5rem);
     background: var(--ev-bg);
   }
   /* Póster estático (antes de la aurora, sin JS, sin WebGL o con movimiento reducido) */
@@ -376,15 +420,16 @@ const memories = [
   .ev-hero-bg :global(.aurora-container canvas) { display: block; width: 100% !important; height: 100% !important; }
 
   .ev-hero-grid { display: grid; gap: clamp(2.75rem, 6vw, 4rem); align-items: end; }
-  /* Móvil y tableta: la primera pantalla es una portada tipográfica (título, frase y botón);
-     la foto llega al deslizar, con su revelado. El título es el LCP (pinta con la fuente de
-     respaldo ajustada y no se anima). */
+  /* Móvil y tableta: la primera pantalla es una portada tipográfica (título, frase y botón),
+     centrada en ~¾ de la pantalla para que asome la primera frase de la introducción (invita a
+     deslizar, sin huecos vacíos arriba ni abajo). La foto llega al deslizar, con su revelado.
+     El título es el LCP (pinta con la fuente de respaldo ajustada y no se anima). */
   @media (max-width: 959.98px) {
     .ev-hero-copy {
       display: flex;
       flex-direction: column;
       justify-content: center;
-      min-height: calc(88svh - var(--header-h) - clamp(2.25rem, 1rem + 5vw, 5.5rem));
+      min-height: calc(72svh - var(--header-h) - var(--hero-pad-top));
     }
   }
 
@@ -411,17 +456,24 @@ const memories = [
   @media (max-width: 479.98px) {
     .ev-kicker { gap: .7rem; font-size: .88rem; letter-spacing: .18em; }
   }
+  /* 360 px: «Historias reales. Personas reales.» sin palabra huérfana */
+  @media (max-width: 389.98px) {
+    .ev-kicker { letter-spacing: .12em; text-wrap: balance; }
+  }
 
   .ev-title { display: flex; flex-direction: column; margin: 0; font-weight: 400; }
   .ev-title-a {
     font-family: var(--ff-serif);
     font-style: italic;
     font-weight: 500;
-    font-size: clamp(3.9rem, 1.3rem + 9.6vw, 10rem);
+    /* Mínimo ligado al ancho (17vw) para que «Empoderando» quepa siempre (320 px, zoom, espaciado
+       de texto WCAG 1.4.12); si aun así no cabe, se parte en lugar de recortarse. */
+    font-size: clamp(min(3.9rem, 17vw), 1.3rem + 9.6vw, 10rem);
     line-height: .92;
     letter-spacing: -.025em;
     color: var(--ev-text);
     margin-left: -.04em;
+    overflow-wrap: anywhere;
   }
   .ev-title-b {
     display: flex;
@@ -500,7 +552,7 @@ const memories = [
 
   @media (min-width: 960px) {
     .ev-hero-frame::after { inset: -1rem 1rem 1rem -1rem; }
-    .ev-hero { min-height: min(100svh, 62rem); display: flex; align-items: center; }
+    .ev-hero { min-height: min(94svh, 60rem); display: flex; align-items: center; }
     .ev-hero > .container { width: 100%; }
     .ev-hero-grid { grid-template-columns: minmax(0, 1.4fr) minmax(0, .6fr); gap: clamp(2rem, 4vw, 4.5rem); }
     .ev-hero-photo { display: block; width: 100%; max-width: 30rem; justify-self: end; }
@@ -523,7 +575,8 @@ const memories = [
   .ev-hero-frame :global(picture) { overflow: clip; border-radius: 4px; box-shadow: 0 40px 80px -30px rgba(0, 0, 0, .7); }
 
   /* ---------- Introducción ---------- */
-  .ev-intro { padding-block: var(--section-pad) clamp(3rem, 2rem + 4vw, 6rem); }
+  /* La portada ya da la pausa (mismo fondo, sin corte visible): aquí solo un respiro corto. */
+  .ev-intro { padding-block: clamp(1.5rem, 1rem + 2vw, 3rem) clamp(3rem, 2rem + 4vw, 6rem); }
   .ev-intro-grid { display: grid; gap: clamp(2rem, 5vw, 3rem); }
   .ev-statement {
     font-family: var(--ff-serif);
@@ -594,6 +647,7 @@ const memories = [
   .ev-strip:focus-visible { outline-offset: -3px; }
   .ev-strip li { flex: none; height: 100%; scroll-snap-align: start; }
   .ev-strip figure { display: flex; flex-direction: column; height: 100%; margin: 0; }
+  .ev-strip picture { display: contents; }
   .ev-strip img {
     flex: 1 1 auto;
     min-height: 0;
@@ -634,7 +688,7 @@ const memories = [
   .ev-gallery[data-gl] :global(.ev-gallery-gl) { opacity: 1; pointer-events: auto; }
   /* Con la galería WebGL activa, la lista sigue en el árbol de accesibilidad (texto alternativo)
      pero ya no se ve ni se enfoca. */
-  .ev-gallery[data-gl] .ev-strip { opacity: 0; pointer-events: none; }
+  .ev-gallery[data-gl] .ev-strip { opacity: 0; pointer-events: none; overflow: hidden; }
 
   .ev-gallery :global(.ev-gallery-controls) {
     grid-area: 2 / 1;

@@ -25,6 +25,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # Sin dominio definitivo no se publica: canonical, Open Graph, JSON-LD, sitemap y robots.txt
+      # apuntarían al marcador https://denissegonzalez.example.
+      - name: Check SITE_URL
+        if: ${{ vars.SITE_URL == '' }}
+        run: |
+          echo "::error::Define la variable de repositorio SITE_URL (dominio definitivo, p. ej. https://www.dominio.es) antes de publicar."
+          exit 1
       - name: Checkout
         uses: actions/checkout@v6
       - name: Build with Astro
@@ -45,6 +52,8 @@ jobs:
 
   deploy:
     needs: build
+    # Solo se publica desde main (un «Run workflow» manual desde otra rama compila, pero no publica).
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

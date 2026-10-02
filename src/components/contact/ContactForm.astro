@@ -1,8 +1,8 @@
 ---
 /**
  * Formulario de contacto (/contacto/) → formulario «contacto» de AccioGest
- * (docs/integracion-acciogest.md §4). Sin email ni dirección visibles hasta que la cliente
- * los facilite (README → Pendiente).
+ * (docs/integracion-acciogest.md §4). El email, el teléfono y la dirección del despacho están
+ * en la parte superior de /contacto/ (src/data/site.ts → EMAIL, OFFICE).
  */
 import { WA_TEXT } from '~/data/site';
 import LeadForm from '../forms/LeadForm.astro';
@@ -69,7 +69,6 @@ const p = 'cf';
 </script>
 
 <style>
-  .contact-form-section { scroll-margin-top: var(--header-h); }
   .contact-form-grid { display: grid; gap: 2.5rem; }
   .contact-form-intro .section-title { margin-bottom: 1.25rem; }
   .contact-form-lead { max-width: 26rem; }

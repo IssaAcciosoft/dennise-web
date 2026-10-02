@@ -1,7 +1,7 @@
 /**
  * En medios / Publicaciones (docs/contenido.md → EN MEDIOS).
  * La transcripción está copiada literalmente del cartel publicado: PENDIENTE de validar por
- * la cliente (README → Pendiente, punto 11).
+ * la cliente (README → Pendiente, punto 9).
  */
 export const ARTICLE_8M = {
   publisher: 'Construyendo un Mundo Mejor',

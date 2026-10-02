@@ -3,21 +3,38 @@ import BaseLayout from '~/layouts/BaseLayout.astro';
 import Icon from '~/components/ui/Icon.astro';
 import SocialLinks from '~/components/ui/SocialLinks.astro';
 import ContactForm from '~/components/contact/ContactForm.astro';
-import { BOOKING_PATH, PHONE, SITE, TEL_LINK, WA_TEXT, waLink } from '~/data/site';
+import { BOOKING_PATH, PHONE, SITE, TEL_LINK, WA_TEXT, waLink, EMAIL, OFFICE } from '~/data/site';
 import { url } from '~/lib/url';
 ---
 
 <BaseLayout
-  title="Contacto · Denisse González, abogada"
-  description="Contacta con Denisse González, abogada: WhatsApp y teléfono +34 670 647 593, redes sociales y reserva de asesorías online y presenciales."
-  preloadFonts={['serif-600', 'sans-400']}
+  title="Contacto · Denisse González, abogada · DG Gestores y Abogados"
+  description="Contacta con Denisse González (DG Gestores y Abogados): +34 670 647 593, lic.denissegb@icloud.com y despacho en C/ Eraso 31, 28028 Madrid. Asesorías online y presenciales."
 >
   <section class="contact-page" aria-labelledby="contact-title" data-wa-hide>
     <div class="container contact-grid">
       <div class="contact-intro">
         <p class="eyebrow">Contacto</p>
         <h1 class="page-title" id="contact-title">Hablemos de tu caso.</h1>
-        <p class="lead contact-lead">Asesorías online y presenciales.</p>
+        {/* Textos de la web anterior (docs/web-anterior.md §1): «su consulta» → «tu consulta». */}
+        <p class="lead contact-lead">Ponte en contacto con nuestro despacho para consultas sobre extranjería, regularización o apertura de empresas en España o Dubái.</p>
+        <p class="contact-response"><Icon name="clock" />Esperamos responder tu consulta en menos de 24&nbsp;horas.</p>
+
+        <address class="contact-office" aria-labelledby="office-title">
+          <p class="contact-office-label">Despacho</p>
+          <p class="contact-office-name" id="office-title">{OFFICE.name}</p>
+          <p class="contact-office-lines">
+            <span>{OFFICE.street} <span class="nowrap">({OFFICE.neighborhood})</span></span>
+            <span>{OFFICE.postalCode} {OFFICE.locality}</span>
+          </p>
+          <p class="contact-office-note">Asesorías online y presenciales.</p>
+          <a class="btn btn--ghost btn--sm contact-office-map" href={OFFICE.mapsUrl} target="_blank" rel="noopener">
+            <Icon name="pin" />
+            <span>Cómo llegar</span>
+            <span class="visually-hidden"> (Google Maps, se abre en una pestaña nueva)</span>
+          </a>
+        </address>
+
         <p class="contact-tagline">{SITE.tagline}</p>
       </div>
 
@@ -35,6 +52,14 @@ import { url } from '~/lib/url';
           <span class="contact-card-text">
             <span class="contact-card-label">Teléfono</span>
             <span class="contact-card-value">{PHONE.display}</span>
+          </span>
+          <Icon name="arrow" class="contact-card-arrow" />
+        </a>
+        <a class="contact-card" href={EMAIL.href}>
+          <span class="contact-card-icon"><Icon name="mail" /></span>
+          <span class="contact-card-text">
+            <span class="contact-card-label">Email</span>
+            <span class="contact-card-value contact-card-value--email">{EMAIL.user}<wbr />@{EMAIL.domain}</span>
           </span>
           <Icon name="arrow" class="contact-card-arrow" />
         </a>
@@ -84,8 +109,49 @@ import { url } from '~/lib/url';
       var(--c-lavender);
     overflow: clip;
   }
-  .contact-grid { position: relative; z-index: 1; display: grid; gap: 3rem; }
+  /* minmax(0, 1fr): la columna nunca se ensancha por el teléfono (sin cortes a 320 px). */
+  .contact-grid { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr); gap: 3rem; }
   .contact-intro .page-title { margin-bottom: 1.25rem; }
+  .contact-lead { max-width: 34rem; }
+  .contact-response {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    margin-top: 1.25rem;
+    color: var(--c-plum-800);
+    font-weight: 600;
+  }
+  .contact-response :global(.icon) { color: var(--c-plum); }
+  .contact-office {
+    display: grid;
+    justify-items: start;
+    gap: .15rem;
+    max-width: 26rem;
+    margin-top: 2rem;
+    padding: 1.35rem 1.5rem 1.5rem;
+    border-left: 3px solid var(--c-plum);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    background: rgba(255, 255, 255, .7);
+    font-style: normal;
+  }
+  .contact-office-label {
+    color: var(--c-muted);
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+  .contact-office-name {
+    margin-top: .2rem;
+    font-family: var(--ff-serif);
+    font-size: clamp(1.4rem, 1.25rem + .6vw, 1.7rem);
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--c-ink);
+  }
+  .contact-office-lines { display: grid; margin-top: .35rem; color: var(--c-ink-soft); line-height: 1.5; }
+  .contact-office-note { margin-top: .35rem; color: var(--c-muted); font-size: var(--fs-small); }
+  .contact-office-map { margin-top: 1rem; }
   .contact-tagline {
     margin-top: 2rem;
     font-family: var(--ff-serif);
@@ -138,6 +204,7 @@ import { url } from '~/lib/url';
     font-weight: 600;
     line-height: 1.2;
   }
+  .contact-card-value--email { font-size: clamp(1.15rem, 1rem + .5vw, 1.45rem); }
   .contact-card :global(.contact-card-arrow) { margin-left: auto; color: var(--c-muted); transition: transform var(--dur) var(--ease-out), color var(--dur-fast) var(--ease-hover); }
   @media (hover: hover) and (pointer: fine) {
     .contact-card:hover { border-color: var(--c-plum); background: var(--c-lavender); color: var(--c-ink); }
@@ -169,6 +236,12 @@ import { url } from '~/lib/url';
   .contact-story strong { display: block; color: var(--ev-text); font-weight: 600; }
   .contact-story .btn--link { color: var(--ev-gold); text-decoration-color: rgba(242, 179, 61, .5); }
   @media (min-width: 900px) {
-    .contact-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); align-items: center; column-gap: 5rem; }
+    .contact-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); align-items: start; column-gap: 5rem; }
+  }
+  /* 320–359 px (o zoom 400 %): panel y tarjetas más compactos para que quepa el teléfono. */
+  @media (max-width: 359.98px) {
+    .contact-panel { padding: 1rem; }
+    .contact-card { gap: .75rem; padding: .85rem .9rem; }
+    .contact-card-icon { width: 2.5rem; height: 2.5rem; }
   }
 </style>

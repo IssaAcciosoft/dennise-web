@@ -1,0 +1,52 @@
+---
+/**
+ * Testimonio de un cliente (web anterior, docs/web-anterior.md §4), tal cual y sin foto (la de
+ * la web anterior era de stock). Es el único testimonio real: los demás eran de la plantilla.
+ * PENDIENTE (alerta 9.4): la cliente debe confirmar que es real y que tiene permiso para
+ * publicarlo. Si no lo confirma, quitar <Testimonial /> de src/pages/index.astro.
+ */
+---
+
+<section class="section section--white testimonial" aria-labelledby="testimonial-title">
+  <div class="container">
+    <figure class="testimonial-figure" data-reveal>
+      <h2 class="eyebrow eyebrow--center testimonial-eyebrow" id="testimonial-title">Testimonio</h2>
+      <blockquote class="testimonial-quote">
+        <p>«Nos ayudaron a reunirnos como familia en España. No solo son expertos legales, también son humanos y comprometidos. Eternamente agradecidos.»</p>
+      </blockquote>
+      <figcaption class="testimonial-author">Jose</figcaption>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .testimonial { padding-block: clamp(3.75rem, 2rem + 5vw, 6.5rem); }
+  .testimonial-figure {
+    position: relative;
+    max-width: 52rem;
+    margin-inline: auto;
+    text-align: center;
+  }
+  .testimonial-eyebrow { margin-bottom: 1.75rem; }
+  .testimonial-quote p {
+    font-family: var(--ff-serif);
+    font-size: var(--fs-quote);
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1.34;
+    color: var(--c-ink);
+    text-wrap: balance;
+  }
+  .testimonial-author {
+    display: inline-flex;
+    align-items: center;
+    gap: .75rem;
+    margin-top: 1.75rem;
+    color: var(--c-plum);
+    font-size: .85rem;
+    font-weight: 600;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+  }
+  .testimonial-author::before { content: ""; width: 1.75rem; height: 1px; background: currentColor; }
+</style>

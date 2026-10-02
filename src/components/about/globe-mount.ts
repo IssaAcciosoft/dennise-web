@@ -1,13 +1,15 @@
 /**
- * Globo 3D de Conóceme (WebGL con cobe, ~6 KB gzip): México, Madrid (España) y Nueva York.
+ * Globo 3D de Conóceme (WebGL con cobe): México, España y Nueva York. Sin React: lo carga el
+ * <script> de GlobeSlot.astro con import() cuando la caja se acerca a la pantalla, y solo sin
+ * «reducir movimiento» (≈ 8 KB gzip con cobe; antes, como isla de React, ≈ 75 KB).
  *
- * Isla de React con client:visible, encima del póster estático (GlobeSlot.astro), que es el
- * mismo globo renderizado con la misma vista (scripts/render-globe-poster.mjs). Por eso:
- * - antes de hidratar, sin JavaScript, sin WebGL o con «reducir movimiento» se ve el póster;
+ * Va encima del póster estático (GlobeSlot.astro), que es el mismo globo renderizado con la
+ * misma vista (scripts/render-globe-poster.mjs). Por eso:
+ * - antes de cargar, sin JavaScript, sin WebGL o con «reducir movimiento» se ve el póster;
  * - al montar, el lienzo se funde sobre el póster sin salto (mismo encuadre, mismo tamaño).
  *
- * Rendimiento (README → Islas de React):
- * - El contexto WebGL se crea en un momento ocioso, no al hidratar.
+ * Rendimiento (README → Globo 3D):
+ * - El contexto WebGL se crea en un momento ocioso (lo decide GlobeSlot.astro).
  * - Bucle propio con requestAnimationFrame (cobe 2 no tiene bucle): ~30 fps en reposo (el
  *   vaivén es lentísimo), fotogramas completos solo al arrastrar; se detiene fuera de pantalla
  *   y con la pestaña oculta.
@@ -19,15 +21,17 @@
  * tres lugares siempre a la vista. Arrastrar en horizontal lo gira (captura del puntero,
  * inercia con rozamiento); al soltar, tras una pausa, vuelve con suavidad a su vista.
  * En táctil, el gesto vertical sigue desplazando la página (touch-action: pan-y).
+ * El vaivén automático se frena y se detiene a los 5 s sin interacción (WCAG 2.2.2); al
+ * arrastrar vuelve a moverse.
  */
-import { useEffect, useRef } from 'react';
 import createGlobe from 'cobe';
-import { usePrefersReducedMotion } from '../islands/hooks';
 import { PLACES, VIEW, cobeOptions, project } from './globe-config';
 
 const IDLE_FRAME_MS = 1000 / 30 - 2;
 const RETURN_AFTER_MS = 2200;
 const MAX_VELOCITY = 0.005; // rad/ms (un golpe rápido no lo hace girar sin control)
+const IDLE_SWAY_MS = 5000; // vaivén automático sin interacción antes de detenerse (WCAG 2.2.2)
+const SETTLE_MS = 1500; // tramo final en el que el vaivén se frena
 
 const wrapAngle = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
 const smoothstep = (a: number, b: number, x: number) => {
@@ -35,7 +39,7 @@ const smoothstep = (a: number, b: number, x: number) => {
   return t * t * (3 - 2 * t);
 };
 
-function mountGlobe(host: HTMLElement, slot: HTMLElement | null): (() => void) | undefined {
+export function mountGlobe(host: HTMLElement, slot: HTMLElement | null): (() => void) | undefined {
   const canvas = document.createElement('canvas');
   canvas.className = 'globe-canvas';
   host.append(canvas);
@@ -95,6 +99,8 @@ function mountGlobe(host: HTMLElement, slot: HTMLElement | null): (() => void) |
   let pageVisible = document.visibilityState !== 'hidden';
   let shown = false;
   let frames = 0;
+  let swayed = 0; // ms de vaivén automático desde la última interacción
+  let settled = false;
 
   const draw = (now: number) => {
     const phi = VIEW.phi + VIEW.sway * Math.sin((clock / VIEW.swayPeriod) * Math.PI * 2) + offset;
@@ -113,7 +119,17 @@ function mountGlobe(host: HTMLElement, slot: HTMLElement | null): (() => void) |
     const dt = Math.min(now - last, 64);
     last = now;
     const active = dragging || Math.abs(velocity) > 1e-5 || Math.abs(offset) > 1e-4 || !shown;
-    clock += dt;
+    // Vaivén: a velocidad 1 hasta acercarse a IDLE_SWAY_MS; luego se frena (smoothstep) hasta 0.
+    if (!active) swayed += dt;
+    const rate = 1 - smoothstep(IDLE_SWAY_MS - SETTLE_MS, IDLE_SWAY_MS, swayed);
+    clock += dt * rate;
+    if (!active && rate <= 0) {
+      draw(now);
+      settled = true;
+      cancelAnimationFrame(raf);
+      raf = 0;
+      return;
+    }
     if (!active && now - lastDraw < IDLE_FRAME_MS) return;
 
     if (!dragging) {
@@ -134,7 +150,7 @@ function mountGlobe(host: HTMLElement, slot: HTMLElement | null): (() => void) |
   };
 
   const sync = () => {
-    const run = inView && pageVisible;
+    const run = inView && pageVisible && !settled;
     if (run && !raf) {
       last = performance.now();
       raf = requestAnimationFrame(frame);
@@ -175,6 +191,12 @@ function mountGlobe(host: HTMLElement, slot: HTMLElement | null): (() => void) |
     velocity = 0;
     canvas.setPointerCapture(e.pointerId);
     slot?.setAttribute('data-dragging', '');
+    // La interacción vuelve a poner en marcha el bucle (y el vaivén, otros 5 s como mucho).
+    swayed = 0;
+    if (settled) {
+      settled = false;
+      sync();
+    }
   };
   const onMove = (e: PointerEvent) => {
     if (!dragging || e.pointerId !== pointerId) return;
@@ -191,6 +213,7 @@ function mountGlobe(host: HTMLElement, slot: HTMLElement | null): (() => void) |
     pointerId = -1;
     if (e.timeStamp - lastMove > 80) velocity = 0; // se detuvo antes de soltar: sin inercia
     lastInteraction = performance.now();
+    swayed = 0;
     slot?.removeAttribute('data-dragging');
   };
   canvas.addEventListener('pointerdown', onDown);
@@ -227,31 +250,4 @@ function mountGlobe(host: HTMLElement, slot: HTMLElement | null): (() => void) |
     gl.getExtension('WEBGL_lose_context')?.loseContext();
     wrapper.remove();
   };
-}
-
-export default function Globe() {
-  const hostRef = useRef<HTMLDivElement>(null);
-  const reduced = usePrefersReducedMotion(); // true en SSR y en el primer render: no monta hasta saberlo
-
-  useEffect(() => {
-    const host = hostRef.current;
-    if (reduced || !host) return;
-    const slot = host.closest<HTMLElement>('[data-globe-slot]');
-    let cleanup: (() => void) | undefined;
-    let cancelled = false;
-    // Contexto WebGL y compilación de shaders en un momento ocioso (nunca compite con la carga).
-    const start = () => {
-      if (!cancelled) cleanup = mountGlobe(host, slot);
-    };
-    const ric = window.requestIdleCallback;
-    const id = typeof ric === 'function' ? ric(start, { timeout: 1200 }) : window.setTimeout(start, 200);
-    return () => {
-      cancelled = true;
-      if (typeof window.cancelIdleCallback === 'function' && typeof ric === 'function') window.cancelIdleCallback(id);
-      else window.clearTimeout(id);
-      cleanup?.();
-    };
-  }, [reduced]);
-
-  return <div ref={hostRef} className="globe-gl" aria-hidden="true" />;
 }

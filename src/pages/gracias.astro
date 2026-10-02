@@ -11,7 +11,8 @@
  * tras el pago de cada plan y tras la reserva, SI AccioGest lo permite. Mientras tanto la
  * página existe pero nadie llega a ella.
  * PENDIENTE (cliente): el proceso tras la compra no está confirmado; aquí solo figura lo que
- * incluyen los planes (servicios.json), sin plazos.
+ * incluyen los planes (servicios.json → «Todos los planes incluyen», tal cual), sin pasos ni
+ * plazos. Cuando la cliente o AccioGest confirmen el proceso, se podrá añadir una lista numerada.
  */
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import Icon from '~/components/ui/Icon.astro';
@@ -19,22 +20,16 @@ import { autogestiona } from '~/lib/services';
 import { WA_TEXT, waLink } from '~/data/site';
 import { url } from '~/lib/url';
 
-// Solo nombres conocidos (nunca se muestra texto de la URL).
+// Solo nombres conocidos (nunca se muestra texto de la URL): búsqueda por propiedad PROPIA
+// (?plan=constructor o toString no deben resolver a las del prototipo).
 const planNames = Object.fromEntries(autogestiona.plans.flatMap((p) => [[p.form_key, p.name], [p.id, p.name]]));
-const nextSteps = [
-  'Asesoría inicial con un experto en extranjería',
-  'Cumplimentación de los formularios',
-  'Presentación del expediente',
-  'Acceso a las notificaciones de extranjería y resolución de dudas sobre los requerimientos',
-];
-const variantScript = `(function(){try{var q=new URLSearchParams(location.search),t=q.get('tipo'),v=t==='plan'||t==='reserva'?t:'';if(v){document.querySelectorAll('[data-thanks]').forEach(function(el){el.hidden=el.getAttribute('data-thanks')!==v})}var n=${JSON.stringify(planNames)}[q.get('plan')||''];if(n){document.querySelectorAll('[data-plan-name]').forEach(function(el){el.textContent=n})}}catch(e){}})();`;
+const variantScript = `(function(){try{var q=new URLSearchParams(location.search),t=q.get('tipo'),v=t==='plan'||t==='reserva'?t:'';if(v){document.querySelectorAll('[data-thanks]').forEach(function(el){el.hidden=el.getAttribute('data-thanks')!==v})}var m=${JSON.stringify(planNames)},k=q.get('plan')||'',n=Object.prototype.hasOwnProperty.call(m,k)?m[k]:'';if(typeof n==='string'&&n){document.querySelectorAll('[data-plan-name]').forEach(function(el){el.textContent=n})}}catch(e){}})();`;
 ---
 
 <BaseLayout
   title="Gracias · Denisse González"
   description="Gracias por confiar en Denisse González, abogada."
   noindex
-  preloadFonts={['serif-600', 'sans-400']}
 >
   <section class="thanks" data-wa-hide>
     <div class="container container--narrow thanks-inner">
@@ -50,16 +45,16 @@ const variantScript = `(function(){try{var q=new URLSearchParams(location.search
         <h1 class="page-title">Gracias por contratar el <span data-plan-name>plan</span>.</h1>
         <div class="thanks-steps">
           <h2 class="thanks-steps-title">Lo que incluye tu plan</h2>
-          <ol class="thanks-list" role="list">
+          <ul class="check-list thanks-list" role="list">
             {
-              nextSteps.map((step, i) => (
+              autogestiona.includes.map((item) => (
                 <li>
-                  <span class="thanks-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-                  <span>{step}</span>
+                  <Icon name="check" />
+                  {item}
                 </li>
               ))
             }
-          </ol>
+          </ul>
         </div>
       </div>
 
@@ -69,7 +64,7 @@ const variantScript = `(function(){try{var q=new URLSearchParams(location.search
         <p class="lead">Tu reserva se ha completado.</p>
       </div>
 
-      <p class="thanks-help">¿Tienes cualquier duda?</p>
+      <p class="thanks-help">¿Tienes alguna duda?</p>
       <div class="btn-row thanks-actions">
         <a class="btn btn--primary" href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">
           <Icon name="whatsapp" />
@@ -121,19 +116,7 @@ const variantScript = `(function(){try{var q=new URLSearchParams(location.search
     text-align: left;
   }
   .thanks-steps-title { margin-bottom: 1rem; font-family: var(--ff-serif); font-size: var(--fs-h4); font-weight: 600; }
-  .thanks-list { display: grid; gap: .9rem; }
-  .thanks-list li { display: grid; grid-template-columns: 2.5rem 1fr; gap: .9rem; align-items: center; color: var(--c-ink); font-weight: 500; line-height: 1.45; }
-  .thanks-num {
-    display: grid;
-    place-items: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 50%;
-    background: var(--c-lavender);
-    color: var(--c-plum);
-    font-family: var(--ff-serif);
-    font-weight: 600;
-  }
+  .thanks-list { gap: .85rem; }
   .thanks-help { margin-top: 2rem; color: var(--c-ink-soft); }
   .thanks-actions { justify-content: center; margin-top: 1.25rem; }
 </style>

@@ -130,6 +130,12 @@
   --z-float: 40;
   --z-header: 50;
 
+  /* Celosía geométrica (estrella de ocho puntas): motivo de Dubái (página /dubai/, tarjeta del
+     inicio y bloque del partner). Dos tintas: oro (sobre ciruela oscuro) y ciruela (sobre claro).
+     Teselas de 60 px; se usa como background-image con un degradado encima para fundirla. */
+  --lattice-gold: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='none' stroke='%23DDB56C' stroke-width='.9'%3E%3Cpath d='M18 18h24v24H18zM30 13.03 46.97 30 30 46.97 13.03 30z'/%3E%3Cpath d='M30 0v13.03M30 46.97V60M0 30h13.03M46.97 30H60M0 0l18 18M60 0 42 18M60 60 42 42M0 60l18-18'/%3E%3C/g%3E%3C/svg%3E");
+  --lattice-plum: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='none' stroke='%236E1D7A' stroke-width='.8'%3E%3Cpath d='M18 18h24v24H18zM30 13.03 46.97 30 30 46.97 13.03 30z'/%3E%3Cpath d='M30 0v13.03M30 46.97V60M0 30h13.03M46.97 30H60M0 0l18 18M60 0 42 18M60 60 42 42M0 60l18-18'/%3E%3C/g%3E%3C/svg%3E");
+
   --focus: var(--c-plum);
   color-scheme: light;
 }
@@ -246,9 +252,11 @@ main:focus { outline: none; }
 .nowrap { white-space: nowrap; }
 
 /* 4. Tipografía =========================================================== */
+/* Si el antetítulo ocupa dos líneas, el filete acompaña a la primera (no queda centrado en el
+   bloque): flex-start + margen de media línea (line-height 1.4 → .7em). */
 .eyebrow {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   gap: .85em;
   margin-bottom: 1.25rem;
   color: var(--c-plum);
@@ -264,12 +272,13 @@ main:focus { outline: none; }
   content: "";
   width: 2rem;
   height: 1px;
+  margin-top: .7em;
   background: currentColor;
   flex: none;
 }
 .eyebrow--light { color: var(--c-lavender-300); }
 .eyebrow--center { justify-content: center; }
-.eyebrow--center::after { content: ""; width: 2rem; height: 1px; background: currentColor; flex: none; }
+.eyebrow--center::after { content: ""; width: 2rem; height: 1px; margin-top: .7em; background: currentColor; flex: none; }
 
 .page-title,
 .section-title {
@@ -585,13 +594,15 @@ dialog { color: inherit; }
 }
 .field textarea { min-height: 9.5rem; resize: vertical; }
 .field :is(input, select, textarea):hover { border-color: var(--c-plum); }
-.field :is(input[type="text"], input[type="email"], input[type="tel"], select, textarea):focus {
-  outline: none;
-  border-color: var(--c-plum);
-  box-shadow: 0 0 0 4px rgba(110, 29, 122, .2);
+/* Foco: borde ciruela + anillo sólido de 2 px separado del campo (visible también cuando el
+   campo está marcado como erróneo, donde el borde ya es rojo). */
+.field :is(input[type="text"], input[type="email"], input[type="tel"], select, textarea):focus { outline: none; border-color: var(--c-plum); }
+.field :is(input[type="text"], input[type="email"], input[type="tel"], select, textarea):focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 10px;
 }
 .field [aria-invalid="true"] { border-color: var(--c-error) !important; }
-.field [aria-invalid="true"]:focus { box-shadow: 0 0 0 4px rgba(168, 38, 28, .15) !important; }
 
 .select-wrap { position: relative; }
 .select-wrap::after {
@@ -624,6 +635,7 @@ dialog { color: inherit; }
 .field-error:not(:empty) { display: flex; }
 .field-error:not(:empty)::before {
   content: "!";
+  content: "!" / "";  /* decorativo: fuera del nombre accesible del mensaje */
   display: grid;
   place-items: center;
   flex: none;
@@ -691,7 +703,8 @@ dialog { color: inherit; }
   accent-color: var(--c-plum);
   cursor: pointer;
 }
-.consent input[aria-invalid="true"] { outline: 2px solid var(--c-error); outline-offset: 2px; }
+/* Error sin usar outline: así el contorno de :focus-visible sigue viéndose encima. */
+.consent input[aria-invalid="true"] { box-shadow: 0 0 0 2px var(--c-white), 0 0 0 4px var(--c-error); border-radius: 3px; }
 
 .hp-field { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 
@@ -731,9 +744,14 @@ dialog { color: inherit; }
 ::view-transition-group(site-header) { animation-duration: var(--dur-page); }
 ::view-transition-group(wa-float) { animation-duration: 0s; }
 
-/* Tarjeta de Empoderando Voces (inicio) ↔ portada de su página: la tarjeta oscura se
-   expande hasta ocupar la página (movimiento en pantalla → ease-in-out). La tarjeta no se
-   desvanece (nada de «doble imagen»): la portada nueva la cubre a mitad del gesto. */
+/* Tarjeta de Empoderando Voces (inicio) ↔ portada de su página («ev-panel»): la tarjeta oscura
+   se expande hasta ocupar la página (movimiento en pantalla → ease-in-out). Solo hay pareja si
+   la tarjeta (o la portada, al volver) está a la vista al cambiar de página: lo deciden los
+   scripts de EvTeaser.astro y de /empoderando-voces/; si no, fundido normal (:only-child).
+   - Fundido cruzado de las dos instantáneas en la MISMA ventana (plus-lighter: la suma es opaca,
+     sin «doble imagen» ni hueco); la antigua además se desenfoca un poco (Emil: el desenfoque
+     funde el cruce).
+   - El radio de la tarjeta se anima con el recorte (sin esquinas que saltan a cuadradas). */
 ::view-transition-group(ev-panel) {
   animation-duration: var(--dur-morph);
   animation-timing-function: var(--ease-in-out);
@@ -743,21 +761,33 @@ dialog { color: inherit; }
   height: 100%;
   object-fit: cover;
   object-position: 50% 0;
-  overflow: clip;
-  mix-blend-mode: normal;
+  mix-blend-mode: plus-lighter;
 }
-/* La tarjeta se desenfoca un poco al crecer (Emil: el desenfoque disimula el fundido cruzado)
-   y la portada nueva la cubre deprisa: casi no hay «doble imagen». */
-::view-transition-old(ev-panel) { animation: vt-soften calc(var(--dur-morph) * .4) var(--ease-out) both; }
+::view-transition-old(ev-panel) {
+  animation: vt-soften-out calc(var(--dur-morph) * .32) var(--ease-out) calc(var(--dur-morph) * .2) both;
+}
 ::view-transition-new(ev-panel) {
-  animation: vt-fade-in calc(var(--dur-morph) * .3) var(--ease-out) calc(var(--dur-morph) * .28) both;
+  animation: vt-fade-in calc(var(--dur-morph) * .32) var(--ease-out) calc(var(--dur-morph) * .2) both;
 }
-@keyframes vt-soften { to { filter: blur(5px); } }
-/* Si solo existe en una de las dos páginas (p. ej. del inicio a Servicios): fundido normal. */
-::view-transition-old(ev-panel):only-child { animation: vt-out var(--dur-exit) var(--ease-out) both; }
-::view-transition-new(ev-panel):only-child { animation: vt-fade-in var(--dur-page) var(--ease-out) both; }
-/* Del inicio a Empoderando Voces (tipo «ev-morph», lo marca la propia página al revelarse):
-   el inicio se queda un instante para que se vea la tarjeta crecer sobre él. */
+@keyframes vt-soften-out { to { opacity: 0; filter: blur(6px); } }
+/* Radio, solo cuando hay pareja (los tipos los marca el script de la página que llega): de la
+   tarjeta a 0 al ir («ev-morph»), de 0 a la tarjeta al volver («ev-return»). */
+::view-transition-image-pair(ev-panel) { overflow: clip; }
+html:active-view-transition-type(ev-morph)::view-transition-image-pair(ev-panel) {
+  animation: vt-panel-radius-out var(--dur-morph) var(--ease-in-out) both;
+}
+html:active-view-transition-type(ev-return)::view-transition-image-pair(ev-panel) {
+  animation: vt-panel-radius-in var(--dur-morph) var(--ease-in-out) both;
+}
+@keyframes vt-panel-radius-out { from { border-radius: clamp(20px, 3vw, 36px); } to { border-radius: 0; } }
+@keyframes vt-panel-radius-in { from { border-radius: 0; } to { border-radius: clamp(20px, 3vw, 36px); } }
+/* Si solo existe en una de las dos páginas (p. ej. del inicio a Servicios, o la tarjeta no se
+   veía al pulsar el menú): fundido normal. */
+::view-transition-old(ev-panel):only-child { mix-blend-mode: normal; animation: vt-out var(--dur-exit) var(--ease-out) both; }
+::view-transition-new(ev-panel):only-child { mix-blend-mode: normal; animation: vt-fade-in var(--dur-page) var(--ease-out) both; }
+/* Del inicio a Empoderando Voces CON pareja (tipo «ev-morph», lo marca la propia página al
+   revelarse solo si la tarjeta del inicio participa): el inicio se queda un instante para que
+   se vea la tarjeta crecer sobre él. */
 html:active-view-transition-type(ev-morph)::view-transition-old(root) {
   animation: vt-out 220ms var(--ease-out) calc(var(--dur-morph) * .35) both;
 }
@@ -768,42 +798,30 @@ html:active-view-transition-type(ev-morph)::view-transition-group(site-header) {
   animation-delay: calc(var(--dur-morph) * .3);
 }
 
-/* Retrato compartido entre el inicio y Conóceme («portrait»). El nombre lo pone el script de
-   BaseLayout (pageswap/pagereveal) SOLO en la foto que se ve en pantalla en cada lado: la
-   del hero o la de «Conóceme» del inicio ↔ la foto de la cabecera de Conóceme. La foto se
-   desplaza y cambia de tamaño hasta su sitio (movimiento en pantalla → ease-in-out).
-   - Misma foto (tarjeta «Conóceme» del inicio): fundido cruzado sincronizado (plus-lighter),
-     se percibe como una sola imagen que viaja (tipo «portrait-same»).
-   - Fotos distintas (retrato del hero → foto de la ONU): la anterior se desenfoca un poco y se
-     funde mientras la nueva aparece (Emil: el desenfoque disimula el fundido). */
-::view-transition-group(portrait) {
+/* Retrato compartido entre el inicio y Conóceme (clase «portrait»; nombre «portrait-<foto>»).
+   El nombre lo pone el script de BaseLayout (pageswap/pagereveal) SOLO en la foto que se ve en
+   pantalla en cada lado, e incluye el nombre del archivo: solo hay pareja si es la MISMA foto
+   (retrato del hero ↔ retrato de Conóceme). Entonces viaja y cambia de tamaño hasta su sitio
+   (movimiento en pantalla → ease-in-out) con un fundido cruzado sincronizado (plus-lighter):
+   se percibe como una sola imagen. Fotos distintas = sin pareja: cada una se funde en su sitio
+   con la página (sin «doble imagen» ni fotos semitransparentes cruzando el texto). */
+::view-transition-group(*.portrait) {
   animation-duration: var(--dur-portrait);
   animation-timing-function: var(--ease-in-out);
 }
-::view-transition-old(portrait),
-::view-transition-new(portrait) {
+::view-transition-old(*.portrait),
+::view-transition-new(*.portrait) {
   height: 100%;
   object-fit: cover;
-  mix-blend-mode: normal;
-}
-::view-transition-old(portrait) {
-  animation: vt-portrait-out calc(var(--dur-portrait) * .6) var(--ease-out) both;
-}
-::view-transition-new(portrait) {
-  animation: vt-fade-in calc(var(--dur-portrait) * .55) var(--ease-out) calc(var(--dur-portrait) * .18) both;
-}
-@keyframes vt-portrait-out { to { opacity: 0; filter: blur(4px); } }
-html:active-view-transition-type(portrait-same)::view-transition-old(portrait),
-html:active-view-transition-type(portrait-same)::view-transition-new(portrait) {
   mix-blend-mode: plus-lighter;
   animation-duration: var(--dur-portrait);
-  animation-delay: 0s;
   animation-timing-function: linear;
+  animation-fill-mode: both;
 }
-html:active-view-transition-type(portrait-same)::view-transition-old(portrait) { animation-name: vt-out; }
-html:active-view-transition-type(portrait-same)::view-transition-new(portrait) { animation-name: vt-fade-in; }
-::view-transition-old(portrait):only-child { animation: vt-out var(--dur-exit) var(--ease-out) both; }
-::view-transition-new(portrait):only-child { animation: vt-in var(--dur-page) var(--ease-out) both; }
+::view-transition-old(*.portrait) { animation-name: vt-out; }
+::view-transition-new(*.portrait) { animation-name: vt-fade-in; }
+::view-transition-old(*.portrait):only-child { mix-blend-mode: normal; animation: vt-out var(--dur-exit) var(--ease-out) both; }
+::view-transition-new(*.portrait):only-child { mix-blend-mode: normal; animation: vt-in var(--dur-page) var(--ease-out) both; }
 
 /* Indicador de la página actual en la navegación de escritorio (Header: .nav-current): la
    línea se desliza de un enlace al siguiente en lugar de apagarse y encenderse. */
@@ -822,8 +840,13 @@ html:active-view-transition-type(portrait-same)::view-transition-new(portrait) {
   ::view-transition-new(root) { animation-name: vt-fade-in !important; }
   ::view-transition-old(ev-panel) { animation: vt-out var(--dur-exit) var(--ease-out) both !important; }
   ::view-transition-new(ev-panel) { animation: vt-fade-in var(--dur-page) var(--ease-out) both !important; }
-  ::view-transition-old(portrait) { animation: vt-out var(--dur-exit) var(--ease-out) both !important; }
-  ::view-transition-new(portrait) { animation: vt-fade-in var(--dur-page) var(--ease-out) both !important; }
+  ::view-transition-image-pair(ev-panel) { animation: none !important; }
+  ::view-transition-old(ev-panel),
+  ::view-transition-new(ev-panel),
+  ::view-transition-old(*.portrait),
+  ::view-transition-new(*.portrait) { mix-blend-mode: normal; }
+  ::view-transition-old(*.portrait) { animation: vt-out var(--dur-exit) var(--ease-out) both !important; }
+  ::view-transition-new(*.portrait) { animation: vt-fade-in var(--dur-page) var(--ease-out) both !important; }
 }
 
 /* 9. Aparición al hacer scroll y movimiento reducido ====================== */

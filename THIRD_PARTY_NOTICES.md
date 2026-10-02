@@ -4,11 +4,23 @@ Componentes y recursos de terceros incluidos en la web, con su licencia.
 
 ## Librerías
 
+Todas llegan al navegador; sus licencias completas se publican con la web en `/licencias.txt`
+(`src/pages/licencias.txt.ts`, enlazado desde el aviso legal §4), porque el minificador elimina
+los comentarios de licencia del JavaScript.
+
 | Librería | Uso | Licencia |
 |---|---|---|
-| `ogl` | WebGL de la aurora y la galería (Empoderando Voces) | MIT |
-| `cobe` (Shu Ding) | Globo 3D de Conóceme (`src/components/about/Globe.tsx`) y su póster | MIT |
+| `react`, `react-dom` (Meta Platforms, Inc. y afiliados) | Islas de React (Empoderando Voces) | MIT |
+| `astro` (runtime de las islas) | Hidratación de las islas | MIT |
+| `ogl` | WebGL de la aurora y la galería (Empoderando Voces) | The Unlicense (dominio público) |
+| `cobe` (Shu Ding) | Globo 3D de Conóceme (`src/components/about/globe-mount.ts`) y su póster | MIT |
 | `driver.js` (Kamran Ahmed) | Visita guiada de Servicios (`src/scripts/tour.ts`, carga diferida) | MIT |
+
+## Marcas de terceros
+
+| Elemento | Uso | Titular |
+|---|---|---|
+| Logotipo de Poplavsky International Offices (`src/assets/img/poplavsky-logo.jpg`, de la web anterior) | Bloque «Partner en Dubái» en /dubai/ y /conoceme/ | Su titular (pendiente de confirmar la autorización, `docs/contenido.md` §7) |
 
 ## Tipografías (autoalojadas con @fontsource)
 

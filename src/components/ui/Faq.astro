@@ -1,0 +1,120 @@
+---
+/**
+ * Preguntas frecuentes con <details>/<summary> nativos: accesibles con teclado y lector de
+ * pantalla, funcionan sin JavaScript y se encuentran con la búsqueda del navegador.
+ * La respuesta entra con un fundido + 6 px (220 ms, ease-out); al cerrar, desaparece al instante.
+ * El marcador gira con transición (interrumpible). Con «reducir movimiento», sin desplazamiento.
+ * El FAQPage de JSON-LD lo pone la página (src/data/faq.ts → faqJsonLd).
+ */
+import type { FaqItem } from '~/data/faq';
+
+interface Props {
+  items: FaqItem[];
+  /** Tono del fondo donde va la lista. */
+  tone?: 'light' | 'dark';
+  class?: string;
+}
+const { items, tone = 'light', class: className } = Astro.props;
+---
+
+<div class:list={['faq', `faq--${tone}`, className]}>
+  {
+    items.map((item) => (
+      <details class="faq-item" id={item.id}>
+        <summary class="faq-q">
+          <span class="faq-q-text">{item.question}</span>
+          <span class="faq-marker" aria-hidden="true" />
+        </summary>
+        <div class="faq-a">
+          <p>{item.answer}</p>
+        </div>
+      </details>
+    ))
+  }
+</div>
+
+<style>
+  .faq {
+    --faq-line: var(--c-line);
+    --faq-fg: var(--c-ink);
+    --faq-soft: var(--c-ink-soft);
+    --faq-accent: var(--c-plum);
+    --faq-marker-bg: var(--c-lavender);
+    border-top: 1px solid var(--faq-line);
+  }
+  .faq--dark {
+    --faq-line: rgba(243, 237, 245, .18);
+    --faq-fg: #fff;
+    --faq-soft: rgba(243, 237, 245, .86);
+    --faq-accent: var(--c-lavender-300);
+    --faq-marker-bg: rgba(243, 237, 245, .1);
+    --focus: #fff;
+  }
+  .faq-item { border-bottom: 1px solid var(--faq-line); }
+  .faq-q {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    min-height: 44px;
+    padding: 1.35rem 0;
+    color: var(--faq-fg);
+    font-family: var(--ff-serif);
+    font-size: clamp(1.3rem, 1.15rem + .7vw, 1.65rem);
+    font-weight: 600;
+    line-height: 1.22;
+    cursor: pointer;
+    list-style: none;
+    -webkit-tap-highlight-color: transparent;
+    text-wrap: pretty;
+  }
+  .faq-q::-webkit-details-marker { display: none; }
+  .faq-q::marker { content: ""; }
+  .faq-q:focus-visible { outline-offset: 4px; border-radius: 6px; }
+  .faq-marker {
+    position: relative;
+    flex: none;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: var(--faq-marker-bg);
+    transition: background-color var(--dur-fast) var(--ease-hover);
+  }
+  .faq-marker::before,
+  .faq-marker::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: .8rem;
+    height: 1.5px;
+    margin: -.75px 0 0 -.4rem;
+    border-radius: 2px;
+    background: var(--faq-accent);
+    transition: transform var(--dur) var(--ease-out);
+  }
+  .faq-marker::after { transform: rotate(90deg); }
+  .faq-item[open] .faq-marker::after { transform: rotate(0deg); }
+  @media (hover: hover) and (pointer: fine) {
+    .faq-q:hover { color: var(--faq-accent); }
+    .faq--dark .faq-q:hover { color: #fff; }
+    .faq-q:hover .faq-marker { background: var(--c-lavender-200); }
+    .faq--dark .faq-q:hover .faq-marker { background: rgba(243, 237, 245, .18); }
+  }
+  .faq-a {
+    max-width: 44rem;
+    padding: 0 3.5rem 1.6rem 0;
+    color: var(--faq-soft);
+    line-height: 1.6;
+    text-wrap: pretty;
+  }
+  .faq-item[open] .faq-a { animation: faq-in 220ms var(--ease-out); }
+  @keyframes faq-in { from { opacity: 0; translate: 0 -6px; } }
+  @media (max-width: 479.98px) {
+    .faq-a { padding-right: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .faq-item[open] .faq-a { animation: faq-fade 200ms var(--ease-out) !important; }
+    @keyframes faq-fade { from { opacity: 0; } }
+  }
+</style>

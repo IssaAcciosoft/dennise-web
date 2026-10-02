@@ -5,7 +5,8 @@
  * Precios y servicios desde src/data/servicios.json (siempre coinciden con la web).
  */
 import LegalLayout from '~/layouts/LegalLayout.astro';
-import { PHONE, TEL_LINK, WA_TEXT, waLink } from '~/data/site';
+import { PHONE, TEL_LINK, WA_TEXT, waLink, EMAIL, OFFICE } from '~/data/site';
+import { LEGAL_ID } from '~/data/legal';
 import { consultations, autogestiona, formatAmount } from '~/lib/services';
 import { url } from '~/lib/url';
 ---
@@ -24,11 +25,12 @@ import { url } from '~/lib/url';
 
   <h2>1. Prestadora del servicio</h2>
   <dl>
-    <div><dt>Titular</dt><dd>Denisse González Barbosa</dd></div>
-    <div><dt>NIF / NIE</dt><dd><span class="placeholder">[PENDIENTE: NIF]</span></dd></div>
-    <div><dt>Domicilio profesional</dt><dd><span class="placeholder">[PENDIENTE: domicilio]</span></dd></div>
+    <div><dt>Titular</dt><dd>{LEGAL_ID.holder}</dd></div>
+    <div><dt>NIE</dt><dd>{LEGAL_ID.nie}</dd></div>
+    <div><dt>Nombre comercial</dt><dd>{LEGAL_ID.tradeName}</dd></div>
+    <div><dt>Domicilio profesional</dt><dd>{OFFICE.oneLine}</dd></div>
     <div><dt>Teléfono</dt><dd><a href={TEL_LINK}>{PHONE.display}</a></dd></div>
-    <div><dt>Correo electrónico</dt><dd><span class="placeholder">[PENDIENTE: email de contacto]</span></dd></div>
+    <div><dt>Correo electrónico</dt><dd><a href={EMAIL.href}>{EMAIL.address}</a></dd></div>
     <div><dt>Colegio profesional y n.º de colegiada</dt><dd><span class="placeholder">[PENDIENTE: si aplica]</span></dd></div>
   </dl>
 
@@ -51,7 +53,7 @@ import { url } from '~/lib/url';
     {autogestiona.plans.map((p) => <li>{p.name}: {formatAmount(p.amount)} €.</li>)}
   </ul>
   <p>{autogestiona.includes_title}: {autogestiona.includes.map((i) => i.charAt(0).toLowerCase() + i.slice(1)).join('; ')}. <span class="placeholder">[PENDIENTE: qué diferencia a cada plan]</span></p>
-  <p>Los precios se indican en euros e incluyen el IVA. <span class="placeholder">[PENDIENTE: confirmar que los precios de las asesorías incluyen IVA]</span></p>
+  <p>Los precios se indican en euros. Los planes del {autogestiona.name} incluyen el IVA. <span class="placeholder">[PENDIENTE: confirmar si los precios de las asesorías incluyen IVA]</span></p>
 
   <h2>4. Contratación y pago</h2>
   <ul>
@@ -63,7 +65,7 @@ import { url } from '~/lib/url';
 
   <h2>5. Prestación del servicio</h2>
   <ul>
-    <li><strong>Asesorías:</strong> se prestan el día y a la hora reservados, en la modalidad elegida. Online: <span class="placeholder">[PENDIENTE: herramienta de videollamada y cómo se envía el enlace]</span>. Presencial: <span class="placeholder">[PENDIENTE: dirección de la oficina]</span>.</li>
+    <li><strong>Asesorías:</strong> se prestan el día y a la hora reservados, en la modalidad elegida. Online: <span class="placeholder">[PENDIENTE: herramienta de videollamada y cómo se envía el enlace]</span>. Presencial: en el despacho, {OFFICE.oneLine}.</li>
     <li><strong>{autogestiona.name}:</strong> incluye los servicios indicados en el apartado 3 para el trámite contratado. <span class="placeholder">[PENDIENTE: proceso tras la compra (quién contacta, cómo se agenda la asesoría inicial y cómo se entrega la documentación)]</span></li>
     <li>La persona usuaria se compromete a facilitar información veraz, completa y actualizada y la documentación necesaria para el trámite.</li>
   </ul>
@@ -73,7 +75,7 @@ import { url } from '~/lib/url';
   <ul>
     <li><strong>Inicio del servicio dentro del plazo:</strong> si solicitas expresamente que el servicio comience durante esos 14 días (por ejemplo, al reservar una asesoría para una fecha dentro de ese plazo o al empezar el {autogestiona.name}), y después desistes, deberás abonar la parte proporcional del servicio ya prestado (art. 108.3).</li>
     <li><strong>Servicio completamente prestado:</strong> no podrás desistir una vez que el servicio se haya prestado por completo, si su ejecución comenzó con tu consentimiento expreso previo y con tu reconocimiento de que, en ese caso, pierdes el derecho de desistimiento (art. 103.a).</li>
-    <li><strong>Cómo desistir:</strong> comunícalo de forma inequívoca a <span class="placeholder">[PENDIENTE: email de contacto]</span> o por WhatsApp al <a href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">{PHONE.display}</a>. Puedes usar este modelo (no es obligatorio): «Por la presente le comunico que desisto de mi contrato de prestación del siguiente servicio: […], contratado el […]. Nombre: […]. Domicilio: […]. Fecha: […]».</li>
+    <li><strong>Cómo desistir:</strong> comunícalo de forma inequívoca a <a href={EMAIL.href}>{EMAIL.address}</a> o por WhatsApp al <a href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">{PHONE.display}</a>. Puedes usar este modelo (no es obligatorio): «Por la presente le comunico que desisto de mi contrato de prestación del siguiente servicio: […], contratado el […]. Nombre: […]. Domicilio: […]. Fecha: […]».</li>
     <li><strong>Devolución:</strong> se reembolsarán los importes que correspondan en un plazo máximo de 14 días naturales desde la comunicación, por el mismo medio de pago utilizado.</li>
   </ul>
   <p><span class="placeholder">[PENDIENTE: confirmar con AccioGest cómo recoge el sistema de reservas y la página de pago la solicitud expresa de inicio del servicio y el reconocimiento de pérdida del derecho (casilla en el momento de la compra)]</span></p>

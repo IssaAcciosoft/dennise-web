@@ -8,10 +8,17 @@
  * para lectores de pantalla (sigue en el árbol de accesibilidad; deja de ser enfocable).
  * Botones «anterior / siguiente» siempre visibles y una región aria-live que anuncia la foto.
  * El lienzo no anima nada en reposo (sin rAF permanente) y solo se mueve con el gesto.
+ *
+ * Rendimiento: CircularGallery y ogl se descargan aparte (import() diferido) y SOLO sin
+ * «reducir movimiento» (con él, la isla solo aporta los botones y el anuncio). Las texturas son
+ * los mismos archivos que ya eligió cada <img> de la lista (currentSrc: AVIF o WebP, 450 o
+ * 600 px según la pantalla): una sola descarga por foto.
  */
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import CircularGallery, { type CircularGalleryHandle, type GalleryItem } from '../react-bits/CircularGallery/CircularGallery';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import type { CircularGalleryHandle, GalleryItem } from '../react-bits/CircularGallery/CircularGallery';
 import { usePrefersReducedMotion } from '../islands/hooks';
+
+const CircularGallery = lazy(() => import('../react-bits/CircularGallery/CircularGallery'));
 
 interface Props {
   items: GalleryItem[];
@@ -41,6 +48,32 @@ export default function EvGallery({ items }: Props) {
   const n = items.length;
 
   const host = () => layerRef.current?.closest<HTMLElement>('[data-ev-gallery]') ?? null;
+
+  // Texturas: el archivo que el navegador eligió para cada foto de la lista (srcset).
+  const [glItems, setGlItems] = useState<GalleryItem[] | null>(null);
+  useEffect(() => {
+    if (reduced) return;
+    const imgs = Array.from(host()?.querySelectorAll<HTMLImageElement>('[data-ev-strip] img') ?? []);
+    if (imgs.length !== items.length) {
+      setGlItems(items);
+      return;
+    }
+    let alive = true;
+    const urlOf = (img: HTMLImageElement, i: number) =>
+      new Promise<string>((resolve) => {
+        const done = () => resolve(img.currentSrc || items[i].image);
+        if (img.complete && img.naturalWidth) return done();
+        img.loading = 'eager'; // la galería las necesita todas: que no esperen al scroll
+        img.addEventListener('load', done, { once: true });
+        img.addEventListener('error', () => resolve(items[i].image), { once: true });
+      });
+    Promise.all(imgs.map(urlOf)).then((urls) => {
+      if (alive) setGlItems(items.map((item, i) => ({ ...item, image: urls[i] })));
+    });
+    return () => {
+      alive = false;
+    };
+  }, [reduced, items]);
 
   useEffect(() => {
     const el = host();
@@ -89,20 +122,22 @@ export default function EvGallery({ items }: Props) {
   return (
     <>
       <div ref={layerRef} className="ev-gallery-gl" aria-hidden="true">
-        {!reduced && (
-          <CircularGallery
-            ref={galleryRef}
-            items={items}
-            bend={2.4}
-            textColor="#E9D8EC"
-            font={'italic 500 56px "Cormorant Garamond"'}
-            borderRadius={0.02}
-            planeHeight={0.66}
-            offsetY={0.085}
-            scrollEase={0.075}
-            onReady={() => setGlOn(true)}
-            onIndexChange={onIndexChange}
-          />
+        {!reduced && glItems && (
+          <Suspense fallback={null}>
+            <CircularGallery
+              ref={galleryRef}
+              items={glItems}
+              bend={2.4}
+              textColor="#E9D8EC"
+              font={'italic 500 56px "Cormorant Garamond"'}
+              borderRadius={0.02}
+              planeHeight={0.66}
+              offsetY={0.085}
+              scrollEase={0.075}
+              onReady={() => setGlOn(true)}
+              onIndexChange={onIndexChange}
+            />
+          </Suspense>
         )}
       </div>
       <div className="ev-gallery-controls" onKeyDown={onKey}>

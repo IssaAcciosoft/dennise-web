@@ -1,0 +1,127 @@
+---
+/**
+ * «Servicios de extranjería en España» (/servicios/, antes de los precios). Textos de la web
+ * anterior (docs/web-anterior.md §5 y §6) desde src/data/servicios.json → immigration.
+ * - Cada servicio: «Solicitar información» abre el diálogo de solicitud (ServiceRequestDialog)
+ *   con el servicio preseleccionado (data-service-request = lead_value); sin JavaScript, WhatsApp.
+ * - Visita guiada: data-tour="extranjeria" (src/scripts/tour.ts).
+ */
+import { immigration } from '~/lib/services';
+import { waLink } from '~/data/site';
+import Icon from '../ui/Icon.astro';
+
+const askText = (leadValue: string) => `Hola Denisse, me gustaría recibir información sobre: ${leadValue}.`;
+const [lead, ...rest] = immigration.intro;
+---
+
+<section class="section section--white immigration" id="extranjeria" aria-labelledby="extranjeria-title">
+  <div class="container">
+    <div class="imm-head" data-tour="extranjeria">
+      <div>
+        <p class="eyebrow" data-reveal>{immigration.eyebrow}</p>
+        <h2 class="section-title imm-title" id="extranjeria-title" data-reveal>{immigration.title}</h2>
+      </div>
+      <div class="prose imm-intro" data-reveal>
+        <p class="prose-lead">{lead}</p>
+        {rest.map((p) => <p>{p}</p>)}
+      </div>
+    </div>
+
+    <ul class="imm-grid" role="list">
+      {
+        immigration.services.map((s, i) => (
+          <li class="imm-card" data-service-id={s.id} data-reveal data-spotlight>
+            <span class="imm-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <h3 class="imm-name">{s.name}</h3>
+            <p class="imm-desc">{s.description}</p>
+            <a class="btn btn--link imm-ask" href={waLink(askText(s.lead_value))} target="_blank" rel="noopener" data-service-request={s.lead_value}>
+              <span>
+                Solicitar información<span class="visually-hidden">{` sobre ${s.name.toLowerCase()}`}</span>
+              </span>
+              <Icon name="arrow" />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="imm-also" data-reveal>
+      <p class="imm-also-title">{immigration.also_title}</p>
+      <ul class="imm-also-list" role="list">
+        {immigration.also.map((a) => <li>{a.name}</li>)}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .imm-head {
+    display: grid;
+    gap: 1.5rem clamp(3rem, 6vw, 5rem);
+    margin-bottom: clamp(2.5rem, 5vw, 3.5rem);
+  }
+  .imm-title { max-width: 9em; }
+  .imm-intro { max-width: 34em; }
+  @media (min-width: 960px) {
+    .imm-head { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: end; }
+  }
+
+  .imm-grid { display: grid; gap: 1.25rem; }
+  @media (min-width: 680px) {
+    .imm-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width: 1040px) {
+    .imm-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; }
+  }
+  .imm-card {
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+    padding: clamp(1.5rem, 1.2rem + 1vw, 2.1rem) clamp(1.5rem, 1.2rem + 1vw, 2.1rem) 1.25rem;
+    background: var(--c-ivory);
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius-l);
+    transition: border-color var(--dur) var(--ease-hover), box-shadow var(--dur) var(--ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .imm-card:hover { border-color: var(--c-line-strong); box-shadow: var(--shadow-s); }
+  }
+  .imm-num { color: var(--c-plum); font-size: .78rem; font-weight: 600; letter-spacing: .2em; }
+  .imm-name {
+    font-family: var(--ff-serif);
+    font-size: var(--fs-h4);
+    font-weight: 600;
+    line-height: 1.12;
+    text-wrap: balance;
+  }
+  .imm-desc { color: var(--c-ink-soft); font-size: var(--fs-small); line-height: 1.65; text-wrap: pretty; }
+  .imm-ask { align-self: flex-start; margin-top: auto; font-size: .95rem; }
+
+  .imm-also {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .75rem 1.25rem;
+    margin-top: clamp(1.75rem, 3vw, 2.5rem);
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--c-line);
+  }
+  .imm-also-title {
+    color: var(--c-muted);
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+  .imm-also-list { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem 1rem; }
+  .imm-also-list li {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    font-family: var(--ff-serif);
+    font-size: clamp(1.2rem, 1.1rem + .4vw, 1.4rem);
+    font-weight: 600;
+    color: var(--c-ink);
+  }
+  .imm-also-list li + li::before { content: ""; width: .35rem; height: .35rem; background: var(--c-plum); rotate: 45deg; }
+</style>

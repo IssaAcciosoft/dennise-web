@@ -1,12 +1,14 @@
 /**
- * Visita guiada de /servicios/ con driver.js (MIT, ~7 KB gzip + 1 KB de CSS).
+ * Visita guiada de /servicios/ con driver.js (MIT; este fragmento diferido, con el CSS, pesa
+ * ≈ 13 KB gzip).
  *
  * Se carga SOLO al pulsar «¿Te guío?» (import() dinámico desde ServicesTour.astro): ni el JS
  * ni el CSS de driver.js están en la carga inicial. Nunca arranca sola.
  *
- * Recorrido (en el orden de la página, sin saltos atrás): asesorías (online / presencial) →
- * orientación académica → Programa Autogestiona (trámites, planes, «¿Cómo funciona?»,
- * «Todos los planes incluyen») → Reserva tu asesoría → «Solicitar información».
+ * Recorrido (en el orden de la página, sin saltos atrás): servicios de extranjería en España →
+ * asesorías (online / presencial) → orientación académica → Programa Autogestiona (trámites,
+ * planes, «¿Cómo funciona?», «Todos los planes incluyen») → Reserva tu asesoría → preguntas
+ * frecuentes («¿Tienes dudas?», con el botón «Solicitar información»).
  * Textos: solo hechos de docs/contenido.md y de la propia página (precios desde
  * src/data/servicios.json). Sin plazos ni promesas.
  *
@@ -21,7 +23,7 @@ import { driver, type DriveStep, type Driver, type PopoverDOM } from 'driver.js'
 // estilos, Astro lo incrustaría en el HTML de /servicios/ (carga inicial).
 import driverCss from 'driver.js/dist/driver.css?inline';
 import tourCss from '~/styles/tour.css?inline';
-import { consultations, autogestiona, formatAmount, CATALOG } from '~/lib/services';
+import { consultations, autogestiona, immigration, formatAmount, CATALOG } from '~/lib/services';
 
 function injectStyles(): void {
   if (document.getElementById('dg-tour-styles')) return;
@@ -36,7 +38,49 @@ const euros = (n: number | undefined) => (n === undefined ? '' : `${formatAmount
 const priceOf = (id: string, modality: string) =>
   consultations.find((c) => c.id === id)?.prices.find((p) => p.modality === modality)?.amount;
 
+/** Móviles: el paso y su tarjeta deben caber a la vez en la pantalla (sin taparse). */
+const isNarrow = () => window.matchMedia('(max-width: 599.98px)').matches;
+
+/*
+ * En móvil, los bloques altos (trámites, «¿Cómo funciona?», «Todos los planes incluyen») se
+ * señalan con un «proxy»: una caja invisible sobre su título y sus primeras filas (las que caben
+ * con la tarjeta debajo), para que el bloque resaltado y la tarjeta quepan juntos en la
+ * pantalla. Se retiran al cerrar la visita.
+ */
+const proxies: HTMLElement[] = [];
+function proxyFor(selector: string, rows: string, count: number): () => Element {
+  let made: HTMLElement | null = null;
+  return () => {
+    if (made?.isConnected) return made;
+    const box = document.querySelector<HTMLElement>(selector);
+    const items = box ? Array.from(box.querySelectorAll<HTMLElement>(rows)).slice(0, count) : [];
+    if (!box || !items.length) return box ?? document.body;
+    const a = box.getBoundingClientRect();
+    // Además, que quepa con la tarjeta (≈ 240 px) bajo la cabecera en pantallas bajas.
+    const header = document.querySelector('.site-header')?.getBoundingClientRect().height ?? 0;
+    const room = window.innerHeight - header - 14 - 2 * 10 - 12 - 240;
+    const fitting = items.filter((it, i) => i === 0 || it.getBoundingClientRect().bottom - a.top <= room);
+    const last = fitting[fitting.length - 1].getBoundingClientRect();
+    const el = document.createElement('div');
+    el.className = 'dg-tour-proxy';
+    el.setAttribute('aria-hidden', 'true');
+    Object.assign(el.style, {
+      position: 'absolute',
+      left: `${a.left + window.scrollX}px`,
+      top: `${a.top + window.scrollY}px`,
+      width: `${a.width}px`,
+      height: `${last.bottom - a.top - 6}px`,
+      pointerEvents: 'none',
+    });
+    document.body.append(el);
+    proxies.push(el);
+    made = el;
+    return el;
+  };
+}
+
 function buildSteps(): DriveStep[] {
+  const narrow = isNarrow();
   const main = consultations.find((c) => c.id === 'asesoria-migratoria-60') ?? consultations[0];
   const academic = consultations.find((c) => c.id.startsWith('orientacion'));
   const durations = consultations.filter((c) => c.name === main.name).map((c) => c.duration_label);
@@ -45,7 +89,15 @@ function buildSteps(): DriveStep[] {
   const plansText = plans.map((p) => `${p.name} ${euros(p.amount)}`);
   const placeholder = document.querySelector('[data-booking-placeholder]');
 
+  const immServices = immigration.services.map((s) => s.name);
   const steps: (DriveStep | null)[] = [
+    {
+      element: '[data-tour="extranjeria"]',
+      popover: {
+        title: immigration.title,
+        description: `${immServices.slice(0, 3).join(', ').replace(/, ([A-ZÁÉÍÓÚ])/g, (_, c: string) => `, ${c.toLowerCase()}`)}${immServices.length > 3 ? ` y ${immServices.length - 3} servicios más` : ''}. En cada uno puedes «Solicitar información».`,
+      },
+    },
     {
       element: `[data-service-id="${main.id}"]`,
       popover: {
@@ -62,7 +114,7 @@ function buildSteps(): DriveStep[] {
     },
     academic
       ? {
-          element: `[data-service-id="${academic.id}"]`,
+          element: narrow ? `[data-service-id="${academic.id}"] .consult-main` : `[data-service-id="${academic.id}"]`,
           popover: {
             title: 'Orientación académica',
             description: `${academic.description ?? ''} ${academic.duration_label}: ${euros(priceOf(academic.id, 'online'))} online o ${euros(priceOf(academic.id, 'presencial'))} presencial.`.trim(),
@@ -70,14 +122,14 @@ function buildSteps(): DriveStep[] {
         }
       : null,
     {
-      element: '[data-tour="tramites"]',
+      element: narrow ? proxyFor('[data-tour="tramites"]', '.chip-list li', 99) : '[data-tour="tramites"]',
       popover: {
         title: autogestiona.name,
         description: `${autogestiona.procedures_title}: ${procedures.slice(0, 3).map(lcFirst).join(', ')}${procedures.length > 3 ? ` y ${procedures.length - 3} más` : ''}.`,
       },
     },
     {
-      element: '[data-tour="planes"]',
+      element: narrow ? '[data-tour="planes"] .plan-card--featured' : '[data-tour="planes"]',
       popover: {
         title: 'Planes',
         description: `${plansText.slice(0, -1).join(', ')} y ${plansText.at(-1)}, ${CATALOG.tax_label}. Pago seguro con tarjeta.`,
@@ -85,7 +137,7 @@ function buildSteps(): DriveStep[] {
     },
     {
       // Mismo orden que «¿Cómo funciona?» (Autogestiona.astro)
-      element: '[data-tour="como-funciona"]',
+      element: narrow ? proxyFor('[data-tour="como-funciona"]', '.step', 2) : '[data-tour="como-funciona"]',
       popover: {
         title: '¿Cómo funciona?',
         description:
@@ -93,7 +145,7 @@ function buildSteps(): DriveStep[] {
       },
     },
     {
-      element: '[data-tour="incluye"]',
+      element: narrow ? proxyFor('[data-tour="incluye"]', '.check-list li', 3) : '[data-tour="incluye"]',
       popover: {
         title: autogestiona.includes_title,
         description: `${autogestiona.includes.slice(0, -1).join(', ')} y ${lcFirst(autogestiona.includes.at(-1) ?? '')}.`.replace(/, ([A-ZÁÉÍÓÚ])/g, (_, c: string) => `, ${c.toLowerCase()}`),
@@ -109,13 +161,24 @@ function buildSteps(): DriveStep[] {
       },
     },
     {
+      element: '[data-tour="preguntas"]',
       popover: {
         title: '¿Tienes dudas?',
-        description: 'En cada servicio encontrarás «Solicitar información»: cuéntame qué necesitas y me pondré en contacto contigo.',
+        description: 'Aquí tienes las preguntas frecuentes. Y en cada servicio de extranjería y en cada asesoría encontrarás «Solicitar información»: cuéntame qué necesitas y me pondré en contacto contigo.',
       },
     },
   ];
-  return steps.filter((s): s is DriveStep => Boolean(s && (!s.element || document.querySelector(String(s.element)))));
+  return steps
+    .filter((s): s is DriveStep => Boolean(s && (!s.element || typeof s.element !== 'string' || document.querySelector(s.element))))
+    .map((s) => (narrow ? { ...s, popover: { ...s.popover, side: 'bottom' as const, align: 'start' as const } } : s));
+}
+
+/** Móvil: el elemento resaltado se coloca justo bajo la cabecera, y la tarjeta, debajo. */
+function placeUnderHeader(el: Element | undefined): void {
+  if (!el || !isNarrow()) return;
+  const header = document.querySelector('.site-header')?.getBoundingClientRect().height ?? 0;
+  const top = el.getBoundingClientRect().top + window.scrollY - header - 14;
+  window.scrollTo({ top: Math.max(0, top), behavior: 'instant' });
 }
 
 let active: Driver | null = null;
@@ -153,7 +216,12 @@ export function startTour(trigger: HTMLElement): void {
     animate: !reduced,
     smoothScroll: !reduced,
     duration: 300,
+    onHighlightStarted: (el) => placeUnderHeader(el),
     onPopoverRender: (popover: PopoverDOM, { state }) => {
+      // driver.js crea <header>/<footer> sueltos en <body>: no son regiones de la página.
+      popover.title.setAttribute('role', 'heading');
+      popover.title.setAttribute('aria-level', '2');
+      popover.footer.setAttribute('role', 'group');
       popover.closeButton.setAttribute('aria-label', 'Cerrar la visita guiada');
       popover.closeButton.innerHTML =
         '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M18 6 6 18M6 6l12 12"/></svg>';
@@ -181,6 +249,7 @@ export function startTour(trigger: HTMLElement): void {
     },
     onDestroyed: () => {
       active = null;
+      proxies.splice(0).forEach((el) => el.remove());
       document.documentElement.removeAttribute('data-tour-active');
       returnFocus?.focus({ preventScroll: true });
     },

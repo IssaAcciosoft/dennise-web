@@ -7,14 +7,20 @@ import Autogestiona from '~/components/services/Autogestiona.astro';
 import BookingSlot from '~/components/services/BookingSlot.astro';
 import ServiceRequestDialog from '~/components/services/ServiceRequestDialog.astro';
 import ServicesTour from '~/components/services/ServicesTour.astro';
+import Immigration from '~/components/services/Immigration.astro';
+import ServicesFaq from '~/components/services/ServicesFaq.astro';
+import { FAQ_SPAIN, faqJsonLd } from '~/data/faq';
 import despacho from '~/assets/img/despacho.jpg';
 ---
 
 <BaseLayout
   title="Servicios de extranjería y precios · Denisse González, abogada"
-  description="Asesoría migratoria online y presencial, orientación académica y Programa Autogestiona para trámites de extranjería: precios y reserva de asesorías."
-  preloadFonts={['serif-600', 'sans-400']}
+  description="Extranjería en España (arraigos, reagrupación familiar, nacionalidad, estudios…), asesoría migratoria online y presencial y Programa Autogestiona: precios y reserva de asesorías."
 >
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(faqJsonLd(FAQ_SPAIN))} />
+  </Fragment>
+
   <section class="services-hero" aria-labelledby="services-title">
     <div class="container services-intro">
       <div class="services-intro-copy">
@@ -37,6 +43,8 @@ import despacho from '~/assets/img/despacho.jpg';
     </div>
   </section>
 
+  <Immigration />
+
   <section class="section section--ivory services-block" id="asesorias" aria-labelledby="asesorias-title">
     <div class="container">
       <div class="block-head" data-reveal>
@@ -54,6 +62,8 @@ import despacho from '~/assets/img/despacho.jpg';
   </section>
 
   <BookingSlot />
+
+  <ServicesFaq />
 
   <ServiceRequestDialog slot="after" />
 </BaseLayout>
@@ -90,7 +100,7 @@ import despacho from '~/assets/img/despacho.jpg';
     .services-media { width: min(100% - 1.5rem, 340px); justify-self: end; margin-right: 1.5rem; }
   }
 
-  .services-block { padding-top: clamp(2rem, 4vw, 3.5rem); padding-bottom: clamp(2rem, 4vw, 3rem); }
+  .services-block { padding-top: clamp(3rem, 2rem + 4vw, 5rem); padding-bottom: clamp(2rem, 4vw, 3rem); }
   .services-program { padding-top: clamp(2rem, 4vw, 3rem); }
   .block-head {
     display: flex;

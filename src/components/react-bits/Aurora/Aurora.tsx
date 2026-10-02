@@ -20,6 +20,8 @@
  * - ResizeObserver del contenedor en lugar de `resize` de la ventana.
  * - Si no hay WebGL2 (o falla el contexto) no se monta nada: queda el póster estático.
  * - `onReady` tras el primer fotograma (el padre funde el lienzo sobre el póster).
+ * - `settleAfter` (ms de animación): el movimiento se frena con suavidad y el bucle se detiene
+ *   (WCAG 2.2.2); queda el último fotograma, quieto.
  */
 import { useEffect, useRef } from 'react';
 import { Renderer, Program, Mesh, Color, Triangle } from 'ogl';
@@ -142,6 +144,8 @@ export interface AuroraProps {
   dpr?: number;
   /** Fotogramas por segundo máximos. */
   fps?: number;
+  /** Detener el movimiento tras estos ms de animación (0 = nunca). Se frena en el último 1,5 s. */
+  settleAfter?: number;
   className?: string;
   onReady?: () => void;
 }
@@ -159,6 +163,7 @@ export default function Aurora({
   paused = false,
   dpr = 0.5,
   fps = 30,
+  settleAfter = 0,
   className = '',
   onReady,
 }: AuroraProps) {
@@ -238,24 +243,38 @@ export default function Aurora({
     let elapsed = 0;
     let running = false;
     let announced = false;
+    let ran = 0; // ms animados (solo mientras corre el bucle)
+    let settled = false;
     const frameMs = 1000 / fps;
+    const SETTLE_MS = 1500;
+    const ease = (x: number) => {
+      const t = Math.min(1, Math.max(0, x));
+      return t * t * (3 - 2 * t);
+    };
 
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick);
       if (last && now - last < frameMs - 1) return;
       const dt = last ? Math.min(now - last, 100) : frameMs;
       last = now;
-      elapsed += dt;
+      ran += dt;
+      // Velocidad 1 → 0 en el último tramo antes de settleAfter (sin frenazo).
+      const rate = settleAfter > 0 ? 1 - ease((ran - (settleAfter - SETTLE_MS)) / SETTLE_MS) : 1;
+      elapsed += dt * rate;
       program.uniforms.uTime.value = elapsed * 0.001 * speed;
       renderer.render({ scene: mesh });
       if (!announced) {
         announced = true;
         onReadyRef.current?.();
       }
+      if (settleAfter > 0 && ran >= settleAfter) {
+        settled = true;
+        loop.stop();
+      }
     };
     const loop: Loop = {
       start() {
-        if (running) return;
+        if (running || settled) return;
         running = true;
         last = 0;
         raf = requestAnimationFrame(tick);
@@ -275,7 +294,7 @@ export default function Aurora({
       if (canvas.parentNode === ctn) ctn.removeChild(canvas);
       gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
-  }, [stopsKey, amplitude, blend, speed, dpr, fps]);
+  }, [stopsKey, amplitude, blend, speed, dpr, fps, settleAfter]);
 
   useEffect(() => {
     const loop = loopRef.current;

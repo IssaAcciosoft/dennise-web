@@ -49,6 +49,8 @@ export function initLeadForm(rootEl: HTMLElement | null): LeadFormController | n
   const resultMock = q('[data-result-mock]');
   const idleLabel = submitLabel.textContent ?? 'Enviar';
   const waHref = whatsappLink(root.dataset.waText || undefined);
+  // El botón nace desactivado (LeadForm.astro): sin este script no se puede enviar nada.
+  submitBtn.disabled = false;
 
   let attempted = false;
   let sending = false;
@@ -241,10 +243,17 @@ export function initLeadForm(rootEl: HTMLElement | null): LeadFormController | n
         fields.forEach((name) => {
           const first = controlsOf(name)[0];
           const apiSaysEmail = first.type === 'email' && /v[aá]lid/i.test(res.message);
+          // AccioGest lo da por obligatorio y está vacío (aunque aquí figure como «opcional»):
+          // decirlo claramente, no un genérico «Revisa este campo».
+          const missingHere = res.missing.includes(name) && !valueOf(name);
           setFieldError(
             name,
             ruleFor(name) ||
-              (apiSaysEmail ? msg(first, 'msgEmail', 'Escribe un email válido, por ejemplo nombre@dominio.com.') : 'Revisa este campo.'),
+              (missingHere
+                ? msg(first, 'msgRequired', first.type === 'checkbox' ? 'Debes marcar esta casilla para continuar.' : 'Este campo es obligatorio.')
+                : apiSaysEmail
+                  ? msg(first, 'msgEmail', 'Escribe un email válido, por ejemplo nombre@dominio.com.')
+                  : 'Revisa este campo.'),
           );
         });
         attempted = true;

@@ -53,11 +53,11 @@ const isCurrent = (path: string) => current === path;
           ))
         }
       </ul>
-      <a class="btn btn--primary header-cta header-cta--nav" href={url(BOOKING_PATH)}>
+      <a class="btn btn--primary header-cta header-cta--nav" href={url(BOOKING_PATH)} style={`--i:${NAV.length}`}>
         <Icon name="calendar" />
         <span>Reserva tu asesoría</span>
       </a>
-      <p class="nav-meta">{SITE.motto}</p>
+      <p class="nav-meta" style={`--i:${NAV.length + 1}`}>{SITE.motto}</p>
     </nav>
   </div>
 </header>
@@ -66,6 +66,8 @@ const isCurrent = (path: string) => current === path;
   // Mejora progresiva del menú (la apertura/cierre ya funciona sin JS con popover).
   const nav = document.getElementById('site-nav') as (HTMLElement & { hidePopover?: () => void }) | null;
   if (nav && typeof nav.hidePopover === 'function') {
+    const toggle = document.querySelector<HTMLElement>('.nav-toggle');
+    const mobile = window.matchMedia('(max-width: 1159.98px)');
     const close = () => {
       try {
         if (nav.matches(':popover-open')) nav.hidePopover!();
@@ -73,16 +75,40 @@ const isCurrent = (path: string) => current === path;
         /* navegador sin :popover-open */
       }
     };
+    // El panel cubre toda la pantalla: mientras está abierto, el resto de la página es inerte
+    // (el foco no puede ir a contenido tapado ni el lector de pantalla recorrerlo).
+    const setInert = (on: boolean) => {
+      document.querySelectorAll<HTMLElement>('main, .site-footer, .wa-region').forEach((el) => {
+        el.inert = on;
+      });
+    };
+    nav.addEventListener('toggle', (e) => {
+      const open = (e as ToggleEvent).newState === 'open';
+      setInert(open && mobile.matches);
+    });
+    // Si el foco pasa a algo fuera del panel (Tab tras el último enlace → «Saltar al contenido»,
+    // la marca…), el panel se cierra. El botón «Menú» no cuenta: él mismo lo abre y lo cierra.
+    document.addEventListener('focusin', (e) => {
+      const target = e.target as Node | null;
+      if (!target || nav.contains(target) || toggle?.contains(target)) return;
+      if (nav.matches(':popover-open')) close();
+    });
     // Enlaces a la misma página (#ancla): cerrar el panel al pulsarlos.
     nav.addEventListener('click', (e) => {
       if ((e.target as Element).closest('a')) close();
     });
     // Al pasar a escritorio, el panel nunca debe quedarse abierto.
-    window.matchMedia('(min-width: 1160px)').addEventListener('change', (e) => {
-      if (e.matches) close();
+    mobile.addEventListener('change', (e) => {
+      if (!e.matches) {
+        close();
+        setInert(false);
+      }
     });
     // Al volver con el botón «atrás» (bfcache), el panel aparece cerrado.
-    window.addEventListener('pageshow', close);
+    window.addEventListener('pageshow', () => {
+      close();
+      setInert(false);
+    });
   }
 </script>
 
@@ -116,7 +142,9 @@ const isCurrent = (path: string) => current === path;
       backdrop-filter: saturate(1.4) blur(14px);
     }
   }
-  /* Tono oscuro: ciruela translúcido sobre la página oscura (sin corte claro/oscuro). */
+  /* Tono oscuro: transparente sobre la portada oscura (sin corte claro/oscuro) y ciruela
+     translúcido en cuanto se desplaza la página (animación ligada al scroll, más abajo). Sin
+     scroll-driven animations: el ciruela casi opaco de siempre. */
   .site-header[data-tone="dark"] {
     --hdr-bg: rgba(31, 16, 36, .94);
     --hdr-bg-blur: rgba(31, 16, 36, .62);
@@ -145,16 +173,41 @@ const isCurrent = (path: string) => current === path;
   @media (hover: hover) and (pointer: fine) {
     .site-header[data-tone="dark"] :global(.header-cta:hover) { --btn-bg: var(--ev-gold); --btn-fg: var(--ev-bg); --btn-bd: var(--ev-gold); box-shadow: none; }
   }
-  /* Sombra al hacer scroll: CSS puro (scroll-driven animation) */
+  /* Sombra al hacer scroll: CSS puro (scroll-driven animation).
+     Propiedades sueltas y la línea de tiempo con var(): si no, el minificador las funde en
+     `animation: … scroll(root)`, que los navegadores rechazan (la línea de tiempo no admite el
+     atajo) y la animación no se aplicaba. */
   @supports (animation-timeline: scroll()) {
     .site-header {
-      animation: header-elevate linear both;
-      animation-timeline: scroll(root);
+      animation-name: header-elevate;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: var(--hdr-timeline, scroll(root));
       animation-range: 0 48px;
     }
   }
   @keyframes header-elevate {
     to {
+      border-bottom-color: var(--hdr-line);
+      box-shadow: var(--hdr-shadow);
+    }
+  }
+  @supports (animation-timeline: scroll()) and (backdrop-filter: blur(1px)) {
+    .site-header[data-tone="dark"] {
+      background-color: rgba(31, 16, 36, 0);
+      -webkit-backdrop-filter: saturate(1) blur(0px);
+      backdrop-filter: saturate(1) blur(0px);
+      animation-name: header-elevate-dark;
+      animation-range: 0 64px;
+    }
+    /* Con el menú abierto, la cabecera siempre tiene fondo (el panel empieza debajo). */
+    .site-header[data-tone="dark"]:has(.site-nav:popover-open) { background-color: var(--hdr-panel-bg); animation: none; }
+  }
+  @keyframes header-elevate-dark {
+    to {
+      background-color: rgba(31, 16, 36, .62);
+      -webkit-backdrop-filter: saturate(1.4) blur(14px);
+      backdrop-filter: saturate(1.4) blur(14px);
       border-bottom-color: var(--hdr-line);
       box-shadow: var(--hdr-shadow);
     }
@@ -242,7 +295,7 @@ const isCurrent = (path: string) => current === path;
     position: relative;
     display: block;
     color: var(--hdr-fg);
-    font-weight: 500;
+    font-weight: 400;
     text-decoration: none;
   }
   .nav-list a[aria-current="page"] { color: var(--hdr-accent); }
@@ -284,14 +337,21 @@ const isCurrent = (path: string) => current === path;
     @starting-style {
       .site-nav:popover-open { clip-path: inset(0 0 100% 0); }
     }
-    /* Enlaces: entran escalonados (40 ms) mientras el panel se despliega */
+    /* Enlaces, botón y lema: entran escalonados (25 ms) mientras el panel se despliega, en el
+       orden de la pantalla. 200 ms cada uno: los enlaces terminan antes de 300 ms. */
     .nav-list li,
+    .header-cta--nav,
     .nav-meta {
-      transition: opacity var(--dur) var(--ease-out), translate var(--dur) var(--ease-out);
-      transition-delay: calc(40ms + var(--i, 5) * 40ms);
+      transition:
+        opacity 200ms var(--ease-out) calc(30ms + var(--i, 5) * 25ms),
+        translate 200ms var(--ease-out) calc(30ms + var(--i, 5) * 25ms),
+        background-color var(--dur-fast) var(--ease-hover),
+        border-color var(--dur-fast) var(--ease-hover),
+        box-shadow var(--dur) var(--ease-out),
+        transform var(--dur-press) var(--ease-out);
     }
     @starting-style {
-      .site-nav:popover-open :is(.nav-list li, .nav-meta) { opacity: 0; translate: 0 -10px; }
+      .site-nav:popover-open :is(.nav-list li, .header-cta--nav, .nav-meta) { opacity: 0; translate: 0 -8px; }
     }
     .nav-list li { border-bottom: 1px solid var(--hdr-line); }
     .nav-list a {
@@ -335,7 +395,7 @@ const isCurrent = (path: string) => current === path;
     .site-nav:popover-open { opacity: 1; transition-duration: var(--dur) !important; }
     @starting-style {
       .site-nav:popover-open { opacity: 0; }
-      .site-nav:popover-open :is(.nav-list li, .nav-meta) { opacity: 1; translate: none; }
+      .site-nav:popover-open :is(.nav-list li, .header-cta--nav, .nav-meta) { opacity: 1; translate: none; }
     }
   }
 
@@ -428,8 +488,16 @@ const isCurrent = (path: string) => current === path;
     .nav-list a:hover { color: var(--hdr-accent); }
     .nav-list a:hover::after { transform: scaleX(1); }
   }
+  /* 1160–1239 px (seis enlaces desde que existe «Dubái»): más compacta para que la marca nunca
+     choque con la navegación (con barra de desplazamiento de 15 px incluida). */
+  @media (min-width: 1160px) and (max-width: 1239.98px) {
+    .header-inner { gap: 1.25rem; }
+    .site-nav { gap: 1.25rem; }
+    .nav-list { gap: .8rem; }
+    .header-cta--nav :global(.icon) { display: none; }
+  }
   @media (min-width: 1320px) {
-    .site-nav { gap: 2.25rem; }
-    .nav-list { gap: 1.9rem; }
+    .site-nav { gap: 2rem; }
+    .nav-list { gap: 1.6rem; }
   }
 </style>

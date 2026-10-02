@@ -14,7 +14,9 @@
     "check": "astro check",
     "icons": "node scripts/generate-icons.mjs",
     "astro": "astro",
-    "globe-poster": "node scripts/render-globe-poster.mjs"
+    "globe-poster": "node scripts/render-globe-poster.mjs",
+    "web-anterior-images": "node scripts/prepare-web-anterior-images.mjs",
+    "og-images": "node scripts/render-og-images.mjs"
   },
   "dependencies": {
     "@astrojs/react": "^7.0.0",

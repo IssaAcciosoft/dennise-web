@@ -23,7 +23,7 @@ Imágenes originales en `_originales/web-anterior/`:
 ## 1. Datos de contacto (nuevos)
 
 - Email: **lic.denissegb@icloud.com**
-- Dirección antigua: "Calle mayo 6, piso 2 oficina 10, Madrid." → **YA NO SE USA**. La cliente
+- Dirección: la de la web antigua **YA NO SE USA** (no se reproduce en ningún sitio). La cliente
   confirmó el 02/10 el domicilio actual: **C/ Eraso 31, local A (Guindalera), 28028 Madrid**.
 - Teléfono: +34 670 647 593 (confirma el prefijo +34).
 - Texto del formulario de contacto: "esperamos responder su consulta en menos de 24 horas".

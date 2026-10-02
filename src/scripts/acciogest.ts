@@ -11,7 +11,7 @@
  * - UTM (utm_source / utm_medium / utm_campaign) de la URL de llegada, guardadas en
  *   sessionStorage para toda la visita (las captura también BaseLayout en cada página).
  * - MODO SIMULADO si el ID es de ejemplo: misma forma de respuesta tras ~700 ms; errores
- *   forzados con ?acciogest_mock=400 | 400-email | 429 | 429-5 | 403 | 404 | 500 | network | timeout.
+ *   forzados con ?acciogest_mock=400 | 400-tel | 400-email | 429 | 429-5 | 403 | 404 | 500 | network | timeout.
  * - DEPURACIÓN con IDs reales: ?acciogest_debug=1 compara las etiquetas con
  *   GET {API}/form-builder/public/{FORM_ID} y avisa en la consola de las diferencias.
  */
@@ -33,8 +33,9 @@ export type LeadValues = Record<string, FieldValue>;
 type Base = { mock: boolean };
 export type LeadResult =
   | (Base & { ok: true; kind: 'success'; status: number; message: string; responseId: number | null })
-  /** 400: campos que faltan o no son válidos (nombres internos del HTML). */
-  | (Base & { ok: false; kind: 'validation'; status: 400; message: string; fields: string[] })
+  /** 400: campos que faltan o no son válidos (nombres internos del HTML); `missing`: los que
+   *  AccioGest da por obligatorios y vacíos (missing_fields), aunque la web los trate como opcionales. */
+  | (Base & { ok: false; kind: 'validation'; status: 400; message: string; fields: string[]; missing: string[] })
   /** 403 / 404: formulario inactivo o inexistente. */
   | (Base & { ok: false; kind: 'unavailable'; status: 403 | 404; message: string })
   /** 429: demasiados envíos; `retryAfter` en segundos. */
@@ -172,10 +173,14 @@ function normalise(formKey: FormKey, res: RawResponse, mock: boolean): LeadResul
   }
   if (status === 400) {
     const fields = new Set<string>();
+    const missing = new Set<string>();
     if (Array.isArray(body.missing_fields)) {
       for (const label of body.missing_fields) {
         const name = typeof label === 'string' ? labelToName(formKey, label) : null;
-        if (name) fields.add(name);
+        if (name) {
+          fields.add(name);
+          missing.add(name);
+        }
       }
     }
     // {"error":"El campo \"Email\" debe ser un email válido"}
@@ -190,6 +195,7 @@ function normalise(formKey: FormKey, res: RawResponse, mock: boolean): LeadResul
       mock,
       message: text('error') || text('message') || 'Faltan campos obligatorios o no son válidos.',
       fields: [...fields],
+      missing: [...missing],
     };
   }
   if (status === 403 || status === 404) {
@@ -254,6 +260,7 @@ async function mockSubmit(formKey: FormKey, data: Record<string, string>): Promi
   if (forced === 'network') return networkResult(true, false);
   if (forced === 'timeout') return networkResult(true, true);
   if (forced === '400') return reply(400, { error: 'Faltan campos obligatorios', missing_fields: ['Email'] });
+  if (forced === '400-tel') return reply(400, { error: 'Faltan campos obligatorios', missing_fields: ['Teléfono'] });
   if (forced === '400-email') return reply(400, { error: 'El campo "Email" debe ser un email válido' });
   if (forced === '403') return reply(403, { error: 'Este formulario no está activo' });
   if (forced === '404') return reply(404, { error: 'Formulario no encontrado' });
@@ -283,7 +290,15 @@ export async function submitLead(
 ): Promise<LeadResult> {
   const mock = isMock(formKey);
   if (values.consentimiento !== true) {
-    return { ok: false, kind: 'validation', status: 400, mock, message: 'Falta el consentimiento.', fields: ['consentimiento'] };
+    return {
+      ok: false,
+      kind: 'validation',
+      status: 400,
+      mock,
+      message: 'Falta el consentimiento.',
+      fields: ['consentimiento'],
+      missing: ['consentimiento'],
+    };
   }
   const data = buildResponseData(formKey, values);
   if (mock) return mockSubmit(formKey, data);

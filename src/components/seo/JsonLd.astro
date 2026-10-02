@@ -1,12 +1,13 @@
 ---
 /**
- * Datos estructurados (schema.org) con URLs absolutas: WebSite, Attorney/LegalService,
- * Person y WebPage. Solo hechos de docs/contenido.md: sin idiomas (knowsLanguage), sin zona
- * de servicio (areaServed) ni dirección hasta que la cliente los confirme.
+ * Datos estructurados (schema.org) con URLs absolutas: WebSite, LegalService (el despacho,
+ * «DG Gestores y Abogados», con email, teléfono y dirección), Person (fundadora) y WebPage.
+ * Solo hechos de docs/contenido.md: sin idiomas (knowsLanguage) ni zona de servicio
+ * (areaServed) hasta que la cliente los confirme. El NIE NUNCA va aquí (solo páginas legales).
  */
 import { getImage } from 'astro:assets';
-import { SITE, PHONE, SOCIALS } from '~/data/site';
-import { consultations, autogestiona, minAmount, maxAmount, formatAmount, CATALOG } from '~/lib/services';
+import { SITE, PHONE, SOCIALS, EMAIL, OFFICE } from '~/data/site';
+import { consultations, autogestiona, immigration, dubai, minAmount, maxAmount, formatAmount, CATALOG } from '~/lib/services';
 import { absoluteUrl } from '~/lib/url';
 import retrato from '~/assets/img/retrato.jpg';
 
@@ -14,8 +15,10 @@ interface Props {
   title: string;
   description: string;
   path: string;
+  /** Páginas noindex: sin nodo WebPage (no se declara como página indexable). */
+  noindex?: boolean;
 }
-const { title, description, path } = Astro.props;
+const { title, description, path, noindex = false } = Astro.props;
 const site = Astro.site;
 const home = absoluteUrl('/', site);
 const pageUrl = absoluteUrl(path, site);
@@ -40,6 +43,8 @@ const offers = [
     priceCurrency: currency,
   })),
 ];
+// Servicios sin precio publicado (se solicitan por el formulario): Offer → Service, sin price.
+const serviceOffer = (name: string) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name } });
 
 const graph = {
   '@context': 'https://schema.org',
@@ -53,21 +58,40 @@ const graph = {
       publisher: { '@id': `${home}#despacho` },
     },
     {
-      '@type': ['Attorney', 'LegalService'],
+      '@type': 'LegalService',
       '@id': `${home}#despacho`,
-      name: SITE.title,
+      name: SITE.firm,
       url: home,
-      description: 'Asesoría migratoria y trámites de extranjería online y presenciales, derecho internacional y derechos humanos.',
+      description:
+        'Despacho de Denisse González en Madrid: extranjería y asesoría migratoria online y presencial, derecho internacional, derechos humanos y apertura de empresas en Dubái.',
       image: portraitUrl,
       logo: absoluteUrl('/icon-512.png', site),
       telephone: PHONE.e164,
+      email: EMAIL.address,
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: OFFICE.streetAddress,
+        postalCode: OFFICE.postalCode,
+        addressLocality: OFFICE.locality,
+        addressRegion: OFFICE.region,
+        addressCountry: OFFICE.country,
+      },
+      hasMap: OFFICE.mapsUrl,
       priceRange: `${formatAmount(minAmount)} € – ${formatAmount(maxAmount)} €`,
       sameAs,
       founder: { '@id': `${home}#denisse` },
       hasOfferCatalog: {
         '@type': 'OfferCatalog',
-        name: 'Servicios de extranjería',
-        itemListElement: offers,
+        name: 'Servicios',
+        itemListElement: [
+          {
+            '@type': 'OfferCatalog',
+            name: immigration.title,
+            itemListElement: immigration.services.map((s) => serviceOffer(s.name)),
+          },
+          { '@type': 'OfferCatalog', name: 'Asesorías y Programa Autogestiona', itemListElement: offers },
+          { '@type': 'OfferCatalog', name: 'Apertura de empresas en Dubái', itemListElement: [serviceOffer(dubai.name)] },
+        ],
       },
     },
     {
@@ -76,6 +100,7 @@ const graph = {
       name: SITE.legalName,
       alternateName: SITE.name,
       jobTitle: SITE.role,
+      worksFor: { '@id': `${home}#despacho` },
       url: absoluteUrl('/conoceme/', site),
       image: portraitUrl,
       sameAs,
@@ -87,16 +112,20 @@ const graph = {
         { '@type': 'CollegeOrUniversity', name: 'UAX' },
       ],
     },
-    {
-      '@type': 'WebPage',
-      '@id': `${pageUrl}#webpage`,
-      url: pageUrl,
-      name: title,
-      description,
-      inLanguage: 'es',
-      isPartOf: { '@id': `${home}#website` },
-      about: { '@id': `${home}#despacho` },
-    },
+    ...(noindex
+      ? []
+      : [
+          {
+            '@type': 'WebPage',
+            '@id': `${pageUrl}#webpage`,
+            url: pageUrl,
+            name: title,
+            description,
+            inLanguage: 'es',
+            isPartOf: { '@id': `${home}#website` },
+            about: { '@id': `${home}#despacho` },
+          },
+        ]),
   ],
 };
 ---

@@ -1,4 +1,15 @@
 ---
+/**
+ * Conóceme. Bloque principal «de la fundadora» (estructura de «Conoce a Mishell», de
+ * bread-communion.com, adaptada a la marca): a la izquierda antetítulo, retrato, nombre
+ * completo, tres líneas con datos suyos, frase destacada y dos líneas de cierre; a la derecha
+ * el titular y sus párrafos en primera persona (tal cual, docs/contenido.md → CONÓCEME) y
+ * «Trayectoria reciente». Debajo: Mi propósito, Experiencia, Mi trayectoria, el globo y
+ * «El despacho».
+ *
+ * El retrato es el MISMO archivo que el del hero del inicio: la transición entre páginas lo
+ * convierte en una sola foto que viaja (BaseLayout → portrait, global.css §8).
+ */
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import Photo from '~/components/ui/Photo.astro';
 import Icon from '~/components/ui/Icon.astro';
@@ -6,70 +17,119 @@ import Experience from '~/components/about/Experience.astro';
 import Timeline from '~/components/about/Timeline.astro';
 import GlobeSlot from '~/components/about/GlobeSlot.astro';
 import ContactCta from '~/components/contact/ContactCta.astro';
-import { BOOKING_PATH } from '~/data/site';
+import Firm from '~/components/about/Firm.astro';
+import { BOOKING_PATH, SITE } from '~/data/site';
 import { url } from '~/lib/url';
-import onuBlanco from '~/assets/img/onu-blanco.jpg';
+import retrato from '~/assets/img/retrato.jpg';
+
+// Tres líneas con datos de docs/contenido.md (profesión, áreas y cargos), sin adjetivos propios.
+const roles = [
+  'Abogada · Extranjería y movilidad internacional',
+  'Directora Ejecutiva de Jóvenes por los Derechos Humanos',
+  'Delegada · International Human Rights Summit 2026',
+];
+
+// Trayectoria reciente (docs/contenido.md → MI TRAYECTORIA y DERECHOS HUMANOS), de lo más
+// reciente a lo más antiguo.
+const recent: { title: string; role: string; from: string; to?: string }[] = [
+  { title: 'International Human Rights Summit, Nueva York', role: 'Delegada', from: '2026' },
+  { title: 'Jóvenes por los Derechos Humanos', role: 'Directora Ejecutiva', from: '2026' },
+  { title: 'Embajada de México en España', role: 'Asuntos Jurídicos', from: '2024' },
+  { title: 'Poplavsky International Law Offices', role: 'Directora Legal México', from: '2020', to: '2023' },
+  {
+    title: 'Centro de Justicia para la Mujer',
+    role: 'Asesoría legal a mujeres víctimas de violencia de género',
+    from: '2018',
+    to: '2019',
+  },
+];
 ---
 
 <BaseLayout
   title="Conóceme · Denisse González, abogada"
   description="Denisse González, abogada mexicana con formación jurídica internacional y experiencia profesional entre México y España: trayectoria, experiencia y propósito."
-  preloadFonts={['serif-600', 'sans-400']}
+  preloadFonts={['serif-600', 'serif-500', 'sans-400', 'sans-600']}
 >
-  <section class="about-hero" aria-labelledby="about-title">
-    <div class="container about-grid">
-      <header class="about-head">
-        <p class="eyebrow">Conóceme</p>
-        <h1 class="page-title" id="about-title">Una trayectoria entre el derecho, las fronteras y las personas.</h1>
-      </header>
+  <section class="founder" aria-labelledby="about-title">
+    <div class="container founder-grid">
+      <div class="founder-card">
+        <p class="eyebrow founder-eyebrow">Conóceme</p>
+        <figure class="founder-photo">
+          <div class="founder-frame vt-portrait">
+            <Photo
+              src={retrato}
+              alt="Denisse González, abogada, sonriendo con blazer morado"
+              widths={[320, 420, 560, 732]}
+              sizes="(min-width: 960px) 23rem, min(calc(100vw - 2rem), 23rem)"
+              position="50% 62%"
+              priority
+            />
+          </div>
+        </figure>
+        <p class="founder-name">{SITE.legalName}</p>
+        <ul class="founder-roles" role="list">
+          {roles.map((r) => <li>{r}</li>)}
+        </ul>
+        <blockquote class="founder-quote">
+          <p>«Porque detrás de cada expediente hay una persona.»</p>
+        </blockquote>
+        <p class="founder-sign">
+          <span>{SITE.motto}</span>
+          <span>México&nbsp;· España&nbsp;· <span class="nowrap">Nueva York</span></span>
+        </p>
+      </div>
 
-      <figure class="about-media">
-        <div class="frame frame--tall">
-          <Photo
-            src={onuBlanco}
-            alt="Denisse González con blazer blanco junto a la bandera y el emblema de las Naciones Unidas"
-            widths={[360, 540, 720, 900]}
-            sizes="(min-width: 960px) 40vw, calc(100vw - 3rem)"
-            position="50% 55%"
-            priority
-            pictureClass="vt-portrait"
-          />
-        </div>
-        <figcaption class="about-caption">
-          <span class="about-caption-name">Denisse González</span>
-          <span>Naciones Unidas · Nueva York, 2026</span>
-        </figcaption>
-      </figure>
-
-      <div class="about-body">
-        <div class="prose">
-          <p class="prose-lead">Soy Denisse González, abogada mexicana con formación jurídica internacional y experiencia profesional desarrollada entre México y España.</p>
+      <div class="founder-story">
+        <h1 class="founder-title" id="about-title">Una trayectoria entre el derecho, las fronteras y las personas.</h1>
+        <div class="prose founder-prose">
+          <p>Soy Denisse González, abogada mexicana con formación jurídica internacional y experiencia profesional desarrollada entre México y España.</p>
           <p>Mi trayectoria comenzó en la práctica jurídica y la litigación, y con el tiempo fue incorporando nuevas dimensiones: el derecho internacional, la movilidad internacional, la gestión administrativa, las relaciones institucionales y la defensa y promoción de los derechos humanos.</p>
           <p>He trabajado en despachos jurídicos, en asesoría migratoria y en instituciones como la Embajada de México en España, donde colaboré en el área de Asuntos Jurídicos. También he ejercido como abogada litigante en materias civil, penal y de amparo, y como Directora Legal México en Poplavsky International Law Offices, participando en la representación de demandas internacionales.</p>
-          <p class="prose-turn">Pero mi trayectoria no se ha construido únicamente dentro de un despacho.</p>
+          <p>Pero mi trayectoria no se ha construido únicamente dentro de un despacho.</p>
           <p>Una parte esencial de mi camino ha estado vinculada al trabajo con personas y comunidades. Desde mis primeras prácticas en el Centro de Justicia para la Mujer, donde participé en la asesoría legal a mujeres víctimas de violencia de género, hasta mi actual participación en iniciativas de derechos humanos.</p>
           <p>Hoy entiendo el derecho como una herramienta para conectar personas con oportunidades, instituciones con comunidades y derechos con realidades concretas.</p>
           <p>Mi formación también refleja esa visión: Derecho, una Maestría en Derecho con especialización en Litigación Oral, un Máster en Derecho Internacional, Comercio y Relaciones Internacionales, formación en Negociación en NYU y un Máster en Gestión Administrativa.</p>
         </div>
 
-        <aside class="purpose" aria-labelledby="purpose-title" data-reveal>
-          <h2 class="purpose-title" id="purpose-title">Mi propósito</h2>
-          <p class="purpose-text">Trabajar en la intersección entre derecho, movilidad internacional y derechos humanos, acompañando a personas, organizaciones e instituciones que necesitan comprender, gestionar o defender sus derechos dentro de contextos cada vez más internacionales.</p>
-          <div class="purpose-close">
+        <div class="founder-recent">
+          <h2 class="founder-label" id="recent-title">Trayectoria reciente</h2>
+          <ul class="recent-list" role="list" aria-labelledby="recent-title">
+            {
+              recent.map((item) => (
+                <li>
+                  <strong class="recent-title">{item.title}</strong>
+                  <span class="recent-role">
+                    {item.role} (<time datetime={item.from}>{item.from}</time>{item.to && <>–<time datetime={item.to}>{item.to}</time></>})
+                  </span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="purpose" aria-labelledby="purpose-title">
+    <div class="container">
+      <div class="purpose-grid">
+        <h2 class="founder-label purpose-label" id="purpose-title" data-reveal>Mi propósito</h2>
+        <div class="purpose-body">
+          <p class="purpose-text" data-reveal>Trabajar en la intersección entre derecho, movilidad internacional y derechos humanos, acompañando a personas, organizaciones e instituciones que necesitan comprender, gestionar o defender sus derechos dentro de contextos cada vez más internacionales.</p>
+          <div class="purpose-close" data-reveal>
             <p>Porque detrás de cada expediente hay una persona.</p>
             <p>Y detrás de cada trámite, una historia, un proyecto de vida o una oportunidad que merece ser tomada en serio.</p>
           </div>
-        </aside>
-
-        <div class="btn-row">
-          <a class="btn btn--primary" href={url(BOOKING_PATH)}>
-            <Icon name="calendar" />
-            <span>Reserva tu asesoría</span>
-          </a>
-          <a class="btn btn--link" href="#trayectoria">
-            <span>Ver mi trayectoria</span>
-            <Icon name="arrow" />
-          </a>
+          <div class="btn-row purpose-actions" data-reveal>
+            <a class="btn btn--primary" href={url(BOOKING_PATH)}>
+              <Icon name="calendar" />
+              <span>Reserva tu asesoría</span>
+            </a>
+            <a class="btn btn--link" href="#trayectoria">
+              <span>Ver mi trayectoria</span>
+              <Icon name="arrow" />
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -89,105 +149,156 @@ import onuBlanco from '~/assets/img/onu-blanco.jpg';
     </div>
   </section>
 
+  {/* El despacho: historia, misión, valores, equipo y partner en Dubái (docs/web-anterior.md §3-4) */}
+  <Firm />
+
   <ContactCta />
 </BaseLayout>
 
 <style>
-  .about-hero {
-    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5.5rem) var(--section-pad);
+  /* ---------- Bloque de la fundadora ---------- */
+  .founder {
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5.5rem) clamp(3rem, 2rem + 4vw, 5.5rem);
     background:
-      radial-gradient(60rem 40rem at 100% 0%, rgba(232, 221, 236, .85), transparent 62%),
+      radial-gradient(60rem 40rem at 100% 0%, rgba(232, 221, 236, .7), transparent 62%),
       var(--c-ivory);
   }
-  .about-grid {
+  .founder-grid { display: grid; gap: clamp(3rem, 8vw, 4.5rem); }
+
+  .founder-card { min-width: 0; }
+  .founder-eyebrow { margin-bottom: 1.5rem; }
+  .founder-photo { width: min(100%, 23rem); margin: 0; }
+  .founder-frame {
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: var(--radius-s);
+    background: var(--c-lavender-200);
+  }
+  .founder-frame :global(picture),
+  .founder-frame :global(img) { width: 100%; height: 100%; }
+  .founder-frame :global(img) { object-fit: cover; }
+  .founder-name {
+    margin-top: clamp(1.75rem, 1.4rem + 1vw, 2.25rem);
+    font-family: var(--ff-serif);
+    font-size: clamp(2.15rem, 1.7rem + 1.6vw, 3.1rem);
+    font-weight: 500;
+    line-height: 1.04;
+    letter-spacing: -.012em;
+    color: var(--c-ink);
+    text-wrap: balance;
+  }
+  .founder-roles {
     display: grid;
-    grid-template-areas: "head" "media" "body";
-    gap: clamp(2rem, 5vw, 3rem);
+    gap: .3rem;
+    margin-top: 1.25rem;
+    color: var(--c-muted);
+    font-size: var(--fs-small);
+    line-height: 1.45;
   }
-  .about-head { grid-area: head; }
-  .about-head .page-title { max-width: 8.6em; }
-  .about-media {
-    grid-area: media;
-    position: relative;
-    isolation: isolate;
-    width: min(100% - .75rem, 520px);
-    justify-self: center;
+  .founder-quote {
+    margin-top: clamp(2rem, 1.6rem + 1.4vw, 2.75rem);
+    max-width: 21rem;
   }
-  .about-body { grid-area: body; }
-  .about-caption {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: .25rem 1rem;
-    margin-top: 2rem;
-    padding-top: .85rem;
-    border-top: 1px solid var(--c-line);
+  .founder-quote p {
+    font-family: var(--ff-serif);
+    font-size: clamp(1.75rem, 1.45rem + 1.1vw, 2.3rem);
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1.22;
+    color: var(--c-terracotta-700);
+    text-wrap: balance;
+  }
+  .founder-sign {
+    display: grid;
+    gap: .2rem;
+    margin-top: 1.5rem;
     color: var(--c-muted);
     font-size: .85rem;
-    letter-spacing: .04em;
+    line-height: 1.5;
   }
-  .about-caption-name { font-family: var(--ff-serif); font-size: 1.15rem; font-weight: 600; color: var(--c-ink); letter-spacing: 0; }
-  .about-body .prose { margin-bottom: 2.75rem; }
 
-  .purpose {
-    position: relative;
-    margin-bottom: 2.5rem;
-    padding: clamp(2rem, 1.5rem + 2vw, 3rem);
-    padding-top: clamp(2.6rem, 2rem + 2vw, 3.4rem);
-    background: var(--c-lavender);
-    border-radius: var(--radius-l);
-    overflow: hidden;
-  }
-  .purpose::before {
-    content: "“";
-    position: absolute;
-    top: -.15em;
-    right: .1em;
+  .founder-story { min-width: 0; }
+  .founder-title {
+    max-width: 17em;
+    margin-bottom: clamp(1.5rem, 1.2rem + 1vw, 2rem);
     font-family: var(--ff-serif);
-    font-size: 12rem;
-    line-height: 1;
-    color: rgba(110, 29, 122, .12);
-    pointer-events: none;
+    font-size: clamp(1.95rem, 1.5rem + 1.6vw, 2.85rem);
+    font-weight: 500;
+    line-height: 1.12;
+    letter-spacing: -.01em;
+    color: var(--c-ink);
+    text-wrap: balance;
   }
-  .purpose-title {
-    display: inline-flex;
-    align-items: center;
-    gap: .85em;
-    margin-bottom: 1rem;
-    color: var(--c-plum);
-    font-size: .8rem;
+  .founder-prose { max-width: 38rem; }
+  .founder-prose p + p { margin-top: 1.15em; }
+
+  /* Rótulo pequeño en mayúsculas (Trayectoria reciente, Mi propósito) */
+  .founder-label {
+    color: var(--c-ink);
+    font-family: var(--ff-sans);
+    font-size: .78rem;
     font-weight: 600;
     letter-spacing: .2em;
+    line-height: 1.4;
     text-transform: uppercase;
   }
-  .purpose-title::before { content: ""; width: 2rem; height: 1px; background: currentColor; }
+  .founder-recent {
+    max-width: 38rem;
+    margin-top: clamp(2.5rem, 2rem + 2vw, 3.5rem);
+    padding-top: clamp(2rem, 1.6rem + 1.4vw, 2.75rem);
+    border-top: 1px solid var(--c-line);
+  }
+  .recent-list { margin-top: 1.25rem; }
+  .recent-list li {
+    display: grid;
+    gap: .2rem;
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--c-line);
+  }
+  .recent-list li:first-child { padding-top: 0; }
+  .recent-list li:last-child { border-bottom: 0; padding-bottom: 0; }
+  .recent-title { color: var(--c-ink); font-weight: 600; line-height: 1.4; }
+  .recent-role { color: var(--c-muted); font-size: var(--fs-small); line-height: 1.5; font-variant-numeric: lining-nums tabular-nums; }
+
+  @media (min-width: 960px) {
+    .founder-grid {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+      column-gap: clamp(3.5rem, 7vw, 7.5rem);
+      align-items: start;
+    }
+    /* El titular a la altura de la foto, como en la referencia */
+    .founder-story { padding-top: calc(1.5rem + .8rem * 1.4); }
+  }
+
+  /* ---------- Mi propósito ---------- */
+  .purpose { padding-bottom: var(--section-pad); background: var(--c-ivory); }
+  .purpose-grid {
+    display: grid;
+    gap: 1.5rem;
+    padding-top: clamp(2.5rem, 2rem + 3vw, 4.5rem);
+    border-top: 1px solid var(--c-line);
+  }
+  .purpose-label { color: var(--c-plum); }
   .purpose-text {
-    position: relative;
+    max-width: 30em;
     font-family: var(--ff-serif);
-    font-size: clamp(1.45rem, 1.2rem + 1.1vw, 2rem);
+    font-size: clamp(1.5rem, 1.25rem + 1vw, 2.05rem);
     font-style: italic;
     font-weight: 500;
     line-height: 1.32;
     color: var(--c-plum-800);
+    text-wrap: pretty;
   }
   .purpose-close {
+    max-width: 38rem;
     margin-top: 1.75rem;
-    padding-top: 1.25rem;
-    border-top: 1px solid var(--c-line-strong);
-    color: var(--c-ink);
-    font-weight: 500;
+    color: var(--c-ink-soft);
   }
-  .purpose-close p + p { margin-top: .35rem; color: var(--c-ink-soft); font-weight: 400; }
-
+  .purpose-close p + p { margin-top: .35rem; }
+  .purpose-actions { margin-top: 2.25rem; }
   @media (min-width: 960px) {
-    .about-grid {
-      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-      grid-template-areas: "media head" "media body";
-      grid-template-rows: auto 1fr;
-      column-gap: clamp(3rem, 6vw, 6rem);
-      row-gap: 2.5rem;
-    }
-    .about-media { position: sticky; top: calc(var(--header-h) + 2rem); align-self: start; justify-self: stretch; width: 100%; }
+    .purpose-grid { grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); column-gap: clamp(3.5rem, 7vw, 7.5rem); }
+    .purpose-label { padding-top: .7rem; }
   }
 
   .crossing-grid { display: grid; gap: clamp(2.5rem, 6vw, 5rem); align-items: center; }

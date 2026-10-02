@@ -41,30 +41,24 @@ const areas: { icon: IconName; title: string; text: string }[] = [
   .experience-head { display: grid; gap: 1.25rem; margin-bottom: clamp(2.5rem, 5vw, 4rem); }
   .experience-head .section-title { max-width: 7.7em; }
   .experience-head .lead { max-width: 34rem; }
-  .experience-grid { display: grid; gap: 1.25rem; }
+  .experience-grid { display: grid; gap: 1.25rem 2.5rem; }
+  /* Áreas: separadas por filetes finos (sin cajas ni sombras), más sereno. */
   .area-card {
     position: relative;
-    padding: 2rem 1.75rem 2.1rem;
-    background: var(--c-ivory);
-    border-radius: var(--radius);
-    border: 1px solid var(--c-line);
-    transition: background-color var(--dur) var(--ease-hover), border-color var(--dur) var(--ease-hover);
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .area-card:hover { background: var(--c-lavender); border-color: var(--c-line-strong); }
+    padding: 1.75rem 0 .5rem;
+    border-top: 1px solid var(--c-line-strong);
   }
   .area-icon {
     display: grid;
     place-items: center;
-    width: 3.4rem;
-    height: 3.4rem;
-    margin-bottom: 1.4rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-bottom: 1.1rem;
     border-radius: 50%;
-    border: 1px solid var(--c-line-strong);
+    background: var(--c-lavender);
     color: var(--c-plum);
-    background: var(--c-white);
   }
-  .area-icon :global(.icon) { width: 1.6rem; height: 1.6rem; }
+  .area-icon :global(.icon) { width: 1.35rem; height: 1.35rem; }
   .area-title {
     margin-bottom: .6rem;
     font-family: var(--ff-serif);
@@ -83,7 +77,7 @@ const areas: { icon: IconName; title: string; text: string }[] = [
     .experience-head { grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); column-gap: 5rem; align-items: end; }
   }
   @media (min-width: 1024px) {
-    .experience-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1.5rem; }
+    .experience-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 2.5rem 3rem; }
     .area-card,
     .area-card:last-child { grid-column: span 2; }
     .area-card:nth-child(n + 4) { grid-column: span 3; }

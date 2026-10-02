@@ -6,9 +6,9 @@
  * Los textos de consentimiento de los formularios salen de src/data/legal.ts (los mismos).
  */
 import LegalLayout from '~/layouts/LegalLayout.astro';
-import { PHONE, TEL_LINK } from '~/data/site';
+import { PHONE, TEL_LINK, EMAIL, OFFICE } from '~/data/site';
 import { POLICY_VERSION } from '~/config/acciogest';
-import { CONSENT, FORM_NAMES } from '~/data/legal';
+import { CONSENT, FORM_NAMES, LEGAL_ID } from '~/data/legal';
 import { url } from '~/lib/url';
 
 /** Texto de la casilla, tal cual aparece en el formulario (sin el punto final para citarlo). */
@@ -23,11 +23,12 @@ const consentLabel = (key: keyof typeof CONSENT) => `He leído y acepto la polí
 
   <h2>1. Responsable del tratamiento</h2>
   <dl>
-    <div><dt>Responsable</dt><dd>Denisse González Barbosa</dd></div>
-    <div><dt>NIF / NIE</dt><dd><span class="placeholder">[PENDIENTE: NIF]</span></dd></div>
-    <div><dt>Domicilio</dt><dd><span class="placeholder">[PENDIENTE: domicilio]</span></dd></div>
+    <div><dt>Responsable</dt><dd>{LEGAL_ID.holder}</dd></div>
+    <div><dt>NIE</dt><dd>{LEGAL_ID.nie}</dd></div>
+    <div><dt>Nombre comercial</dt><dd>{LEGAL_ID.tradeName}</dd></div>
+    <div><dt>Domicilio</dt><dd>{OFFICE.oneLine}</dd></div>
     <div><dt>Teléfono</dt><dd><a href={TEL_LINK}>{PHONE.display}</a></dd></div>
-    <div><dt>Correo electrónico</dt><dd><span class="placeholder">[PENDIENTE: email de contacto]</span></dd></div>
+    <div><dt>Correo electrónico</dt><dd><a href={EMAIL.href}>{EMAIL.address}</a></dd></div>
   </dl>
 
   <h2>2. Qué datos se tratan y para qué</h2>
@@ -88,7 +89,7 @@ const consentLabel = (key: keyof typeof CONSENT) => `He leído y acepto la polí
   <p>Algunos de estos proveedores pueden tratar datos fuera del Espacio Económico Europeo. En tal caso, las transferencias se amparan en el Marco de Privacidad de Datos UE-EE. UU. o en cláusulas contractuales tipo aprobadas por la Comisión Europea. <span class="placeholder">[PENDIENTE: verificar para cada proveedor]</span></p>
 
   <h2>7. Tus derechos</h2>
-  <p>Puedes ejercer tus derechos de acceso, rectificación, supresión, oposición, limitación del tratamiento y portabilidad, así como retirar tu consentimiento en cualquier momento, escribiendo a <span class="placeholder">[PENDIENTE: email de contacto]</span> o por WhatsApp al {PHONE.display}, indicando el derecho que deseas ejercer.</p>
+  <p>Puedes ejercer tus derechos de acceso, rectificación, supresión, oposición, limitación del tratamiento y portabilidad, así como retirar tu consentimiento en cualquier momento, escribiendo a <a href={EMAIL.href}>{EMAIL.address}</a>, por correo postal a {OFFICE.oneLine} o por WhatsApp al {PHONE.display}, indicando el derecho que deseas ejercer.</p>
   <p>Si consideras que tus datos no se han tratado correctamente, puedes presentar una reclamación ante la Agencia Española de Protección de Datos (<a href="https://www.aepd.es" target="_blank" rel="noopener">www.aepd.es</a>).</p>
 
   <h2>8. Menores de edad</h2>

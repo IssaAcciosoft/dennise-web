@@ -1,0 +1,262 @@
+---
+/**
+ * «El despacho» (Conóceme, debajo del bloque principal de Denisse): Nuestra historia, Nuestra
+ * misión, Nuestros valores y «Conoce al equipo» + «Partner en Dubái: Poplavsky» → /dubai/.
+ * Textos de la web anterior (docs/web-anterior.md §3 y §4), tal cual con sus correcciones
+ * ortográficas (§8). Fotos: recortes 4:5 de _originales/web-anterior/
+ * (scripts/prepare-web-anterior-images.mjs) optimizados con astro:assets.
+ * Componente independiente: no toca el bloque principal de /conoceme/.
+ */
+import type { ImageMetadata } from 'astro';
+import { SITE } from '~/data/site';
+import Photo from '../ui/Photo.astro';
+import PartnerCard from '../dubai/PartnerCard.astro';
+import denisse from '~/assets/img/equipo/denisse-gonzalez.jpg';
+import everardo from '~/assets/img/equipo/everardo-corona.jpg';
+import stephanie from '~/assets/img/equipo/stephanie-gonzalez.jpg';
+
+const values = [
+  { title: 'Cercanía', text: 'Escuchamos y entendemos las historias detrás de cada trámite.' },
+  { title: 'Excelencia jurídica', text: 'Ofrecemos asesoría basada en rigor legal, actualización constante y experiencia real.' },
+  { title: 'Transparencia', text: 'Comunicación clara, sin promesas falsas ni procesos ocultos.' },
+  { title: 'Compromiso', text: 'Cada caso es único, y lo tratamos con dedicación y respeto.' },
+  { title: 'Visión internacional', text: 'Pensamos a largo plazo y acompañamos a nuestros clientes más allá de las fronteras.' },
+];
+
+type Member = { name: string; role: string; photo: ImageMetadata; alt: string; position?: string; bio: string[] };
+const team: Member[] = [
+  {
+    name: 'Denisse González',
+    role: 'Directora ejecutiva',
+    photo: denisse,
+    alt: 'Denisse González con blazer negro y los brazos cruzados',
+    bio: [
+      'Denisse, fundadora y directora. Está especializada en Derecho Internacional. Le apasiona ofrecer soluciones legales claras y efectivas, y se involucra personalmente en la estrategia jurídica y el acompañamiento de cada cliente.',
+    ],
+  },
+  {
+    name: 'Everardo Corona',
+    role: 'Cofundador honorífico y consultor externo',
+    photo: everardo,
+    alt: 'Retrato de Everardo Corona con traje oscuro y corbata',
+    bio: [
+      'El Embajador Corona, cofundador honorífico, colabora de manera externa en la fineza de la estrategia institucional. Su visión sutil aporta una valiosa colaboración basada en una amplia experiencia en entornos oficiales y empresariales internacionales.',
+      'Su compromiso con los valores de integridad, excelencia y servicio lo convierten en una figura clave en la representación de la firma ante aliados y socios globales.',
+    ],
+  },
+  {
+    name: 'Stephanie González',
+    role: 'Directora técnica',
+    photo: stephanie,
+    alt: 'Stephanie González sonriendo, con blusa roja',
+    bio: [
+      'Stephanie, directora técnica del despacho. Supervisa la correcta aplicación de los criterios legales en cada caso y asegura que los procesos se realicen con precisión y profesionalismo. Su experiencia garantiza un servicio riguroso y de alta calidad para todos nuestros clientes.',
+    ],
+  },
+];
+---
+
+<section class="section section--white firm" id="despacho" aria-labelledby="firm-title">
+  <div class="container firm-grid">
+    <header class="firm-head">
+      <p class="eyebrow" data-reveal>El despacho</p>
+      <h2 class="section-title firm-title" id="firm-title" data-reveal>{SITE.firm}</h2>
+    </header>
+
+    <div class="firm-body">
+      <div class="firm-block" data-reveal>
+        <h3 class="firm-subtitle">Nuestra historia</h3>
+        <div class="prose">
+          <p class="prose-lead">Este despacho nace con una visión clara: brindar soluciones legales efectivas, humanas y confiables a personas extranjeras y emprendedores que buscan construir un futuro sólido en México, España o expandirse a Dubái.</p>
+          <p>Fundado por Denisse Elena González, consultora internacional, abogada mexicana con dos maestrías, una en Estados Unidos por California Western School of Law y otra en España por el Instituto Superior de Derecho y Economía (ISDE). Especializada en extranjería y creación de empresas internacionales, el proyecto crece desde una vocación profunda de servicio, excelencia legal y compromiso con el éxito de cada cliente.</p>
+          <p>Hoy, somos una firma que combina experiencia jurídica, atención personalizada y una mirada estratégica para acompañar a quienes desean avanzar legalmente y sin complicaciones.</p>
+        </div>
+      </div>
+
+      <div class="firm-mission" data-reveal>
+        <h3 class="firm-subtitle firm-subtitle--plum">Nuestra misión</h3>
+        <p class="mission-statement">Ofrecer un servicio legal claro, profesional y accesible, centrado en la persona.</p>
+        <p class="mission-text">Acompañamos a nuestros clientes en sus procesos migratorios y empresariales con estrategias legales personalizadas, enfocadas en resultados reales y duraderos, tanto en México, España como en Dubái.</p>
+      </div>
+    </div>
+
+    <div class="firm-values">
+      <h3 class="firm-subtitle" data-reveal>Nuestros valores</h3>
+      <ol class="values" role="list">
+        {
+          values.map((v, i) => (
+            <li class="value" data-reveal>
+              <span class="value-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+              <h4 class="value-title">{v.title}</h4>
+              <p class="value-text">{v.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section class="section section--ivory team" id="equipo" aria-labelledby="team-title">
+  <div class="container">
+    <div class="team-head">
+      <p class="eyebrow" data-reveal>Equipo</p>
+      <h2 class="section-title" id="team-title" data-reveal>Conoce a nuestro equipo</h2>
+      <p class="lead" data-reveal>Profesionales especializados que se encargan de nuestro éxito.</p>
+    </div>
+
+    <ul class="team-grid" role="list">
+      {
+        team.map((m) => (
+          <li class="member" data-reveal>
+            <figure class="member-photo">
+              <Photo src={m.photo} alt={m.alt} widths={[280, 420, 560]} sizes="(min-width: 960px) 300px, (min-width: 600px) 220px, 132px" position={m.position} />
+            </figure>
+            <div class="member-copy">
+              <h3 class="member-name">{m.name}</h3>
+              <p class="member-role">{m.role}</p>
+              <div class="member-bio">
+                {m.bio.map((p) => (
+                  <p>{p}</p>
+                ))}
+              </div>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="team-partner" data-reveal>
+      <PartnerCard link="dubai" headingId="team-partner-title" />
+    </div>
+  </div>
+</section>
+
+<style>
+  /* ---------- El despacho ---------- */
+  .firm-grid { display: grid; gap: clamp(2rem, 4vw, 3rem) clamp(3rem, 6vw, 6rem); }
+  .firm-title { max-width: 7em; }
+  .firm-body { display: grid; gap: clamp(2.5rem, 5vw, 3.5rem); }
+  .firm-subtitle {
+    display: inline-flex;
+    align-items: center;
+    gap: .85em;
+    margin-bottom: 1.1rem;
+    color: var(--c-ink);
+    font-size: .8rem;
+    font-weight: 600;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+  }
+  .firm-subtitle::before { content: ""; width: 2rem; height: 1px; background: var(--c-plum); }
+  .firm-subtitle--plum { color: var(--c-plum); }
+
+  .firm-mission {
+    position: relative;
+    padding: clamp(1.75rem, 1.25rem + 2vw, 2.75rem);
+    background: var(--c-lavender);
+    border-radius: var(--radius-l);
+    overflow: hidden;
+  }
+  .mission-statement {
+    font-family: var(--ff-serif);
+    font-size: clamp(1.5rem, 1.25rem + 1.1vw, 2.1rem);
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1.28;
+    color: var(--c-plum-800);
+    text-wrap: balance;
+  }
+  .mission-text { max-width: 36em; margin-top: 1.1rem; color: var(--c-ink-soft); text-wrap: pretty; }
+
+  .firm-values { min-width: 0; }
+  .values { display: grid; border-top: 1px solid var(--c-line); }
+  .value {
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr);
+    column-gap: .5rem;
+    padding: 1.25rem 0 1.35rem;
+    border-bottom: 1px solid var(--c-line);
+  }
+  .value-num { grid-row: span 2; padding-top: .35rem; color: var(--c-plum); font-size: .78rem; font-weight: 600; letter-spacing: .16em; }
+  .value-title { font-family: var(--ff-serif); font-size: clamp(1.35rem, 1.2rem + .5vw, 1.6rem); font-weight: 600; line-height: 1.2; }
+  .value-text { margin-top: .3rem; color: var(--c-ink-soft); line-height: 1.55; text-wrap: pretty; }
+
+  @media (min-width: 960px) {
+    .firm-grid {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+      grid-template-areas: "head body" "values values";
+    }
+    .firm-head { grid-area: head; position: sticky; top: calc(var(--header-h) + 2rem); align-self: start; }
+    .firm-body { grid-area: body; }
+    .firm-values { grid-area: values; margin-top: clamp(1rem, 3vw, 2.5rem); }
+    .values { grid-template-columns: repeat(5, minmax(0, 1fr)); column-gap: 1.75rem; border-top: 0; }
+    .value {
+      grid-template-columns: 1fr;
+      align-content: start;
+      padding: 1.4rem 0 0;
+      border-top: 1px solid var(--c-line-strong);
+      border-bottom: 0;
+    }
+    .value-num { grid-row: auto; padding-top: 0; margin-bottom: .6rem; }
+  }
+
+  /* ---------- Equipo ---------- */
+  .team-head { max-width: 46rem; margin-bottom: clamp(2.5rem, 5vw, 3.5rem); }
+  .team-head .section-title { margin-bottom: 1rem; }
+  .team-grid { display: grid; gap: 1.25rem; }
+  .member {
+    display: grid;
+    grid-template-columns: 132px minmax(0, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+    align-content: start;
+    padding: 1.25rem;
+    background: var(--c-white);
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius-l);
+  }
+  .member-photo {
+    margin: 0;
+    aspect-ratio: 4 / 5;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--c-lavender-200);
+  }
+  .member-photo :global(picture),
+  .member-photo :global(img) { width: 100%; height: 100%; }
+  .member-photo :global(img) { object-fit: cover; }
+  .member-name { font-family: var(--ff-serif); font-size: var(--fs-h4); font-weight: 600; line-height: 1.12; }
+  .member-role {
+    margin-top: .35rem;
+    color: var(--c-plum);
+    font-size: .74rem;
+    font-weight: 600;
+    letter-spacing: .14em;
+    line-height: 1.45;
+    text-transform: uppercase;
+  }
+  .member-bio { grid-column: 1 / -1; display: grid; gap: .75rem; color: var(--c-ink-soft); font-size: var(--fs-small); line-height: 1.65; text-wrap: pretty; }
+  .member-copy { display: contents; }
+  .member-copy > :is(.member-name, .member-role) { grid-column: 2; }
+  .member-name { grid-row: 1; align-self: end; }
+  .member-role { grid-row: 2; align-self: start; }
+  .member-photo { grid-row: 1 / span 2; }
+  .member-bio { margin-top: .25rem; }
+
+  @media (min-width: 600px) {
+    .member { grid-template-columns: 200px minmax(0, 1fr); gap: 1rem 2rem; padding: 1.5rem; }
+    .member-photo { grid-row: 1 / span 3; }
+    .member-bio { grid-column: 2; grid-row: 3; margin-top: .75rem; }
+    .member-name { align-self: start; }
+  }
+  @media (min-width: 960px) {
+    .team-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; }
+    .member { grid-template-columns: 1fr; grid-template-rows: auto; align-content: start; gap: 0; padding: 1rem 1rem 1.75rem; }
+    .member-copy { display: block; padding: 1.5rem .75rem 0; }
+    .member-photo { grid-row: auto; }
+    .member-bio { margin-top: 1rem; }
+  }
+
+  .team-partner { margin-top: clamp(2.5rem, 5vw, 3.5rem); }
+</style>

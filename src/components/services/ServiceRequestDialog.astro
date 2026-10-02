@@ -5,28 +5,36 @@
  *
  * Disparadores: cualquier elemento con data-service-request="<lead_value>" (el servicio queda
  * preseleccionado). Usar un <a href="https://wa.me/…"> para que sin JavaScript abra WhatsApp.
- * Opciones del selector: lead_value de src/data/servicios.json + «Otro trámite / no lo sé».
+ * Opciones del selector: lead_value de src/data/servicios.json (extranjería en España,
+ * asesorías, planes, Dubái) + «Otro trámite / no lo sé» (serviceOptions en src/lib/services.ts).
+ * Se usa en /servicios/ y en /dubai/ (`kicker` y `waText` cambian según la página).
  */
-import { consultations, autogestiona } from '~/lib/services';
+import { serviceOptions } from '~/lib/services';
 import { WA_TEXT } from '~/data/site';
 import FormDialog from '../forms/FormDialog.astro';
 import LeadForm from '../forms/LeadForm.astro';
 import Field from '../forms/Field.astro';
 
-const OTHER_SERVICE = 'Otro trámite / no lo sé';
-
-const options = [
-  { label: 'Asesorías', options: consultations.map((c) => ({ value: c.lead_value })) },
-  { label: autogestiona.name, options: autogestiona.plans.map((p) => ({ value: p.lead_value })) },
-  { value: OTHER_SERVICE },
-];
+interface Props {
+  kicker?: string;
+  waText?: string;
+  /** Pista del campo «Mensaje». En /servicios/ pide la modalidad (online o presencial): las
+   *  citas solicitadas desde «Solicitar cita» la necesitan y el formulario no tiene ese campo. */
+  messageHint?: string;
+}
+const {
+  kicker = 'Servicios de extranjería',
+  waText = WA_TEXT.general,
+  messageHint = 'Por ejemplo: si prefieres la asesoría online o presencial, tu situación actual o el trámite que te interesa.',
+} = Astro.props;
+const options = serviceOptions;
 const p = 'sr';
 ---
 
 <FormDialog
   id="service-dialog"
   tone="brand"
-  kicker="Servicios de extranjería"
+  kicker={kicker}
   title="Solicitar información"
   intro="Cuéntame qué necesitas y me pondré en contacto contigo."
   dataAttr="data-service-dialog"
@@ -39,7 +47,7 @@ const p = 'sr';
     successTitle="¡Solicitud enviada!"
     successText="He recibido tu solicitud correctamente."
     againLabel="Enviar otra solicitud"
-    waText={WA_TEXT.general}
+    waText={waText}
   >
     <Field name="nombre" id={`${p}-nombre`} label="Nombre" required autocomplete="name" maxlength={120} msgRequired="Escribe tu nombre." />
     <Field
@@ -73,7 +81,7 @@ const p = 'sr';
       rows={4}
       maxlength={1500}
       counter
-      hint="Por ejemplo, tu situación actual o el trámite que te interesa."
+      hint={messageHint}
     />
   </LeadForm>
 </FormDialog>

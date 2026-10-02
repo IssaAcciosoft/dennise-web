@@ -423,9 +423,11 @@ revictimización.
 
 ## 7. Pendiente de la cliente
 
-Resuelto el 02/10: teléfono (+34), email, domicilio, nombre completo, NIE, nombre comercial,
-web anterior (equipo, Dubái, extranjería: ver `docs/web-anterior.md`), integración de formularios
-(AccioGest).
+Resuelto el 02/10: teléfono (+34), email (lic.denissegb@icloud.com), domicilio del despacho
+(C/ Eraso 31, local A, 28028 Madrid), nombre completo, NIE, nombre comercial (DG Gestores y
+Abogados), texto del hero, web anterior (equipo, Dubái, extranjería, FAQ, valores y testimonio:
+ver `docs/web-anterior.md`; ya están en la web: /dubai/, /servicios/, /conoceme/ e inicio) e
+integración de formularios (AccioGest).
 
 1. Qué diferencia los planes Básico / Estándar / Premium.
 2. Colegiación en España (colegio y nº de colegiada), si aplica: el aviso legal debe indicarlo
@@ -434,6 +436,23 @@ web anterior (equipo, Dubái, extranjería: ver `docs/web-anterior.md`), integra
 3. Proceso después del pago (quién contacta, plazo, documentación, hoja de encargo) y política de
    cancelación y reembolso.
 4. Plataforma de videollamada de las asesorías online.
-5. Alertas de `docs/web-anterior.md` §9: fiscalidad en Dubái, cifra "más de 1000", testimonio de
-   Jose, nacionalidad por matrimonio/descendencia.
-6. IDs de AccioGest (formularios, planes, plugin de reservas).
+5. Alertas de la web anterior (`docs/web-anterior.md` §9), ya aplicadas en la web a la espera de
+   su confirmación:
+   - **9.1 Fiscalidad en Dubái.** En /dubai/ se omitió la frase sin matices de la entradilla
+     («sin impuestos sobre ganancias personales o empresariales»). Quedan publicadas, marcadas
+     en el código como pendientes de revisión legal: «Cero impuestos sobre beneficios personales
+     o empresariales en muchas zonas francas» (¿Por qué Dubái?), «…estructuras legales eficientes
+     y ventajas fiscales» (servicios) y «Es rápido, legal y con grandes ventajas fiscales» (FAQ).
+   - **9.2 «Más de 1000 personas…»**: NO se publica hasta que la confirme (y con qué base).
+   - **9.4 Testimonio de Jose**: publicado en el inicio, sin foto. Confirmar que es real y que hay
+     permiso para publicarlo (si no, se quita `<Testimonial />` de `src/pages/index.astro`).
+   - **9.6 Nacionalidad «por matrimonio o descendencia»** (/servicios/, tarjeta «Nacionalidad
+     española»): publicado tal cual; conviene que lo revise.
+6. Equipo (/conoceme/ → «Conoce al equipo»): confirmar que Everardo Corona y Stephanie González
+   autorizan publicar su foto, cargo y descripción (y el tratamiento «Embajador»). La foto de
+   Stephanie de la web anterior es de baja resolución: si hay una mejor, sustituirla
+   (`npm run web-anterior-images`).
+7. Partner en Dubái: confirmar que Poplavsky autoriza el uso de su logotipo y el enlace a su web.
+8. IDs de AccioGest (formularios, planes, plugin de reservas). Si el campo «Servicio» del
+   formulario de AccioGest es un desplegable, añadir los nuevos valores (extranjería en España y
+   «Apertura de empresa en Dubái»: ver `docs/integracion-acciogest.md` §4).

@@ -38,7 +38,7 @@ const {
   title,
   description,
   ogImage = '/og-image.jpg',
-  ogImageAlt = 'Denisse González, abogada: «Derecho con estrategia. Derecho con perspectiva internacional. Derecho con humanidad.»',
+  ogImageAlt = 'Denisse González, abogada: «Derecho que conecta personas, oportunidades y derechos». Derecho internacional · Movilidad internacional · Derechos humanos.',
   noindex = false,
   preloadFonts,
   bodyClass,
@@ -69,14 +69,16 @@ const speculationRules = JSON.stringify({
 // UTM de la URL de llegada → sessionStorage, en TODAS las páginas (los formularios de AccioGest
 // las envían aunque la persona llegue a otra página). En línea y diminuto: sin petición extra.
 // Retrato compartido inicio ↔ Conóceme (View Transitions entre documentos, global.css §8).
-// Se nombra «portrait» SOLO la foto .vt-portrait que más se ve en pantalla en cada lado
-// (pageswap en la página que se va, pagereveal en la que llega) y solo entre esas dos páginas;
-// si no se ve ninguna, transición normal. Si es la misma foto (p. ej. la de la ONU en ambas),
-// tipo «portrait-same» (fundido cruzado sin desenfoque). Con «reducir movimiento» no se nombra
-// nada (solo el fundido de la página). Sin soporte: no hace nada.
+// Se nombra SOLO la foto .vt-portrait que más se ve en pantalla en cada lado (pageswap en la
+// página que se va, pagereveal en la que llega) y solo entre esas dos páginas. El nombre lleva
+// la foto («portrait-retrato»; clase común «portrait»): así solo hay elemento compartido si es
+// la MISMA foto en los dos lados (se ve una sola imagen que viaja). Si las fotos son distintas,
+// o en un lado no se ve ninguna, cada una se funde en su sitio con la página (Emil: un elemento
+// compartido implica «es el mismo objeto»). Nada se guarda en el navegador. Con «reducir
+// movimiento» no se nombra nada (solo el fundido de la página). Sin soporte: no hace nada.
 const vtHome = url('/');
 const vtAbout = url('/conoceme/');
-const portraitScript = `(function(){if(!('onpagereveal' in window))return;var H=${JSON.stringify(vtHome)},A=${JSON.stringify(vtAbout)},K='vt-portrait';function p(u){try{return new URL(u,location.href).pathname}catch(e){return''}}function linked(a,b){return(a===H&&b===A)||(a===A&&b===H)}function photo(el){var i=el.querySelector('img');return i?(i.currentSrc||i.src).split('/').pop().split('.')[0]:''}function pick(){var best=null,score=.3;if(matchMedia('(prefers-reduced-motion: reduce)').matches)return null;document.querySelectorAll('.vt-portrait').forEach(function(el){var r=el.getBoundingClientRect();if(!r.width||!r.height)return;var w=Math.min(r.right,innerWidth)-Math.max(r.left,0),h=Math.min(r.bottom,innerHeight)-Math.max(r.top,0),s=w>0&&h>0?w*h/(r.width*r.height):0;if(s>=score){score=s;best=el}});return best}function name(el,vt){el.style.viewTransitionName='portrait';vt.finished.finally(function(){el.style.viewTransitionName=''})}addEventListener('pageswap',function(e){if(!e.viewTransition||!e.activation||!e.activation.entry||!linked(p(location.href),p(e.activation.entry.url)))return;var el=pick();try{sessionStorage.setItem(K,el?photo(el)||'?':'')}catch(x){}if(el)name(el,e.viewTransition)});addEventListener('pagereveal',function(e){if(!e.viewTransition)return;var n=window.navigation&&navigation.activation,from=n&&n.from&&n.from.url?p(n.from.url):document.referrer?p(document.referrer):'';if(!linked(from,p(location.href)))return;var was=null;try{was=sessionStorage.getItem(K);sessionStorage.removeItem(K)}catch(x){}if(was==='')return;var el=pick();if(!el)return;if(was&&photo(el)===was)e.viewTransition.types.add('portrait-same');name(el,e.viewTransition)});addEventListener('pageshow',function(){document.querySelectorAll('.vt-portrait').forEach(function(el){el.style.viewTransitionName=''})})})();`;
+const portraitScript = `(function(){if(!('onpagereveal' in window))return;var H=${JSON.stringify(vtHome)},A=${JSON.stringify(vtAbout)};function p(u){try{return new URL(u,location.href).pathname}catch(e){return''}}function linked(a,b){return(a===H&&b===A)||(a===A&&b===H)}function key(el){var i=el.querySelector('img');return i?(i.currentSrc||i.src).split('/').pop().split('.')[0].toLowerCase().replace(/[^a-z0-9-]/g,'-'):''}function pick(){var best=null,score=.3;if(matchMedia('(prefers-reduced-motion: reduce)').matches)return null;document.querySelectorAll('.vt-portrait').forEach(function(el){var r=el.getBoundingClientRect();if(!r.width||!r.height)return;var w=Math.min(r.right,innerWidth)-Math.max(r.left,0),h=Math.min(r.bottom,innerHeight)-Math.max(r.top,0),s=w>0&&h>0?w*h/(r.width*r.height):0;if(s>=score){score=s;best=el}});return best}function clear(el){el.style.viewTransitionName='';el.style.removeProperty('view-transition-class')}function name(el,vt){var k=key(el);if(!k)return;el.style.viewTransitionName='portrait-'+k;el.style.setProperty('view-transition-class','portrait');vt.finished.finally(function(){clear(el)})}addEventListener('pageswap',function(e){if(!e.viewTransition||!e.activation||!e.activation.entry||!linked(p(location.href),p(e.activation.entry.url)))return;var el=pick();if(el)name(el,e.viewTransition)});addEventListener('pagereveal',function(e){if(!e.viewTransition)return;var n=window.navigation&&navigation.activation,from=n&&n.from&&n.from.url?p(n.from.url):document.referrer?p(document.referrer):'';if(!linked(from,p(location.href)))return;var el=pick();if(el)name(el,e.viewTransition)});addEventListener('pageshow',function(){document.querySelectorAll('.vt-portrait').forEach(clear)})})();`;
 
 const utmScript = `try{var q=new URLSearchParams(location.search),u={},n=0;${JSON.stringify(UTM_KEYS)}.forEach(function(k){var v=(q.get(k)||'').trim();if(v){u[k]=v.slice(0,200);n++}});if(n)sessionStorage.setItem(${JSON.stringify(UTM_STORAGE_KEY)},JSON.stringify(u))}catch(e){}`;
 ---
@@ -88,7 +90,8 @@ const utmScript = `try{var q=new URLSearchParams(location.search),u={},n=0;${JSO
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
+    {/* Páginas noindex (404, /gracias/): sin canonical ni og:url (señales contradictorias). */}
+    {!noindex && <link rel="canonical" href={canonical} />}
     {noindex && <meta name="robots" content="noindex, follow" />}
     <meta name="theme-color" content={themeColor} />
     <meta name="color-scheme" content="light" />
@@ -106,7 +109,7 @@ const utmScript = `try{var q=new URLSearchParams(location.search),u={},n=0;${JSO
     <meta property="og:site_name" content={SITE.title} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
+    {!noindex && <meta property="og:url" content={canonical} />}
     <meta property="og:image" content={ogImageUrl} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -117,7 +120,7 @@ const utmScript = `try{var q=new URLSearchParams(location.search),u={},n=0;${JSO
     <meta name="twitter:image" content={ogImageUrl} />
     <meta name="twitter:image:alt" content={ogImageAlt} />
 
-    <JsonLd title={title} description={description} path={path} />
+    <JsonLd title={title} description={description} path={path} noindex={noindex} />
     <script type="speculationrules" is:inline set:html={speculationRules} />
     <script is:inline set:html={utmScript} />
     <script is:inline set:html={portraitScript} />
@@ -129,7 +132,7 @@ const utmScript = `try{var q=new URLSearchParams(location.search),u={},n=0;${JSO
     <main id="contenido" tabindex="-1">
       <slot />
     </main>
-    <Footer />
+    <Footer logoEager={noindex} />
     <WhatsAppFloat />
     <slot name="after" />
     <script>

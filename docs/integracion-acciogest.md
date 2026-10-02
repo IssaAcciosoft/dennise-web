@@ -50,14 +50,19 @@ sin tocar nada más (`isConfigured(id)`: no vacío y no es un valor de ejemplo).
   a esta sección (`/servicios/#reservar`).
 - Implementación: el script se inyecta justo después del contenedor **solo** cuando la sección
   se acerca a la pantalla (IntersectionObserver, 1200 px antes) o en el acto si se llega con
-  `#reservar`; así no hay peticiones a terceros al cargar la página. Si el script falla, se
-  muestra «Solicitar cita» + WhatsApp.
+  `#reservar`; así no hay peticiones a terceros al cargar la página. El widget se da por
+  cargado cuando aparece su iframe («Cargando el calendario de reservas…» hasta entonces). Si
+  el script falla, o carga pero no pinta su iframe (8 s después de cargar, 15 s como máximo),
+  se muestra «Solicitar cita» + WhatsApp + teléfono dentro del mismo hueco reservado.
+- Bajo el widget (y en el panel sin configurar): «Pago seguro con tarjeta. Al reservar aceptas
+  las condiciones de contratación» con enlace a `/condiciones-contratacion/`.
 - Sin `BOOKING_PLUGIN_ID`: panel con lo que incluye la reserva (servicio, día y hora,
   modalidad, pago seguro con tarjeta), «Solicitar cita» (formulario `servicio`) y WhatsApp.
 
 ## 2. Catálogo
 
-`src/data/servicios.json`: precios con IVA incluido, en EUR. Astro genera el HTML desde el
+`src/data/servicios.json`: precios en EUR; los planes del Programa Autogestiona, con IVA
+incluido (las asesorías: pendiente de confirmar si lo incluyen). Astro genera el HTML desde el
 JSON al compilar (`src/lib/services.ts`). Cuando exista el endpoint de catálogo, solo cambia la
 función que carga los datos (o se recompila la web al cambiar precios).
 
@@ -103,12 +108,15 @@ Etiquetas que usa la web (editables en `src/config/acciogest.ts` → `FIELD_LABE
 |---|---|
 | servicio | Nombre, Email, Teléfono, Servicio, Mensaje, Consentimiento RGPD, Versión política, utm_source, utm_medium, utm_campaign |
 | historia | Nombre, Email, Teléfono, País, Tema, Historia, Compartir públicamente, Anonimato, Cómo contactarte, Consentimiento RGPD, Versión política, utm_source, utm_medium, utm_campaign |
+| contacto | Nombre, Email, Teléfono, Mensaje, Consentimiento RGPD, Versión política, utm_source, utm_medium, utm_campaign |
 
 Valores: `Servicio` = `lead_value` de `servicios.json` (p. ej. `Asesoría migratoria · 1 hora`,
-`Programa Autogestiona · Plan Estándar`) u `Otro trámite / no lo sé`; `Tema` = Migración,
+`Programa Autogestiona · Plan Estándar`, `Extranjería · Arraigos` y el resto de servicios de
+extranjería en España, `Extranjería · Nómadas digitales`, `Apertura de empresa en Dubái`) u
+`Otro trámite / no lo sé`. El diálogo de solicitud está en /servicios/ y en /dubai/ (allí el
+servicio llega preseleccionado como `Apertura de empresa en Dubái`); `Tema` = Migración,
 Superación, Derechos humanos, Lucha, Transformación, Justicia u Otra; `Cómo contactarte` =
 `Email`, `Teléfono` o `WhatsApp` (con Teléfono/WhatsApp el teléfono es obligatorio en la web).
-| contacto | Nombre, Email, Teléfono, Mensaje, Consentimiento RGPD, Versión política, utm_source, utm_medium, utm_campaign |
 
 Respuestas:
 

@@ -1,5 +1,11 @@
 ---
-import { BOOKING_PATH } from '~/data/site';
+/**
+ * Hero del inicio. Texto de la cliente, tal cual (docs/contenido.md §4 «HERO», recibido el
+ * 02/10): titular (H1), firma (nombre + áreas), dos párrafos y el par de cierre.
+ * El H1 es el LCP en móvil: nunca se oculta ni se anima (sin data-reveal en el hero).
+ * «Derecho con estrategia…» ya no está aquí: es el cierre de «Más allá del expediente».
+ */
+import { BOOKING_PATH, SITE, OFFICE } from '~/data/site';
 import { url } from '~/lib/url';
 import Photo from '../ui/Photo.astro';
 import Icon from '../ui/Icon.astro';
@@ -9,16 +15,20 @@ import retrato from '~/assets/img/retrato.jpg';
 <section class="hero" aria-labelledby="hero-title" data-wa-hide>
   <div class="container hero-grid">
     <div class="hero-copy">
-      <p class="eyebrow">
-        <span>Abogada&nbsp;· Extranjería&nbsp;· <span class="nowrap">Derecho internacional</span>&nbsp;· <span class="nowrap">Derechos humanos</span></span>
+      <h1 class="hero-title" id="hero-title">Derecho que conecta <em>personas, oportunidades y&nbsp;derechos</em></h1>
+      <p class="hero-signature">
+        <span class="hero-signature-name">Denisse González</span>
+        <span class="hero-signature-areas">
+          <span class="nowrap">Derecho internacional</span><span class="hero-dot" aria-hidden="true"> · </span><span class="nowrap">Movilidad internacional</span><span class="hero-dot" aria-hidden="true"> · </span><span class="nowrap">Derechos humanos</span>
+        </span>
       </p>
-      <h1 class="hero-title" id="hero-title">
-        <span class="hero-line">Derecho con <em>estrategia.</em></span>
-        <span class="hero-line">Derecho con <em>perspectiva internacional.</em></span>
-        <span class="hero-line">Derecho con <em>humanidad.</em></span>
-      </h1>
-      <p class="hero-lead">
-        Porque detrás de cada expediente hay una persona. Y detrás de cada trámite, una historia, un proyecto de vida o una oportunidad que merece ser tomada en serio.
+      <div class="hero-text">
+        <p>Entre personas, instituciones y fronteras existen caminos que no siempre son fáciles de recorrer.</p>
+        <p>Mi trabajo consiste en ayudar a construir esos caminos con conocimiento jurídico, visión internacional y, sobre todo, con una mirada humana.</p>
+      </div>
+      <p class="hero-closing">
+        <span>Conocer el derecho es importante.</span>
+        <span>Entender a las personas que necesitan de él lo es aún más.</span>
       </p>
       <div class="btn-row hero-actions">
         <a class="btn btn--primary btn--lg" href={url(BOOKING_PATH)}>
@@ -44,8 +54,8 @@ import retrato from '~/assets/img/retrato.jpg';
         />
       </div>
       <p class="hero-badge">
-        <span class="hero-badge-name">Denisse González</span>
-        <span class="hero-badge-role">Abogada · Mtra. en Derecho</span>
+        <span class="hero-badge-name">{SITE.firm}</span>
+        <span class="hero-badge-role">Despacho en {OFFICE.locality}</span>
       </p>
     </div>
   </div>
@@ -68,26 +78,85 @@ import retrato from '~/assets/img/retrato.jpg';
     gap: clamp(2.5rem, 5vw, 5rem);
     align-items: center;
   }
-  .hero .eyebrow { letter-spacing: .15em; }
+  /* Jerarquía: titular (serif, H1) → firma (nombre + áreas) → dos párrafos → par de cierre
+     destacado → botones. Anchos en em (nunca ch: CLS al cambiar de fuente). */
   .hero-title {
-    margin-bottom: 1.5rem;
+    max-width: 11.5em;
+    margin-bottom: clamp(1.35rem, 1rem + 1vw, 1.9rem);
     font-family: var(--ff-serif);
-    font-size: var(--fs-h1);
+    font-size: clamp(2.35rem, 1.45rem + 3.5vw, 4.4rem);
     font-weight: 600;
     line-height: 1.02;
     letter-spacing: -.015em;
     color: var(--c-ink);
+    text-wrap: balance;
   }
   .hero-title em { font-style: italic; font-weight: 500; color: var(--c-plum); }
-  .hero-line { display: block; }
-  .hero-line + .hero-line { margin-top: .12em; }
-  .hero-lead {
-    max-width: 38rem;
-    margin-bottom: 2rem;
+
+  .hero-signature {
+    display: grid;
+    gap: .3rem;
+    margin-bottom: clamp(1.5rem, 1.2rem + 1vw, 2.1rem);
+    padding-left: 1rem;
+    border-left: 1px solid var(--c-line-strong);
+  }
+  .hero-signature-name {
+    font-family: var(--ff-serif);
+    font-size: clamp(1.3rem, 1.2rem + .4vw, 1.5rem);
+    font-weight: 600;
+    line-height: 1.15;
+    color: var(--c-ink);
+  }
+  /* Áreas: en una línea si cabe con holgura; si no, una por línea. Lo decide el ancho del
+     contenedor (no el de la fuente), así el cambio de fuente nunca reorganiza la línea (CLS). */
+  .hero-signature { container-type: inline-size; }
+  .hero-signature-areas {
+    display: flex;
+    flex-wrap: nowrap;
+    color: var(--c-plum);
+    font-size: .74rem;
+    font-weight: 600;
+    letter-spacing: .15em;
+    line-height: 1.7;
+    text-transform: uppercase;
+  }
+  .hero-dot { color: var(--c-grey); white-space: pre; }
+  @container (max-width: 37rem) {
+    .hero-signature-areas { flex-direction: column; }
+    .hero-dot { display: none; }
+  }
+
+  .hero-text {
+    display: grid;
+    gap: .85rem;
+    max-width: 34em;
     color: var(--c-ink-soft);
-    font-size: var(--fs-lead);
-    line-height: 1.55;
+    font-size: clamp(1.08rem, 1rem + .3vw, 1.22rem);
+    line-height: 1.6;
     text-wrap: pretty;
+  }
+  .hero-closing {
+    display: grid;
+    gap: .15rem;
+    max-width: 26em;
+    margin-block: clamp(1.5rem, 1.2rem + 1vw, 2rem) clamp(1.75rem, 1.4rem + 1vw, 2.25rem);
+    font-family: var(--ff-serif);
+    font-size: clamp(1.32rem, 1.15rem + .7vw, 1.7rem);
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1.28;
+    color: var(--c-ink);
+    text-wrap: balance;
+  }
+  .hero-closing span:last-child { color: var(--c-plum); }
+  .hero-closing::before {
+    content: "";
+    display: block;
+    width: .5rem;
+    height: .5rem;
+    margin-bottom: .9rem;
+    background: var(--c-plum);
+    rotate: 45deg;
   }
 
   .hero-media {
@@ -142,7 +211,7 @@ import retrato from '~/assets/img/retrato.jpg';
   }
   .hero-badge-name {
     font-family: var(--ff-serif);
-    font-size: 1.35rem;
+    font-size: 1.28rem;
     font-weight: 600;
     line-height: 1.1;
   }
@@ -156,7 +225,6 @@ import retrato from '~/assets/img/retrato.jpg';
   }
 
   @media (max-width: 479.98px) {
-    .hero .eyebrow { font-size: .72rem; letter-spacing: .12em; }
     .hero-actions .btn { width: 100%; }
   }
   @media (min-width: 600px) {

@@ -1,0 +1,109 @@
+---
+/**
+ * «Partner en Dubái: Poplavsky» (web anterior, docs/web-anterior.md §4), tal cual.
+ * - /dubai/: enlace a su web (www.poplavskygroup.com, pestaña nueva, rel="noopener").
+ * - /conoceme/ (equipo): enlace a /dubai/.
+ * El logo original tiene fondo negro: sobre el ciruela oscuro se funde con mix-blend-mode:
+ * lighten (el negro desaparece; el oro y el gris se mantienen). Imagen con astro:assets.
+ */
+import { url } from '~/lib/url';
+import Photo from '../ui/Photo.astro';
+import Icon from '../ui/Icon.astro';
+import logo from '~/assets/img/poplavsky-logo.jpg';
+
+interface Props {
+  /** «external»: enlace a la web del partner; «dubai»: enlace a /dubai/. */
+  link?: 'external' | 'dubai';
+  headingId?: string;
+  class?: string;
+}
+const { link = 'external', headingId = 'partner-title', class: className } = Astro.props;
+---
+
+<article class:list={['partner', className]} aria-labelledby={headingId}>
+  <figure class="partner-logo">
+    <Photo src={logo} alt="Logotipo de Poplavsky International Offices · Dubai · UAE" widths={[240, 360, 480]} sizes="(min-width: 760px) 200px, 160px" />
+  </figure>
+  <div class="partner-copy">
+    <p class="partner-kicker">Partner en Dubái</p>
+    <h3 class="partner-name" id={headingId}>Poplavsky</h3>
+    <p class="partner-text">Firma colaboradora especializada en la constitución de empresas y asesoría legal para emprendedores internacionales en los Emiratos Árabes.</p>
+    {
+      link === 'external' ? (
+        <a class="partner-link" href="https://www.poplavskygroup.com" target="_blank" rel="noopener">
+          <span>www.poplavskygroup.com</span>
+          <Icon name="external" />
+          <span class="visually-hidden"> (se abre en una pestaña nueva)</span>
+        </a>
+      ) : (
+        <a class="partner-link" href={url('/dubai/')}>
+          <span>Abre tu empresa en Dubái</span>
+          <Icon name="arrow" />
+        </a>
+      )
+    }
+  </div>
+</article>
+
+<style>
+  .partner {
+    --focus: var(--ev-gold);
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    gap: 1.5rem 2.5rem;
+    align-items: center;
+    padding: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+    border: 1px solid rgba(221, 181, 108, .28);
+    border-radius: var(--radius-l);
+    overflow: clip;
+    color: var(--ev-text);
+    background:
+      radial-gradient(28rem 18rem at 0% 0%, rgba(122, 44, 134, .55), transparent 70%),
+      linear-gradient(160deg, #34103C, var(--ev-bg));
+  }
+  .partner-logo { width: 160px; margin: 0; }
+  .partner-logo :global(img) { width: 100%; height: auto; mix-blend-mode: lighten; }
+  .partner-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: .75em;
+    color: var(--ev-gold);
+    font-size: .76rem;
+    font-weight: 600;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+  }
+  .partner-kicker::before { content: ""; width: 1.5rem; height: 1px; background: currentColor; }
+  .partner-name {
+    margin-top: .4rem;
+    font-family: var(--ff-serif);
+    font-size: clamp(1.8rem, 1.5rem + 1.2vw, 2.4rem);
+    font-weight: 600;
+    line-height: 1.05;
+    color: #fff;
+  }
+  .partner-text { max-width: 34rem; margin-top: .75rem; color: var(--ev-muted); line-height: 1.6; text-wrap: pretty; }
+  .partner-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    min-height: 44px;
+    margin-top: 1rem;
+    color: var(--ev-gold-2);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: rgba(235, 203, 142, .45);
+    text-underline-offset: .3em;
+    transition: color var(--dur-fast) var(--ease-hover), text-decoration-color var(--dur-fast) var(--ease-hover);
+  }
+  .partner-link :global(.icon) { width: 1.05em; height: 1.05em; transition: transform var(--dur) var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) {
+    .partner-link:hover { color: #fff; text-decoration-color: currentColor; }
+    .partner-link:hover :global(.icon) { transform: translateX(2px); }
+  }
+  @media (min-width: 760px) {
+    .partner { grid-template-columns: auto minmax(0, 1fr); }
+    .partner-logo { width: 200px; }
+  }
+</style>

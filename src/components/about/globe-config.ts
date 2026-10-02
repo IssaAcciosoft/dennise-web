@@ -1,6 +1,6 @@
 /**
  * Globo de Conóceme (México · España · Nueva York): datos, vista y colores compartidos por
- * - la isla WebGL (Globe.tsx, cobe),
+ * - el globo WebGL (globe-mount.ts, cobe),
  * - las etiquetas HTML y el póster estático (GlobeSlot.astro),
  * - el generador del póster (scripts/render-globe-poster.mjs → src/assets/globe-poster.png).
  * Si cambias la vista o los colores, regenera el póster: `npm run globe-poster`.

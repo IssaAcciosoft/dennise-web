@@ -1,5 +1,5 @@
 /**
- * Utilidades compartidas para las islas de React (globo 3D, visita guiada, React Bits…).
+ * Utilidades compartidas para las islas de React (Empoderando Voces · React Bits).
  * - usePrefersReducedMotion: con «reducir movimiento», no montar WebGL/animaciones (dejar el póster).
  * - useInView: pausar el render (WebGL, rAF) cuando la isla sale de pantalla.
  */

@@ -11,7 +11,7 @@ interface Props {
 const { title, heading, description } = Astro.props;
 ---
 
-<BaseLayout title={title} description={description} preloadFonts={['serif-600', 'sans-400']}>
+<BaseLayout title={title} description={description}>
   <section class="legal-hero" aria-labelledby="legal-title">
     <div class="container">
       <p class="eyebrow">Información legal</p>

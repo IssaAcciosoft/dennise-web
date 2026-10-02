@@ -17,6 +17,7 @@
 import { PHONE, TEL_LINK, WA_TEXT, waLink } from '~/data/site';
 import { bookingScriptUrl } from '~/config/acciogest';
 import { consultations } from '~/lib/services';
+import { url } from '~/lib/url';
 import Icon, { type IconName } from '../ui/Icon.astro';
 
 const scriptSrc = bookingScriptUrl();
@@ -49,20 +50,32 @@ const requestWa = waLink(WA_TEXT.reserva);
     {
       scriptSrc ? (
         <>
-          <div class="booking-widget" id="acciogest-booking" data-booking-src={scriptSrc} />
-          <div class="booking-error" data-booking-error hidden>
-            <p>No se ha podido cargar el sistema de reservas. Puedes solicitar tu cita o escribirme por WhatsApp.</p>
-            <div class="btn-row">
-              <a class="btn btn--primary" href={requestWa} target="_blank" rel="noopener" data-service-request="">
-                <Icon name="calendar" />
-                <span>Solicitar cita</span>
-              </a>
-              <a class="btn btn--ghost" href={requestWa} target="_blank" rel="noopener">
-                <Icon name="whatsapp" />
-                <span>Reservar por WhatsApp</span>
-              </a>
+          {/* El aviso de error ocupa el mismo hueco reservado (760 px): nunca queda una caja vacía
+              ni hay saltos de diseño si el calendario no llega. */}
+          <div class="booking-frame">
+            <div class="booking-widget" id="acciogest-booking" data-booking-src={scriptSrc} />
+            <div class="booking-error" data-booking-error role="status" hidden>
+              <span class="booking-error-icon" aria-hidden="true"><Icon name="calendar" /></span>
+              <p class="booking-error-text">No se ha podido cargar el sistema de reservas. Puedes solicitar tu cita o escribirme por WhatsApp.</p>
+              <div class="booking-error-actions">
+                <a class="btn btn--primary btn--lg btn--block" href={requestWa} target="_blank" rel="noopener" data-service-request="">
+                  <Icon name="calendar" />
+                  <span>Solicitar cita</span>
+                </a>
+                <a class="btn btn--ghost btn--lg btn--block" href={requestWa} target="_blank" rel="noopener">
+                  <Icon name="whatsapp" />
+                  <span>Reservar por WhatsApp</span>
+                </a>
+                <a class="booking-phone" href={TEL_LINK}>
+                  <Icon name="phone" />
+                  <span>{PHONE.display}</span>
+                </a>
+              </div>
             </div>
           </div>
+          <p class="booking-terms">
+            Pago seguro con tarjeta. Al reservar aceptas las <a href={url('/condiciones-contratacion/')}>condiciones de contratación</a>.
+          </p>
           <noscript>
             <p class="booking-noscript">
               Para reservar online necesitas activar JavaScript. También puedes <a href={requestWa}>reservar por WhatsApp</a> o llamar al{' '}
@@ -111,6 +124,9 @@ const requestWa = waLink(WA_TEXT.reserva);
                 <span>{PHONE.display}</span>
               </a>
             </div>
+            <p class="booking-terms booking-terms--card">
+              Al reservar aceptas las <a href={url('/condiciones-contratacion/')}>condiciones de contratación</a>.
+            </p>
           </div>
         </div>
       )
@@ -129,25 +145,47 @@ const requestWa = waLink(WA_TEXT.reserva);
   }
 
   // Widget de AccioGest: carga diferida (solo si hay BOOKING_PLUGIN_ID).
+  // Se da por cargado cuando aparece su iframe (no con un temporizador). Si el script falla, o
+  // carga pero no pinta nada (pluginId incorrecto, error interno…), se muestra «Solicitar cita»
+  // + WhatsApp en el mismo hueco reservado.
   const host = document.getElementById('acciogest-booking');
   const src = host?.dataset.bookingSrc;
   if (host && src) {
     let io: IntersectionObserver | undefined;
     let injected = false;
+    const LOAD_TIMEOUT_MS = 15000; // desde que se inyecta el script
+    const RENDER_TIMEOUT_MS = 8000; // desde que el script ha cargado
     const inject = () => {
       if (injected) return;
       injected = true;
       io?.disconnect();
       host.dataset.state = 'loading';
+      let settled = false;
+      let timer = 0;
+      const hasFrame = () => Boolean(host.querySelector('iframe'));
+      const settle = (state: 'ready' | 'error') => {
+        if (settled) return;
+        settled = true;
+        mo.disconnect();
+        window.clearTimeout(timer);
+        host.dataset.state = state;
+        if (state === 'error') {
+          const box = document.querySelector<HTMLElement>('[data-booking-error]');
+          if (box) box.hidden = false;
+        }
+      };
+      const mo = new MutationObserver(() => hasFrame() && settle('ready'));
+      mo.observe(host, { childList: true, subtree: true });
+      timer = window.setTimeout(() => settle(hasFrame() ? 'ready' : 'error'), LOAD_TIMEOUT_MS);
       const script = document.createElement('script');
       script.src = src;
       script.async = true;
-      script.onload = () => window.setTimeout(() => (host.dataset.state = 'ready'), 4000);
-      script.onerror = () => {
-        host.dataset.state = 'error';
-        const box = document.querySelector<HTMLElement>('[data-booking-error]');
-        if (box) box.hidden = false;
+      script.onload = () => {
+        if (settled) return;
+        window.clearTimeout(timer);
+        timer = window.setTimeout(() => settle(hasFrame() ? 'ready' : 'error'), RENDER_TIMEOUT_MS);
       };
+      script.onerror = () => settle('error');
       host.after(script); // mismo sitio que en el código de AccioGest: justo después del contenedor
     };
     const wantsBooking = () => location.hash === '#reservar';
@@ -168,7 +206,6 @@ const requestWa = waLink(WA_TEXT.reserva);
 </script>
 
 <style>
-  .booking { scroll-margin-top: var(--header-h); }
   .booking-head { text-align: center; margin-bottom: clamp(2rem, 4vw, 3rem); }
   .booking-head .section-title { margin-inline: auto; }
 
@@ -188,7 +225,8 @@ const requestWa = waLink(WA_TEXT.reserva);
       radial-gradient(30rem 18rem at 100% 0%, rgba(232, 221, 236, .8), transparent 70%),
       var(--c-ivory);
   }
-  .booking-widget[data-state="loading"]:empty::before {
+  /* «Cargando…» hasta que el widget pinta su iframe */
+  .booking-widget[data-state="loading"]:not(:has(iframe))::before {
     content: "Cargando el calendario de reservas…";
     position: absolute;
     inset: 0;
@@ -197,15 +235,34 @@ const requestWa = waLink(WA_TEXT.reserva);
     color: var(--c-muted);
     font-size: var(--fs-small);
   }
+  .booking-widget[data-state="error"]::before { content: none; }
+  .booking-frame { position: relative; max-width: 960px; margin-inline: auto; }
   .booking-error {
-    max-width: 960px;
-    margin: 1.5rem auto 0;
-    padding: 1.25rem 1.5rem;
-    border-radius: var(--radius);
-    background: var(--c-error-bg);
-    color: var(--c-ink);
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-content: start;
+    justify-items: center;
+    gap: 1.25rem;
+    padding: clamp(2.5rem, 1.5rem + 5vw, 5rem) clamp(1.25rem, 1rem + 2vw, 3rem);
+    border-radius: var(--radius-l);
+    text-align: center;
   }
-  .booking-error .btn-row { margin-top: 1rem; }
+  .booking-error[hidden] { display: none; }
+  .booking-error-icon {
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background: var(--c-lavender);
+    color: var(--c-plum);
+  }
+  .booking-error-icon :global(.icon) { width: 1.6rem; height: 1.6rem; }
+  .booking-error-text { max-width: 28rem; color: var(--c-ink); font-size: var(--fs-lead); line-height: 1.5; text-wrap: pretty; }
+  .booking-error-actions { display: grid; gap: .75rem; width: min(100%, 22rem); }
+  .booking-terms { max-width: 960px; margin: 1.25rem auto 0; color: var(--c-muted); font-size: var(--fs-small); text-align: center; }
+  .booking-terms--card { margin-top: .25rem; }
   .booking-alt,
   .booking-noscript { max-width: 960px; margin: 1.25rem auto 0; color: var(--c-muted); font-size: var(--fs-small); text-align: center; }
 

@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
+import { fileURLToPath } from 'node:url';
 
 /**
  * URL pública del sitio (canonical, Open Graph, JSON-LD, sitemap y robots.txt).
@@ -15,6 +16,11 @@ import sitemap from '@astrojs/sitemap';
  * dominio propio: `https://usuario.github.io/dennise-web/` → BASE_PATH=/dennise-web).
  */
 export const SITE_URL_PLACEHOLDER = 'https://denissegonzalez.example';
+// En integración continua (CI=true: GitHub Actions, Netlify, Cloudflare Pages, Vercel…) el
+// dominio es obligatorio: nunca se publica una web con canonical/sitemap al marcador.
+if (process.env.CI && !process.env.SITE_URL) {
+  throw new Error('SITE_URL es obligatoria al publicar (dominio definitivo, p. ej. https://www.dominio.es).');
+}
 const SITE_URL = process.env.SITE_URL || SITE_URL_PLACEHOLDER;
 const BASE_PATH = process.env.BASE_PATH || '/';
 
@@ -36,6 +42,19 @@ export default defineConfig({
     // Islas de React: hidratar SIEMPRE con client:visible / client:idle (nunca client:load
     // salvo que sea imprescindible). Ver README → «Islas de React».
     react(),
+    // client:deferred={{ media, motion, on, rootMargin }}: decide antes de descargar la isla
+    // (src/directives/deferred.ts). Ver README → «Islas de React».
+    {
+      name: 'client-deferred',
+      hooks: {
+        'astro:config:setup': ({ addClientDirective }) => {
+          addClientDirective({
+            name: 'deferred',
+            entrypoint: fileURLToPath(new URL('./src/directives/deferred.ts', import.meta.url)),
+          });
+        },
+      },
+    },
     sitemap({
       filter: (page) => !NOINDEX.some((path) => new URL(page).pathname.endsWith(path)),
     }),

@@ -22,3 +22,14 @@ export const FORM_NAMES: Record<FormKey, string> = {
   servicio: 'Formulario «Solicitar información» (servicios y citas)',
   contacto: 'Formulario de contacto',
 };
+
+/**
+ * Datos identificativos de la titular (LSSI art. 10 / RGPD art. 13), confirmados el 02/10/2026.
+ * ⚠️ El NIE se muestra SOLO en las páginas legales (aviso legal, privacidad y condiciones):
+ * nunca en JSON-LD, en el pie ni en el resto de la web. Importar solo desde esas páginas.
+ */
+export const LEGAL_ID = {
+  holder: 'Denisse Elena González Barbosa',
+  nie: 'Z1195681P',
+  tradeName: 'DG Gestores y Abogados',
+} as const;

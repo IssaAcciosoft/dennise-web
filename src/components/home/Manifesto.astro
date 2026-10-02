@@ -74,16 +74,16 @@
   }
   .manifesto-body {
     display: grid;
-    gap: 1.25rem 3rem;
+    gap: 1.25rem 3.5rem;
     margin-top: clamp(2.5rem, 5vw, 4rem);
-    max-width: 62rem;
     color: rgba(243, 237, 245, .88);
     font-size: var(--fs-lead);
     line-height: 1.55;
   }
+  .manifesto-body p { max-width: 34rem; }
   .triad {
     display: grid;
-    gap: .5rem;
+    gap: .5rem 2.5rem;
     margin-top: clamp(2.5rem, 5vw, 4rem);
     padding-top: 2rem;
     border-top: 1px solid rgba(243, 237, 245, .18);
@@ -107,10 +107,12 @@
     rotate: 45deg;
   }
   @media (min-width: 760px) {
-    .manifesto-statements { grid-template-columns: 1fr 1fr; column-gap: 3.5rem; }
-    .manifesto-body { grid-template-columns: 1fr 1fr; }
+    /* Mismo reticulado que las cuatro frases de arriba: una sola línea de alineación. */
+    .manifesto-statements,
+    .manifesto-body { grid-template-columns: 1fr 1fr; column-gap: 3.5rem; }
   }
-  @media (min-width: 1024px) {
+  /* Las tres líneas solo van en fila cuando caben en una línea cada una (≥ 1280 px). */
+  @media (min-width: 1280px) {
     .triad { grid-template-columns: repeat(3, auto); justify-content: space-between; }
   }
 </style>

@@ -31,9 +31,6 @@ const items: Item[] = [
     <div class="journey-head">
       <p class="eyebrow" data-reveal>Mi trayectoria</p>
       <h2 class="section-title" id="journey-title" data-reveal>Del litigio a una visión internacional del derecho.</h2>
-      <p class="journey-places" aria-hidden="true" data-reveal>
-        <span>México</span><span>España</span><span>Nueva York</span>
-      </p>
     </div>
 
     <ol class="timeline">
@@ -68,20 +65,6 @@ const items: Item[] = [
 <style>
   .journey-grid { display: grid; gap: 3rem; }
   .journey-head .section-title { max-width: 7.2em; }
-  .journey-places {
-    display: flex;
-    flex-direction: column;
-    gap: .25rem;
-    margin-top: 2.5rem;
-    font-family: var(--ff-serif);
-    font-style: italic;
-    font-size: clamp(1.4rem, 1.2rem + 1vw, 2rem);
-    color: var(--c-plum);
-    line-height: 1.25;
-  }
-  .journey-places span { display: flex; align-items: center; gap: .75rem; }
-  .journey-places span::before { content: ""; width: 1.5rem; height: 1px; background: var(--c-line-strong); }
-
   .timeline { position: relative; list-style: none; margin: 0; padding: 0 0 0 2.25rem; }
   .timeline::before {
     content: "";
@@ -122,26 +105,14 @@ const items: Item[] = [
     line-height: 1.15;
   }
   .tl-text { color: var(--c-ink-soft); max-width: 40rem; }
-  .tl-list { display: grid; gap: .55rem; margin-top: .75rem; }
+  /* Formación: lista con filetes finos (sin cajas), como «Trayectoria reciente». */
+  .tl-list { margin-top: .75rem; border-top: 1px solid var(--c-line); }
   .tl-list li {
-    position: relative;
-    padding: .7rem 1rem .7rem 1.1rem;
-    background: var(--c-white);
-    border: 1px solid var(--c-line);
-    border-radius: 10px;
+    padding: .7rem 0;
+    border-bottom: 1px solid var(--c-line);
     color: var(--c-ink-soft);
     font-size: var(--fs-small);
     line-height: 1.5;
-  }
-  .tl-list li::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: .9rem;
-    bottom: .9rem;
-    width: 2px;
-    background: var(--c-plum);
-    border-radius: 2px;
   }
   @media (min-width: 960px) {
     .journey-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: 5rem; }

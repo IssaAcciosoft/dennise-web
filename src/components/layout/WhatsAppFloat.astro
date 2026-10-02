@@ -7,9 +7,13 @@ import { WA_TEXT, waLink } from '~/data/site';
 import Icon from '../ui/Icon.astro';
 ---
 
-<a class="wa-float" href={waLink(WA_TEXT.general)} target="_blank" rel="noopener" aria-label="Escríbeme por WhatsApp" data-wa-float>
-  <Icon name="whatsapp" />
-</a>
+<!-- Región propia (complementaria): quien navega por regiones con lector de pantalla también
+     encuentra el acceso directo a WhatsApp. La posición fija no depende de dónde esté. -->
+<aside class="wa-region" aria-label="WhatsApp">
+  <a class="wa-float" href={waLink(WA_TEXT.general)} target="_blank" rel="noopener" aria-label="Escríbeme por WhatsApp" data-wa-float>
+    <Icon name="whatsapp" />
+  </a>
+</aside>
 
 <script>
   const fab = document.querySelector<HTMLElement>('[data-wa-float]');

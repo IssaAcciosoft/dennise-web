@@ -7,16 +7,17 @@
  *  1. Póster estático: el MISMO globo renderizado con cobe y la misma vista
  *     (src/assets/globe-poster.png, `npm run globe-poster`), AVIF/WebP y diferido.
  *     Es el globo antes de hidratar, sin JavaScript, sin WebGL y con «reducir movimiento».
- *  2. Isla de React <Globe client:visible> (WebGL, cobe): se funde sobre el póster cuando
+ *  2. Lienzo WebGL (cobe, src/components/about/globe-mount.ts), SIN React: el <script> de
+ *     abajo lo carga con import() cuando la caja se acerca a la pantalla (240 px), solo sin
+ *     «reducir movimiento», y lo monta en un momento ocioso. Se funde sobre el póster cuando
  *     tiene su primer fotograma completo (data-globe="live").
  *  3. Etiquetas HTML de los tres lugares (posición inicial calculada aquí con la misma
- *     proyección; la isla las desplaza con transform mientras gira).
+ *     proyección; el globo las desplaza con transform mientras gira).
  *  Accesibilidad: la caja es role="img" con texto alternativo; lienzo y etiquetas son
  *  decorativos (aria-hidden). Pie visible: «México · España · Nueva York».
  * ============================================================================
  */
 import { Picture } from 'astro:assets';
-import Globe from './Globe';
 import { PLACES, VIEW, project } from './globe-config';
 import poster from '~/assets/globe-poster.png';
 
@@ -37,7 +38,7 @@ const caption = ['México', 'España', 'Nueva York'];
   <div
     class="globe-stage"
     role="img"
-    aria-label="Globo terráqueo con tres puntos marcados, México, Madrid (España) y Nueva York, unidos por arcos."
+    aria-label="Globo terráqueo con tres puntos marcados, México, España y Nueva York, unidos por arcos."
   >
     <Picture
       src={poster}
@@ -49,7 +50,7 @@ const caption = ['México', 'España', 'Nueva York'];
       decoding="async"
       class="globe-poster"
     />
-    <Globe client:visible={{ rootMargin: '240px' }} />
+    <div class="globe-gl" aria-hidden="true" data-globe-host></div>
     <ul class="globe-labels" role="list" aria-hidden="true">
       {
         labels.map((l) => (
@@ -71,6 +72,31 @@ const caption = ['México', 'España', 'Nueva York'];
     }
   </figcaption>
 </figure>
+
+<script>
+  // Globo WebGL: se descarga (cobe + montaje, ≈ 8 KB gzip) solo al acercarse a la pantalla y
+  // sin «reducir movimiento»; el contexto WebGL se crea en un momento ocioso.
+  const slot = document.querySelector<HTMLElement>('[data-globe-slot]');
+  const host = slot?.querySelector<HTMLElement>('[data-globe-host]');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  if (slot && host && !reduce.matches && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        import('./globe-mount').then(({ mountGlobe }) => {
+          const start = () => {
+            if (!reduce.matches) mountGlobe(host, slot);
+          };
+          if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(start, { timeout: 1200 });
+          else window.setTimeout(start, 200);
+        });
+      },
+      { rootMargin: '240px' },
+    );
+    io.observe(slot);
+  }
+</script>
 
 <style>
   .globe-slot {
@@ -107,10 +133,9 @@ const caption = ['México', 'España', 'Nueva York'];
     transition: opacity 520ms var(--ease-out);
   }
 
-  /* Isla WebGL: ocupa la misma caja; el lienzo se funde cuando ya tiene su primer fotograma
+  /* Lienzo WebGL: ocupa la misma caja; se funde cuando ya tiene su primer fotograma
      (entrada → ease-out; decorativo, puede durar algo más que la UI). */
-  .globe-stage :global(astro-island),
-  .globe-stage :global(.globe-gl) {
+  .globe-stage .globe-gl {
     position: absolute;
     inset: 0;
   }

@@ -2,7 +2,8 @@
 /** Borrador pendiente de revisión: completar los datos [PENDIENTE] antes de publicar. */
 import LegalLayout from '~/layouts/LegalLayout.astro';
 import { url } from '~/lib/url';
-import { PHONE, TEL_LINK } from '~/data/site';
+import { PHONE, TEL_LINK, EMAIL, OFFICE } from '~/data/site';
+import { LEGAL_ID } from '~/data/legal';
 ---
 
 <LegalLayout title="Aviso legal · Denisse González" heading="Aviso legal" description="Aviso legal del sitio web de Denisse González, abogada: datos identificativos, condiciones de uso, propiedad intelectual y responsabilidad.">
@@ -14,19 +15,20 @@ import { PHONE, TEL_LINK } from '~/data/site';
         <h2>1. Datos identificativos</h2>
         <p>En cumplimiento del artículo 10 de la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y de Comercio Electrónico (LSSI-CE), se facilitan los datos identificativos de la titular de este sitio web:</p>
         <dl>
-          <div><dt>Titular</dt><dd>Denisse González Barbosa</dd></div>
-          <div><dt>NIF / NIE</dt><dd><span class="placeholder">[PENDIENTE: NIF]</span></dd></div>
-          <div><dt>Domicilio profesional</dt><dd><span class="placeholder">[PENDIENTE: domicilio]</span></dd></div>
+          <div><dt>Titular</dt><dd>{LEGAL_ID.holder}</dd></div>
+          <div><dt>NIE</dt><dd>{LEGAL_ID.nie}</dd></div>
+          <div><dt>Nombre comercial</dt><dd>{LEGAL_ID.tradeName}</dd></div>
+          <div><dt>Domicilio profesional</dt><dd>{OFFICE.oneLine}</dd></div>
           <div><dt>Teléfono</dt><dd><a href={TEL_LINK}>{PHONE.display}</a></dd></div>
-          <div><dt>Correo electrónico</dt><dd><span class="placeholder">[PENDIENTE: email de contacto]</span></dd></div>
-          <div><dt>Actividad</dt><dd>Asesoría jurídica en materia de extranjería, derecho internacional y derechos humanos.</dd></div>
+          <div><dt>Correo electrónico</dt><dd><a href={EMAIL.href}>{EMAIL.address}</a></dd></div>
+          <div><dt>Actividad</dt><dd>Asesoría jurídica en materia de extranjería, derecho internacional y derechos humanos, y asesoramiento para la apertura de empresas en Dubái.</dd></div>
           <div><dt>Titulación</dt><dd>Licenciatura en Derecho (Universidad TecMilenio). <span class="placeholder">[PENDIENTE: homologación del título en España, si aplica]</span></dd></div>
           <div><dt>Colegio profesional y n.º de colegiada</dt><dd><span class="placeholder">[PENDIENTE: colegio profesional y número de colegiada, si aplica]</span></dd></div>
           <div><dt>Normas profesionales aplicables</dt><dd><span class="placeholder">[PENDIENTE: normativa deontológica aplicable, si aplica]</span></dd></div>
         </dl>
 
         <h2>2. Objeto y condiciones de uso</h2>
-        <p>Este sitio web tiene por objeto dar a conocer la actividad profesional de Denisse González y facilitar el contacto con ella. El acceso y la navegación atribuyen la condición de persona usuaria e implican la aceptación de este aviso legal.</p>
+        <p>Este sitio web tiene por objeto dar a conocer la actividad profesional de Denisse González y de su despacho, {LEGAL_ID.tradeName}, y facilitar el contacto. El acceso y la navegación atribuyen la condición de persona usuaria e implican la aceptación de este aviso legal.</p>
         <p>La persona usuaria se compromete a hacer un uso adecuado de los contenidos y a no emplearlos para actividades ilícitas o contrarias a la buena fe, ni para dañar el sitio web o a terceros.</p>
 
         <h2>3. Información de carácter general</h2>
@@ -36,12 +38,14 @@ import { PHONE, TEL_LINK } from '~/data/site';
         <h2>4. Propiedad intelectual e industrial</h2>
         <p>Los textos, fotografías, logotipo, diseño y demás elementos de este sitio web son titularidad de Denisse González o se utilizan con autorización de sus titulares. Queda prohibida su reproducción, distribución, comunicación pública o transformación sin autorización expresa, salvo para uso personal y privado.</p>
         <p>El artículo «8 de marzo — Voces que se unen» fue publicado por Construyendo un Mundo Mejor; los derechos sobre su diseño corresponden a sus respectivos titulares.</p>
+        <p>El logotipo de Poplavsky International Offices (partner en Dubái) es propiedad de su titular y se reproduce únicamente para identificar la colaboración.</p>
+        <p>La web utiliza componentes de software y tipografías de terceros, cada uno con su propia licencia. Sus avisos y licencias completos están en <a href={url('/licencias.txt')}>licencias.txt</a>.</p>
 
         <h2>5. Responsabilidad</h2>
         <p>Se procura que la información publicada sea exacta y esté actualizada, pero no se garantiza la ausencia de errores ni la disponibilidad ininterrumpida del sitio web. La titular no se responsabiliza de los daños derivados de un uso indebido de los contenidos.</p>
 
         <h2>6. Enlaces a sitios de terceros</h2>
-        <p>Este sitio web contiene enlaces a servicios de terceros (WhatsApp, Facebook, Instagram y TikTok). La titular no controla dichos servicios ni es responsable de sus contenidos o de sus políticas de privacidad, que conviene consultar al acceder a ellos.</p>
+        <p>Este sitio web contiene enlaces a servicios y sitios de terceros (WhatsApp, Facebook, Instagram, TikTok, Google Maps y la web de Poplavsky). La titular no controla dichos servicios ni es responsable de sus contenidos o de sus políticas de privacidad, que conviene consultar al acceder a ellos.</p>
 
         <h2>7. Protección de datos</h2>
         <p>El tratamiento de los datos personales que se facilitan a través de este sitio web se describe en la <a href={url('/politica-privacidad/')}>política de privacidad</a>.</p>

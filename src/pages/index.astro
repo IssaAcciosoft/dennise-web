@@ -4,7 +4,9 @@ import Hero from '~/components/home/Hero.astro';
 import Credentials from '~/components/home/Credentials.astro';
 import FeatureTeaser from '~/components/home/FeatureTeaser.astro';
 import Manifesto from '~/components/home/Manifesto.astro';
+import Ways from '~/components/home/Ways.astro';
 import ServicesSnapshot from '~/components/home/ServicesSnapshot.astro';
+import Testimonial from '~/components/home/Testimonial.astro';
 import EvTeaser from '~/components/home/EvTeaser.astro';
 import MediaTeaser from '~/components/media/MediaTeaser.astro';
 import ContactCta from '~/components/contact/ContactCta.astro';
@@ -15,9 +17,10 @@ import onuNegro from '~/assets/img/onu-negro.jpg';
 ---
 
 <BaseLayout
-  title="Denisse González · Abogada de extranjería y derecho internacional"
-  description="Denisse González, abogada mexicana en España: asesoría migratoria y trámites de extranjería online y presenciales, derecho internacional y derechos humanos."
-  preloadFonts={['serif-600', 'serif-500i', 'sans-400']}
+  title="Denisse González · Abogada · Derecho que conecta personas, oportunidades y derechos"
+  description="Denisse González, abogada mexicana en Madrid: derecho internacional, movilidad internacional y derechos humanos. Extranjería en España y apertura de empresas en Dubái."
+  ogImageAlt="Denisse González, abogada: «Derecho que conecta personas, oportunidades y derechos». Derecho internacional · Movilidad internacional · Derechos humanos."
+  preloadFonts={['serif-600', 'serif-500i', 'sans-400', 'sans-600']}
 >
   <Hero>
     <div class="home-credentials">
@@ -35,7 +38,9 @@ import onuNegro from '~/assets/img/onu-negro.jpg';
     portrait
   >
     <p class="prose-lead">Soy Denisse González, abogada mexicana con formación jurídica internacional y experiencia profesional desarrollada entre México y España.</p>
-    <p>Hoy entiendo el derecho como una herramienta para conectar personas con oportunidades, instituciones con comunidades y derechos con realidades concretas.</p>
+    {/* «Hoy entiendo el derecho como una herramienta para conectar…» está en «Escuchar ·
+        Conectar · Actuar» (Ways.astro): aquí, otra frase suya de Conóceme. */}
+    <p>Pero mi trayectoria no se ha construido únicamente dentro de un despacho.</p>
     <Fragment slot="actions">
       <a class="btn btn--primary" href={url('/conoceme/')}>
         <span>Conóceme</span>
@@ -49,7 +54,9 @@ import onuNegro from '~/assets/img/onu-negro.jpg';
   </FeatureTeaser>
 
   <Manifesto />
+  <Ways />
   <ServicesSnapshot />
+  <Testimonial />
 
   <FeatureTeaser
     id="derechos-humanos"
@@ -60,6 +67,7 @@ import onuNegro from '~/assets/img/onu-negro.jpg';
     imagePosition="70% 50%"
     side="right"
     frame="arch"
+    tone="ivory"
   >
     <p class="prose-lead">Mi compromiso con los derechos humanos nace de una convicción sencilla: conocer nuestros derechos es el primer paso para poder ejercerlos, defenderlos y exigir que sean respetados.</p>
     <p>Mi objetivo es llevar los derechos humanos fuera de los textos jurídicos y acercarlos a las personas.</p>

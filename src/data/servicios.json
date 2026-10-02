@@ -3,6 +3,68 @@
   "currency": "EUR",
   "tax_included": true,
   "tax_label": "IVA incluido",
+  "immigration": {
+    "id": "extranjeria",
+    "_fuente": "docs/web-anterior.md §5 y §6 (web anterior, textos tal cual)",
+    "eyebrow": "Vive en España de manera legal",
+    "title": "Servicios de extranjería en España",
+    "intro": [
+      "En nuestro despacho te ayudamos a regularizar tu situación en España con soluciones legales claras, actualizadas y adaptadas a tu caso.",
+      "Acompañamos a personas extranjeras en todo su proceso migratorio, desde la primera consulta hasta la resolución final."
+    ],
+    "services": [
+      {
+        "id": "arraigos",
+        "name": "Arraigos",
+        "description": "Arraigo de segunda oportunidad, sociolaboral, social, familiar y socioformativo. Te ayudamos a demostrar tus vínculos y cumplir con todos los requisitos.",
+        "lead_value": "Extranjería · Arraigos"
+      },
+      {
+        "id": "reagrupacion-familiar",
+        "name": "Reagrupación familiar",
+        "description": "Te guiamos para traer a tu cónyuge, hijos o padres de forma legal y segura.",
+        "lead_value": "Extranjería · Reagrupación familiar"
+      },
+      {
+        "id": "residencia-emprendedores",
+        "name": "Residencia para emprendedores",
+        "description": "¿Quieres emprender en España? Gestionamos tu residencia como inversor.",
+        "lead_value": "Extranjería · Residencia para emprendedores"
+      },
+      {
+        "id": "renovaciones-modificaciones",
+        "name": "Renovaciones y modificaciones",
+        "description": "Evita errores y rechazos. Gestionamos tus renovaciones a tiempo y sin complicaciones.",
+        "lead_value": "Extranjería · Renovaciones y modificaciones"
+      },
+      {
+        "id": "estancia-estudios",
+        "name": "Estancia por estudios y prácticas",
+        "description": "Si vienes a estudiar, formarte o hacer prácticas, tramitamos tu estancia legal desde el inicio.",
+        "lead_value": "Extranjería · Estancia por estudios y prácticas"
+      },
+      {
+        "id": "nacionalidad",
+        "name": "Nacionalidad española",
+        "description": "Te asesoramos en cada paso para solicitar la nacionalidad por residencia, matrimonio o descendencia.",
+        "lead_value": "Extranjería · Nacionalidad española",
+        "_pendiente": "Alerta 9.6 de docs/web-anterior.md: revisar con la cliente «por matrimonio o descendencia» (el matrimonio reduce el plazo de residencia; la descendencia es opción u origen)."
+      }
+    ],
+    "also_title": "También",
+    "also": [
+      {
+        "name": "Nómadas digitales",
+        "lead_value": "Extranjería · Nómadas digitales"
+      },
+      {
+        "name": "Emprendedores"
+      },
+      {
+        "name": "Residencias"
+      }
+    ]
+  },
   "consultations": [
     {
       "id": "asesoria-migratoria-60",
@@ -11,8 +73,16 @@
       "duration_label": "1 hora",
       "description": null,
       "prices": [
-        { "modality": "online", "label": "Online", "amount": 60 },
-        { "modality": "presencial", "label": "Presencial", "amount": 80 }
+        {
+          "modality": "online",
+          "label": "Online",
+          "amount": 60
+        },
+        {
+          "modality": "presencial",
+          "label": "Presencial",
+          "amount": 80
+        }
       ],
       "bookable": true,
       "lead_value": "Asesoría migratoria · 1 hora"
@@ -24,8 +94,16 @@
       "duration_label": "30 min",
       "description": null,
       "prices": [
-        { "modality": "online", "label": "Online", "amount": 30 },
-        { "modality": "presencial", "label": "Presencial", "amount": 50 }
+        {
+          "modality": "online",
+          "label": "Online",
+          "amount": 30
+        },
+        {
+          "modality": "presencial",
+          "label": "Presencial",
+          "amount": 50
+        }
       ],
       "bookable": true,
       "lead_value": "Asesoría migratoria · 30 min"
@@ -37,8 +115,16 @@
       "duration_label": "30 min",
       "description": "Esta opción es para aquellos que necesitan el servicio de búsqueda del centro de estudios más la gestión de la matriculación con el proceso migratorio de visa o estancia de estudios.",
       "prices": [
-        { "modality": "online", "label": "Online", "amount": 45 },
-        { "modality": "presencial", "label": "Presencial", "amount": 65 }
+        {
+          "modality": "online",
+          "label": "Online",
+          "amount": 45
+        },
+        {
+          "modality": "presencial",
+          "label": "Presencial",
+          "amount": 65
+        }
       ],
       "bookable": true,
       "lead_value": "Sesión de orientación académica · 30 min"
@@ -71,10 +157,42 @@
         "Resolución de dudas sobre los requerimientos"
       ],
       "plans": [
-        { "id": "basico", "name": "Plan Básico", "amount": 121, "featured": false, "form_key": "basico", "lead_value": "Programa Autogestiona · Plan Básico" },
-        { "id": "estandar", "name": "Plan Estándar", "amount": 200, "featured": true, "form_key": "estandar", "lead_value": "Programa Autogestiona · Plan Estándar" },
-        { "id": "premium", "name": "Plan Premium", "amount": 300, "featured": false, "form_key": "premium", "lead_value": "Programa Autogestiona · Plan Premium" }
+        {
+          "id": "basico",
+          "name": "Plan Básico",
+          "amount": 121,
+          "featured": false,
+          "form_key": "basico",
+          "lead_value": "Programa Autogestiona · Plan Básico"
+        },
+        {
+          "id": "estandar",
+          "name": "Plan Estándar",
+          "amount": 200,
+          "featured": true,
+          "form_key": "estandar",
+          "lead_value": "Programa Autogestiona · Plan Estándar"
+        },
+        {
+          "id": "premium",
+          "name": "Plan Premium",
+          "amount": 300,
+          "featured": false,
+          "form_key": "premium",
+          "lead_value": "Programa Autogestiona · Plan Premium"
+        }
       ]
     }
-  ]
+  ],
+  "dubai": {
+    "id": "dubai",
+    "_fuente": "docs/web-anterior.md §5 y §7 (web anterior). Página: /dubai/",
+    "name": "Apertura de empresa en Dubái",
+    "lead_value": "Apertura de empresa en Dubái",
+    "structures": [
+      "Holding",
+      "Real Estate",
+      "Trading"
+    ]
+  }
 }

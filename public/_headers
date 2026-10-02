@@ -1,0 +1,5 @@
+# Cabeceras HTTP para alojamientos que las leen (Netlify, Cloudflare Pages). En GitHub Pages
+# se ignora (no permite cabeceras propias: todo se sirve con max-age=600). Ver README → Publicación.
+# Los archivos de /_astro/ llevan un hash en el nombre: se pueden guardar en caché para siempre.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable

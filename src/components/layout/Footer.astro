@@ -1,17 +1,32 @@
 ---
-import { NAV, LEGAL_NAV, SITE, PHONE, TEL_LINK, WA_TEXT, waLink } from '~/data/site';
-import { url } from '~/lib/url';
+import { NAV, LEGAL_NAV, SITE, PHONE, TEL_LINK, WA_TEXT, waLink, EMAIL, OFFICE } from '~/data/site';
+import { url, normalizePath } from '~/lib/url';
 import logo from '~/assets/logo/dg-logo.svg?url';
 import SocialLinks from '../ui/SocialLinks.astro';
 
+interface Props {
+  /** Páginas cortas (404, /gracias/): el logo del pie se ve al cargar y puede ser el LCP. */
+  logoEager?: boolean;
+}
+const { logoEager = false } = Astro.props;
 const year = new Date().getFullYear();
+const current = normalizePath(Astro.url.pathname);
+const here = (path: string) => (current === path ? 'page' : undefined);
 ---
 
 <footer class="site-footer" data-wa-hide>
   <div class="container footer-grid">
     <div class="footer-brand">
       <a class="footer-logo" href={url('/')}>
-        <img src={logo} width="656" height="494" alt="Denisse González — volver al inicio" loading="lazy" decoding="async" />
+        <img
+          src={logo}
+          width="656"
+          height="494"
+          alt="Denisse González — volver al inicio"
+          loading={logoEager ? 'eager' : 'lazy'}
+          fetchpriority={logoEager ? 'high' : undefined}
+          decoding="async"
+        />
       </a>
       <p class="footer-motto">{SITE.motto}</p>
     </div>
@@ -19,8 +34,8 @@ const year = new Date().getFullYear();
     <nav class="footer-nav" aria-label="Pie de página">
       <h2 class="footer-title">Navegación</h2>
       <ul role="list">
-        <li><a href={url('/')}>Inicio</a></li>
-        {NAV.map((item) => <li><a href={url(item.path)}>{item.label}</a></li>)}
+        <li><a href={url('/')} aria-current={here('/')}>Inicio</a></li>
+        {NAV.map((item) => <li><a href={url(item.path)} aria-current={here(item.path)}>{item.label}</a></li>)}
       </ul>
     </nav>
 
@@ -29,17 +44,26 @@ const year = new Date().getFullYear();
       <ul class="footer-contact-list" role="list">
         <li><a href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">WhatsApp</a></li>
         <li><a href={TEL_LINK}>{PHONE.display}</a></li>
+        <li><a class="footer-email" href={EMAIL.href}>{EMAIL.user}<wbr />@{EMAIL.domain}</a></li>
         <li>Asesorías online y presenciales</li>
       </ul>
+      <address class="footer-address">
+        <span class="footer-address-name">{OFFICE.name}</span>
+        <span>{OFFICE.street} <span class="nowrap">({OFFICE.neighborhood})</span></span>
+        <span>{OFFICE.postalCode} {OFFICE.locality}</span>
+        <a href={OFFICE.mapsUrl} target="_blank" rel="noopener">Cómo llegar<span class="visually-hidden"> (Google Maps, se abre en una pestaña nueva)</span></a>
+      </address>
       <SocialLinks variant="icons" class="footer-social" />
     </div>
   </div>
 
   <div class="container footer-bottom">
-    <p>© {year} {SITE.name}. Todos los derechos reservados.</p>
-    <ul class="footer-legal" role="list">
-      {LEGAL_NAV.map((item) => <li><a href={url(item.path)}>{item.label}</a></li>)}
-    </ul>
+    <p>© {year} {SITE.firm}&nbsp;· {SITE.legalName}</p>
+    <nav class="footer-legal-nav" aria-label="Legal">
+      <ul class="footer-legal" role="list">
+        {LEGAL_NAV.map((item) => <li><a href={url(item.path)} aria-current={here(item.path)}>{item.label}</a></li>)}
+      </ul>
+    </nav>
   </div>
 </footer>
 
@@ -81,6 +105,15 @@ const year = new Date().getFullYear();
   @media (hover: hover) {
     .site-footer a:hover { color: var(--c-plum); text-decoration: underline; }
   }
+  .footer-address {
+    display: grid;
+    gap: .1rem;
+    margin-top: 1.1rem;
+    font-style: normal;
+    line-height: 1.5;
+  }
+  .footer-address-name { color: var(--c-ink); font-weight: 600; }
+  .footer-address a { justify-self: start; padding-block: .3rem; text-decoration: underline; text-decoration-color: var(--c-line-strong); }
   .footer-contact :global(.footer-social) { margin-top: 1.25rem; }
 
   .footer-bottom {
@@ -102,6 +135,7 @@ const year = new Date().getFullYear();
     background: var(--c-line);
   }
   .footer-legal { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; }
+  .site-footer a[aria-current="page"] { color: var(--c-plum); font-weight: 600; }
   .footer-legal a { display: inline-block; padding-block: .25rem; text-decoration: underline; text-decoration-color: var(--c-line-strong); }
 
   @media (min-width: 700px) {
