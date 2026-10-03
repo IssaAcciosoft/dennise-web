@@ -1,0 +1,129 @@
+---
+/**
+ * «En medios» → prensa de 2021 (src/data/medios.ts → PRESS_2021): lista semántica con medio,
+ * fecha, titular (enlace externo, pestaña nueva) y el extracto literal en el que se la cita.
+ * Va debajo del artículo del 8M en /derechos-humanos/#en-medios (ancla #prensa).
+ */
+import { PRESS_2021, PRESS_CONTEXT } from '~/data/medios';
+import Icon from '../ui/Icon.astro';
+---
+
+<div class="press" id="prensa">
+  <div class="press-head" data-reveal>
+    <h3 class="press-title" id="press-title">En prensa</h3>
+    <p class="press-context">{PRESS_CONTEXT}</p>
+  </div>
+  <ul class="press-list" role="list" aria-labelledby="press-title">
+    {
+      PRESS_2021.map((p) => (
+        <li class="press-item" data-reveal>
+          <p class="press-meta">
+            <span class="press-outlet">{p.outlet}</span>
+            {p.note && <span class="press-note">{p.note}</span>}
+          </p>
+          <p class="press-date"><time datetime={p.date}>{p.dateLabel}</time></p>
+          <h4 class="press-headline">
+            <a href={p.href} target="_blank" rel="noopener">
+              <span>{p.headline}</span>
+              <Icon name="external" />
+              <span class="visually-hidden"> ({p.outlet}, se abre en una pestaña nueva)</span>
+            </a>
+          </h4>
+          {p.excerpt && (
+            <blockquote class="press-excerpt" cite={p.href}>
+              <p>«{p.excerpt}»</p>
+            </blockquote>
+          )}
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  .press {
+    margin-top: clamp(3rem, 2rem + 4vw, 5rem);
+    scroll-margin-top: calc(var(--header-h) + 1.5rem);
+  }
+  .press-head {
+    display: grid;
+    gap: .75rem 3rem;
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.75rem;
+    border-bottom: 1px solid var(--c-line);
+  }
+  .press-title {
+    font-family: var(--ff-serif);
+    font-size: var(--fs-h3);
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--c-ink);
+  }
+  .press-context { max-width: 40rem; color: var(--c-ink-soft); text-wrap: pretty; }
+
+  .press-list { display: grid; gap: 1rem; }
+  .press-item {
+    display: flex;
+    flex-direction: column;
+    padding: clamp(1.25rem, 1rem + 1vw, 1.75rem);
+    background: var(--c-white);
+    border: 1px solid var(--c-line);
+    border-top: 3px solid var(--c-terracotta);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-s);
+  }
+  .press-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .2rem .7rem;
+    align-items: baseline;
+    color: var(--c-terracotta-700);
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+  .press-note { color: var(--c-muted); font-weight: 600; letter-spacing: .1em; }
+  .press-note::before { content: "·"; margin-right: .7rem; color: var(--c-terracotta-700); }
+  .press-date { margin-top: .35rem; color: var(--c-muted); font-size: var(--fs-small); font-variant-numeric: lining-nums; }
+  .press-headline {
+    margin-top: 1rem;
+    font-family: var(--ff-serif);
+    font-size: clamp(1.3rem, 1.15rem + .55vw, 1.6rem);
+    font-weight: 600;
+    line-height: 1.18;
+    text-wrap: balance;
+  }
+  .press-headline a {
+    color: var(--c-ink);
+    text-decoration: underline;
+    text-decoration-color: var(--c-line-strong);
+    text-decoration-thickness: 1px;
+    text-underline-offset: .2em;
+    transition: color var(--dur-fast) var(--ease-hover), text-decoration-color var(--dur-fast) var(--ease-hover);
+  }
+  .press-headline :global(.icon) {
+    width: .8em;
+    height: .8em;
+    margin-left: .3em;
+    vertical-align: -.02em;
+    color: var(--c-plum);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .press-headline a:hover { color: var(--c-plum); text-decoration-color: currentColor; }
+  }
+  .press-excerpt {
+    margin-top: 1.1rem;
+    padding-left: 1rem;
+    border-left: 2px solid var(--c-lavender-300);
+    color: var(--c-ink-soft);
+    font-size: var(--fs-small);
+    line-height: 1.6;
+    text-wrap: pretty;
+  }
+
+  @media (min-width: 960px) {
+    .press-head { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); align-items: baseline; }
+    .press-list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; }
+  }
+</style>

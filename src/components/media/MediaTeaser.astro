@@ -1,10 +1,17 @@
 ---
-/** «En medios» compacto para el inicio: enlaza a la versión completa en Derechos humanos. */
-import { ARTICLE_8M as A } from '~/data/medios';
+/**
+ * «En medios» compacto para el inicio: enlaza a la versión completa en Derechos humanos
+ * (artículo del 8M y, debajo, una línea con la prensa de 2021 → #prensa).
+ */
+import { ARTICLE_8M as A, PRESS_2021 } from '~/data/medios';
 import { url } from '~/lib/url';
 import Photo from '../ui/Photo.astro';
 import Icon from '../ui/Icon.astro';
 import cartel from '~/assets/img/cartel-8m.jpg';
+
+// «Expansión (AFP), SDP Noticias y Economis»
+const names = PRESS_2021.map((p) => (p.note?.includes('AFP') ? `${p.outlet} (AFP)` : p.outlet));
+const pressOutlets = `${names.slice(0, -1).join(', ')} y ${names[names.length - 1]}`;
 ---
 
 <section class="section section--ivory media-teaser" aria-labelledby="media-teaser-title">
@@ -13,23 +20,50 @@ import cartel from '~/assets/img/cartel-8m.jpg';
       <p class="eyebrow" data-reveal>Publicaciones</p>
       <h2 class="section-title" id="media-teaser-title" data-reveal>En medios</h2>
     </div>
-    <a class="media-card" href={url('/derechos-humanos/#en-medios')} data-reveal>
-      <span class="media-thumb">
-        <Photo src={cartel} alt="" widths={[240, 360, 480]} sizes="(min-width: 600px) 180px, 120px" />
-      </span>
-      <span class="media-body">
-        <span class="media-meta">{A.publisher}</span>
-        <span class="media-title">{A.title}</span>
-        <span class="media-standfirst">«{A.standfirst}»</span>
-        <span class="media-more">Leer el artículo <Icon name="arrow" /></span>
-      </span>
-    </a>
+    <div class="media-main">
+      <a class="media-card" href={url('/derechos-humanos/#en-medios')} data-reveal>
+        <span class="media-thumb">
+          <Photo src={cartel} alt="" widths={[240, 360, 480]} sizes="(min-width: 600px) 180px, 120px" />
+        </span>
+        <span class="media-body">
+          <span class="media-meta">{A.publisher}</span>
+          <span class="media-title">{A.title}</span>
+          <span class="media-standfirst">«{A.standfirst}»</span>
+          <span class="media-more">Leer el artículo <Icon name="arrow" /></span>
+        </span>
+      </a>
+      <p class="media-press" data-reveal>
+        <span class="media-press-label">En prensa (2021)</span>
+        <a href={url('/derechos-humanos/#prensa')}>
+          <span>{pressOutlets}: la demanda internacional contra China y la OMS por la <span class="nowrap">COVID-19<Icon name="arrow" /></span></span>
+        </a>
+      </p>
+    </div>
   </div>
 </section>
 
 <style>
   .media-grid { display: grid; gap: 2rem; align-items: center; }
   .media-head .section-title { margin-bottom: 0; }
+  .media-main { min-width: 0; }
+  .media-press {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem 1rem;
+    align-items: baseline;
+    margin-top: 1.25rem;
+    padding-inline: clamp(.25rem, 1vw, 1.75rem);
+    color: var(--c-ink-soft);
+    font-size: var(--fs-small);
+    line-height: 1.5;
+  }
+  .media-press-label { color: var(--c-terracotta-700); font-size: .74rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+  .media-press a { display: inline; font-weight: 600; text-decoration: none; }
+  .media-press a :global(.icon) { width: 1.05em; height: 1.05em; margin-left: .3em; vertical-align: -.15em; transition: transform var(--dur) var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) {
+    .media-press a:hover > span { text-decoration: underline; }
+    .media-press a:hover :global(.icon) { transform: translateX(4px); }
+  }
   .media-card {
     display: grid;
     grid-template-columns: 120px minmax(0, 1fr);

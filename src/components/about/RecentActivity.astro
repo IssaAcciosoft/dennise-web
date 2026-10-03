@@ -1,0 +1,190 @@
+---
+/**
+ * Conóceme → «Actividad reciente · Agenda 2026» (tras el bloque de la fundadora y «Mi
+ * propósito»). Datos en src/data/actividad.ts. Foto: Franchise Innovation Summit (Madrid,
+ * 30/09/2026): recorte de _originales/redes/franchise-innovation-summit-photocall-2026-09-30.jpg
+ * (x 200–1400, y 280–1100 → 1200×820, sin techo ni tarima); object-position la centra a ella
+ * con el logotipo del photocall encima.
+ */
+import Photo from '../ui/Photo.astro';
+import Icon from '../ui/Icon.astro';
+import { AGENDA_2026, CAMPAIGNS_2026 } from '~/data/actividad';
+import fis from '~/assets/img/franchise-innovation-summit.jpg';
+---
+
+<section class="section section--lavender activity" id="actividad" aria-labelledby="activity-title">
+  <div class="container activity-grid">
+    <div class="activity-head">
+      <p class="eyebrow" data-reveal>Actividad reciente</p>
+      <h2 class="section-title activity-title" id="activity-title" data-reveal>Agenda 2026</h2>
+    </div>
+
+    <figure class="activity-photo" data-reveal="photo">
+      <div class="activity-frame">
+        <Photo
+          src={fis}
+          alt="Denisse González, con traje burdeos y acreditación, en el escenario ante el photocall del Franchise Innovation Summit"
+          widths={[400, 600, 800, 1200]}
+          sizes="(min-width: 960px) 30rem, calc(100vw - 2rem)"
+          position="48% 50%"
+        />
+      </div>
+      <figcaption class="activity-caption">Franchise Innovation Summit · Madrid, 30 de septiembre de 2026</figcaption>
+    </figure>
+
+    <div class="activity-body">
+      <ol class="agenda" role="list" aria-label="Agenda 2026">
+        {
+          AGENDA_2026.map((e) => (
+            <li class="agenda-item" data-reveal>
+              <p class="agenda-date">
+                <Icon name="calendar" />
+                <time datetime={e.date}>{e.dateLabel}</time>
+              </p>
+              <h3 class="agenda-title">{e.title}</h3>
+              <p class="agenda-place">
+                <Icon name="pin" />
+                <span>{e.place}</span>
+                {e.role && <span class="agenda-role">{e.role}</span>}
+              </p>
+              {e.text && <p class="agenda-text">{e.text}</p>}
+            </li>
+          ))
+        }
+      </ol>
+
+      <div class="campaigns" data-reveal>
+        <h3 class="campaigns-title" id="campaigns-title">Campañas informativas 2026</h3>
+        <ul class="campaigns-list" role="list" aria-labelledby="campaigns-title">
+          {
+            CAMPAIGNS_2026.map((c) => (
+              <li>
+                <time class="campaigns-month" datetime={c.date}>{c.dateLabel}</time>
+                <span class="campaigns-text"><strong>{c.title}</strong> {c.text}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .activity-grid { display: grid; gap: 2rem; }
+  .activity-head .section-title { margin-bottom: 0; }
+
+  .activity-photo { position: relative; margin: 0; min-width: 0; }
+  .activity-frame {
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border-radius: var(--radius-s);
+    background: var(--c-lavender-200);
+    box-shadow: var(--shadow);
+  }
+  .activity-frame :global(picture),
+  .activity-frame :global(img) { width: 100%; height: 100%; }
+  .activity-frame :global(img) { object-fit: cover; }
+  .activity-caption {
+    margin-top: .85rem;
+    color: var(--c-muted);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: .12em;
+    line-height: 1.5;
+    text-transform: uppercase;
+  }
+
+  .activity-body { min-width: 0; }
+  .agenda { display: grid; }
+  .agenda-item {
+    display: grid;
+    gap: .35rem;
+    padding-block: 1.35rem;
+    border-top: 1px solid var(--c-line);
+  }
+  .agenda-item:first-child { border-top: 0; padding-top: 0; }
+  .agenda-date,
+  .agenda-place {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .2rem .5rem;
+    font-variant-numeric: lining-nums;
+  }
+  .agenda-date { color: var(--c-plum); font-size: .8rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+  .agenda-date :global(.icon),
+  .agenda-place :global(.icon) { width: 1.05rem; height: 1.05rem; }
+  .agenda-title {
+    font-family: var(--ff-serif);
+    font-size: var(--fs-h4);
+    font-weight: 600;
+    line-height: 1.15;
+    color: var(--c-ink);
+    text-wrap: balance;
+  }
+  .agenda-place { color: var(--c-muted); font-size: var(--fs-small); }
+  .agenda-place :global(.icon) { color: var(--c-plum); }
+  .agenda-role {
+    margin-left: .25rem;
+    padding: .15rem .65rem;
+    border-radius: var(--radius-pill);
+    background: var(--c-plum);
+    color: #fff;
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  .agenda-text { margin-top: .3rem; max-width: 36rem; color: var(--c-ink-soft); text-wrap: pretty; }
+
+  .campaigns {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background: var(--c-white);
+    border: 1px solid var(--c-line);
+    border-top: 3px solid var(--c-plum);
+    border-radius: var(--radius);
+  }
+  .campaigns-title {
+    margin-bottom: 1rem;
+    font-family: var(--ff-serif);
+    font-size: 1.4rem;
+    font-weight: 600;
+    line-height: 1.15;
+  }
+  .campaigns-list { display: grid; gap: .8rem; }
+  .campaigns-list li {
+    display: grid;
+    gap: .25rem 1rem;
+    padding-top: .8rem;
+    border-top: 1px solid var(--c-line);
+  }
+  .campaigns-month {
+    padding-top: .2rem;
+    color: var(--c-muted);
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .campaigns-text { color: var(--c-ink-soft); line-height: 1.5; }
+  .campaigns-text strong { color: var(--c-ink); font-weight: 600; }
+
+  @media (min-width: 600px) {
+    .activity-frame { aspect-ratio: 4 / 3; }
+    .campaigns-list li { grid-template-columns: 4.5rem minmax(0, 1fr); }
+  }
+  @media (min-width: 960px) {
+    .activity-grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      grid-template-rows: auto 1fr;
+      column-gap: clamp(3.5rem, 6vw, 6rem);
+      row-gap: 2.5rem;
+    }
+    .activity-head { grid-column: 2; grid-row: 1; }
+    .activity-photo { grid-column: 1; grid-row: 1 / span 2; align-self: start; position: sticky; top: calc(var(--header-h) + 1.5rem); }
+    .activity-frame { aspect-ratio: 4 / 5; }
+    .activity-body { grid-column: 2; grid-row: 2; }
+  }
+</style>

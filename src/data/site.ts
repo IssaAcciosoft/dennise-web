@@ -60,7 +60,7 @@ export const OFFICE = {
 } as const;
 
 export const SOCIALS = [
-  { id: 'facebook', label: 'Facebook', handle: 'Facebook', href: 'https://www.facebook.com/share/1GQdBrwuAy/' },
+  { id: 'facebook', label: 'Facebook', handle: 'Facebook', href: 'https://www.facebook.com/profile.php?id=100068039383642' },
   { id: 'instagram', label: 'Instagram', handle: '@lic.denisseg', href: 'https://www.instagram.com/lic.denisseg' },
   { id: 'tiktok', label: 'TikTok', handle: '@lic.denissegb', href: 'https://www.tiktok.com/@lic.denissegb' },
 ] as const;

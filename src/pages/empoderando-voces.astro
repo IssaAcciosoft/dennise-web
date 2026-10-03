@@ -277,6 +277,8 @@ const memories = [
             <p>Tu historia puede inspirar a alguien que hoy está atravesando algo parecido.</p>
           </div>
           <p class="ev-voice-invite" data-reveal>Si quieres compartirla conmigo, escríbeme.</p>
+          {/* Su frase de «Empoderando tu voz» (TikTok 09/09/2026, docs/redes-sociales.md §6) */}
+          <p class="ev-rights" data-reveal><span>Conoce tus derechos.</span> <span>Hazte escuchar.</span> <span>Defiende tu dignidad.</span></p>
         </div>
         <figure class="ev-voice-photo" data-reveal="photo">
           <div class="ev-frame">
@@ -305,6 +307,8 @@ const memories = [
       <div class="ev-signoff">
         <p class="ev-motto" data-reveal>{SITE.motto}</p>
         <p class="ev-sign" data-reveal><span class="ev-sign-name">Empoderando Voces</span> — Historias reales. Personas reales. Voces que merecen un espacio.</p>
+        {/* Su lema (Instagram 27/09/2026, docs/redes-sociales.md §5) */}
+        <p class="ev-lema" data-reveal><span>Empoderando Voces.</span> <span>Afirmando la Dignidad.</span> <span>Construyendo conexiones.</span></p>
       </div>
     </div>
   </div>
@@ -921,4 +925,38 @@ const memories = [
   }
   .ev-sign { max-width: 34rem; color: var(--ev-faint); font-size: .95rem; letter-spacing: .14em; line-height: 1.6; }
   .ev-sign-name { color: var(--ev-gold); }
+  .ev-lema {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .15rem .3em;
+    flex-basis: 100%;
+    margin-top: .5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--ev-line);
+    color: var(--ev-muted);
+    font-family: var(--ff-serif);
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(1.15rem, 1rem + .6vw, 1.5rem);
+    line-height: 1.3;
+  }
+  .ev-lema span:first-child { color: var(--ev-gold); }
+
+  /* «Conoce tus derechos. Hazte escuchar. Defiende tu dignidad.» */
+  .ev-rights {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem .6rem;
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--ev-gold);
+    max-width: 34em;
+    font-family: var(--ff-cond);
+    font-weight: 500;
+    font-size: clamp(1rem, .9rem + .45vw, 1.25rem);
+    letter-spacing: .16em;
+    line-height: 1.4;
+    text-transform: uppercase;
+    color: var(--ev-gold-2);
+  }
 </style>

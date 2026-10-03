@@ -22,7 +22,8 @@ Este documento es la referencia de textos. Los textos de la cliente se usan **ta
   - `tel:+34670647593`
   - `https://wa.me/34670647593`
 - Redes:
-  - Facebook: https://www.facebook.com/share/1GQdBrwuAy/
+  - Facebook: https://www.facebook.com/profile.php?id=100068039383642 (página «Denisse Gonzalez
+    International Legal Consulting»; el enlace `share/1GQdBrwuAy` que envió redirige aquí)
   - Instagram: https://www.instagram.com/lic.denisseg
   - TikTok: https://www.tiktok.com/@lic.denissegb
 - Logo: monograma "DG" con balanza de la justicia.
@@ -456,3 +457,17 @@ integración de formularios (AccioGest).
 8. IDs de AccioGest (formularios, planes, plugin de reservas). Si el campo «Servicio» del
    formulario de AccioGest es un desplegable, añadir los nuevos valores (extranjería en España y
    «Apertura de empresa en Dubái»: ver `docs/integracion-acciogest.md` §4).
+9. Redes sociales (`docs/redes-sociales.md`, extracción del 03/10/2026):
+   - Avisarle de que el enlace «TikTok» de su bio de Instagram apunta a `@lic.denisseg`, no a su
+     cuenta real `@lic.denissegb` (probablemente roto).
+   - Pedirle el original del retrato del despacho con banderas (en redes solo llega a 681 px).
+   - Sede de C/ Santa Catalina 7 (Migrar con Derechos 22/02, conferencia del 8M, charlas «Conoce
+     tus derechos» de los viernes, I Encuentro de Literatura, Arte y Poesía): es la Iglesia de
+     Cienciología de Madrid (§4 de ese documento). Comentárselo y que decida si se mencionan
+     esos actos y con qué fotos; hasta entonces NO aparecen en la web (ni la sede).
+   - Confirmar su relación con «SANDIN & Asociados» (logo de los vídeos de abril sobre la
+     regularización extraordinaria). Hasta entonces no se menciona.
+   - Publicado en la web (03/10): prensa de 2021 en /derechos-humanos/#prensa (Expansión/AFP,
+     SDP Noticias, Economis; Tiptip MX no, URL sin verificar), «Agenda 2026» en /conoceme/#actividad
+     (foto del Franchise Innovation Summit), sus frases en /empoderando-voces/ y /servicios/.
+     Que lo revise.

@@ -37,12 +37,13 @@ scripts/
 src/
   pages/                    Una página por archivo (la URL sale del nombre)
     index.astro             Inicio (hero de la cliente, servicios + Dubái, testimonio)
-    conoceme.astro          Conóceme · Experiencia · Mi trayectoria · globo 3D · El despacho y equipo
+    conoceme.astro          Conóceme · Actividad reciente (agenda 2026) · Experiencia · Mi trayectoria ·
+                            globo 3D · El despacho y equipo
     servicios.astro         Extranjería en España · Asesorías · Programa Autogestiona · #reservar ·
                             preguntas frecuentes (#preguntas) · visita guiada
     dubai.astro             Abre tu empresa en Dubái (¿Por qué Dubái?, estructuras, equipo local,
                             partner Poplavsky, preguntas frecuentes, solicitud de información)
-    derechos-humanos.astro  Derechos humanos · Summit · cita · Mi compromiso · En medios
+    derechos-humanos.astro  Derechos humanos · Summit · cita · Mi compromiso · En medios (8M + prensa 2021)
     empoderando-voces.astro Empoderando Voces + formulario «Cuéntame tu historia»
     contacto.astro          Despacho (dirección y «Cómo llegar»), WhatsApp, teléfono, email, redes y
                             formulario de contacto
@@ -58,7 +59,8 @@ src/
     seo/                    Fonts (tipografías autoalojadas + fallbacks), JsonLd
     ui/                     Icon, Photo (imágenes optimizadas), SocialLinks, Faq (<details>)
     home/ about/ services/ media/ contact/ ev/ dubai/   Secciones de cada página
-                            (about/Firm.astro: El despacho + equipo; dubai/PartnerCard.astro;
+                            (about/Firm.astro: El despacho + equipo; about/RecentActivity.astro: agenda
+                            2026; media/PressList.astro: prensa 2021; dubai/PartnerCard.astro;
                             services/Immigration.astro y ServicesFaq.astro; home/Testimonial.astro)
                             (about/globe-mount.ts + globe-config.ts + GlobeSlot.astro: globo 3D, sin React;
                             services/ServicesTour.astro: botón «¿Te guío?»)
@@ -71,7 +73,9 @@ src/
     site.ts                 Teléfono, WhatsApp, email, despacho, redes, navegación ← ÚNICA fuente
     servicios.json          Catálogo: extranjería en España, asesorías, planes, Dubái ← precios aquí
     faq.ts                  Preguntas frecuentes (España / Dubái) + FAQPage para JSON-LD
-    medios.ts               Artículo «8 de marzo — Voces que se unen» y su transcripción
+    medios.ts               Artículo «8 de marzo — Voces que se unen» y su transcripción; prensa de
+                            2021 (PRESS_2021: medio, fecha, titular, extracto literal, enlace)
+    actividad.ts            Agenda 2026 y campañas informativas de Conóceme (docs/redes-sociales.md §4)
     legal.ts                Textos de consentimiento + datos de la titular (NIE: solo páginas legales)
   config/acciogest.ts       IDs de AccioGest, etiquetas de los campos, versión de la política
   lib/                      Utilidades (rutas con base, catálogo de servicios)
@@ -83,8 +87,8 @@ src/
                             sombras, curvas y duraciones de animación) y estilos comunes
   styles/tour.css           Estilos de marca de la visita guiada (se cargan solo al abrirla)
   assets/                   Fotos originales (se optimizan al compilar), logotipo, póster del globo
-docs/                       Textos de la cliente (contenido.md), web anterior (web-anterior.md) e
-                            integración con AccioGest
+docs/                       Textos de la cliente (contenido.md), web anterior (web-anterior.md),
+                            redes sociales (redes-sociales.md) e integración con AccioGest
 _originales/                Originales sin tocar: NO se publican (no están en src/ ni public/)
 ```
 
@@ -417,6 +421,8 @@ De la cliente (ver `docs/contenido.md` §7):
 8. Idiomas de atención y zona en la que presta servicio (JSON-LD `knowsLanguage`, `areaServed`).
 9. Validar la transcripción del artículo «8 de marzo — Voces que se unen».
 10. Dominio definitivo (`SITE_URL`).
+11. Redes sociales (`docs/contenido.md` §7, punto 9): enlace de TikTok de su bio de Instagram,
+    original del retrato del despacho, sede de C/ Santa Catalina 7 y SANDIN & Asociados.
 
 Técnico: hecho el sistema de movimiento, el rediseño de Empoderando Voces y su transición desde
 el inicio, el globo 3D de Conóceme, el retrato compartido inicio ↔ Conóceme, la visita guiada

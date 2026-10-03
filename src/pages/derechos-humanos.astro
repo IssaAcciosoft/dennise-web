@@ -2,6 +2,7 @@
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import Photo from '~/components/ui/Photo.astro';
 import ArticleCard from '~/components/media/ArticleCard.astro';
+import PressList from '~/components/media/PressList.astro';
 import ContactCta from '~/components/contact/ContactCta.astro';
 import onuNegro from '~/assets/img/onu-negro.jpg';
 import yhri from '~/assets/img/yhri-asamblea.jpg';
@@ -10,7 +11,7 @@ import summitAtril from '~/assets/img/summit-atril.jpg';
 
 <BaseLayout
   title="Derechos humanos · Denisse González, abogada"
-  description="El compromiso de Denisse González con los derechos humanos: educación y sensibilización, delegada en el 20th International Human Rights Summit (Nueva York, 2026) y publicaciones."
+  description="El compromiso de Denisse González con los derechos humanos: educación y sensibilización, delegada en el 20th International Human Rights Summit (Nueva York, 2026), publicaciones y prensa."
   preloadFonts={['serif-600', 'serif-500i', 'sans-400', 'sans-600']}
 >
   <section class="rights-hero" aria-labelledby="rights-title">
@@ -124,6 +125,7 @@ import summitAtril from '~/assets/img/summit-atril.jpg';
         <h2 class="section-title" id="media-title" data-reveal>En medios</h2>
       </div>
       <ArticleCard />
+      <PressList />
     </div>
   </section>
 

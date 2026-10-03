@@ -18,3 +18,56 @@ export const ARTICLE_8M = {
     'Hoy existe una violencia menos visible, pero más dura: la revictimización. Cuando una mujer decide hablar, enfrenta no solo a su agresor, sino cuestionamientos, difamaciones, indiferencia institucional y procesos que la obligan a repetir su dolor. Esto puede llevar a que la víctima parezca culpable o mentirosa y se vea obligada a abandonar el proceso legal.',
   ],
 } as const;
+
+/**
+ * Prensa de 2021 (docs/redes-sociales.md §3, verificada en la web de cada medio): la demanda
+ * internacional contra China y la OMS por la COVID-19. Citas literales, tal como las publicó
+ * cada medio (SDP Noticias escribe «Deniss»). Economis la cita con su nombre completo, que solo
+ * aparece en las páginas legales (README → Dónde se edita): sin extracto. Tiptip MX NO se
+ * incluye: su URL no está verificada.
+ */
+export const PRESS_CONTEXT =
+  'Citada como representante en México de Poplavsky International Law Offices en la demanda internacional contra China y la OMS por la COVID-19.';
+
+export interface PressItem {
+  outlet: string;
+  /** Agencia o detalle del medio (opcional). */
+  note?: string;
+  /** Fecha ISO para <time datetime> (día o solo año). */
+  date: string;
+  /** Fecha para mostrar. */
+  dateLabel: string;
+  headline: string;
+  /** Extracto literal del medio en el que se la cita (sin comillas exteriores). */
+  excerpt?: string;
+  href: string;
+}
+
+export const PRESS_2021: readonly PressItem[] = [
+  {
+    outlet: 'Expansión',
+    note: 'México · nota de AFP',
+    date: '2021-12-31',
+    dateLabel: '31 de diciembre de 2021',
+    headline: 'Mexicanos reclaman a China y la OMS indemnizaciones millonarias por el COVID',
+    excerpt: '“Estos reclamos se presentan por la negligencia que hubo tanto de China como de la OMS en el manejo del COVID-19”, dice a la AFP la abogada Denisse González, representante en México de Poplavsky.',
+    href: 'https://expansion.mx/mundo/2021/12/31/mexicanos-reclaman-china-oms-indemnizacion-millonaria-covid',
+  },
+  {
+    outlet: 'SDP Noticias',
+    note: 'México',
+    date: '2021-12-29',
+    dateLabel: '29 de diciembre de 2021',
+    headline: 'Mexicanos afectados por Covid-19 buscan indemnizaciones de China y la OMS',
+    excerpt: 'Deniss González, representante del despacho en México, aseguró que la demanda se presenta por la negligencia de China y la OMS en el manejo del Covid-19.',
+    href: 'https://www.sdpnoticias.com/internacional/mexicanos-afectados-por-covid-19-buscan-indemnizaciones-de-china-y-la-oms/',
+  },
+  {
+    outlet: 'Economis',
+    note: 'Argentina',
+    date: '2021',
+    dateLabel: '2021',
+    headline: 'Más de 3.000 personas de todo el mundo demandaron a China y la OMS por la pandemia de COVID-19',
+    href: 'https://economis.com.ar/mas-de-3-000-personas-de-todo-el-mundo-demandaron-a-china-y-la-oms-por-la-pandemia-de-covid-19/',
+  },
+] as const;
