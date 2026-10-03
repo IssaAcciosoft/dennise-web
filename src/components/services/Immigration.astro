@@ -123,5 +123,5 @@ const [lead, ...rest] = immigration.intro;
     font-weight: 600;
     color: var(--c-ink);
   }
-  .imm-also-list li + li::before { content: ""; width: .35rem; height: .35rem; background: var(--c-plum); rotate: 45deg; }
+  .imm-also-list li:not(:last-child)::after { content: ""; width: .35rem; height: .35rem; background: var(--c-plum); rotate: 45deg; }
 </style>

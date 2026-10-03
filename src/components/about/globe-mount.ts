@@ -79,7 +79,14 @@ export function mountGlobe(host: HTMLElement, slot: HTMLElement | null): (() => 
       if (!l.el) continue;
       const q = project(l.place.location, phi, VIEW.theta);
       l.el.style.transform = `translate3d(${((q.x - l.base.x) * size).toFixed(2)}px, ${((q.y - l.base.y) * size).toFixed(2)}px, 0)`;
-      l.el.style.opacity = smoothstep(0, 0.18, q.z).toFixed(3); // se apaga al pasar detrás
+      // Se apaga al girar hacia el borde: por profundidad (z) y por distancia al centro del disco
+      // (el globo ocupa un radio de 0,4 del lienzo; la etiqueta desaparece antes de salirse).
+      // Extremo exterior de la etiqueta (las de lado izquierdo/derecho crecen hacia fuera).
+      const w = size ? l.el.offsetWidth / size : 0;
+      const farX = l.place.side === 'left' ? q.x - w : l.place.side === 'right' ? q.x + w : q.x;
+      const edge = Math.max(Math.hypot(q.x - 0.5, q.y - 0.5), Math.hypot(farX - 0.5, q.y - 0.5) - 0.02);
+      const fade = Math.min(smoothstep(0.2, 0.45, q.z), 1 - smoothstep(0.34, 0.4, edge));
+      l.el.style.opacity = fade.toFixed(3);
     }
   };
 
