@@ -107,7 +107,7 @@ Etiquetas que usa la web (editables en `src/config/acciogest.ts` → `FIELD_LABE
 | Formulario | Etiquetas |
 |---|---|
 | servicio | Nombre, Email, Teléfono, Servicio, Mensaje, Consentimiento RGPD, Versión política, utm_source, utm_medium, utm_campaign |
-| historia | Nombre, Email, Teléfono, País, Tema, Historia, Compartir públicamente, Anonimato, Cómo contactarte, Consentimiento RGPD, Versión política, utm_source, utm_medium, utm_campaign |
+| historia | Nombre, Email, Teléfono, País, Tema, Historia, Compartir públicamente, Anonimato, Cómo contactarte, Instagram, Consentimiento RGPD, Versión política, utm_source, utm_medium, utm_campaign |
 | contacto | Nombre, Email, Teléfono, Mensaje, Consentimiento RGPD, Versión política, utm_source, utm_medium, utm_campaign |
 
 Valores: `Servicio` = `lead_value` de `servicios.json` (p. ej. `Asesoría migratoria · 1 hora`,
@@ -116,7 +116,8 @@ extranjería en España, `Extranjería · Nómadas digitales`, `Apertura de empr
 `Otro trámite / no lo sé`. El diálogo de solicitud está en /servicios/ y en /dubai/ (allí el
 servicio llega preseleccionado como `Apertura de empresa en Dubái`); `Tema` = Migración,
 Superación, Derechos humanos, Lucha, Transformación, Justicia u Otra; `Cómo contactarte` =
-`Email`, `Teléfono` o `WhatsApp` (con Teléfono/WhatsApp el teléfono es obligatorio en la web).
+`Email`, `Teléfono`, `WhatsApp` o `Instagram` (con Teléfono/WhatsApp el teléfono es obligatorio en la web;
+con Instagram se pide y se envía `Instagram` = usuario de Instagram, que solo se envía en ese caso).
 
 Respuestas:
 

@@ -6,8 +6,6 @@
 
 export const SITE = {
   name: 'Denisse González',
-  /** Nombre completo (JSON-LD, pie y páginas legales). Confirmado el 02/10/2026. */
-  legalName: 'Denisse Elena González Barbosa',
   /** Nombre comercial del despacho (JSON-LD LegalService, pie, contacto, páginas legales). */
   firm: 'DG Gestores y Abogados',
   role: 'Abogada',

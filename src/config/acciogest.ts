@@ -80,6 +80,7 @@ export const FIELD_LABELS = {
     compartir: 'Compartir públicamente',
     anonimato: 'Anonimato',
     contacto: 'Cómo contactarte',
+    instagram: 'Instagram',
     ...COMMON,
   },
   contacto: {

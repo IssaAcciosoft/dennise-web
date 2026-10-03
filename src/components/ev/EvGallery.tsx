@@ -143,7 +143,7 @@ export default function EvGallery({ items }: Props) {
       <div className="ev-gallery-controls" onKeyDown={onKey}>
         <p className="ev-gallery-hint">
           <span className="ev-gallery-count" aria-hidden="true">
-            {glOn ? `${String(index + 1).padStart(2, '0')} / ${String(n).padStart(2, '0')}` : `${String(n).padStart(2, '0')} fotos`}
+            {glOn ? `${String(index + 1).padStart(2, '0')} / ${String(n).padStart(2, '0')}` : `${n} fotos`}
           </span>
           <span>{glOn ? 'Arrastra o usa las flechas' : 'Desliza para ver más'}</span>
         </p>

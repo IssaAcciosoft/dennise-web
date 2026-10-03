@@ -570,6 +570,7 @@ dialog { color: inherit; }
 }
 
 .field { display: flex; flex-direction: column; gap: .4rem; min-width: 0; margin: 0; padding: 0; border: 0; }
+.field[hidden] { display: none; }
 .field label,
 .field legend {
   color: var(--c-ink);

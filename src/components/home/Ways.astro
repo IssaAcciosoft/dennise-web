@@ -7,7 +7,13 @@
  *   Escuchar → MI COMPROMISO · Conectar → CONÓCEME · Actuar → MI COMPROMISO.
  * («Me interesa explicar lo complejo…» no se repite aquí: está en el manifiesto, justo encima.)
  * Aparición con el sistema de movimiento (data-reveal, escalonado de 50 ms).
+ * Cierre (como la referencia): el lema en cursiva y un enlace a «Reserva tu asesoría»; solo
+ * textos que ya existen en la web. En ≥ 900 px las columnas se reparten según la longitud de
+ * cada frase (la de «Escuchar» es la más corta) para que las tres tarjetas queden equilibradas.
  */
+import { SITE } from '~/data/site';
+import { url } from '~/lib/url';
+import Icon from '../ui/Icon.astro';
 const ways = [
   { num: '01', word: 'Escuchar', text: 'Creo en un ejercicio del derecho que escucha, explica y acompaña.', tone: 'sand' },
   {
@@ -43,6 +49,13 @@ const ways = [
         ))
       }
     </ol>
+    <div class="ways-close" data-reveal>
+      <p class="ways-motto">{SITE.motto}</p>
+      <a class="btn btn--link" href={url('/servicios/#reservar')}>
+        <span>Reserva tu asesoría</span>
+        <Icon name="arrow" />
+      </a>
+    </div>
   </div>
 </section>
 
@@ -89,6 +102,28 @@ const ways = [
     text-wrap: pretty;
   }
   @media (min-width: 900px) {
-    .ways-list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; }
+    .ways-list { grid-template-columns: minmax(0, .74fr) minmax(0, 1.13fr) minmax(0, 1.13fr); gap: 1.5rem; }
+    /* Misma altura (stretch) y el texto apoyado abajo: el aire queda entre la etiqueta y la
+       frase, no como un hueco bajo la frase corta de «Escuchar». */
+    .way { display: flex; flex-direction: column; }
+    .way-label { margin-bottom: auto; padding-bottom: 1.75rem; }
+  }
+  .ways-close {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .75rem 2rem;
+    margin-top: clamp(2rem, 3.5vw, 2.75rem);
+    padding-top: clamp(1.25rem, 2vw, 1.5rem);
+    border-top: 1px solid var(--c-line);
+  }
+  .ways-motto {
+    font-family: var(--ff-serif);
+    font-size: clamp(1.35rem, 1.15rem + .7vw, 1.75rem);
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--c-plum);
   }
 </style>

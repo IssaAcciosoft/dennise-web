@@ -4,6 +4,8 @@
  *
  * - Validación en español a partir de los atributos del HTML: required, type=email,
  *   type=tel, minlength y data-required-when="campo=Valor1|Valor2" (obligatorio si…).
+ * - Campos condicionales: el contenedor .field con data-show-when="campo=Valor1|Valor2" solo se
+ *   muestra con esos valores; oculto, ni se valida ni se envía.
  *   Mensajes propios con data-msg-required / data-msg-email / data-msg-minlength / data-msg-tel.
  * - Honeypot (name="website"): si viene relleno no se envía nada y se finge éxito.
  * - Botón con aria-disabled mientras se envía (el foco no se pierde) y región aria-live.
@@ -80,10 +82,29 @@ export function initLeadForm(rootEl: HTMLElement | null): LeadFormController | n
   };
   const msg = (el: Control, key: string, fallback: string) => el.dataset[key] || fallback;
 
+  /* ---------- Campos condicionales (data-show-when) ---------- */
+  const conditional = Array.from(form.querySelectorAll<HTMLElement>('[data-show-when]'));
+  const matches = (rule: string) => {
+    const [other, list = ''] = rule.split('=');
+    return list.split('|').includes(valueOf(other));
+  };
+  const isHiddenField = (name: string) =>
+    Boolean(controlsOf(name)[0]?.closest<HTMLElement>('[data-show-when]')?.hidden);
+  function syncConditional() {
+    conditional.forEach((wrap) => {
+      const show = matches(wrap.dataset.showWhen ?? '');
+      if (wrap.hidden !== show) return;
+      wrap.hidden = !show;
+      if (!show) {
+        wrap.querySelectorAll<Control>('input, select, textarea').forEach((c) => setFieldError(c.name, ''));
+      }
+    });
+  }
+
   function ruleFor(name: string): string {
     const controls = controlsOf(name);
     const first = controls[0];
-    if (!first) return '';
+    if (!first || isHiddenField(name)) return '';
     const value = valueOf(name);
     const required = controls.some((c) => c.required);
     if (!value) {
@@ -199,6 +220,7 @@ export function initLeadForm(rootEl: HTMLElement | null): LeadFormController | n
   function showSuccess(message: string, mock: boolean) {
     completed = true;
     form.reset();
+    syncConditional();
     clearErrors();
     setStatus('');
     attempted = false;
@@ -302,6 +324,7 @@ export function initLeadForm(rootEl: HTMLElement | null): LeadFormController | n
   /* ---------- Eventos ---------- */
   function onEdit(e: Event) {
     const name = (e.target as Control).name;
+    if (conditional.length) syncConditional();
     if (e.type === 'input' && counters.length) updateCounters();
     if (!attempted || !name || name === HONEYPOT) return;
     validateField(name);
@@ -327,7 +350,7 @@ export function initLeadForm(rootEl: HTMLElement | null): LeadFormController | n
     const values: LeadValues = {};
     for (const name of Object.keys(FIELD_LABELS[formKey])) {
       const first = controlsOf(name)[0];
-      if (!first) continue;
+      if (!first || isHiddenField(name)) continue;
       values[name] = first instanceof HTMLInputElement && first.type === 'checkbox' ? first.checked : valueOf(name);
     }
 
@@ -359,6 +382,7 @@ export function initLeadForm(rootEl: HTMLElement | null): LeadFormController | n
   );
 
   updateCounters();
+  syncConditional();
   void debugLabels(
     formKey,
     names().filter((name) => controlsOf(name).some((c) => c.required)),

@@ -2,6 +2,10 @@
 /**
  * Botón flotante de WhatsApp. Se oculta sobre los elementos con [data-wa-hide]
  * (hero, bloques de contacto, pie), mientras hay un diálogo abierto o el menú móvil.
+ * En TODAS las páginas aparece solo tras desplazarse ≈ 40 % de la pantalla (un «testigo»
+ * invisible de 40vh arriba del documento): así no tapa el primer bloque editorial en móvil
+ * (p. ej. los cargos bajo el retrato de /conoceme/). Empieza oculto para no destellar; sin
+ * JavaScript, la regla <noscript> lo muestra siempre.
  */
 import { WA_TEXT, waLink } from '~/data/site';
 import Icon from '../ui/Icon.astro';
@@ -10,15 +14,22 @@ import Icon from '../ui/Icon.astro';
 <!-- Región propia (complementaria): quien navega por regiones con lector de pantalla también
      encuentra el acceso directo a WhatsApp. La posición fija no depende de dónde esté. -->
 <aside class="wa-region" aria-label="WhatsApp">
-  <a class="wa-float" href={waLink(WA_TEXT.general)} target="_blank" rel="noopener" aria-label="Escríbeme por WhatsApp" data-wa-float>
+  <a class="wa-float is-hidden" href={waLink(WA_TEXT.general)} target="_blank" rel="noopener" aria-label="Escríbeme por WhatsApp" data-wa-float>
     <Icon name="whatsapp" />
   </a>
+  <noscript><style>.wa-float.is-hidden { opacity: 1 !important; visibility: visible !important; transform: none !important; }</style></noscript>
 </aside>
 
 <script>
   const fab = document.querySelector<HTMLElement>('[data-wa-float]');
-  const zones = document.querySelectorAll<HTMLElement>('[data-wa-hide]');
-  if (fab && zones.length && 'IntersectionObserver' in window) {
+  const zones = Array.from(document.querySelectorAll<HTMLElement>('[data-wa-hide]'));
+  if (fab && 'IntersectionObserver' in window) {
+    // Testigo del primer 40 % de pantalla: mientras se ve, el botón espera.
+    const top = document.createElement('div');
+    top.setAttribute('aria-hidden', 'true');
+    top.style.cssText = 'position:absolute;top:0;left:0;width:1px;height:40vh;pointer-events:none;visibility:hidden';
+    document.body.prepend(top);
+    zones.push(top);
     const visible = new Set<Element>();
     const io = new IntersectionObserver(
       (entries) => {
@@ -34,6 +45,8 @@ import Icon from '../ui/Icon.astro';
       { threshold: 0.15 },
     );
     zones.forEach((z) => io.observe(z));
+  } else {
+    fab?.classList.remove('is-hidden');
   }
 </script>
 

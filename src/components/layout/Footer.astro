@@ -58,7 +58,7 @@ const here = (path: string) => (current === path ? 'page' : undefined);
   </div>
 
   <div class="container footer-bottom">
-    <p>© {year} {SITE.firm}&nbsp;· {SITE.legalName}</p>
+    <p>© {year} {SITE.firm}&nbsp;· {SITE.name}</p>
     <nav class="footer-legal-nav" aria-label="Legal">
       <ul class="footer-legal" role="list">
         {LEGAL_NAV.map((item) => <li><a href={url(item.path)} aria-current={here(item.path)}>{item.label}</a></li>)}

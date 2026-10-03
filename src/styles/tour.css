@@ -147,3 +147,24 @@
 
 /* Durante la visita, el botón flotante de WhatsApp se aparta (menos ruido sobre el velo). */
 html[data-tour-active] .wa-float { visibility: hidden; }
+
+/* Título: <h2> dentro del <header> de driver.js (tour.ts); hereda la tipografía del título. */
+.dg-tour .dg-tour-title-text {
+  margin: 0;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-wrap: inherit;
+}
+
+/* Móvil: la tarjeta ocupa el ancho útil con el mismo margen (16 px) a ambos lados; driver.js
+   la alinearía al borde del elemento resaltado y quedaría pegada al borde derecho. */
+@media (max-width: 599.98px) {
+  .driver-popover.dg-tour {
+    left: 1rem !important;
+    right: auto !important;
+    width: calc(100vw - 2rem);
+    min-width: 0;
+    max-width: calc(100vw - 2rem);
+  }
+}

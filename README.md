@@ -94,8 +94,10 @@ _originales/                Originales sin tocar: NO se publican (no están en s
   al compilar (no hay precios escritos a mano en las páginas). JSON-LD también.
 - **Teléfono, WhatsApp, email, dirección del despacho y redes:** `src/data/site.ts` (`PHONE`,
   `EMAIL`, `OFFICE`; si cambia algo, solo aquí: cabecera, pie, contacto, JSON-LD y legales).
-- **Datos legales de la titular (NIE):** `src/data/legal.ts` → `LEGAL_ID`. Solo lo importan
-  las páginas legales: el NIE no aparece en ninguna otra página ni en JSON-LD.
+- **Datos legales de la titular (nombre completo y NIE):** `src/data/legal.ts` → `LEGAL_ID`.
+  Solo lo importan las páginas legales (aviso legal, privacidad, condiciones): ni el nombre
+  completo de la titular ni el NIE aparecen en ninguna otra página, en el pie ni en JSON-LD
+  (docs/contenido.md §1). El resto de la web usa `SITE.name` («Denisse González»).
 - **Servicios de extranjería en España y Dubái:** `src/data/servicios.json` (`immigration`,
   `dubai`). Sus `lead_value` son las opciones del selector «Servicio» del formulario.
 - **Preguntas frecuentes:** `src/data/faq.ts` (mismo texto en la página y en el JSON-LD).
@@ -280,17 +282,18 @@ JavaScript es un enlace a `#asesorias`. Al pulsarlo se descarga `src/scripts/tou
 driver.js y su CSS (≈ 13 KB gzip, todo en ese chunk diferido; se precarga al pasar el ratón o
 enfocar el botón).
 
-- Pasos, en el orden de la página (10): servicios de extranjería en España → asesorías → online
-  o presencial → orientación académica → Programa Autogestiona (trámites, planes, «¿Cómo
-  funciona?», «Todos los planes incluyen») → Reserva tu asesoría → preguntas frecuentes
+- Pasos, en el orden de la página (9): servicios de extranjería en España → asesorías → online
+  o presencial → orientación académica → Programa Autogestiona (trámites, planes, «Todos los
+  planes incluyen») → Reserva tu asesoría → preguntas frecuentes
   («¿Tienes dudas?», con el botón «Solicitar información», que abre el diálogo de solicitud con
   el evento `dg:service-request`). Sin JavaScript, «¿Te guío?» lleva a `#extranjeria`.
 - Textos solo con hechos de `docs/contenido.md` y de la página (precios desde
-  `servicios.json`). Si cambian los pasos de «¿Cómo funciona?» (`Autogestiona.astro`),
-  revisar el texto de ese paso en `tour.ts`.
+  `servicios.json`). «¿Cómo funciona?» (pasos tras la compra) y el plan destacado se retiraron
+  hasta que la cliente confirme el proceso y qué diferencia los planes (`docs/contenido.md` §7):
+  si se reponen, añadir su paso en `tour.ts`.
 - Móvil (< 600 px): el bloque resaltado se coloca justo bajo la cabecera y la tarjeta debajo,
-  sin taparlo; en los bloques altos se resalta una parte (la tarjeta del plan destacado, el
-  título y las primeras filas de trámites / «¿Cómo funciona?» / «Todos los planes incluyen»)
+  sin taparlo; en los bloques altos se resalta una parte (la tarjeta del plan destacado o, si no
+  hay, la primera; el título y las primeras filas de trámites / «Todos los planes incluyen»)
   para que bloque y tarjeta quepan juntos en la pantalla.
 - Teclado: el foco va a «Siguiente», Tab se queda en el paso, ← → navegan, Esc cierra y el foco
   vuelve a «¿Te guío?». Estilos de marca en `src/styles/tour.css` (tarjeta 200 ms `ease-out`

@@ -5,7 +5,6 @@
   "tax_label": "IVA incluido",
   "immigration": {
     "id": "extranjeria",
-    "_fuente": "docs/web-anterior.md §5 y §6 (web anterior, textos tal cual)",
     "eyebrow": "Vive en España de manera legal",
     "title": "Servicios de extranjería en España",
     "intro": [
@@ -47,8 +46,7 @@
         "id": "nacionalidad",
         "name": "Nacionalidad española",
         "description": "Te asesoramos en cada paso para solicitar la nacionalidad por residencia, matrimonio o descendencia.",
-        "lead_value": "Extranjería · Nacionalidad española",
-        "_pendiente": "Alerta 9.6 de docs/web-anterior.md: revisar con la cliente «por matrimonio o descendencia» (el matrimonio reduce el plazo de residencia; la descendencia es opción u origen)."
+        "lead_value": "Extranjería · Nacionalidad española"
       }
     ],
     "also_title": "También",
@@ -169,7 +167,7 @@
           "id": "estandar",
           "name": "Plan Estándar",
           "amount": 200,
-          "featured": true,
+          "featured": false,
           "form_key": "estandar",
           "lead_value": "Programa Autogestiona · Plan Estándar"
         },
@@ -186,7 +184,6 @@
   ],
   "dubai": {
     "id": "dubai",
-    "_fuente": "docs/web-anterior.md §5 y §7 (web anterior). Página: /dubai/",
     "name": "Apertura de empresa en Dubái",
     "lead_value": "Apertura de empresa en Dubái",
     "structures": [

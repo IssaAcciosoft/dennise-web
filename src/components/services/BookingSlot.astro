@@ -189,14 +189,21 @@ const requestWa = waLink(WA_TEXT.reserva);
       host.after(script); // mismo sitio que en el código de AccioGest: justo después del contenedor
     };
     const wantsBooking = () => location.hash === '#reservar';
+    // Un script async insertado antes del evento «load» lo retrasa hasta que termina: si
+    // AccioGest tarda o no responde, la pestaña seguiría «cargando» (y todo lo que espera a
+    // «load», también). Las cargas automáticas esperan a «load»; los clics del usuario, no.
+    const injectAfterLoad = () => {
+      if (document.readyState === 'complete') inject();
+      else window.addEventListener('load', inject, { once: true });
+    };
 
-    if (wantsBooking()) inject();
+    if (wantsBooking()) injectAfterLoad();
     else if ('IntersectionObserver' in window) {
-      io = new IntersectionObserver((entries) => entries.some((en) => en.isIntersecting) && inject(), {
+      io = new IntersectionObserver((entries) => entries.some((en) => en.isIntersecting) && injectAfterLoad(), {
         rootMargin: '1200px 0px',
       });
       io.observe(host);
-    } else inject();
+    } else injectAfterLoad();
 
     window.addEventListener('hashchange', () => wantsBooking() && inject());
     document.addEventListener('click', (e) => {

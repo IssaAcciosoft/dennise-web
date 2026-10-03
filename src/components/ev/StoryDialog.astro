@@ -2,7 +2,9 @@
 /**
  * Diálogo «Cuéntame tu historia» (Empoderando Voces) → formulario «historia» de AccioGest
  * (docs/integracion-acciogest.md §4). Campos pedidos por la cliente (docs/contenido.md) +
- * Email (obligatorio, nunca se publica) y Teléfono.
+ * Email (obligatorio, nunca se publica) y Teléfono. «¿Cómo puedo contactarte?» ofrece los canales
+ * que pidió la cliente (email, teléfono/WhatsApp, Instagram); con Instagram aparece, y es
+ * obligatorio, «Usuario de Instagram».
  * Disparadores: <a data-story-open href="https://wa.me/…">: sin JavaScript abren WhatsApp.
  * /empoderando-voces/#cuentame abre el diálogo directamente.
  */
@@ -115,9 +117,21 @@ const p = 'sf';
         { value: 'Email', label: 'Email' },
         { value: 'Teléfono', label: 'Teléfono' },
         { value: 'WhatsApp', label: 'WhatsApp' },
+        { value: 'Instagram', label: 'Instagram' },
       ]}
       required
       msgRequired="Elige cómo prefieres que te contacte."
+    />
+    <Field
+      name="instagram"
+      id={`${p}-instagram`}
+      label="Usuario de Instagram"
+      autocomplete="off"
+      maxlength={60}
+      hint="Por ejemplo, @tuusuario."
+      showWhen="contacto=Instagram"
+      requiredWhen="contacto=Instagram"
+      msgRequiredWhen="Indica tu usuario de Instagram para que pueda contactarte por allí."
     />
     <p slot="note" class="form-note">Tu historia me llegará de forma privada y solo se compartirá si lo autorizas.</p>
   </LeadForm>

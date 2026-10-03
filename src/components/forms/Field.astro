@@ -28,6 +28,8 @@ interface Props {
   counter?: boolean;
   /** Obligatorio solo si otro campo tiene ciertos valores: «contacto=Teléfono|WhatsApp». */
   requiredWhen?: string;
+  /** Solo se muestra (y se valida y envía) si otro campo tiene ciertos valores: «contacto=Instagram». */
+  showWhen?: string;
   msgRequired?: string;
   msgRequiredWhen?: string;
   msgEmail?: string;
@@ -52,6 +54,7 @@ const {
   full = false,
   counter = false,
   requiredWhen,
+  showWhen,
   msgRequired,
   msgRequiredWhen,
   msgEmail,
@@ -77,10 +80,10 @@ const common = {
 };
 ---
 
-<div class:list={['field', { 'field--full': full }]}>
+<div class:list={['field', { 'field--full': full }]} data-show-when={showWhen} hidden={showWhen ? true : undefined}>
   <label for={id}>
     {label}
-    {required ? <span class="req" aria-hidden="true">*</span> : !requiredWhen && <span class="opt">(opcional)</span>}
+    {required || (requiredWhen && showWhen) ? <span class="req" aria-hidden="true">*</span> : !requiredWhen && <span class="opt">(opcional)</span>}
   </label>
   {
     type === 'textarea' ? (

@@ -1,6 +1,6 @@
 ---
 /**
- * Programa Autogestiona: trámites, planes, «¿Cómo funciona?» y «Todos los planes incluyen»
+ * Programa Autogestiona: trámites, planes y «Todos los planes incluyen»
  * (servicios.json). docs/integracion-acciogest.md §3:
  * - «Contratar Plan X» con el ID del plan configurado (PLANES en src/config/acciogest.ts) →
  *   página de pago de AccioGest {API}/form-builder/public/{FORM_ID}/page en pestaña nueva.
@@ -17,18 +17,11 @@ const planMessage = (name: string, amount: number) =>
   `Hola Denisse, me interesa el ${name} (${formatAmount(amount)} €, ${CATALOG.tax_label}) del ${program.name}. Mi trámite es: `;
 
 /*
- * «¿Cómo funciona?»: SOLO hechos conocidos (pago previo + lo que incluyen los planes, en el
- * orden lógico del trámite). Sin plazos.
- * PENDIENTE DE CONFIRMAR (cliente / AccioGest): el proceso exacto tras la compra (quién
- * contacta, cómo se agenda la asesoría inicial, cómo se envía la documentación).
+ * Sin «¿Cómo funciona?» ni plan destacado (featured: false en los tres): la cliente envió la
+ * misma lista para los tres planes y aún no ha confirmado qué los diferencia ni el proceso tras
+ * la compra (docs/contenido.md §7.1 y §7.3). Cuando lo confirme: «featured: true» en
+ * servicios.json vuelve a activar el estilo .plan-card--featured, y los pasos se pueden reponer.
  */
-const steps = [
-  'Eliges tu plan y realizas el pago de forma segura',
-  'Asesoría inicial con un experto en extranjería',
-  'Cumplimentación de los formularios',
-  'Presentación del expediente',
-  'Acceso a las notificaciones de extranjería y resolución de dudas sobre los requerimientos',
-];
 ---
 
 <div class="autogestiona" id="autogestiona">
@@ -87,20 +80,6 @@ const steps = [
     Pago seguro con tarjeta. Al contratar aceptas las{' '}
     <a href={url('/condiciones-contratacion/')}>condiciones de contratación</a>.
   </p>
-
-  <div class="plan-steps" data-reveal data-tour="como-funciona">
-    <h3 class="plan-steps-title">¿Cómo funciona?</h3>
-    <ol class="steps" role="list">
-      {
-        steps.map((step, i) => (
-          <li class="step">
-            <span class="step-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-            <span class="step-text">{step}</span>
-          </li>
-        ))
-      }
-    </ol>
-  </div>
 
   <div class="plan-includes" data-reveal data-tour="incluye">
     <h3 class="plan-includes-title">{program.includes_title}</h3>
@@ -213,7 +192,7 @@ const steps = [
   }
   /* Plan destacado más alto sin transform (v1: V5) */
   @media (min-width: 1024px) {
-    .plan-grid { padding-block: 1rem; }
+    .plan-grid:has(.plan-card--featured) { padding-block: 1rem; }
     .plan-card--featured { margin-block: -1rem; }
   }
 
@@ -227,71 +206,8 @@ const steps = [
     text-wrap: balance;
   }
 
-  .plan-steps {
-    margin-top: clamp(2rem, 4vw, 3rem);
-    padding: clamp(1.25rem, .75rem + 2vw, 2.5rem);
-    background: var(--c-white);
-    border: 1px solid rgba(110, 29, 122, .14);
-    border-radius: var(--radius-l);
-  }
-  .plan-steps-title {
-    margin-bottom: 1.5rem;
-    font-family: var(--ff-serif);
-    font-size: var(--fs-h4);
-    font-weight: 600;
-  }
-  .steps { display: grid; gap: 0; counter-reset: none; }
-  .step {
-    position: relative;
-    display: grid;
-    grid-template-columns: 2.75rem 1fr;
-    align-items: start;
-    align-content: start;
-    gap: 1rem;
-    padding-bottom: 1.4rem;
-  }
-  .step:last-child { padding-bottom: 0; }
-  /* Línea que une los pasos (vertical en móvil) */
-  .step:not(:last-child)::before {
-    content: "";
-    position: absolute;
-    left: calc(1.375rem - .5px);
-    top: 2.9rem;
-    bottom: .2rem;
-    width: 1px;
-    background: var(--c-line-strong);
-  }
-  .step-num {
-    display: grid;
-    place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    border-radius: 50%;
-    background: var(--c-lavender);
-    color: var(--c-plum);
-    font-family: var(--ff-serif);
-    font-size: 1.15rem;
-    font-weight: 600;
-    font-variant-numeric: lining-nums tabular-nums;
-  }
-  .step:first-child .step-num { background: var(--c-plum); color: #fff; }
-  .step-text { padding-top: .55rem; color: var(--c-ink); font-weight: 400; line-height: 1.45; text-wrap: pretty; }
-  @media (min-width: 1000px) {
-    .steps { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1.5rem; }
-    .step { grid-template-columns: 1fr; gap: .9rem; padding-bottom: 0; }
-    .step:not(:last-child)::before {
-      left: 3.5rem;
-      right: -1rem;
-      top: 1.375rem;
-      bottom: auto;
-      width: auto;
-      height: 1px;
-    }
-    .step-text { padding-top: 0; }
-  }
-
   .plan-includes {
-    margin-top: 1.5rem;
+    margin-top: clamp(2rem, 4vw, 3rem);
     padding: clamp(1.25rem, .75rem + 2vw, 2.5rem);
     background: rgba(255, 255, 255, .7);
     border: 1px solid rgba(110, 29, 122, .14);

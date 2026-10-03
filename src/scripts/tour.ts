@@ -7,7 +7,7 @@
  *
  * Recorrido (en el orden de la página, sin saltos atrás): servicios de extranjería en España →
  * asesorías (online / presencial) → orientación académica → Programa Autogestiona (trámites,
- * planes, «¿Cómo funciona?», «Todos los planes incluyen») → Reserva tu asesoría → preguntas
+ * planes, «Todos los planes incluyen») → Reserva tu asesoría → preguntas
  * frecuentes («¿Tienes dudas?», con el botón «Solicitar información»).
  * Textos: solo hechos de docs/contenido.md y de la propia página (precios desde
  * src/data/servicios.json). Sin plazos ni promesas.
@@ -42,7 +42,7 @@ const priceOf = (id: string, modality: string) =>
 const isNarrow = () => window.matchMedia('(max-width: 599.98px)').matches;
 
 /*
- * En móvil, los bloques altos (trámites, «¿Cómo funciona?», «Todos los planes incluyen») se
+ * En móvil, los bloques altos (trámites, «Todos los planes incluyen») se
  * señalan con un «proxy»: una caja invisible sobre su título y sus primeras filas (las que caben
  * con la tarjeta debajo), para que el bloque resaltado y la tarjeta quepan juntos en la
  * pantalla. Se retiran al cerrar la visita.
@@ -129,19 +129,17 @@ function buildSteps(): DriveStep[] {
       },
     },
     {
-      element: narrow ? '[data-tour="planes"] .plan-card--featured' : '[data-tour="planes"]',
+      // Móvil: una sola tarjeta (la destacada, si la cliente marca alguna; si no, la primera).
+      element: narrow
+        ? `[data-tour="planes"] > ${plans.some((p) => p.featured) ? '.plan-card--featured' : 'li:first-child'}`
+        : '[data-tour="planes"]',
       popover: {
         title: 'Planes',
         description: `${plansText.slice(0, -1).join(', ')} y ${plansText.at(-1)}, ${CATALOG.tax_label}. Pago seguro con tarjeta.`,
-      },
-    },
-    {
-      // Mismo orden que «¿Cómo funciona?» (Autogestiona.astro)
-      element: narrow ? proxyFor('[data-tour="como-funciona"]', '.step', 2) : '[data-tour="como-funciona"]',
-      popover: {
-        title: '¿Cómo funciona?',
-        description:
-          'Eliges tu plan y realizas el pago de forma segura. Después vienen la asesoría inicial con un experto en extranjería, la cumplimentación de los formularios y la presentación del expediente.',
+        // Escritorio: encima de las tarjetas (debajo no cabe y driver.js la pondría sobre el
+        // plan del centro, tapando su precio).
+        side: 'top',
+        align: 'center',
       },
     },
     {
@@ -181,6 +179,18 @@ function placeUnderHeader(el: Element | undefined): void {
   window.scrollTo({ top: Math.max(0, top), behavior: 'instant' });
 }
 
+/*
+ * driver.js marca el elemento resaltado como disparador de un diálogo (aria-haspopup,
+ * aria-expanded, aria-controls). En bloques estáticos (<div>, <dl>…) aria-expanded no está
+ * permitido (axe: aria-allowed-attr) y un lector lo anunciaría como desplegable: se retiran.
+ * Se llama al pintar la tarjeta y al terminar el resaltado (driver.js los pone entre medias).
+ */
+const DRIVER_ARIA = ['aria-haspopup', 'aria-expanded', 'aria-controls'] as const;
+function stripDriverAria(el: Element | undefined): void {
+  if (!el || el.matches('button, a[href], [role="button"]')) return;
+  DRIVER_ARIA.forEach((a) => el.removeAttribute(a));
+}
+
 let active: Driver | null = null;
 
 export function startTour(trigger: HTMLElement): void {
@@ -217,10 +227,25 @@ export function startTour(trigger: HTMLElement): void {
     smoothScroll: !reduced,
     duration: 300,
     onHighlightStarted: (el) => placeUnderHeader(el),
+    onHighlighted: (el) => {
+      stripDriverAria(el);
+      // Si hubo desplazamiento durante la transición, driver.js recoloca la tarjeta con el
+      // elemento del paso ANTERIOR (estado aún sin actualizar) y no vuelve a hacerlo al terminar:
+      // la tarjeta podía quedar sobre el bloque nuevo. refresh() (en el siguiente frame) la
+      // recoloca con el elemento y el lado del paso actual.
+      tour.refresh();
+    },
     onPopoverRender: (popover: PopoverDOM, { state }) => {
-      // driver.js crea <header>/<footer> sueltos en <body>: no son regiones de la página.
-      popover.title.setAttribute('role', 'heading');
-      popover.title.setAttribute('aria-level', '2');
+      stripDriverAria(state.activeElement);
+      // driver.js pinta el título en un <header id="driver-popover-title"> (nombre del diálogo
+      // por aria-labelledby). role="heading" no está permitido en <header>: dentro, un <h2> real.
+      const heading = document.createElement('h2');
+      heading.className = 'dg-tour-title-text';
+      heading.textContent = popover.title.textContent;
+      popover.title.replaceChildren(heading);
+      // Y el <header> suelto en <body> no debe ser un segundo «banner» de la página.
+      popover.title.setAttribute('role', 'none');
+      // <footer> suelto en <body>: no es una región de la página.
       popover.footer.setAttribute('role', 'group');
       popover.closeButton.setAttribute('aria-label', 'Cerrar la visita guiada');
       popover.closeButton.innerHTML =
