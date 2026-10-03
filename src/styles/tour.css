@@ -168,3 +168,7 @@ html[data-tour-active] .wa-float { visibility: hidden; }
     max-width: calc(100vw - 2rem);
   }
 }
+
+/* Móvil: mientras la página se desplaza al siguiente paso, la tarjeta y el recorte se apartan. */
+body.dg-tour-moving .driver-popover.dg-tour { opacity: 0; transition: opacity 120ms var(--ease-out); }
+body.dg-tour-moving .driver-overlay { opacity: .6; }

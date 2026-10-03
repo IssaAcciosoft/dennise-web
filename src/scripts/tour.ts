@@ -171,12 +171,42 @@ function buildSteps(): DriveStep[] {
     .map((s) => (narrow ? { ...s, popover: { ...s.popover, side: 'bottom' as const, align: 'start' as const } } : s));
 }
 
-/** Móvil: el elemento resaltado se coloca justo bajo la cabecera, y la tarjeta, debajo. */
+/** Móvil: posición de scroll que deja el elemento justo bajo la cabecera (la tarjeta va debajo). */
+function topUnderHeader(el: Element): number {
+  const header = document.querySelector('.site-header')?.getBoundingClientRect().height ?? 0;
+  return Math.max(0, Math.round(el.getBoundingClientRect().top + window.scrollY - header - 14));
+}
+
 function placeUnderHeader(el: Element | undefined): void {
   if (!el || !isNarrow()) return;
-  const header = document.querySelector('.site-header')?.getBoundingClientRect().height ?? 0;
-  const top = el.getBoundingClientRect().top + window.scrollY - header - 14;
-  window.scrollTo({ top: Math.max(0, top), behavior: 'instant' });
+  window.scrollTo({ top: topUnderHeader(el), behavior: 'instant' });
+}
+
+/**
+ * Móvil: antes de pasar de paso, desplaza la página con suavidad hasta el siguiente bloque
+ * (en vez de saltar de golpe) y resuelve al terminar. Con movimiento reducido, sin animación.
+ */
+function glideTo(selector: DriveStep['element'], reduced: boolean): Promise<void> {
+  const el = typeof selector === 'string' ? document.querySelector(selector) : null;
+  if (!el || !isNarrow()) return Promise.resolve();
+  const top = topUnderHeader(el);
+  if (Math.abs(window.scrollY - top) < 2) return Promise.resolve();
+  if (reduced) {
+    window.scrollTo({ top, behavior: 'instant' });
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      window.removeEventListener('scrollend', finish);
+      resolve();
+    };
+    window.addEventListener('scrollend', finish, { once: true });
+    window.setTimeout(finish, 1200); // navegadores sin «scrollend»
+    window.scrollTo({ top, behavior: 'smooth' });
+  });
 }
 
 /*
@@ -227,6 +257,25 @@ export function startTour(trigger: HTMLElement): void {
     smoothScroll: !reduced,
     duration: 300,
     onHighlightStarted: (el) => placeUnderHeader(el),
+    // Móvil: desplazamiento suave entre pasos; la tarjeta se oculta mientras la página se mueve.
+    onNextClick: (_el, _step, { driver: d }) => {
+      const i = d.getActiveIndex() ?? 0;
+      if (!isNarrow() || i >= steps.length - 1) return d.moveNext();
+      document.body.classList.add('dg-tour-moving');
+      glideTo(steps[i + 1].element, reduced).then(() => {
+        document.body.classList.remove('dg-tour-moving');
+        d.moveNext();
+      });
+    },
+    onPrevClick: (_el, _step, { driver: d }) => {
+      const i = d.getActiveIndex() ?? 0;
+      if (!isNarrow() || i <= 0) return d.movePrevious();
+      document.body.classList.add('dg-tour-moving');
+      glideTo(steps[i - 1].element, reduced).then(() => {
+        document.body.classList.remove('dg-tour-moving');
+        d.movePrevious();
+      });
+    },
     onHighlighted: (el) => {
       stripDriverAria(el);
       // Si hubo desplazamiento durante la transición, driver.js recoloca la tarjeta con el
@@ -273,6 +322,7 @@ export function startTour(trigger: HTMLElement): void {
       }, 0);
     },
     onDestroyed: () => {
+      document.body.classList.remove('dg-tour-moving');
       active = null;
       proxies.splice(0).forEach((el) => el.remove());
       document.documentElement.removeAttribute('data-tour-active');

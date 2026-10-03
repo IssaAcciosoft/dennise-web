@@ -29,7 +29,7 @@ const team: Member[] = [
     name: 'Denisse González',
     role: 'Directora ejecutiva',
     photo: denisse,
-    alt: 'Denisse González con blazer negro y los brazos cruzados',
+    alt: 'Retrato de Denisse González con blazer morado',
     bio: [
       'Denisse, fundadora y directora. Está especializada en Derecho Internacional. Le apasiona ofrecer soluciones legales claras y efectivas, y se involucra personalmente en la estrategia jurídica y el acompañamiento de cada cliente.',
     ],
@@ -48,7 +48,7 @@ const team: Member[] = [
     name: 'Stephanie González',
     role: 'Directora técnica',
     photo: stephanie,
-    alt: 'Stephanie González sonriendo, con blusa roja',
+    alt: 'Stephanie González con blusa roja junto a una estatua de la Justicia',
     bio: [
       'Stephanie, directora técnica del despacho. Supervisa la correcta aplicación de los criterios legales en cada caso y asegura que los procesos se realicen con precisión y profesionalismo. Su experiencia garantiza un servicio riguroso y de alta calidad para todos nuestros clientes.',
     ],
@@ -110,7 +110,7 @@ const team: Member[] = [
         team.map((m) => (
           <li class="member" data-reveal>
             <figure class="member-photo">
-              <Photo src={m.photo} alt={m.alt} widths={[280, 420, 560]} sizes="(min-width: 960px) 300px, (min-width: 600px) 220px, 132px" position={m.position} />
+              <Photo src={m.photo} alt={m.alt} widths={[160, 240, 320]} sizes="(min-width: 600px) 152px, 112px" position={m.position} />
             </figure>
             <div class="member-copy">
               <h3 class="member-name">{m.name}</h3>
@@ -187,7 +187,7 @@ const team: Member[] = [
       grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
       grid-template-areas: "head body" "values values";
     }
-    .firm-head { grid-area: head; position: sticky; top: calc(var(--header-h) + 2rem); align-self: start; }
+    .firm-head { grid-area: head; align-self: start; }
     .firm-body { grid-area: body; }
     .firm-values { grid-area: values; margin-top: clamp(1rem, 3vw, 2.5rem); }
     .values { grid-template-columns: repeat(5, minmax(0, 1fr)); column-gap: 1.75rem; border-top: 0; }
@@ -204,31 +204,30 @@ const team: Member[] = [
   /* ---------- Equipo ---------- */
   .team-head { max-width: 46rem; margin-bottom: clamp(2.5rem, 5vw, 3.5rem); }
   .team-head .section-title { margin-bottom: 1rem; }
-  .team-grid { display: grid; gap: 1.25rem; }
+  .team-grid { display: grid; gap: clamp(2rem, 4vw, 3rem) clamp(2rem, 5vw, 4.5rem); }
+  /* Retrato circular y pequeño (como en su web anterior): las fotos originales son de baja
+     resolución y así se ven nítidas. */
   .member {
     display: grid;
-    grid-template-columns: 132px minmax(0, 1fr);
-    gap: 1.25rem;
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 1.25rem 1.5rem;
     align-items: start;
-    align-content: start;
-    padding: 1.25rem;
-    background: var(--c-white);
-    border: 1px solid var(--c-line);
-    border-radius: var(--radius-l);
   }
   .member-photo {
     margin: 0;
-    aspect-ratio: 4 / 5;
-    border-radius: 12px;
+    aspect-ratio: 1;
+    border-radius: 50%;
     overflow: hidden;
     background: var(--c-lavender-200);
+    box-shadow: 0 0 0 1px var(--c-line), 0 0 0 6px var(--c-white), 0 0 0 7px var(--c-lavender-300);
   }
   .member-photo :global(picture),
   .member-photo :global(img) { width: 100%; height: 100%; }
   .member-photo :global(img) { object-fit: cover; }
+  .member-copy { padding-top: .35rem; }
   .member-name { font-family: var(--ff-serif); font-size: var(--fs-h4); font-weight: 600; line-height: 1.12; }
   .member-role {
-    margin-top: .35rem;
+    margin-top: .4rem;
     color: var(--c-plum);
     font-size: .74rem;
     font-weight: 600;
@@ -236,26 +235,13 @@ const team: Member[] = [
     line-height: 1.45;
     text-transform: uppercase;
   }
-  .member-bio { grid-column: 1 / -1; display: grid; gap: .75rem; color: var(--c-ink-soft); font-size: var(--fs-small); line-height: 1.65; text-wrap: pretty; }
-  .member-copy { display: contents; }
-  .member-copy > :is(.member-name, .member-role) { grid-column: 2; }
-  .member-name { grid-row: 1; align-self: end; }
-  .member-role { grid-row: 2; align-self: start; }
-  .member-photo { grid-row: 1 / span 2; }
-  .member-bio { margin-top: .25rem; }
+  .member-bio { display: grid; gap: .75rem; margin-top: 1rem; color: var(--c-ink-soft); font-size: var(--fs-small); line-height: 1.65; text-wrap: pretty; }
 
   @media (min-width: 600px) {
-    .member { grid-template-columns: 200px minmax(0, 1fr); gap: 1rem 2rem; padding: 1.5rem; }
-    .member-photo { grid-row: 1 / span 3; }
-    .member-bio { grid-column: 2; grid-row: 3; margin-top: .75rem; }
-    .member-name { align-self: start; }
+    .member { grid-template-columns: 152px minmax(0, 1fr); gap: 2rem; }
   }
-  @media (min-width: 960px) {
-    .team-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; }
-    .member { grid-template-columns: 1fr; grid-template-rows: auto; align-content: start; gap: 0; padding: 1rem 1rem 1.75rem; }
-    .member-copy { display: block; padding: 1.5rem .75rem 0; }
-    .member-photo { grid-row: auto; }
-    .member-bio { margin-top: 1rem; }
+  @media (min-width: 1024px) {
+    .team-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 
   .team-partner { margin-top: clamp(2.5rem, 5vw, 3.5rem); }
