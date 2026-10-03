@@ -1,6 +1,7 @@
 # Despliegue en Netlify (sitio estático de Astro).
 # En Netlify → Site configuration → Environment variables, define SITE_URL con el dominio final
 # (p. ej. https://www.dominio.es) para que canonical, Open Graph y sitemap usen URLs absolutas correctas.
+# Si no se define, se usa la URL que asigna Netlify (variables URL / DEPLOY_PRIME_URL).
 [build]
   command = "npm run build"
   publish = "dist"

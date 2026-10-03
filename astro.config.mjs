@@ -18,10 +18,18 @@ import { fileURLToPath } from 'node:url';
 export const SITE_URL_PLACEHOLDER = 'https://denissegonzalez.example';
 // En integración continua (CI=true: GitHub Actions, Netlify, Cloudflare Pages, Vercel…) el
 // dominio es obligatorio: nunca se publica una web con canonical/sitemap al marcador.
-if (process.env.CI && !process.env.SITE_URL) {
+// En Netlify, si no se ha definido SITE_URL, se usa la URL que Netlify asigna al sitio
+// (URL en producción; DEPLOY_PRIME_URL en vistas previas de ramas y pull requests).
+const NETLIFY_URL = process.env.NETLIFY
+  ? process.env.CONTEXT === 'production'
+    ? process.env.URL
+    : process.env.DEPLOY_PRIME_URL || process.env.URL
+  : undefined;
+const RESOLVED_SITE_URL = process.env.SITE_URL || NETLIFY_URL;
+if (process.env.CI && !RESOLVED_SITE_URL) {
   throw new Error('SITE_URL es obligatoria al publicar (dominio definitivo, p. ej. https://www.dominio.es).');
 }
-const SITE_URL = process.env.SITE_URL || SITE_URL_PLACEHOLDER;
+const SITE_URL = RESOLVED_SITE_URL || SITE_URL_PLACEHOLDER;
 const BASE_PATH = process.env.BASE_PATH || '/';
 
 // Páginas fuera del sitemap (también llevan <meta name="robots" content="noindex">).
