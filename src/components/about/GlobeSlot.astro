@@ -51,6 +51,10 @@ const caption = ['México', 'España', 'Nueva York'];
       class="globe-poster"
     />
     <div class="globe-gl" aria-hidden="true" data-globe-host></div>
+    <button type="button" class="globe-toggle" data-globe-toggle hidden aria-pressed="false" aria-label="Pausar el giro del globo">
+      <svg class="globe-toggle-pause" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+      <svg class="globe-toggle-play" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M8 5.5v13l11-6.5z"/></svg>
+    </button>
     <ul class="globe-labels" role="list" aria-hidden="true">
       {
         labels.map((l) => (
@@ -74,20 +78,19 @@ const caption = ['México', 'España', 'Nueva York'];
 </figure>
 
 <script>
-  // Globo WebGL: se descarga (cobe + montaje, ≈ 8 KB gzip) solo al acercarse a la pantalla y
-  // sin «reducir movimiento»; el contexto WebGL se crea en un momento ocioso.
+  // Globo WebGL: se descarga (cobe + montaje, ≈ 8 KB gzip) solo al acercarse a la pantalla; el
+  // contexto WebGL se crea en un momento ocioso. Con «reducir movimiento» también se monta
+  // (se puede arrastrar), pero sin vaivén automático.
   const slot = document.querySelector<HTMLElement>('[data-globe-slot]');
   const host = slot?.querySelector<HTMLElement>('[data-globe-host]');
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
-  if (slot && host && !reduce.matches && 'IntersectionObserver' in window) {
+  if (slot && host && 'IntersectionObserver' in window) {
     const io = new IntersectionObserver(
       (entries) => {
         if (!entries.some((e) => e.isIntersecting)) return;
         io.disconnect();
         import('./globe-mount').then(({ mountGlobe }) => {
-          const start = () => {
-            if (!reduce.matches) mountGlobe(host, slot);
-          };
+          const start = () => mountGlobe(host, slot, reduce.matches);
           if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(start, { timeout: 1200 });
           else window.setTimeout(start, 200);
         });
@@ -206,4 +209,28 @@ const caption = ['México', 'España', 'Nueva York'];
     text-transform: uppercase;
   }
   .globe-caption-sep { color: var(--c-plum); opacity: .6; }
+
+  .globe-toggle {
+    position: absolute;
+    right: 6%;
+    bottom: 6%;
+    z-index: 3;
+    display: inline-grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--c-lavender-300);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .85);
+    color: var(--c-plum-800);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 200ms var(--ease-out), transform 160ms var(--ease-out);
+  }
+  .globe-toggle[hidden] { display: none; }
+  [data-globe="live"] .globe-toggle { opacity: 1; }
+  .globe-toggle:active { transform: scale(.97); }
+  .globe-toggle:focus-visible { outline: 2px solid var(--c-plum); outline-offset: 3px; }
+  .globe-toggle[data-state="playing"] .globe-toggle-play,
+  .globe-toggle[data-state="paused"] .globe-toggle-pause { display: none; }
 </style>

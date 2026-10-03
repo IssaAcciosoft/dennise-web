@@ -21,8 +21,8 @@
  * tres lugares siempre a la vista. Arrastrar en horizontal lo gira (captura del puntero,
  * inercia con rozamiento); al soltar, tras una pausa, vuelve con suavidad a su vista.
  * En táctil, el gesto vertical sigue desplazando la página (touch-action: pan-y).
- * El vaivén automático se frena y se detiene a los 5 s sin interacción (WCAG 2.2.2); al
- * arrastrar vuelve a moverse.
+ * El vaivén automático es continuo y se puede pausar con el botón del globo (WCAG 2.2.2).
+ * Con «reducir movimiento» no hay vaivén ni inercia, pero se puede arrastrar.
  */
 import createGlobe from 'cobe';
 import { PLACES, VIEW, cobeOptions, project } from './globe-config';
@@ -30,8 +30,7 @@ import { PLACES, VIEW, cobeOptions, project } from './globe-config';
 const IDLE_FRAME_MS = 1000 / 30 - 2;
 const RETURN_AFTER_MS = 2200;
 const MAX_VELOCITY = 0.005; // rad/ms (un golpe rápido no lo hace girar sin control)
-const IDLE_SWAY_MS = 5000; // vaivén automático sin interacción antes de detenerse (WCAG 2.2.2)
-const SETTLE_MS = 1500; // tramo final en el que el vaivén se frena
+const SETTLE_MS = 1500; // al pausar, el vaivén se frena durante este tramo
 
 const wrapAngle = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
 const smoothstep = (a: number, b: number, x: number) => {
@@ -39,7 +38,12 @@ const smoothstep = (a: number, b: number, x: number) => {
   return t * t * (3 - 2 * t);
 };
 
-export function mountGlobe(host: HTMLElement, slot: HTMLElement | null): (() => void) | undefined {
+/**
+ * `reduced` («reducir movimiento», p. ej. Windows con «Mostrar animaciones» desactivado): el
+ * globo se monta igual y se puede arrastrar, pero sin vaivén automático ni inercia.
+ * Sin reducir: vaivén lento continuo, con botón de pausa (WCAG 2.2.2).
+ */
+export function mountGlobe(host: HTMLElement, slot: HTMLElement | null, reduced = false): (() => void) | undefined {
   const canvas = document.createElement('canvas');
   canvas.className = 'globe-canvas';
   host.append(canvas);
@@ -106,7 +110,8 @@ export function mountGlobe(host: HTMLElement, slot: HTMLElement | null): (() => 
   let pageVisible = document.visibilityState !== 'hidden';
   let shown = false;
   let frames = 0;
-  let swayed = 0; // ms de vaivén automático desde la última interacción
+  let autoplay = !reduced;
+  let swayed = autoplay ? 0 : SETTLE_MS; // ms frenando desde la pausa
   let settled = false;
 
   const draw = (now: number) => {
@@ -126,9 +131,9 @@ export function mountGlobe(host: HTMLElement, slot: HTMLElement | null): (() => 
     const dt = Math.min(now - last, 64);
     last = now;
     const active = dragging || Math.abs(velocity) > 1e-5 || Math.abs(offset) > 1e-4 || !shown;
-    // Vaivén: a velocidad 1 hasta acercarse a IDLE_SWAY_MS; luego se frena (smoothstep) hasta 0.
-    if (!active) swayed += dt;
-    const rate = 1 - smoothstep(IDLE_SWAY_MS - SETTLE_MS, IDLE_SWAY_MS, swayed);
+    // Vaivén continuo; en pausa se frena (smoothstep) hasta detenerse.
+    if (!autoplay) swayed += dt;
+    const rate = autoplay ? 1 : 1 - smoothstep(0, SETTLE_MS, swayed);
     clock += dt * rate;
     if (!active && rate <= 0) {
       draw(now);
@@ -198,8 +203,7 @@ export function mountGlobe(host: HTMLElement, slot: HTMLElement | null): (() => 
     velocity = 0;
     canvas.setPointerCapture(e.pointerId);
     slot?.setAttribute('data-dragging', '');
-    // La interacción vuelve a poner en marcha el bucle (y el vaivén, otros 5 s como mucho).
-    swayed = 0;
+    // La interacción vuelve a poner en marcha el bucle (el vaivén solo si no está en pausa).
     if (settled) {
       settled = false;
       sync();
@@ -220,9 +224,34 @@ export function mountGlobe(host: HTMLElement, slot: HTMLElement | null): (() => 
     pointerId = -1;
     if (e.timeStamp - lastMove > 80) velocity = 0; // se detuvo antes de soltar: sin inercia
     lastInteraction = performance.now();
-    swayed = 0;
+    if (reduced) velocity = 0; // sin inercia con «reducir movimiento»
     slot?.removeAttribute('data-dragging');
   };
+  // Botón de pausa / reanudar del vaivén (oculto con «reducir movimiento»).
+  const toggle = slot?.querySelector<HTMLButtonElement>('[data-globe-toggle]') ?? null;
+  const paint = () => {
+    if (!toggle) return;
+    toggle.setAttribute('aria-pressed', String(!autoplay));
+    toggle.dataset.state = autoplay ? 'playing' : 'paused';
+    const label = autoplay ? 'Pausar el giro del globo' : 'Reanudar el giro del globo';
+    toggle.setAttribute('aria-label', label);
+    toggle.title = label;
+  };
+  const onToggle = () => {
+    autoplay = !autoplay;
+    swayed = 0;
+    if (settled) {
+      settled = false;
+      sync();
+    }
+    paint();
+  };
+  if (toggle && !reduced) {
+    toggle.hidden = false;
+    toggle.addEventListener('click', onToggle);
+    paint();
+  }
+
   canvas.addEventListener('pointerdown', onDown);
   canvas.addEventListener('pointermove', onMove);
   canvas.addEventListener('pointerup', onUp);
@@ -246,6 +275,8 @@ export function mountGlobe(host: HTMLElement, slot: HTMLElement | null): (() => 
     io.disconnect();
     ro.disconnect();
     document.removeEventListener('visibilitychange', onVisibility);
+    toggle?.removeEventListener('click', onToggle);
+    if (toggle) toggle.hidden = true;
     canvas.removeEventListener('webglcontextlost', onLost);
     slot?.removeAttribute('data-globe');
     slot?.removeAttribute('data-dragging');
