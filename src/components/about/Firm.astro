@@ -27,8 +27,8 @@ const values = [
 ];
 
 // «Nuestro equipo»: textos y cargos nuevos, tal cual (docs/cambios-2026-10.md §3; sustituyen a
-// los de la web antigua). Everardo Corona NO aparece como cofundador de nada. Mishell A. González
-// no tiene foto: ficha con sus iniciales en el mismo círculo que los retratos.
+// los de la web antigua). Everardo Corona NO aparece como cofundador de nada.
+// (Ficha sin foto: iniciales en el mismo círculo que los retratos, si algún miembro no tiene foto.)
 type Member = {
   name: string;
   role: string;
@@ -68,15 +68,6 @@ const team: Member[] = [
     bio: [
       'Stephanie González es directora técnica de DG, donde supervisa la correcta aplicación de criterios, procedimientos y estándares de calidad, procurando que cada asunto sea gestionado con rigor, precisión y profesionalismo.',
       'Asimismo, es cofundadora de Empoderando Voces, participando en el desarrollo y ejecución de sus proyectos. Su perfil combina capacidad técnica, organización y compromiso con la excelencia, contribuyendo al fortalecimiento de la firma y de las iniciativas de impacto social.',
-    ],
-  },
-  {
-    name: 'Mishell A. González',
-    role: 'Cofundadora de Empoderando Voces · Fundadora de Bread & CommUnion',
-    initials: 'MG',
-    bio: [
-      'Mishell A. González es cofundadora de Empoderando Voces y fundadora de Bread & CommUnion, con sede en Estados Unidos y vínculos de colaboración a nivel global. Su trabajo se centra en la afirmación de la dignidad, el fortalecimiento comunitario y la defensa de nuestra humanidad compartida.',
-      'Su experiencia entre distintas culturas y comunidades ha fortalecido su compromiso con crear espacios donde cada persona sea vista, escuchada y acogida. Su visión contribuye al desarrollo de iniciativas que promueven la dignidad, la pertenencia y la transformación comunitaria.',
     ],
   },
 ];
@@ -259,7 +250,7 @@ const team: Member[] = [
   .member-photo :global(picture),
   .member-photo :global(img) { width: 100%; height: 100%; }
   .member-photo :global(img) { object-fit: cover; }
-  /* Sin foto (Mishell): sus iniciales en serif sobre lavanda, mismo círculo y mismo anillo. */
+  /* Sin foto: sus iniciales en serif sobre lavanda, mismo círculo y mismo anillo. */
   .member-photo--initials {
     display: grid;
     place-items: center;

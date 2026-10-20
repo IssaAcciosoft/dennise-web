@@ -99,18 +99,7 @@ Asimismo, es cofundadora de Empoderando Voces, participando en el desarrollo y e
 proyectos. Su perfil combina capacidad técnica, organización y compromiso con la excelencia,
 contribuyendo al fortalecimiento de la firma y de las iniciativas de impacto social.
 
-**MISHELL A. GONZÁLEZ** — COFUNDADORA DE EMPODERANDO VOCES · FUNDADORA DE BREAD & COMMUNION
-
-Mishell A. González es cofundadora de Empoderando Voces y fundadora de Bread & CommUnion, con sede
-en Estados Unidos y vínculos de colaboración a nivel global. Su trabajo se centra en la afirmación
-de la dignidad, el fortalecimiento comunitario y la defensa de nuestra humanidad compartida.
-
-Su experiencia entre distintas culturas y comunidades ha fortalecido su compromiso con crear
-espacios donde cada persona sea vista, escuchada y acogida. Su visión contribuye al desarrollo de
-iniciativas que promueven la dignidad, la pertenencia y la transformación comunitaria.
-
-(Mishell: **sin foto**. Usar una ficha sin retrato, p. ej. con sus iniciales o el logo secundario
-de Empoderando Voces, coherente con las demás.)
+(Mishell A. González: la cliente pidió el 20/10 quitarla de toda la web.)
 
 Fotos: Denisse → una de las fotos nuevas del despacho (`despacho-banderas-circular.webp` encaja con
 retratos circulares); Everardo y Stephanie → las que ya están en la web.
@@ -127,9 +116,9 @@ retratos circulares); Everardo y Stephanie → las que ya están en la web.
   Europa, África y Medio Oriente. Periodista durante 20 años en México, escritor galardonado con el
   Premio de Novela de BCS 2026. Actualmente colabora en la vertical de commodities para grupos
   empresariales de México, USA y España."
-- **"Bienvenido / Welcome!"** (`partner-everardo-bienvenido-welcome.png`): es de Everardo Corona;
+- **"Bienvenido / Welcome!"** (`partner-everardo-bienvenido-welcome.png`): es de Ariel Noriega;
   va en Partners como logo. No tenemos su nombre ni descripción: mostrar el logo con el pie
-  "Proyecto de Everardo Corona" y comentario PENDIENTE para el nombre y la descripción.
+  "Proyecto de Ariel Noriega" y comentario PENDIENTE para el nombre y la descripción.
 
 Ubicación: en `/conoceme/` tras "Nuestro equipo" (sustituye el bloque actual "Partner en Dubái"),
 y Poplavsky sigue también en la página de Apertura de empresas (parte de Dubái).
