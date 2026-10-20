@@ -22,35 +22,48 @@ export type Plan = {
   featured: boolean;
   form_key: string;
   lead_value: string;
+  /** ids de `Program.features` que incluye el plan (docs/cambios-2026-10.md §5). */
+  includes: string[];
 };
+export type Feature = { id: string; label: string };
 export type Program = {
   id: string;
   name: string;
+  /** Lema de sus piezas gráficas («Gestiona tu propio trámite de extranjería»). */
+  tagline: string;
   procedures_title: string;
   procedures: string[];
-  includes_title: string;
-  includes: string[];
+  features_title: string;
+  /** Todo lo que puede incluir un plan, en orden (de Básico a Premium). */
+  features: Feature[];
   plans: Plan[];
 };
 
-/** Servicios de extranjería en España (sin precio publicado: se solicitan por el formulario). */
-export type ImmigrationService = {
+/**
+ * Servicio sin precio publicado (se solicita por el formulario). `pending: true` → texto
+ * neutro provisional (PENDIENTE: la cliente aún no ha enviado su descripción).
+ */
+export type CatalogService = {
   id: string;
   name: string;
   description: string;
   lead_value: string;
+  pending?: boolean;
 };
+export type ImmigrationService = CatalogService;
 export type Immigration = {
   id: string;
   eyebrow: string;
   title: string;
   intro: string[];
   services: ImmigrationService[];
-  also_title: string;
-  /** «Nómadas digitales · Emprendedores · Residencias» (web anterior). Con lead_value → opción del formulario. */
-  also: { name: string; lead_value?: string }[];
 };
-/** Apertura de empresas en Dubái (/dubai/). */
+/** Gestión administrativa y homologación de títulos (docs/cambios-2026-10.md §2.4 y §2.12). */
+export type FirmServices = { id: string; eyebrow: string; title: string; services: CatalogService[] };
+/** Apertura de empresas en España, México y Dubái (/apertura-de-empresas/). */
+export type Country = { id: string; name: string; lead_value: string };
+export type Companies = { id: string; name: string; path: string; countries: Country[] };
+/** Dubái (parte de /apertura-de-empresas/). */
 export type Dubai = {
   id: string;
   name: string;
@@ -64,43 +77,57 @@ export const CATALOG = catalog as {
   tax_included: boolean;
   tax_label: string;
   immigration: Immigration;
+  firm_services: FirmServices;
   consultations: Consultation[];
   programs: Program[];
+  companies: Companies;
   dubai: Dubai;
 };
 
 export const consultations: Consultation[] = CATALOG.consultations;
-export const autogestiona: Program = CATALOG.programs.find((p) => p.id === 'autogestiona') ?? CATALOG.programs[0];
+/** Autogestión DG (antes «Programa Autogestiona»): página aparte, /autogestion-dg/. */
+export const autogestion: Program = CATALOG.programs.find((p) => p.id === 'autogestion-dg') ?? CATALOG.programs[0];
 export const immigration: Immigration = CATALOG.immigration;
+export const firmServices: FirmServices = CATALOG.firm_services;
+export const companies: Companies = CATALOG.companies;
 export const dubai: Dubai = CATALOG.dubai;
+
+export const AUTOGESTION_PATH = '/autogestion-dg/';
+export const COMPANIES_PATH = companies.path;
+
+/** Etiquetas de lo que incluye un plan (en el orden de `features`). */
+export const planIncludes = (plan: Plan): string[] =>
+  autogestion.features.filter((f) => plan.includes.includes(f.id)).map((f) => f.label);
 
 /** Valor «Otro» del selector de servicio (formulario «servicio» de AccioGest). */
 export const OTHER_SERVICE = 'Otro trámite / no lo sé';
 
+type Option = { value: string; label?: string };
+type Group = { label: string; options: Option[] };
+
 /**
  * Opciones del selector «Servicio» (ServiceRequestDialog): lead_value de todo el catálogo,
  * agrupadas. El texto visible puede ser más corto que el valor que recibe AccioGest.
+ * Los planes de Autogestión DG solo se ofrecen en su página (`withPlans`): fuera de ella no se
+ * promociona (docs/cambios-2026-10.md §2.8).
  */
-export const serviceOptions = [
-  {
-    label: immigration.title,
-    options: [
-      ...immigration.services.map((s) => ({ value: s.lead_value, label: s.name })),
-      ...immigration.also.flatMap((a) => (a.lead_value ? [{ value: a.lead_value, label: a.name }] : [])),
-    ],
-  },
-  { label: 'Asesorías', options: consultations.map((c) => ({ value: c.lead_value })) },
-  { label: autogestiona.name, options: autogestiona.plans.map((p) => ({ value: p.lead_value })) },
-  { label: 'Empresas en Dubái', options: [{ value: dubai.lead_value }] },
-  { value: OTHER_SERVICE },
-];
+export function serviceOptions({ withPlans = false } = {}): (Group | Option)[] {
+  return [
+    { label: immigration.title, options: immigration.services.map((s) => ({ value: s.lead_value, label: s.name })) },
+    { label: firmServices.title, options: firmServices.services.map((s) => ({ value: s.lead_value })) },
+    { label: 'Asesorías', options: consultations.map((c) => ({ value: c.lead_value })) },
+    { label: companies.name, options: companies.countries.map((c) => ({ value: c.lead_value })) },
+    ...(withPlans ? [{ label: autogestion.name, options: autogestion.plans.map((p) => ({ value: p.lead_value })) }] : []),
+    { value: OTHER_SERVICE },
+  ];
+}
 
 const nf = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 2 });
 export const formatAmount = (amount: number) => nf.format(amount);
 
 export const allAmounts = [
   ...consultations.flatMap((c) => c.prices.map((p) => p.amount)),
-  ...autogestiona.plans.map((p) => p.amount),
+  ...autogestion.plans.map((p) => p.amount),
 ];
 export const minAmount = Math.min(...allAmounts);
 export const maxAmount = Math.max(...allAmounts);

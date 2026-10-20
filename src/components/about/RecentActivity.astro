@@ -5,11 +5,16 @@
  * 30/09/2026): recorte de _originales/redes/franchise-innovation-summit-photocall-2026-09-30.jpg
  * (x 200–1400, y 280–1100 → 1200×820, sin techo ni tarima); object-position la centra a ella
  * con el logotipo del photocall encima.
+ * Foto 2 (la primera, el acto más reciente): EMLHIS Impulsa Madrid (19/10/2026), Denisse en el
+ * escenario (docs/cambios-2026-10.md §6; scripts/prepare-recursos-2026-10.mjs).
+ * Móvil y tableta: las dos fotos lado a lado (3:4). Escritorio: una sobre otra en la columna
+ * izquierda (4:5 y 4:3), a la altura de la agenda.
  */
 import Photo from '../ui/Photo.astro';
 import Icon from '../ui/Icon.astro';
 import { AGENDA_2026, CAMPAIGNS_2026 } from '~/data/actividad';
 import fis from '~/assets/img/franchise-innovation-summit.jpg';
+import emlhis from '~/assets/img/emlhis-2026-denisse.jpg';
 ---
 
 <section class="section section--lavender activity" id="actividad" aria-labelledby="activity-title">
@@ -19,18 +24,32 @@ import fis from '~/assets/img/franchise-innovation-summit.jpg';
       <h2 class="section-title activity-title" id="activity-title" data-reveal>Agenda 2026</h2>
     </div>
 
-    <figure class="activity-photo" data-reveal="photo">
-      <div class="activity-frame">
-        <Photo
-          src={fis}
-          alt="Denisse González, con traje burdeos y acreditación, en el escenario ante el photocall del Franchise Innovation Summit"
-          widths={[400, 600, 800, 1200]}
-          sizes="(min-width: 960px) 30rem, calc(100vw - 2rem)"
-          position="48% 50%"
-        />
-      </div>
-      <figcaption class="activity-caption">Franchise Innovation Summit · Madrid, 30 de septiembre de 2026</figcaption>
-    </figure>
+    <div class="activity-photos">
+      <figure class="activity-photo activity-photo--main" data-reveal="photo">
+        <div class="activity-frame">
+          <Photo
+            src={emlhis}
+            alt="Denisse González, con chaqueta burdeos y falda larga negra, en el escenario del 6.º Encuentro de Mujeres Líderes Hispanas, ante la pantalla del evento"
+            widths={[240, 360, 480, 720, 960]}
+            sizes="(min-width: 1280px) 30rem, (min-width: 960px) 36vw, calc(50vw - 1.5rem)"
+            position="50% 38%"
+          />
+        </div>
+        <figcaption class="activity-caption">EMLHIS Impulsa Madrid · 19 de octubre de 2026</figcaption>
+      </figure>
+      <figure class="activity-photo activity-photo--second" data-reveal="photo">
+        <div class="activity-frame">
+          <Photo
+            src={fis}
+            alt="Denisse González, con traje burdeos y acreditación, en el escenario ante el photocall del Franchise Innovation Summit"
+            widths={[240, 360, 480, 720, 960]}
+            sizes="(min-width: 1280px) 30rem, (min-width: 960px) 36vw, calc(50vw - 1.5rem)"
+            position="48% 50%"
+          />
+        </div>
+        <figcaption class="activity-caption">Franchise Innovation Summit · Madrid, 30 de septiembre de 2026</figcaption>
+      </figure>
+    </div>
 
     <div class="activity-body">
       <ol class="agenda" role="list" aria-label="Agenda 2026">
@@ -74,9 +93,16 @@ import fis from '~/assets/img/franchise-innovation-summit.jpg';
   .activity-grid { display: grid; gap: 2rem; }
   .activity-head .section-title { margin-bottom: 0; }
 
+  .activity-photos {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+    min-width: 0;
+  }
   .activity-photo { position: relative; margin: 0; min-width: 0; }
   .activity-frame {
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 3 / 4;
     overflow: hidden;
     border-radius: var(--radius-s);
     background: var(--c-lavender-200);
@@ -172,7 +198,7 @@ import fis from '~/assets/img/franchise-innovation-summit.jpg';
   .campaigns-text strong { color: var(--c-ink); font-weight: 600; }
 
   @media (min-width: 600px) {
-    .activity-frame { aspect-ratio: 4 / 3; }
+    .activity-photos { gap: 1.5rem; }
     .campaigns-list li { grid-template-columns: 4.5rem minmax(0, 1fr); }
   }
   @media (min-width: 960px) {
@@ -183,8 +209,9 @@ import fis from '~/assets/img/franchise-innovation-summit.jpg';
       row-gap: 2.5rem;
     }
     .activity-head { grid-column: 2; grid-row: 1; }
-    .activity-photo { grid-column: 1; grid-row: 1 / span 2; align-self: start; position: sticky; top: calc(var(--header-h) + 1.5rem); }
-    .activity-frame { aspect-ratio: 4 / 5; }
+    .activity-photos { grid-column: 1; grid-row: 1 / span 2; align-self: start; align-content: start; grid-template-columns: 1fr; gap: 2.25rem; }
+    .activity-photo--main .activity-frame { aspect-ratio: 4 / 5; }
+    .activity-photo--second .activity-frame { aspect-ratio: 4 / 3; }
     .activity-body { grid-column: 2; grid-row: 2; }
   }
 </style>

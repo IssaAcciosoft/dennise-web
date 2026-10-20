@@ -2,8 +2,8 @@
  * Preguntas frecuentes de la web anterior (docs/web-anterior.md §5), tal cual.
  * Se muestran con <details>/<summary> (components/ui/Faq.astro) y se publican también como
  * FAQPage en JSON-LD (mismo texto: lo exige schema.org / Google).
- * - /servicios/ → preguntas de España (+ enlace a /dubai/ para la de Dubái).
- * - /dubai/     → pregunta de Dubái.
+ * - /servicios/             → preguntas de España (+ enlace a /apertura-de-empresas/ para la de Dubái).
+ * - /apertura-de-empresas/ → pregunta de Dubái.
  */
 export type FaqItem = { id: string; question: string; answer: string };
 

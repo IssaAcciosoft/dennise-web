@@ -1,0 +1,182 @@
+---
+/**
+ * /autogestion-dg/ — «Autogestión DG» (antes «Programa Autogestiona» en /servicios/).
+ * Página aparte y DISCRETA (docs/cambios-2026-10.md §2.8 y §5): no está en el menú principal
+ * ni se promociona en Inicio; se llega desde un enlace sobrio en /servicios/ y otro en el pie.
+ * - Vídeo de Denisse explicando Autogestión DG (public/video/, comprimido con ffmpeg desde
+ *   _originales/recursos-2026-10/video-autogestion-dg.mp4): póster (fotograma 0:39,6),
+ *   preload="none" (no se descarga nada hasta pulsar play), controles nativos, sin autoplay.
+ *   Lleva los subtítulos incrustados en la imagen (de la propia pieza); no hay pista de texto.
+ *   PENDIENTE: transcripción o subtítulos (.vtt) si la cliente los facilita.
+ * - Trámites, planes (incluye / no incluye), botones de AccioGest y aviso de condiciones:
+ *   components/services/AutogestionPlans.astro.
+ * El H1 es el LCP: no se oculta ni se anima.
+ */
+import { getImage } from 'astro:assets';
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import Icon from '~/components/ui/Icon.astro';
+import AutogestionPlans from '~/components/services/AutogestionPlans.astro';
+import ServiceRequestDialog from '~/components/services/ServiceRequestDialog.astro';
+import { autogestion, formatAmount, CATALOG } from '~/lib/services';
+import { WA_TEXT, waLink } from '~/data/site';
+import { url } from '~/lib/url';
+import posterSrc from '~/assets/img/autogestion-dg-poster.png';
+
+const poster = await getImage({ src: posterSrc, format: 'webp', width: 576, quality: 72 });
+// H.264 406×720, CRF 29, AAC 96 kbps, +faststart: 9,8 MB (original 24 MB). Se probó WebM
+// (VP9, CRF 38): 11,2 MB, más pesado con la misma calidad, así que solo va el MP4.
+const VIDEO = {
+  mp4: url('/video/autogestion-dg.mp4'),
+  width: 406,
+  height: 720,
+  duration: '4 min 29 s',
+};
+const prices = autogestion.plans.map((p) => `${formatAmount(p.amount)} €`);
+---
+
+<BaseLayout
+  title="Autogestión DG · DG Gestores y Abogados"
+  description={`${autogestion.tagline}: formularios, presentación del expediente y acceso a las notificaciones, con asesoría inicial y resolución de dudas según el plan. Planes de ${prices.join(', ').replace(/, ([^,]*)$/, ' y $1')} (${CATALOG.tax_label}).`}
+>
+  <section class="ag-hero" aria-labelledby="ag-title">
+    <div class="container ag-hero-grid">
+      <div class="ag-hero-copy">
+        <p class="eyebrow">DG Gestores y Abogados</p>
+        <h1 class="page-title ag-title" id="ag-title">{autogestion.name}</h1>
+        <p class="lead ag-lead">{autogestion.tagline}.</p>
+        <p class="ag-intro">
+          Elige el plan según la ayuda que necesites: desde los formularios necesarios y la presentación del expediente hasta la cumplimentación de los formularios y la resolución de dudas sobre los requerimientos.
+        </p>
+        <div class="btn-row ag-actions">
+          <a class="btn btn--primary" href="#planes">
+            <span>Ver planes y precios</span>
+            <Icon name="arrow" />
+          </a>
+          <a class="btn btn--ghost" href={waLink(WA_TEXT.autogestionDudas)} target="_blank" rel="noopener">
+            <Icon name="whatsapp" />
+            <span>Consultar por WhatsApp</span>
+          </a>
+        </div>
+        <p class="ag-back">
+          ¿Prefieres que el despacho se encargue de todo? <a href={url('/servicios/')}>Ver servicios</a>
+        </p>
+      </div>
+
+      <figure class="ag-video" aria-labelledby="ag-video-caption">
+        <div class="ag-video-frame">
+          <video
+            controls
+            preload="none"
+            playsinline
+            poster={poster.src}
+            width={VIDEO.width}
+            height={VIDEO.height}
+            title="Vídeo: Denisse González explica qué es Autogestión DG"
+            aria-label="Vídeo: Denisse González explica qué es Autogestión DG"
+            aria-describedby="ag-video-summary"
+          >
+            <source src={VIDEO.mp4} type="video/mp4" />
+            <a href={VIDEO.mp4}>Descargar el vídeo (MP4)</a>
+          </video>
+        </div>
+        <figcaption class="ag-video-caption" id="ag-video-caption">
+          <span class="ag-video-title">Denisse explica qué es {autogestion.name}</span>
+          <span class="ag-video-meta">Vídeo · {VIDEO.duration} · con sonido y subtítulos en la imagen</span>
+          <span class="ag-video-summary" id="ag-video-summary">
+            En este vídeo, Denisse González presenta {autogestion.name}, la opción para gestionar tu propio trámite de extranjería con el apoyo del despacho. Debajo tienes por escrito los trámites disponibles y lo que incluye cada plan.
+          </span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <AutogestionPlans />
+
+  <ServiceRequestDialog
+    slot="after"
+    kicker={autogestion.name}
+    waText={WA_TEXT.autogestionDudas}
+    withPlans
+    messageHint="Por ejemplo, el trámite que quieres gestionar o tus dudas sobre los planes."
+  />
+</BaseLayout>
+
+<script>
+  // Foco de luz en las tarjetas de los planes (solo ratón; global.css §6).
+  import { initSpotlight } from '~/scripts/spotlight';
+  initSpotlight();
+</script>
+
+<style>
+  .ag-hero {
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem) clamp(3rem, 2rem + 4vw, 5.5rem);
+    background:
+      radial-gradient(60rem 40rem at 100% 0%, rgba(232, 221, 236, .85), transparent 62%),
+      var(--c-ivory);
+  }
+  .ag-hero-grid { display: grid; gap: clamp(2.5rem, 5vw, 4rem); align-items: center; }
+  .ag-title { margin-bottom: 1.25rem; }
+  .ag-lead { max-width: 30rem; }
+  .ag-intro { max-width: 34em; margin-top: 1rem; color: var(--c-ink-soft); text-wrap: pretty; }
+  .ag-actions { margin-top: 2rem; }
+  .ag-back { margin-top: 1.5rem; color: var(--c-muted); font-size: var(--fs-small); }
+  .ag-back a {
+    display: inline-block;
+    padding-block: .35rem;
+    color: var(--c-plum);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--c-line-strong);
+    text-underline-offset: .2em;
+  }
+  @media (hover: hover) {
+    .ag-back a:hover { text-decoration-color: currentColor; }
+  }
+  @media (max-width: 479.98px) {
+    .ag-actions .btn { width: 100%; }
+  }
+
+  .ag-video {
+    display: grid;
+    gap: 1.1rem;
+    width: min(100%, 320px);
+    justify-self: center;
+  }
+  .ag-video-frame {
+    position: relative;
+    isolation: isolate;
+  }
+  .ag-video-frame::before {
+    content: "";
+    position: absolute;
+    inset: 1.5rem -1rem -1rem 1.5rem;
+    background: var(--c-lavender-200);
+    border-radius: var(--radius-l);
+    z-index: -1;
+  }
+  .ag-video video {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 9 / 16;
+    object-fit: cover;
+    background: var(--c-plum-900);
+    border-radius: var(--radius-l);
+    box-shadow: var(--shadow);
+  }
+  .ag-video-caption { display: grid; gap: .3rem; padding-top: .5rem; }
+  .ag-video-title { font-family: var(--ff-serif); font-size: 1.3rem; font-weight: 600; line-height: 1.2; color: var(--c-ink); }
+  .ag-video-meta {
+    color: var(--c-plum);
+    font-size: .74rem;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+  .ag-video-summary { margin-top: .35rem; color: var(--c-ink-soft); font-size: var(--fs-small); line-height: 1.6; text-wrap: pretty; }
+
+  @media (min-width: 900px) {
+    .ag-hero-grid { grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr); }
+    .ag-video { width: 100%; max-width: 340px; justify-self: end; margin-right: 1rem; }
+  }
+</style>

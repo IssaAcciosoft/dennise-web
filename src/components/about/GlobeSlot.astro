@@ -1,7 +1,7 @@
 ---
 /**
  * ============================================================================
- *  GLOBO 3D (México · España · Nueva York) — Conóceme, tras «Mi trayectoria»
+ *  GLOBO 3D (México · España) — Conóceme, tras «Mi trayectoria»
  * ============================================================================
  *  Capas, de abajo arriba, en una caja cuadrada reservada (aspect-ratio → sin CLS):
  *  1. Póster estático: el MISMO globo renderizado con cobe y la misma vista
@@ -11,10 +11,12 @@
  *     abajo lo carga con import() cuando la caja se acerca a la pantalla (240 px), solo sin
  *     «reducir movimiento», y lo monta en un momento ocioso. Se funde sobre el póster cuando
  *     tiene su primer fotograma completo (data-globe="live").
- *  3. Etiquetas HTML de los tres lugares (posición inicial calculada aquí con la misma
+ *  3. Etiquetas HTML de los dos lugares (posición inicial calculada aquí con la misma
  *     proyección; el globo las desplaza con transform mientras gira).
- *  Accesibilidad: la caja es role="img" con texto alternativo; lienzo y etiquetas son
- *  decorativos (aria-hidden). Pie visible: «México · España · Nueva York».
+ *  Accesibilidad: el dibujo (.globe-art) es role="img" con texto alternativo; el botón de pausa
+ *  queda fuera de él; lienzo y etiquetas son
+ *  decorativos (aria-hidden). Pie visible: «México · España» (sin Nueva York:
+ *  docs/cambios-2026-10.md §2.5).
  * ============================================================================
  */
 import { Picture } from 'astro:assets';
@@ -30,40 +32,44 @@ const labels = PLACES.map((place) => {
   const q = project(place.location, VIEW.phi, VIEW.theta);
   return { ...place, x: (q.x * 100).toFixed(2), y: (q.y * 100).toFixed(2) };
 });
-// Pie (docs/contenido.md): México · España · Nueva York
-const caption = ['México', 'España', 'Nueva York'];
+// Pie: México · España (docs/cambios-2026-10.md §2.5)
+const caption = PLACES.map((p) => p.label);
 ---
 
 <figure class:list={['globe-slot', className]} data-globe-slot>
-  <div
-    class="globe-stage"
-    role="img"
-    aria-label="Globo terráqueo con tres puntos marcados, México, España y Nueva York, unidos por arcos."
-  >
-    <Picture
-      src={poster}
-      alt=""
-      widths={[400, 560, 720, 960]}
-      sizes="(min-width: 540px) 480px, calc(100vw - 2rem)"
-      formats={['avif', 'webp']}
-      loading="lazy"
-      decoding="async"
-      class="globe-poster"
-    />
-    <div class="globe-gl" aria-hidden="true" data-globe-host></div>
+  <div class="globe-stage">
+    {/* role="img" solo en el dibujo: el botón de pausa queda fuera (un role="img" no puede tener
+        descendientes interactivos). */}
+    <div
+      class="globe-art"
+      role="img"
+      aria-label="Globo terráqueo con dos puntos marcados, México y España, unidos por un arco."
+    >
+      <Picture
+        src={poster}
+        alt=""
+        widths={[400, 560, 720, 960]}
+        sizes="(min-width: 540px) 480px, calc(100vw - 2rem)"
+        formats={['avif', 'webp']}
+        loading="lazy"
+        decoding="async"
+        class="globe-poster"
+      />
+      <div class="globe-gl" aria-hidden="true" data-globe-host></div>
+      <ul class="globe-labels" role="list" aria-hidden="true">
+        {
+          labels.map((l) => (
+            <li class:list={['globe-label', `globe-label--${l.side}`]} data-globe-label={l.id} style={`left:${l.x}%;top:${l.y}%`}>
+              {l.label}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
     <button type="button" class="globe-toggle" data-globe-toggle hidden aria-pressed="false" aria-label="Pausar el giro del globo">
       <svg class="globe-toggle-pause" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
       <svg class="globe-toggle-play" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M8 5.5v13l11-6.5z"/></svg>
     </button>
-    <ul class="globe-labels" role="list" aria-hidden="true">
-      {
-        labels.map((l) => (
-          <li class:list={['globe-label', `globe-label--${l.side}`]} data-globe-label={l.id} style={`left:${l.x}%;top:${l.y}%`}>
-            {l.label}
-          </li>
-        ))
-      }
-    </ul>
   </div>
   <figcaption class="globe-caption">
     {
@@ -111,6 +117,10 @@ const caption = ['México', 'España', 'Nueva York'];
     position: relative;
     aspect-ratio: 1;
     isolation: isolate;
+  }
+  .globe-art {
+    position: absolute;
+    inset: 0;
   }
   /* Halo ciruela muy suave bajo el globo */
   .globe-stage::before {

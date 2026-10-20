@@ -1,7 +1,7 @@
 ---
 /**
  * Preguntas frecuentes de /servicios/ (web anterior, docs/web-anterior.md §5): las dos de España
- * con <details>/<summary> y la de Dubái como enlace a /dubai/#preguntas (allí está su respuesta).
+ * con <details>/<summary> y la de Dubái como enlace a /apertura-de-empresas/#preguntas (allí está su respuesta).
  * El FAQPage de JSON-LD lo pone la página (solo con las preguntas que se responden aquí).
  * Visita guiada: último paso (data-tour="preguntas").
  */
@@ -22,10 +22,10 @@ const dubaiQuestion = FAQ_DUBAI[0]?.question ?? '¿Puedo abrir una empresa en Du
     </div>
     <div data-reveal>
       <div data-tour="preguntas"><Faq items={FAQ_SPAIN} /></div>
-      <a class="faq-dubai" href={url('/dubai/#preguntas')}>
+      <a class="faq-dubai" href={url('/apertura-de-empresas/#preguntas')}>
         <span class="faq-dubai-q">{dubaiQuestion}</span>
         <span class="faq-dubai-go">
-          <span>Respuesta en «Abre tu empresa en Dubái»</span>
+          <span>Respuesta en «Apertura de empresas»</span>
           <Icon name="arrow" />
         </span>
       </a>

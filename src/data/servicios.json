@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-02",
+  "updated_at": "2026-10-20",
   "currency": "EUR",
   "tax_included": true,
   "tax_label": "IVA incluido",
@@ -47,19 +47,27 @@
         "name": "Nacionalidad española",
         "description": "Te asesoramos en cada paso para solicitar la nacionalidad por residencia, matrimonio o descendencia.",
         "lead_value": "Extranjería · Nacionalidad española"
-      }
-    ],
-    "also_title": "También",
-    "also": [
+      },
       {
+        "id": "nomadas-digitales",
         "name": "Nómadas digitales",
-        "lead_value": "Extranjería · Nómadas digitales"
+        "description": "Te orientamos sobre la residencia para nómadas digitales y te acompañamos en su solicitud.",
+        "lead_value": "Extranjería · Nómadas digitales",
+        "pending": true
       },
       {
-        "name": "Emprendedores"
+        "id": "emprendedores",
+        "name": "Emprendedores",
+        "description": "Si quieres emprender en España, te acompañamos con los trámites de extranjería de tu proyecto, desde la primera consulta.",
+        "lead_value": "Extranjería · Emprendedores",
+        "pending": true
       },
       {
-        "name": "Residencias"
+        "id": "residencias",
+        "name": "Residencias",
+        "description": "Te orientamos sobre la autorización de residencia que corresponde a tu caso y gestionamos su solicitud.",
+        "lead_value": "Extranjería · Residencias",
+        "pending": true
       }
     ]
   },
@@ -130,8 +138,8 @@
   ],
   "programs": [
     {
-      "id": "autogestiona",
-      "name": "Programa Autogestiona",
+      "id": "autogestion-dg",
+      "name": "Autogestión DG",
       "procedures_title": "Trámites disponibles en",
       "procedures": [
         "Estudios (estancia inicial y prórroga)",
@@ -145,15 +153,6 @@
         "Renovaciones de residencia",
         "Homologación y equivalencia de títulos universitarios"
       ],
-      "includes_title": "Todos los planes incluyen",
-      "includes": [
-        "Formularios necesarios",
-        "Presentación del expediente",
-        "Acceso a las notificaciones de extranjería",
-        "Asesoría inicial con un experto en extranjería",
-        "Cumplimentación de los formularios",
-        "Resolución de dudas sobre los requerimientos"
-      ],
       "plans": [
         {
           "id": "basico",
@@ -161,7 +160,12 @@
           "amount": 121,
           "featured": false,
           "form_key": "basico",
-          "lead_value": "Programa Autogestiona · Plan Básico"
+          "lead_value": "Autogestión DG · Plan Básico",
+          "includes": [
+            "formularios",
+            "presentacion",
+            "notificaciones"
+          ]
         },
         {
           "id": "estandar",
@@ -169,7 +173,13 @@
           "amount": 200,
           "featured": false,
           "form_key": "estandar",
-          "lead_value": "Programa Autogestiona · Plan Estándar"
+          "lead_value": "Autogestión DG · Plan Estándar",
+          "includes": [
+            "formularios",
+            "presentacion",
+            "notificaciones",
+            "asesoria-inicial"
+          ]
         },
         {
           "id": "premium",
@@ -177,7 +187,43 @@
           "amount": 300,
           "featured": false,
           "form_key": "premium",
-          "lead_value": "Programa Autogestiona · Plan Premium"
+          "lead_value": "Autogestión DG · Plan Premium",
+          "includes": [
+            "formularios",
+            "presentacion",
+            "notificaciones",
+            "asesoria-inicial",
+            "cumplimentacion",
+            "dudas"
+          ]
+        }
+      ],
+      "tagline": "Gestiona tu propio trámite de extranjería",
+      "features_title": "Qué incluye cada plan",
+      "features": [
+        {
+          "id": "formularios",
+          "label": "Formularios necesarios"
+        },
+        {
+          "id": "presentacion",
+          "label": "Presentación del expediente"
+        },
+        {
+          "id": "notificaciones",
+          "label": "Acceso a las notificaciones de extranjería"
+        },
+        {
+          "id": "asesoria-inicial",
+          "label": "Asesoría inicial con un experto en extranjería"
+        },
+        {
+          "id": "cumplimentacion",
+          "label": "Cumplimentación de los formularios"
+        },
+        {
+          "id": "dudas",
+          "label": "Resolución de dudas sobre los requerimientos"
         }
       ]
     }
@@ -190,6 +236,49 @@
       "Holding",
       "Real Estate",
       "Trading"
+    ]
+  },
+  "firm_services": {
+    "id": "gestoria",
+    "eyebrow": "Gestores y abogados",
+    "title": "Gestoría y otros trámites",
+    "services": [
+      {
+        "id": "gestion-administrativa",
+        "name": "Gestión administrativa",
+        "description": "Gestoría administrativa del despacho para tus trámites. Cuéntanos qué necesitas y te orientamos.",
+        "lead_value": "Gestión administrativa",
+        "pending": true
+      },
+      {
+        "id": "homologacion-titulos",
+        "name": "Homologación y equivalencia de títulos universitarios",
+        "description": "Tramitamos la homologación o la equivalencia en España de tu título universitario obtenido en el extranjero.",
+        "lead_value": "Homologación y equivalencia de títulos universitarios",
+        "pending": true
+      }
+    ]
+  },
+  "companies": {
+    "id": "empresas",
+    "name": "Apertura de empresas",
+    "path": "/apertura-de-empresas/",
+    "countries": [
+      {
+        "id": "espana",
+        "name": "España",
+        "lead_value": "Apertura de empresa en España"
+      },
+      {
+        "id": "mexico",
+        "name": "México",
+        "lead_value": "Apertura de empresa en México"
+      },
+      {
+        "id": "dubai",
+        "name": "Dubái",
+        "lead_value": "Apertura de empresa en Dubái"
+      }
     ]
   }
 }

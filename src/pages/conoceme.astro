@@ -21,11 +21,13 @@ import Firm from '~/components/about/Firm.astro';
 import RecentActivity from '~/components/about/RecentActivity.astro';
 import { BOOKING_PATH, SITE } from '~/data/site';
 import { url } from '~/lib/url';
-import retrato from '~/assets/img/retrato.jpg';
+import retrato from '~/assets/img/despacho-retrato.jpg';
 
 // Tres líneas con datos de docs/contenido.md (profesión, áreas y cargos), sin adjetivos propios.
+// docs/cambios-2026-10.md §1: presidenta y fundadora de DG; además de abogada, gestora administrativa.
 const roles = [
-  'Abogada · Extranjería y movilidad internacional',
+  `Presidenta y fundadora de ${SITE.firm}`,
+  'Abogada y gestora administrativa · Extranjería y movilidad internacional',
   'Directora Ejecutiva de Jóvenes por los Derechos Humanos',
   'Delegada · International Human Rights Summit 2026',
 ];
@@ -35,7 +37,7 @@ const roles = [
 const recent: { title: string; role: string; from: string; to?: string }[] = [
   { title: 'International Human Rights Summit, Nueva York', role: 'Delegada', from: '2026' },
   { title: 'Jóvenes por los Derechos Humanos', role: 'Directora Ejecutiva', from: '2026' },
-  { title: 'Embajada de México en España', role: 'Asuntos Jurídicos', from: '2024' },
+  { title: 'Embajada de México en España', role: 'Litigio estratégico', from: '2024' },
   { title: 'Poplavsky International Law Offices', role: 'Directora Legal México', from: '2020', to: '2023' },
   {
     title: 'Centro de Justicia para la Mujer',
@@ -47,7 +49,7 @@ const recent: { title: string; role: string; from: string; to?: string }[] = [
 ---
 
 <BaseLayout
-  title="Conóceme · Denisse González, abogada"
+  title="Conóceme · Denisse González, abogada y gestora administrativa"
   description="Denisse González, abogada mexicana con formación jurídica internacional y experiencia profesional entre México y España: trayectoria, experiencia y propósito."
   preloadFonts={['serif-600', 'serif-500', 'sans-400', 'sans-600']}
 >
@@ -59,10 +61,9 @@ const recent: { title: string; role: string; from: string; to?: string }[] = [
           <div class="founder-frame vt-portrait">
             <Photo
               src={retrato}
-              alt="Denisse González, abogada, sonriendo con blazer morado"
-              widths={[320, 420, 560, 732]}
+              alt="Denisse González en su despacho, junto al logotipo de DG y las banderas de México y España"
+              widths={[320, 420, 560, 736, 880]}
               sizes="(min-width: 960px) 23rem, min(calc(100vw - 2rem), 23rem)"
-              position="50% 62%"
               priority
             />
           </div>
@@ -76,7 +77,8 @@ const recent: { title: string; role: string; from: string; to?: string }[] = [
         </blockquote>
         <p class="founder-sign">
           <span>{SITE.motto}</span>
-          <span>México&nbsp;· España&nbsp;· <span class="nowrap">Nueva York</span></span>
+          {/* docs/cambios-2026-10.md §2.5: no trabaja en Nueva York */}
+          <span>México&nbsp;· España</span>
         </p>
       </div>
 
@@ -85,7 +87,7 @@ const recent: { title: string; role: string; from: string; to?: string }[] = [
         <div class="prose founder-prose">
           <p>Soy Denisse González, abogada mexicana con formación jurídica internacional y experiencia profesional desarrollada entre México y España.</p>
           <p>Mi trayectoria comenzó en la práctica jurídica y la litigación, y con el tiempo fue incorporando nuevas dimensiones: el derecho internacional, la movilidad internacional, la gestión administrativa, las relaciones institucionales y la defensa y promoción de los derechos humanos.</p>
-          <p>He trabajado en despachos jurídicos, en asesoría migratoria y en instituciones como la Embajada de México en España, donde colaboré en el área de Asuntos Jurídicos. También he ejercido como abogada litigante en materias civil, penal y de amparo, y como Directora Legal México en Poplavsky International Law Offices, participando en la representación de demandas internacionales.</p>
+          <p>He trabajado en despachos jurídicos, en asesoría migratoria y en instituciones como la Embajada de México en España, donde colaboré en litigio estratégico. También he ejercido como abogada litigante en materias civil, penal y de amparo, y como Directora Legal México en Poplavsky International Law Offices, participando en la representación de demandas internacionales.</p>
           <p>Pero mi trayectoria no se ha construido únicamente dentro de un despacho.</p>
           <p>Una parte esencial de mi camino ha estado vinculada al trabajo con personas y comunidades. Desde mis primeras prácticas en el Centro de Justicia para la Mujer, donde participé en la asesoría legal a mujeres víctimas de violencia de género, hasta mi actual participación en iniciativas de derechos humanos.</p>
           <p>Hoy entiendo el derecho como una herramienta para conectar personas con oportunidades, instituciones con comunidades y derechos con realidades concretas.</p>
@@ -148,12 +150,12 @@ const recent: { title: string; role: string; from: string; to?: string }[] = [
         <h2 class="section-title" id="crossing-title" data-reveal>Una carrera que continúa cruzando fronteras.</h2>
         <p class="lead" data-reveal>Mi experiencia profesional se ha desarrollado en distintos espacios jurídicos e institucionales, pero existe un hilo conductor: las personas que necesitan encontrar una solución dentro de sistemas que muchas veces pueden resultar complejos.</p>
       </div>
-      <!-- Globo 3D (México · España · Nueva York): src/components/about/GlobeSlot.astro -->
+      <!-- Globo 3D (México · España): src/components/about/GlobeSlot.astro -->
       <GlobeSlot class="crossing-globe" />
     </div>
   </section>
 
-  {/* El despacho: historia, misión, valores, equipo y partner en Dubái (docs/web-anterior.md §3-4) */}
+  {/* El despacho: historia, misión, valores, Nuestro equipo y Partners (docs/web-anterior.md §3, docs/cambios-2026-10.md §3-4) */}
   <Firm />
 
   <ContactCta />

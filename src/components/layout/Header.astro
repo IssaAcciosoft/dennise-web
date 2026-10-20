@@ -26,7 +26,7 @@ const isCurrent = (path: string) => current === path;
       <LogoMark class="brand-mark" idPrefix="hdr" />
       <span class="brand-text">
         <span class="brand-name">{SITE.name}</span>
-        <span class="brand-role">{SITE.role}</span>
+        <span class="brand-role">{SITE.brandRole}</span>
       </span>
     </a>
 
@@ -164,6 +164,7 @@ const isCurrent = (path: string) => current === path;
   .site-header :global(.brand-mark) :global([fill="#7A1F86"]) { fill: var(--logo-a); }
   .site-header :global(.brand-mark) :global([stroke="#7A1F86"]) { stroke: var(--logo-a); }
   .site-header :global(.brand-mark) :global([fill="#9B9B9F"]) { fill: var(--logo-b); }
+  .site-header[data-tone="dark"] .brand-role { color: #EADFEE; } /* AA sobre la cabecera translúcida en cualquier fondo */
   .site-header[data-tone="dark"] :global(.header-cta) {
     --btn-bg: transparent;
     --btn-fg: var(--ev-text);
@@ -247,6 +248,7 @@ const isCurrent = (path: string) => current === path;
     font-weight: 600;
     letter-spacing: .26em;
     text-transform: uppercase;
+    white-space: nowrap;
   }
 
   .header-cta { white-space: nowrap; }
@@ -431,6 +433,9 @@ const isCurrent = (path: string) => current === path;
     .header-inner { gap: 1.5rem; }
     .brand :global(.brand-mark) { width: 66px; }
     .brand-name { font-size: 1.42rem; }
+    /* «Gestores y Abogados» (más largo que el antiguo «Abogada»): algo menos de tracking para no
+       ensanchar la marca más que el nombre. */
+    .brand-role { letter-spacing: .2em; }
     .nav-toggle { display: none; }
     .site-nav,
     .site-nav:popover-open {

@@ -1,5 +1,5 @@
 /**
- * Globo 3D de Conóceme (WebGL con cobe): México, España y Nueva York. Sin React: lo carga el
+ * Globo 3D de Conóceme (WebGL con cobe): México y España. Sin React: lo carga el
  * <script> de GlobeSlot.astro con import() cuando la caja se acerca a la pantalla, y solo sin
  * «reducir movimiento» (≈ 8 KB gzip con cobe; antes, como isla de React, ≈ 75 KB).
  *
@@ -18,7 +18,7 @@
  *   Anchor Positioning, que no usamos): se retira del documento → sin recálculo de estilos.
  *
  * Movimiento (Emil Kowalski): vaivén lento y lineal en el tiempo (movimiento constante), los
- * tres lugares siempre a la vista. Arrastrar en horizontal lo gira (captura del puntero,
+ * dos lugares siempre a la vista. Arrastrar en horizontal lo gira (captura del puntero,
  * inercia con rozamiento); al soltar, tras una pausa, vuelve con suavidad a su vista.
  * En táctil, el gesto vertical sigue desplazando la página (touch-action: pan-y).
  * El vaivén automático es continuo y se puede pausar con el botón del globo (WCAG 2.2.2).

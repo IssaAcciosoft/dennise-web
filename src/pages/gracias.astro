@@ -11,19 +11,21 @@
  * tras el pago de cada plan y tras la reserva, SI AccioGest lo permite. Mientras tanto la
  * página existe pero nadie llega a ella.
  * PENDIENTE (cliente): el proceso tras la compra no está confirmado; aquí solo figura lo que
- * incluyen los planes (servicios.json → «Todos los planes incluyen», tal cual), sin pasos ni
- * plazos. Cuando la cliente o AccioGest confirmen el proceso, se podrá añadir una lista numerada.
+ * incluye el plan contratado (servicios.json → plans[].includes; docs/cambios-2026-10.md §5),
+ * sin pasos ni plazos. Sin ?plan= conocido, la lista no se muestra. Cuando la cliente o AccioGest confirmen el proceso, se podrá añadir una lista numerada.
  */
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import Icon from '~/components/ui/Icon.astro';
-import { autogestiona } from '~/lib/services';
+import { autogestion, planIncludes } from '~/lib/services';
 import { WA_TEXT, waLink } from '~/data/site';
 import { url } from '~/lib/url';
 
 // Solo nombres conocidos (nunca se muestra texto de la URL): búsqueda por propiedad PROPIA
 // (?plan=constructor o toString no deben resolver a las del prototipo).
-const planNames = Object.fromEntries(autogestiona.plans.flatMap((p) => [[p.form_key, p.name], [p.id, p.name]]));
-const variantScript = `(function(){try{var q=new URLSearchParams(location.search),t=q.get('tipo'),v=t==='plan'||t==='reserva'?t:'';if(v){document.querySelectorAll('[data-thanks]').forEach(function(el){el.hidden=el.getAttribute('data-thanks')!==v})}var m=${JSON.stringify(planNames)},k=q.get('plan')||'',n=Object.prototype.hasOwnProperty.call(m,k)?m[k]:'';if(typeof n==='string'&&n){document.querySelectorAll('[data-plan-name]').forEach(function(el){el.textContent=n})}}catch(e){}})();`;
+const planNames = Object.fromEntries(autogestion.plans.flatMap((p) => [[p.form_key, p.name], [p.id, p.name]]));
+// Clave (form_key o id) → form_key: qué lista de «Lo que incluye tu plan» se muestra.
+const planKeys = Object.fromEntries(autogestion.plans.flatMap((p) => [[p.form_key, p.form_key], [p.id, p.form_key]]));
+const variantScript = `(function(){try{var q=new URLSearchParams(location.search),t=q.get('tipo'),v=t==='plan'||t==='reserva'?t:'';if(v){document.querySelectorAll('[data-thanks]').forEach(function(el){el.hidden=el.getAttribute('data-thanks')!==v})}var m=${JSON.stringify(planNames)},k=q.get('plan')||'',n=Object.prototype.hasOwnProperty.call(m,k)?m[k]:'';if(typeof n==='string'&&n){document.querySelectorAll('[data-plan-name]').forEach(function(el){el.textContent=n})}var pk=${JSON.stringify(planKeys)},f=Object.prototype.hasOwnProperty.call(pk,k)?pk[k]:'';if(typeof f==='string'&&f){document.querySelectorAll('[data-plan-includes]').forEach(function(el){el.hidden=el.getAttribute('data-plan-includes')!==f})}}catch(e){}})();`;
 ---
 
 <BaseLayout
@@ -41,21 +43,23 @@ const variantScript = `(function(){try{var q=new URLSearchParams(location.search
       </div>
 
       <div class="thanks-block" data-thanks="plan" hidden>
-        <p class="eyebrow eyebrow--center">{autogestiona.name}</p>
+        <p class="eyebrow eyebrow--center">{autogestion.name}</p>
         <h1 class="page-title">Gracias por contratar el <span data-plan-name>plan</span>.</h1>
-        <div class="thanks-steps">
-          <h2 class="thanks-steps-title">Lo que incluye tu plan</h2>
-          <ul class="check-list thanks-list" role="list">
-            {
-              autogestiona.includes.map((item) => (
-                <li>
-                  <Icon name="check" />
-                  {item}
-                </li>
-              ))
-            }
-          </ul>
-        </div>
+        {
+          autogestion.plans.map((plan) => (
+            <div class="thanks-steps" data-plan-includes={plan.form_key} hidden>
+              <h2 class="thanks-steps-title">Lo que incluye tu plan</h2>
+              <ul class="check-list thanks-list" role="list">
+                {planIncludes(plan).map((item) => (
+                  <li>
+                    <Icon name="check" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
       </div>
 
       <div class="thanks-block" data-thanks="reserva" hidden>

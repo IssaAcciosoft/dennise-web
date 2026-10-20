@@ -1,8 +1,8 @@
 ---
 /**
  * «Partner en Dubái: Poplavsky» (web anterior, docs/web-anterior.md §4), tal cual.
- * - /dubai/: enlace a su web (www.poplavskygroup.com, pestaña nueva, rel="noopener").
- * - /conoceme/ (equipo): enlace a /dubai/.
+ * - /apertura-de-empresas/ (parte de Dubái): enlace a su web (www.poplavskygroup.com, pestaña nueva, rel="noopener").
+ * - /conoceme/ (equipo): enlace a /apertura-de-empresas/#dubai.
  * El logo original tiene fondo negro: sobre el ciruela oscuro se funde con mix-blend-mode:
  * lighten (el negro desaparece; el oro y el gris se mantienen). Imagen con astro:assets.
  */
@@ -12,7 +12,7 @@ import Icon from '../ui/Icon.astro';
 import logo from '~/assets/img/poplavsky-logo.jpg';
 
 interface Props {
-  /** «external»: enlace a la web del partner; «dubai»: enlace a /dubai/. */
+  /** «external»: enlace a la web del partner; «dubai»: enlace a /apertura-de-empresas/#dubai. */
   link?: 'external' | 'dubai';
   headingId?: string;
   class?: string;
@@ -36,8 +36,8 @@ const { link = 'external', headingId = 'partner-title', class: className } = Ast
           <span class="visually-hidden"> (se abre en una pestaña nueva)</span>
         </a>
       ) : (
-        <a class="partner-link" href={url('/dubai/')}>
-          <span>Abre tu empresa en Dubái</span>
+        <a class="partner-link" href={url('/apertura-de-empresas/#dubai')}>
+          <span>Apertura de empresas en Dubái</span>
           <Icon name="arrow" />
         </a>
       )

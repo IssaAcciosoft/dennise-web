@@ -9,7 +9,8 @@ import { BOOKING_PATH, SITE, OFFICE } from '~/data/site';
 import { url } from '~/lib/url';
 import Photo from '../ui/Photo.astro';
 import Icon from '../ui/Icon.astro';
-import retrato from '~/assets/img/retrato.jpg';
+// Retrato en el despacho (docs/cambios-2026-10.md §6): el MISMO archivo que el de Conóceme.
+import retrato from '~/assets/img/despacho-retrato.jpg';
 ---
 
 <section class="hero" aria-labelledby="hero-title" data-wa-hide>
@@ -18,6 +19,8 @@ import retrato from '~/assets/img/retrato.jpg';
       <h1 class="hero-title" id="hero-title">Derecho que conecta <em>personas, oportunidades y&nbsp;derechos</em></h1>
       <p class="hero-signature">
         <span class="hero-signature-name">Denisse González</span>
+        {/* docs/cambios-2026-10.md §1: presidenta y fundadora de DG; abogada y gestora administrativa */}
+        <span class="hero-signature-role">Presidenta y fundadora de DG&nbsp;· Abogada y gestora administrativa</span>
         <span class="hero-signature-areas">
           <span class="nowrap">Derecho internacional</span><span class="hero-dot" aria-hidden="true"> · </span><span class="nowrap">Movilidad internacional</span><span class="hero-dot" aria-hidden="true"> · </span><span class="nowrap">Derechos humanos</span>
         </span>
@@ -46,11 +49,10 @@ import retrato from '~/assets/img/retrato.jpg';
       <div class="hero-arch vt-portrait">
         <Photo
           src={retrato}
-          alt="Denisse González, abogada, sonriendo con blazer morado"
-          widths={[360, 480, 600, 732]}
+          alt="Denisse González en su despacho, junto al logotipo de DG y las banderas de México y España"
+          widths={[360, 480, 600, 880]}
           sizes="(min-width: 960px) 450px, (min-width: 600px) 440px, calc(100vw - 2rem)"
           priority
-          position="50% 62%"
         />
       </div>
       <p class="hero-badge">
@@ -106,6 +108,11 @@ import retrato from '~/assets/img/retrato.jpg';
     font-weight: 600;
     line-height: 1.15;
     color: var(--c-ink);
+  }
+  .hero-signature-role {
+    color: var(--c-ink-soft);
+    font-size: var(--fs-small);
+    line-height: 1.45;
   }
   /* Áreas: en una línea si cabe con holgura; si no, una por línea. Lo decide el ancho del
      contenedor (no el de la fuente), así el cambio de fuente nunca reorganiza la línea (CLS). */

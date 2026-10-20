@@ -5,9 +5,11 @@
  *
  * Disparadores: cualquier elemento con data-service-request="<lead_value>" (el servicio queda
  * preseleccionado). Usar un <a href="https://wa.me/…"> para que sin JavaScript abra WhatsApp.
- * Opciones del selector: lead_value de src/data/servicios.json (extranjería en España,
- * asesorías, planes, Dubái) + «Otro trámite / no lo sé» (serviceOptions en src/lib/services.ts).
- * Se usa en /servicios/ y en /dubai/ (`kicker` y `waText` cambian según la página).
+ * Opciones del selector: lead_value de src/data/servicios.json (extranjería en España, gestoría
+ * y homologación, asesorías, apertura de empresas en España, México y Dubái; los planes de
+ * Autogestión DG solo con `withPlans`) + «Otro trámite / no lo sé» (serviceOptions en
+ * src/lib/services.ts). Se usa en /servicios/, /apertura-de-empresas/ y /autogestion-dg/
+ * (`kicker`, `waText` y `withPlans` cambian según la página).
  */
 import { serviceOptions } from '~/lib/services';
 import { WA_TEXT } from '~/data/site';
@@ -21,13 +23,16 @@ interface Props {
   /** Pista del campo «Mensaje». En /servicios/ pide la modalidad (online o presencial): las
    *  citas solicitadas desde «Solicitar cita» la necesitan y el formulario no tiene ese campo. */
   messageHint?: string;
+  /** Añade los planes de Autogestión DG al selector (solo en /autogestion-dg/). */
+  withPlans?: boolean;
 }
 const {
   kicker = 'Servicios de extranjería',
   waText = WA_TEXT.general,
   messageHint = 'Por ejemplo: si prefieres la asesoría online o presencial, tu situación actual o el trámite que te interesa.',
+  withPlans = false,
 } = Astro.props;
-const options = serviceOptions;
+const options = serviceOptions({ withPlans });
 const p = 'sr';
 ---
 

@@ -100,9 +100,10 @@ Entender a las personas que necesitan de él lo es aún más.
   humanidad." siguen siendo suyas (final de "Más allá del expediente") y pueden seguir usándose
   como frase destacada en esa sección.
 - Credenciales cortas (fila de confianza, datos suyos):
-  - México · España · Nueva York
+  - México · España (octubre 2026: sin Nueva York, `docs/cambios-2026-10.md` §2.5)
   - Ex Directora Legal México — Poplavsky International Law Offices
-  - Asuntos Jurídicos — Embajada de México en España
+  - Litigio estratégico — Embajada de México en España (octubre 2026, §2.6; antes «Asuntos
+    Jurídicos»)
   - Delegada — International Human Rights Summit 2026 (Nueva York)
 
 ### CONÓCEME
@@ -119,6 +120,7 @@ derechos humanos.
 
 He trabajado en despachos jurídicos, en asesoría migratoria y en instituciones como la
 Embajada de México en España, donde colaboré en el área de Asuntos Jurídicos. También he
+<!-- Octubre 2026 (docs/cambios-2026-10.md §2.6): en la web, «donde colaboré en litigio estratégico». -->
 ejercido como abogada litigante en materias civil, penal y de amparo, y como Directora Legal
 México en Poplavsky International Law Offices, participando en la representación de demandas
 internacionales.
@@ -231,6 +233,7 @@ representación legal hasta movilidad internacional y asesoría institucional.
   etapa como Directora Legal México en Poplavsky International Law Offices.
 - **Movilidad internacional** — Experiencia en asesoría legal relacionada con procedimientos
   migratorios y acompañamiento de personas extranjeras.
+<!-- Octubre 2026 (§2.6): en la web, «Experiencia en litigio estratégico en la Embajada de México en España». -->
 - **Asuntos institucionales** — Experiencia en el área de Asuntos Jurídicos de la Embajada
   de México en España.
 - **Derechos humanos** — Participación en proyectos de educación, promoción y
@@ -254,8 +257,8 @@ comprensión real del contexto de la persona que está detrás de él.
 - **2019 — 2020 · Práctica litigiosa** — Abogada litigante en materias Civil, Amparo y Penal.
 - **2020 — 2023 · Derecho transnacional** — Directora Legal México en Poplavsky International
   Law Offices, participando en representación legal de demandas internacionales.
-- **2024 · Embajada de México en España** — Prácticas profesionales en el área de Asuntos
-  Jurídicos.
+- **2024 · Embajada de México en España** — Litigio estratégico. (Octubre 2026,
+  `docs/cambios-2026-10.md` §2.6; sustituye a la línea anterior, sin la palabra «prácticas».)
 - **2024 — 2026 · Movilidad internacional** — Asesoría legal en materia migratoria y
   acompañamiento de procedimientos relacionados con movilidad internacional.
 - **2026 · Derechos humanos** — Directora Ejecutiva de Jóvenes por los Derechos Humanos y
@@ -449,11 +452,13 @@ integración de formularios (AccioGest).
      permiso para publicarlo (si no, se quita `<Testimonial />` de `src/pages/index.astro`).
    - **9.6 Nacionalidad «por matrimonio o descendencia»** (/servicios/, tarjeta «Nacionalidad
      española»): publicado tal cual; conviene que lo revise.
-6. Equipo (/conoceme/ → «Conoce al equipo»): confirmar que Everardo Corona y Stephanie González
+6. Equipo (/conoceme/ → «Nuestro equipo», textos de octubre 2026): confirmar que Everardo Corona y Stephanie González
    autorizan publicar su foto, cargo y descripción (y el tratamiento «Embajador»). La foto de
    Stephanie de la web anterior es de baja resolución: si hay una mejor, sustituirla
    (`npm run web-anterior-images`).
-7. Partner en Dubái: confirmar que Poplavsky autoriza el uso de su logotipo y el enlace a su web.
+7. Partners (/conoceme/#partners): confirmar que Poplavsky, De la Flor Abogados, Espiga Exports y
+   Ariel Noriega autorizan el uso de su logotipo / foto y texto. Mishell A. González también
+   (sin foto: ficha con sus iniciales).
 8. IDs de AccioGest (formularios, planes, plugin de reservas). Si el campo «Servicio» del
    formulario de AccioGest es un desplegable, añadir los nuevos valores (extranjería en España y
    «Apertura de empresa en Dubái»: ver `docs/integracion-acciogest.md` §4).
@@ -471,3 +476,16 @@ integración de formularios (AccioGest).
      SDP Noticias, Economis; Tiptip MX no, URL sin verificar), «Agenda 2026» en /conoceme/#actividad
      (foto del Franchise Innovation Summit), sus frases en /empoderando-voces/ y /servicios/.
      Que lo revise.
+10. Cambios de octubre 2026 (`docs/cambios-2026-10.md`), pendientes de la cliente:
+   - **«Bienvenido / Welcome!»** (Partners): nombre y descripción del proyecto de Everardo
+     Corona. Hoy solo el logo y «Proyecto de Everardo Corona» (comentario PENDIENTE en
+     `src/components/about/Partners.astro`).
+   - **Logos de Empoderando Voces**: los PNG recibidos llegan recortados (la «O» final de
+     «EMPODERANDO» toca el borde, sobre todo en el principal). Pedir el original (SVG o PNG con
+     margen) para sustituir `src/assets/img/ev/` (`npm run recursos-2026-10-images`).
+   - **EMLHIS Impulsa Madrid** (Agenda 2026, 19/10/2026): publicado solo con nombre, fecha y
+     lugar; si tuvo un papel (ponente, invitada…), que lo indique.
+   - Fotos del despacho con banderas (generadas con IA, la cliente las quiere): usadas en la
+     portada del inicio, en Conóceme y en «Nuestro equipo».
+   - «Desde mis primeras prácticas en el Centro de Justicia para la Mujer» (Conóceme) se mantiene:
+     es su texto y no se refiere a la Embajada. Si tampoco quiere ahí la palabra, que lo diga.

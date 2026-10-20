@@ -1,0 +1,213 @@
+---
+/**
+ * Autogestión DG (/autogestion-dg/): trámites disponibles, planes con lo que incluye y lo que no
+ * incluye cada uno (docs/cambios-2026-10.md §5, desde servicios.json) y aviso de condiciones.
+ * Ningún plan destacado (§5). docs/integracion-acciogest.md §3, sin cambios:
+ * - «Contratar Plan X» con el ID del plan configurado (PLANES en src/config/acciogest.ts) →
+ *   página de pago de AccioGest {API}/form-builder/public/{FORM_ID}/page en pestaña nueva.
+ * - Sin ID (valor de ejemplo) → abre el diálogo «Solicitar información» con el plan
+ *   preseleccionado (data-service-request); sin JavaScript, WhatsApp.
+ */
+import { autogestion as program, planIncludes, formatAmount, CATALOG } from '~/lib/services';
+import { WA_TEXT, waLink } from '~/data/site';
+import { planPageUrl, type PlanKey } from '~/config/acciogest';
+import { url } from '~/lib/url';
+import Icon from '../ui/Icon.astro';
+
+// «Trámites disponibles en:» (lista de la cliente) como título de sección, sin el «en:» final.
+const procedures = program.procedures_title.replace(/\s+en:?$/, '');
+const planMessage = (name: string, amount: number) =>
+  `Hola Denisse, me interesa el ${name} (${formatAmount(amount)} €, ${CATALOG.tax_label}) de ${program.name}. Mi trámite es: `;
+---
+
+<section class="section section--white ag-procedures" id="tramites" aria-labelledby="tramites-title">
+  <div class="container ag-procedures-grid">
+    <div>
+      <p class="eyebrow" data-reveal>{program.name}</p>
+      <h2 class="section-title ag-procedures-title" id="tramites-title" data-reveal>{procedures}</h2>
+    </div>
+    <ul class="chip-list ag-chips" role="list" data-reveal>
+      {program.procedures.map((p) => <li>{p}</li>)}
+    </ul>
+  </div>
+</section>
+
+<section class="section section--ivory ag-plans" id="planes" aria-labelledby="planes-title">
+  <div class="container">
+    <div class="ag-plans-head">
+      <div>
+        <p class="eyebrow" data-reveal>Planes&nbsp;· {CATALOG.tax_label}</p>
+        <h2 class="section-title" id="planes-title" data-reveal>{program.features_title}</h2>
+      </div>
+      <p class="ag-plans-sub" data-reveal>
+        Cada plan suma lo del anterior: {program.plans.map((p) => p.name.replace(/^Plan /, '')).join(', ').replace(/, ([^,]*)$/, ' y $1')}.
+      </p>
+    </div>
+
+    <ul class="plan-grid" role="list">
+      {
+        program.plans.map((plan) => {
+          const included = new Set(planIncludes(plan));
+          const payUrl = planPageUrl(plan.form_key as PlanKey);
+          const listId = `plan-${plan.id}-incluye`;
+          return (
+            <li class="plan-card" data-plan-key={plan.form_key} data-reveal data-spotlight>
+              <h3 class="plan-name">{plan.name}</h3>
+              <p class="plan-price">
+                <span class="price">{formatAmount(plan.amount)}</span>
+                <span class="currency">€</span>
+              </p>
+              <p class="plan-vat">{CATALOG.tax_label}</p>
+              <ul class="plan-features" role="list" id={listId} aria-label={`Qué incluye el ${plan.name}`}>
+                {program.features.map((f) =>
+                  included.has(f.label) ? (
+                    <li class="is-in">
+                      <Icon name="check" />
+                      <span>
+                        <span class="visually-hidden">Incluye: </span>
+                        {f.label}
+                      </span>
+                    </li>
+                  ) : (
+                    <li class="is-out">
+                      <span class="plan-dash" aria-hidden="true" />
+                      <span>
+                        <span class="visually-hidden">No incluye: </span>
+                        {f.label}
+                      </span>
+                    </li>
+                  ),
+                )}
+              </ul>
+              {payUrl ? (
+                <a class="btn btn--block btn--outline" href={payUrl} target="_blank" rel="noopener" data-plan-cta={plan.form_key} data-lead-value={plan.lead_value}>
+                  <span>Contratar {plan.name}</span>
+                  <Icon name="external" />
+                  <span class="visually-hidden"> (pago seguro en AccioGest, se abre en una pestaña nueva)</span>
+                </a>
+              ) : (
+                <a
+                  class="btn btn--block btn--outline"
+                  href={waLink(planMessage(plan.name, plan.amount))}
+                  target="_blank"
+                  rel="noopener"
+                  data-plan-cta={plan.form_key}
+                  data-lead-value={plan.lead_value}
+                  data-service-request={plan.lead_value}
+                >
+                  <span>Contratar {plan.name}</span>
+                </a>
+              )}
+            </li>
+          );
+        })
+      }
+    </ul>
+
+    <div class="plan-foot" data-reveal>
+      <p class="plan-terms">
+        Pago seguro con tarjeta. Al contratar aceptas las{' '}
+        <a href={url('/condiciones-contratacion/')}>condiciones de contratación</a>.
+      </p>
+      <a class="btn btn--link" href={waLink(WA_TEXT.autogestionDudas)} target="_blank" rel="noopener">
+        <span>¿Dudas sobre qué plan elegir? Escríbeme</span>
+        <Icon name="arrow" />
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .ag-procedures-grid { display: grid; gap: 1.75rem clamp(3rem, 6vw, 5rem); }
+  .ag-procedures-title { max-width: 9em; }
+  @media (min-width: 960px) {
+    .ag-procedures-grid { grid-template-columns: minmax(0, .8fr) minmax(0, 1.4fr); align-items: start; }
+    .ag-chips { padding-top: .5rem; }
+  }
+
+  .ag-plans-head {
+    display: grid;
+    gap: 1rem 4rem;
+    margin-bottom: clamp(2rem, 4vw, 3rem);
+  }
+  .ag-plans-head .section-title { max-width: 9em; }
+  .ag-plans-sub { max-width: 30rem; color: var(--c-ink-soft); }
+  @media (min-width: 960px) {
+    .ag-plans-head { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: end; }
+  }
+
+  .plan-grid { display: grid; gap: 1.25rem; align-items: stretch; }
+  .plan-card {
+    display: flex;
+    flex-direction: column;
+    padding: clamp(1.5rem, 1.25rem + 1.2vw, 2.25rem);
+    background: var(--c-white);
+    border: 1px solid rgba(110, 29, 122, .14);
+    border-radius: var(--radius-l);
+    box-shadow: var(--shadow-s);
+  }
+  .plan-name {
+    color: var(--c-plum);
+    font-size: .82rem;
+    font-weight: 600;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+  }
+  .plan-price { margin-top: .75rem; color: var(--c-ink); line-height: 1; }
+  .plan-price .price { font-size: clamp(3rem, 2.5rem + 2vw, 4.2rem); }
+  .plan-price .currency { font-size: 1.7rem; }
+  .plan-vat {
+    margin-top: .6rem;
+    color: var(--c-muted);
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+  .plan-features {
+    display: grid;
+    gap: .7rem;
+    margin-block: 1.5rem 1.75rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--c-line);
+    font-size: var(--fs-small);
+    line-height: 1.45;
+  }
+  .plan-features li { display: flex; align-items: flex-start; gap: .7rem; }
+  .plan-features .is-in { color: var(--c-ink); }
+  .plan-features .is-in :global(.icon) {
+    flex: none;
+    width: 1.15rem;
+    height: 1.15rem;
+    margin-top: .1rem;
+    color: var(--c-plum);
+  }
+  /* No incluido: gris legible (AA) y raya en lugar de la marca. */
+  .plan-features .is-out { color: var(--c-muted); }
+  .plan-dash {
+    flex: none;
+    width: 1.15rem;
+    height: 1.15rem;
+    margin-top: .1rem;
+    background: linear-gradient(currentColor, currentColor) center / .7rem 1.5px no-repeat;
+    opacity: .7;
+  }
+  .plan-card .btn { margin-top: auto; }
+  .plan-card .btn :global(.icon) { width: 1rem; height: 1rem; }
+  @media (min-width: 900px) {
+    .plan-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+
+  .plan-foot {
+    display: grid;
+    justify-items: center;
+    gap: .75rem;
+    margin-top: 1.75rem;
+    text-align: center;
+  }
+  .plan-terms {
+    color: var(--c-ink-soft);
+    font-size: var(--fs-small);
+    text-wrap: balance;
+  }
+</style>

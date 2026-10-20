@@ -20,3 +20,17 @@
   [headers.values]
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+
+# /dubai/ pasó a /apertura-de-empresas/ (la sección de Dubái está en #dubai). force: aunque exista
+# dist/dubai/index.html (la redirección de respaldo que genera Astro), Netlify responde con 301.
+[[redirects]]
+  from = "/dubai/"
+  to = "/apertura-de-empresas/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/dubai"
+  to = "/apertura-de-empresas/"
+  status = 301
+  force = true

@@ -1,17 +1,20 @@
 ---
 /**
  * «El despacho» (Conóceme, debajo del bloque principal de Denisse): Nuestra historia, Nuestra
- * misión, Nuestros valores y «Conoce al equipo» + «Partner en Dubái: Poplavsky» → /dubai/.
- * Textos de la web anterior (docs/web-anterior.md §3 y §4), tal cual con sus correcciones
- * ortográficas (§8). Fotos: recortes 4:5 de _originales/web-anterior/
- * (scripts/prepare-web-anterior-images.mjs) optimizados con astro:assets.
+ * misión y Nuestros valores (web anterior, docs/web-anterior.md §3, tal cual con sus correcciones
+ * ortográficas §8), «Nuestro equipo» (docs/cambios-2026-10.md §3) y «Partners» (§4,
+ * components/about/Partners.astro; sustituye al bloque «Partner en Dubái»).
+ * Fotos: Everardo y Stephanie, recortes de _originales/web-anterior/
+ * (scripts/prepare-web-anterior-images.mjs); Denisse, de _originales/recursos-2026-10/
+ * (scripts/prepare-recursos-2026-10.mjs).
  * Componente independiente: no toca el bloque principal de /conoceme/.
  */
 import type { ImageMetadata } from 'astro';
 import { SITE } from '~/data/site';
 import Photo from '../ui/Photo.astro';
-import PartnerCard from '../dubai/PartnerCard.astro';
-import denisse from '~/assets/img/equipo/denisse-gonzalez.jpg';
+import Partners from './Partners.astro';
+// Denisse: foto nueva del despacho (docs/cambios-2026-10.md §3); Everardo y Stephanie, las de antes.
+import denisse from '~/assets/img/equipo/denisse-despacho.jpg';
 import everardo from '~/assets/img/equipo/everardo-corona.jpg';
 import stephanie from '~/assets/img/equipo/stephanie-gonzalez.jpg';
 
@@ -23,34 +26,57 @@ const values = [
   { title: 'Visión internacional', text: 'Pensamos a largo plazo y acompañamos a nuestros clientes más allá de las fronteras.' },
 ];
 
-type Member = { name: string; role: string; photo: ImageMetadata; alt: string; position?: string; bio: string[] };
+// «Nuestro equipo»: textos y cargos nuevos, tal cual (docs/cambios-2026-10.md §3; sustituyen a
+// los de la web antigua). Everardo Corona NO aparece como cofundador de nada. Mishell A. González
+// no tiene foto: ficha con sus iniciales en el mismo círculo que los retratos.
+type Member = {
+  name: string;
+  role: string;
+  photo?: ImageMetadata;
+  alt?: string;
+  initials?: string;
+  position?: string;
+  bio: string[];
+};
 const team: Member[] = [
   {
     name: 'Denisse González',
-    role: 'Directora ejecutiva',
+    role: 'Presidenta y fundadora de DG · Cofundadora de Empoderando Voces',
     photo: denisse,
-    alt: 'Retrato de Denisse González con blazer morado',
+    alt: 'Retrato de Denisse González en su despacho, con blazer burdeos',
+    position: '50% 40%',
     bio: [
-      'Denisse, fundadora y directora. Está especializada en Derecho Internacional. Le apasiona ofrecer soluciones legales claras y efectivas, y se involucra personalmente en la estrategia jurídica y el acompañamiento de cada cliente.',
+      'Denisse González es fundadora y presidenta de DG, firma que creó y dirige, liderando su visión, estrategia y desarrollo. Especializada en Derecho Internacional, cuenta con experiencia en asuntos jurídicos, movilidad internacional y relaciones institucionales.',
+      'Su trayectoria se caracteriza por una visión estratégica, vocación internacional y compromiso con ofrecer soluciones claras, eficaces y orientadas a resultados. Asimismo, es cofundadora de Empoderando Voces, iniciativa internacional dedicada a la promoción de la dignidad humana, los derechos humanos y el fortalecimiento de las comunidades.',
     ],
   },
   {
     name: 'Everardo Corona',
-    role: 'Cofundador honorífico y consultor externo',
+    role: 'Embajador de México en retiro · Consultor externo de DG',
     photo: everardo,
     alt: 'Retrato de Everardo Corona con traje oscuro y corbata',
     bio: [
-      'El Embajador Corona, cofundador honorífico, colabora de manera externa en la fineza de la estrategia institucional. Su visión sutil aporta una valiosa colaboración basada en una amplia experiencia en entornos oficiales y empresariales internacionales.',
-      'Su compromiso con los valores de integridad, excelencia y servicio lo convierten en una figura clave en la representación de la firma ante aliados y socios globales.',
+      'Everardo Corona, Embajador de México en retiro, desarrolló su trayectoria en el ámbito diplomático y fue representante de México en España. Actualmente colabora como consultor externo de DG, aportando su experiencia en relaciones diplomáticas, institucionales y empresariales internacionales.',
+      'Su experiencia y trayectoria aportan una perspectiva estratégica al desarrollo de proyectos y alianzas con instituciones y socios internacionales.',
     ],
   },
   {
     name: 'Stephanie González',
-    role: 'Directora técnica',
+    role: 'Directora técnica de DG · Cofundadora de Empoderando Voces',
     photo: stephanie,
     alt: 'Stephanie González con blusa roja junto a una estatua de la Justicia',
     bio: [
-      'Stephanie, directora técnica del despacho. Supervisa la correcta aplicación de los criterios legales en cada caso y asegura que los procesos se realicen con precisión y profesionalismo. Su experiencia garantiza un servicio riguroso y de alta calidad para todos nuestros clientes.',
+      'Stephanie González es directora técnica de DG, donde supervisa la correcta aplicación de criterios, procedimientos y estándares de calidad, procurando que cada asunto sea gestionado con rigor, precisión y profesionalismo.',
+      'Asimismo, es cofundadora de Empoderando Voces, participando en el desarrollo y ejecución de sus proyectos. Su perfil combina capacidad técnica, organización y compromiso con la excelencia, contribuyendo al fortalecimiento de la firma y de las iniciativas de impacto social.',
+    ],
+  },
+  {
+    name: 'Mishell A. González',
+    role: 'Cofundadora de Empoderando Voces · Fundadora de Bread & CommUnion',
+    initials: 'MG',
+    bio: [
+      'Mishell A. González es cofundadora de Empoderando Voces y fundadora de Bread & CommUnion, con sede en Estados Unidos y vínculos de colaboración a nivel global. Su trabajo se centra en la afirmación de la dignidad, el fortalecimiento comunitario y la defensa de nuestra humanidad compartida.',
+      'Su experiencia entre distintas culturas y comunidades ha fortalecido su compromiso con crear espacios donde cada persona sea vista, escuchada y acogida. Su visión contribuye al desarrollo de iniciativas que promueven la dignidad, la pertenencia y la transformación comunitaria.',
     ],
   },
 ];
@@ -68,7 +94,11 @@ const team: Member[] = [
         <h3 class="firm-subtitle">Nuestra historia</h3>
         <div class="prose">
           <p class="prose-lead">Este despacho nace con una visión clara: brindar soluciones legales efectivas, humanas y confiables a personas extranjeras y emprendedores que buscan construir un futuro sólido en México, España o expandirse a Dubái.</p>
-          <p>Fundado por Denisse Elena González, consultora internacional, abogada mexicana con dos maestrías, una en Estados Unidos por California Western School of Law y otra en España por el Instituto Superior de Derecho y Economía (ISDE). Especializada en extranjería y creación de empresas internacionales, el proyecto crece desde una vocación profunda de servicio, excelencia legal y compromiso con el éxito de cada cliente.</p>
+          {/* PENDIENTE (cliente): confirmar la redacción. Su texto decía «con dos maestrías, una en
+              Estados Unidos por California Western School of Law y otra en España por el ISDE»; se
+              añade el Máster en Gestión Administrativa (UAX) y «gestora administrativa»
+              (docs/cambios-2026-10.md §1) para no contradecir la trayectoria de esta misma página. */}
+          <p>Fundado por Denisse Elena González, consultora internacional, abogada mexicana y gestora administrativa con estudios de posgrado en Estados Unidos, por California Western School of Law, y en España, por el Instituto Superior de Derecho y Economía (ISDE) y la UAX. Especializada en extranjería y creación de empresas internacionales, el proyecto crece desde una vocación profunda de servicio, excelencia legal y compromiso con el éxito de cada cliente.</p>
           <p>Hoy, somos una firma que combina experiencia jurídica, atención personalizada y una mirada estratégica para acompañar a quienes desean avanzar legalmente y sin complicaciones.</p>
         </div>
       </div>
@@ -100,8 +130,8 @@ const team: Member[] = [
 <section class="section section--ivory team" id="equipo" aria-labelledby="team-title">
   <div class="container">
     <div class="team-head">
-      <p class="eyebrow" data-reveal>Equipo</p>
-      <h2 class="section-title" id="team-title" data-reveal>Conoce a nuestro equipo</h2>
+      <p class="eyebrow" data-reveal>{SITE.firm}</p>
+      <h2 class="section-title" id="team-title" data-reveal>Nuestro equipo</h2>
       <p class="lead" data-reveal>Profesionales especializados que se encargan de nuestro éxito.</p>
     </div>
 
@@ -109,9 +139,15 @@ const team: Member[] = [
       {
         team.map((m) => (
           <li class="member" data-reveal>
-            <figure class="member-photo">
-              <Photo src={m.photo} alt={m.alt} widths={[160, 240, 320]} sizes="(min-width: 600px) 152px, 112px" position={m.position} />
-            </figure>
+            {m.photo ? (
+              <figure class="member-photo">
+                <Photo src={m.photo} alt={m.alt ?? ''} widths={[160, 240, 320]} sizes="(min-width: 600px) 152px, 88px" position={m.position} />
+              </figure>
+            ) : (
+              <div class="member-photo member-photo--initials" aria-hidden="true">
+                <span>{m.initials}</span>
+              </div>
+            )}
             <div class="member-copy">
               <h3 class="member-name">{m.name}</h3>
               <p class="member-role">{m.role}</p>
@@ -125,12 +161,10 @@ const team: Member[] = [
         ))
       }
     </ul>
-
-    <div class="team-partner" data-reveal>
-      <PartnerCard link="dubai" headingId="team-partner-title" />
-    </div>
   </div>
 </section>
+
+<Partners />
 
 <style>
   /* ---------- El despacho ---------- */
@@ -221,9 +255,26 @@ const team: Member[] = [
     background: var(--c-lavender-200);
     box-shadow: 0 0 0 1px var(--c-line), 0 0 0 6px var(--c-white), 0 0 0 7px var(--c-lavender-300);
   }
+  @media (max-width: 599.98px) { .member-photo { margin-inline-start: 7px; } }
   .member-photo :global(picture),
   .member-photo :global(img) { width: 100%; height: 100%; }
   .member-photo :global(img) { object-fit: cover; }
+  /* Sin foto (Mishell): sus iniciales en serif sobre lavanda, mismo círculo y mismo anillo. */
+  .member-photo--initials {
+    display: grid;
+    place-items: center;
+    background:
+      radial-gradient(120% 90% at 30% 15%, var(--c-white), transparent 60%),
+      var(--c-lavender);
+  }
+  .member-photo--initials span {
+    font-family: var(--ff-serif);
+    font-size: 2.6rem;
+    font-weight: 500;
+    font-style: italic;
+    letter-spacing: .04em;
+    color: var(--c-plum);
+  }
   .member-copy { padding-top: .35rem; }
   .member-name { font-family: var(--ff-serif); font-size: var(--fs-h4); font-weight: 600; line-height: 1.12; }
   .member-role {
@@ -237,12 +288,24 @@ const team: Member[] = [
   }
   .member-bio { display: grid; gap: .75rem; margin-top: 1rem; color: var(--c-ink-soft); font-size: var(--fs-small); line-height: 1.65; text-wrap: pretty; }
 
+  /* Móvil: nombre y cargo junto al retrato; la biografía ocupa todo el ancho para no quedar en
+     una columna estrecha. */
+  @media (max-width: 599.98px) {
+    .member { grid-template-columns: 88px minmax(0, 1fr); column-gap: 1.25rem; row-gap: .35rem; }
+    .member-copy { display: contents; }
+    .member-photo { grid-row: 1 / span 2; align-self: center; }
+    .member-name, .member-role { grid-column: 2; }
+    .member-name { align-self: end; }
+    .member-role { align-self: start; margin-top: 0; }
+    .member-bio { grid-column: 1 / -1; margin-top: .9rem; }
+    .member-photo--initials span { font-size: 2.1rem; }
+  }
   @media (min-width: 600px) {
     .member { grid-template-columns: 152px minmax(0, 1fr); gap: 2rem; }
+    .member-photo--initials span { font-size: 3.4rem; }
   }
   @media (min-width: 1024px) {
     .team-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 
-  .team-partner { margin-top: clamp(2.5rem, 5vw, 3.5rem); }
 </style>

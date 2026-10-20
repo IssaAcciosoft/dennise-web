@@ -41,6 +41,12 @@ export default defineConfig({
   base: BASE_PATH,
   output: 'static',
   trailingSlash: 'always',
+  // /dubai/ pasó a /apertura-de-empresas/ (docs/cambios-2026-10.md §2.3). En Netlify la
+  // redirección es un 301 real (netlify.toml); aquí Astro genera además /dubai/index.html con
+  // <meta http-equiv="refresh"> y canonical, para que funcione en cualquier alojamiento.
+  redirects: {
+    '/dubai/': '/apertura-de-empresas/',
+  },
   build: {
     format: 'directory',
     // Todo el CSS va en línea: cero hojas de estilo que bloqueen el renderizado.

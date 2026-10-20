@@ -1,8 +1,11 @@
 ---
-import { NAV, LEGAL_NAV, SITE, PHONE, TEL_LINK, WA_TEXT, waLink, EMAIL, OFFICE } from '~/data/site';
+import { NAV, FOOTER_EXTRA, LEGAL_NAV, SITE, PHONE, TEL_LINK, WA_TEXT, waLink, EMAIL, OFFICE } from '~/data/site';
 import { url, normalizePath } from '~/lib/url';
 import logo from '~/assets/logo/dg-logo.svg?url';
 import SocialLinks from '../ui/SocialLinks.astro';
+import Photo from '../ui/Photo.astro';
+// Logo secundario de Empoderando Voces (docs/cambios-2026-10.md §1): franja en el pie general.
+import evLogo from '~/assets/img/ev/logo-ev-secundario.png';
 
 interface Props {
   /** Páginas cortas (404, /gracias/): el logo del pie se ve al cargar y puede ser el LCP. */
@@ -29,13 +32,25 @@ const here = (path: string) => (current === path ? 'page' : undefined);
         />
       </a>
       <p class="footer-motto">{SITE.motto}</p>
+      <a class="footer-ev" href={url('/empoderando-voces/')} aria-current={here('/empoderando-voces/')}>
+        <span class="footer-ev-logo">
+          <Photo src={evLogo} alt="" widths={[120, 180]} sizes="60px" />
+        </span>
+        <span class="footer-ev-text">
+          <span class="footer-ev-name">Empoderando Voces</span>
+          <span class="footer-ev-sub">Afirmando la Dignidad</span>
+        </span>
+      </a>
     </div>
 
     <nav class="footer-nav" aria-label="Pie de página">
       <h2 class="footer-title">Navegación</h2>
       <ul role="list">
         <li><a href={url('/')} aria-current={here('/')}>Inicio</a></li>
-        {NAV.map((item) => <li><a href={url(item.path)} aria-current={here(item.path)}>{item.label}</a></li>)}
+        {NAV.map((item) => <li><a href={url(item.path)} aria-current={here(item.path)}>{item.path === '/apertura-de-empresas/' ? 'Apertura de empresas' : item.label}</a></li>)}
+      </ul>
+      <ul class="footer-extra" role="list">
+        {FOOTER_EXTRA.map((item) => <li><a href={url(item.path)} aria-current={here(item.path)}>{item.label}</a></li>)}
       </ul>
     </nav>
 
@@ -89,6 +104,27 @@ const here = (path: string) => (current === path ? 'page' : undefined);
     font-size: 1.35rem;
     color: var(--c-plum);
   }
+  /* Franja de Empoderando Voces (logo secundario sobre su fondo blanco) */
+  .footer-ev {
+    display: inline-flex;
+    align-items: center;
+    gap: .9rem;
+    margin-top: 1.5rem;
+    padding: .5rem 1.1rem .5rem .5rem;
+    background: var(--c-white);
+    border: 1px solid var(--c-line);
+    border-radius: 14px;
+  }
+  .site-footer a.footer-ev { text-decoration: none; }
+  .footer-ev-logo { width: 60px; flex: none; }
+  .footer-ev-logo :global(img) { display: block; width: 100%; height: auto; }
+  .footer-ev-text { display: grid; gap: .1rem; line-height: 1.3; }
+  .footer-ev-name { color: var(--c-ink); font-family: var(--ff-serif); font-size: 1.15rem; font-weight: 600; }
+  .footer-ev-sub { color: var(--c-muted); font-size: .72rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+  @media (hover: hover) {
+    .site-footer a.footer-ev:hover { text-decoration: none; border-color: var(--c-line-strong); }
+    .site-footer a.footer-ev:hover .footer-ev-name { color: var(--c-plum); }
+  }
   .footer-title {
     margin-bottom: 1rem;
     color: var(--c-ink);
@@ -99,6 +135,7 @@ const here = (path: string) => (current === path ? 'page' : undefined);
   }
   .footer-nav ul,
   .footer-contact-list { display: grid; gap: .2rem; }
+  .footer-extra { margin-top: .6rem; padding-top: .6rem; border-top: 1px solid var(--c-line); }
   .site-footer a { color: var(--c-ink-soft); text-decoration: none; }
   .footer-nav a,
   .footer-contact-list a { display: inline-block; padding-block: .3rem; }

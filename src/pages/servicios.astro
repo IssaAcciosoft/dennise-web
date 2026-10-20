@@ -3,19 +3,21 @@ import BaseLayout from '~/layouts/BaseLayout.astro';
 import Photo from '~/components/ui/Photo.astro';
 import Icon from '~/components/ui/Icon.astro';
 import Consultations from '~/components/services/Consultations.astro';
-import Autogestiona from '~/components/services/Autogestiona.astro';
+import FirmServices from '~/components/services/FirmServices.astro';
 import BookingSlot from '~/components/services/BookingSlot.astro';
 import ServiceRequestDialog from '~/components/services/ServiceRequestDialog.astro';
 import ServicesTour from '~/components/services/ServicesTour.astro';
 import Immigration from '~/components/services/Immigration.astro';
 import ServicesFaq from '~/components/services/ServicesFaq.astro';
 import { FAQ_SPAIN, faqJsonLd } from '~/data/faq';
+import { autogestion, AUTOGESTION_PATH } from '~/lib/services';
+import { url } from '~/lib/url';
 import despacho from '~/assets/img/despacho.jpg';
 ---
 
 <BaseLayout
-  title="Servicios de extranjería y precios · Denisse González, abogada"
-  description="Extranjería en España (arraigos, reagrupación familiar, nacionalidad, estudios…), asesoría migratoria online y presencial y Programa Autogestiona: precios y reserva de asesorías."
+  title="Servicios de extranjería y precios · DG Gestores y Abogados"
+  description="Extranjería en España (arraigos, reagrupación familiar, nacionalidad, estudios, nómadas digitales…), gestión administrativa, homologación de títulos y asesoría migratoria online y presencial: precios y reserva de asesorías."
 >
   <Fragment slot="head">
     <script type="application/ld+json" is:inline set:html={JSON.stringify(faqJsonLd(FAQ_SPAIN))} />
@@ -47,6 +49,8 @@ import despacho from '~/assets/img/despacho.jpg';
 
   <Immigration />
 
+  <FirmServices />
+
   <section class="section section--ivory services-block" id="asesorias" aria-labelledby="asesorias-title">
     <div class="container">
       <div class="block-head" data-reveal>
@@ -54,12 +58,12 @@ import despacho from '~/assets/img/despacho.jpg';
         <p class="block-sub">Precios por sesión, online o presencial.</p>
       </div>
       <Consultations />
-    </div>
-  </section>
-
-  <section class="section section--ivory services-program" aria-labelledby="autogestiona-title">
-    <div class="container">
-      <Autogestiona />
+      {/* Autogestión DG: página aparte y discreta; desde aquí, solo este enlace sobrio
+          (docs/cambios-2026-10.md §2.8). Los protagonistas son los servicios individuales. */}
+      <p class="self-service" data-reveal>
+        ¿Prefieres gestionar tu trámite tú mismo?{' '}
+        <a href={url(AUTOGESTION_PATH)}>{autogestion.name}<span aria-hidden="true">&nbsp;→</span></a>
+      </p>
     </div>
   </section>
 
@@ -115,7 +119,25 @@ import despacho from '~/assets/img/despacho.jpg';
   }
 
   .services-block { padding-top: clamp(3rem, 2rem + 4vw, 5rem); padding-bottom: clamp(2rem, 4vw, 3rem); }
-  .services-program { padding-top: clamp(2rem, 4vw, 3rem); }
+  .self-service {
+    margin-top: clamp(1.75rem, 3vw, 2.5rem);
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--c-line);
+    color: var(--c-muted);
+    font-size: var(--fs-small);
+  }
+  .self-service a {
+    display: inline-block;
+    padding-block: .35rem;
+    color: var(--c-plum);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--c-line-strong);
+    text-underline-offset: .2em;
+  }
+  @media (hover: hover) {
+    .self-service a:hover { text-decoration-color: currentColor; }
+  }
   .block-head {
     display: flex;
     flex-wrap: wrap;

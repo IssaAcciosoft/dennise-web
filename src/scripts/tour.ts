@@ -6,9 +6,11 @@
  * ni el CSS de driver.js están en la carga inicial. Nunca arranca sola.
  *
  * Recorrido (en el orden de la página, sin saltos atrás): servicios de extranjería en España →
- * asesorías (online / presencial) → orientación académica → Programa Autogestiona (trámites,
- * planes, «Todos los planes incluyen») → Reserva tu asesoría → preguntas
- * frecuentes («¿Tienes dudas?», con el botón «Solicitar información»).
+ * gestoría y otros trámites (gestión administrativa, homologación de títulos, apertura de
+ * empresas) → asesorías (online / presencial) → orientación académica → Reserva tu asesoría →
+ * preguntas frecuentes («¿Tienes dudas?», con el botón «Solicitar información»).
+ * Autogestión DG ya no está en /servicios/ (página aparte y discreta, docs/cambios-2026-10.md
+ * §2.8): la visita no tiene pasos del programa.
  * Textos: solo hechos de docs/contenido.md y de la propia página (precios desde
  * src/data/servicios.json). Sin plazos ni promesas.
  *
@@ -23,7 +25,7 @@ import { driver, type DriveStep, type Driver, type PopoverDOM } from 'driver.js'
 // estilos, Astro lo incrustaría en el HTML de /servicios/ (carga inicial).
 import driverCss from 'driver.js/dist/driver.css?inline';
 import tourCss from '~/styles/tour.css?inline';
-import { consultations, autogestiona, immigration, formatAmount, CATALOG } from '~/lib/services';
+import { consultations, immigration, firmServices, companies, formatAmount } from '~/lib/services';
 
 function injectStyles(): void {
   if (document.getElementById('dg-tour-styles')) return;
@@ -42,7 +44,7 @@ const priceOf = (id: string, modality: string) =>
 const isNarrow = () => window.matchMedia('(max-width: 599.98px)').matches;
 
 /*
- * En móvil, los bloques altos (trámites, «Todos los planes incluyen») se
+ * En móvil, los bloques altos (p. ej. la lista de «Gestoría y otros trámites») se
  * señalan con un «proxy»: una caja invisible sobre su título y sus primeras filas (las que caben
  * con la tarjeta debajo), para que el bloque resaltado y la tarjeta quepan juntos en la
  * pantalla. Se retiran al cerrar la visita.
@@ -84,9 +86,6 @@ function buildSteps(): DriveStep[] {
   const main = consultations.find((c) => c.id === 'asesoria-migratoria-60') ?? consultations[0];
   const academic = consultations.find((c) => c.id.startsWith('orientacion'));
   const durations = consultations.filter((c) => c.name === main.name).map((c) => c.duration_label);
-  const procedures = autogestiona.procedures;
-  const plans = autogestiona.plans;
-  const plansText = plans.map((p) => `${p.name} ${euros(p.amount)}`);
   const placeholder = document.querySelector('[data-booking-placeholder]');
 
   const immServices = immigration.services.map((s) => s.name);
@@ -96,6 +95,13 @@ function buildSteps(): DriveStep[] {
       popover: {
         title: immigration.title,
         description: `${immServices.slice(0, 3).join(', ').replace(/, ([A-ZÁÉÍÓÚ])/g, (_, c: string) => `, ${c.toLowerCase()}`)}${immServices.length > 3 ? ` y ${immServices.length - 3} servicios más` : ''}. En cada uno puedes «Solicitar información».`,
+      },
+    },
+    {
+      element: narrow ? proxyFor('[data-tour="gestoria"]', '.firm-card', 2) : '[data-tour="gestoria"]',
+      popover: {
+        title: firmServices.title,
+        description: `${firmServices.services.map((s, i) => (i ? lcFirst(s.name) : s.name)).join(' y ')}. Y ${lcFirst(companies.name)} en ${companies.countries.map((c) => c.name).join(', ').replace(/, ([^,]*)$/, ' y $1')}.`,
       },
     },
     {
@@ -121,34 +127,6 @@ function buildSteps(): DriveStep[] {
           },
         }
       : null,
-    {
-      element: narrow ? proxyFor('[data-tour="tramites"]', '.chip-list li', 99) : '[data-tour="tramites"]',
-      popover: {
-        title: autogestiona.name,
-        description: `${autogestiona.procedures_title}: ${procedures.slice(0, 3).map(lcFirst).join(', ')}${procedures.length > 3 ? ` y ${procedures.length - 3} más` : ''}.`,
-      },
-    },
-    {
-      // Móvil: una sola tarjeta (la destacada, si la cliente marca alguna; si no, la primera).
-      element: narrow
-        ? `[data-tour="planes"] > ${plans.some((p) => p.featured) ? '.plan-card--featured' : 'li:first-child'}`
-        : '[data-tour="planes"]',
-      popover: {
-        title: 'Planes',
-        description: `${plansText.slice(0, -1).join(', ')} y ${plansText.at(-1)}, ${CATALOG.tax_label}. Pago seguro con tarjeta.`,
-        // Escritorio: encima de las tarjetas (debajo no cabe y driver.js la pondría sobre el
-        // plan del centro, tapando su precio).
-        side: 'top',
-        align: 'center',
-      },
-    },
-    {
-      element: narrow ? proxyFor('[data-tour="incluye"]', '.check-list li', 3) : '[data-tour="incluye"]',
-      popover: {
-        title: autogestiona.includes_title,
-        description: `${autogestiona.includes.slice(0, -1).join(', ')} y ${lcFirst(autogestiona.includes.at(-1) ?? '')}.`.replace(/, ([A-ZÁÉÍÓÚ])/g, (_, c: string) => `, ${c.toLowerCase()}`),
-      },
-    },
     {
       element: '[data-tour="reservar"]',
       popover: {

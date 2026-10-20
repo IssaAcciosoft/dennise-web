@@ -1,5 +1,5 @@
 /**
- * Globo de Conóceme (México · España · Nueva York): datos, vista y colores compartidos por
+ * Globo de Conóceme (México · España): datos, vista y colores compartidos por
  * - el globo WebGL (globe-mount.ts, cobe),
  * - las etiquetas HTML y el póster estático (GlobeSlot.astro),
  * - el generador del póster (scripts/render-globe-poster.mjs → src/assets/globe-poster.png).
@@ -11,33 +11,36 @@
 export type LatLon = [number, number];
 
 export interface Place {
-  id: 'mx' | 'es' | 'ny';
+  id: 'mx' | 'es';
   label: string;
   location: LatLon;
   /** Lado de la etiqueta respecto al punto. */
   side: 'below' | 'above' | 'left' | 'right';
 }
 
-/** Ciudad de México, Madrid y Nueva York (docs/contenido.md: «México · España · Nueva York»). */
+/**
+ * Ciudad de México y Madrid. Nueva York ya no aparece: no es un lugar donde trabaje
+ * (docs/cambios-2026-10.md §2.5; el Summit de la ONU, al que asistió como delegada, se mantiene
+ * en el resto de la web).
+ */
 export const PLACES: Place[] = [
   { id: 'mx', label: 'México', location: [19.4326, -99.1332], side: 'below' },
-  { id: 'ny', label: 'Nueva York', location: [40.7128, -74.006], side: 'left' },
   { id: 'es', label: 'España', location: [40.4168, -3.7038], side: 'below' },
 ];
 
 const at = (id: Place['id']) => PLACES.find((p) => p.id === id)!.location;
 
-/** Arcos: México → España y España → Nueva York. */
-export const ARCS: { from: LatLon; to: LatLon }[] = [
-  { from: at('mx'), to: at('es') },
-  { from: at('es'), to: at('ny') },
-];
+/** Arco: México → España. */
+export const ARCS: { from: LatLon; to: LatLon }[] = [{ from: at('mx'), to: at('es') }];
 
-/** Vista inicial (= póster): centrada en el Atlántico norte, inclinada hacia el norte. */
+/**
+ * Vista inicial (= póster): centrada en el Atlántico norte, inclinada hacia el norte, con México
+ * y España simétricos respecto al centro (x ≈ 0,25 y 0,75 del lienzo).
+ */
 export const VIEW = {
-  phi: -0.66,
+  phi: -0.55,
   theta: 0.5,
-  /** Vaivén automático (rad) y su periodo (ms): los tres lugares siempre a la vista. */
+  /** Vaivén automático (rad) y su periodo (ms): los dos lugares siempre a la vista. */
   sway: 0.24,
   swayPeriod: 28000,
 };

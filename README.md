@@ -16,8 +16,10 @@ npm run preview      # sirve dist/ para revisarla
 npm run check        # comprobación de tipos y de los componentes (astro check)
 npm run icons        # regenera los iconos PNG a partir del logotipo (revisar el resultado)
 npm run globe-poster # regenera el póster del globo de Conóceme (necesita Playwright + Chromium)
-npm run og-images    # regenera public/og-image.jpg y public/og-dubai.jpg (Playwright + Chromium)
+npm run og-images    # regenera public/og-image.jpg y public/og-empresas.jpg (Playwright + Chromium)
 npm run web-anterior-images # recortes del equipo y logo del partner desde _originales/web-anterior/
+npm run recursos-2026-10-images # recortes y logos de _originales/recursos-2026-10/ (despacho, equipo,
+                     # partners, EMLHIS, logos de Empoderando Voces)
 ```
 
 Para probar la versión compilada «como en producción» (con gzip): `npx serve dist`.
@@ -34,15 +36,22 @@ scripts/
   render-globe-poster.mjs   Póster del globo (src/assets/globe-poster.png) con cobe y la misma vista
   render-og-images.mjs      Imágenes para redes (og-image.jpg, og-dubai.jpg) con la tipografía de la web
   prepare-web-anterior-images.mjs  Recortes 4:5 del equipo y logo de Poplavsky (web anterior)
+  prepare-recursos-2026-10.mjs     Retrato del despacho (inicio + Conóceme), foto de Denisse del
+                            equipo, EMLHIS, logos de partners, Ariel Noriega y logos de Empoderando Voces
 src/
   pages/                    Una página por archivo (la URL sale del nombre)
     index.astro             Inicio (hero de la cliente, servicios + Dubái, testimonio)
     conoceme.astro          Conóceme · Actividad reciente (agenda 2026) · Experiencia · Mi trayectoria ·
                             globo 3D · El despacho y equipo
-    servicios.astro         Extranjería en España · Asesorías · Programa Autogestiona · #reservar ·
-                            preguntas frecuentes (#preguntas) · visita guiada
-    dubai.astro             Abre tu empresa en Dubái (¿Por qué Dubái?, estructuras, equipo local,
-                            partner Poplavsky, preguntas frecuentes, solicitud de información)
+    servicios.astro         Extranjería en España (9 tarjetas) · Gestoría y otros trámites · Asesorías
+                            · enlace sobrio a Autogestión DG · #reservar · preguntas frecuentes
+                            (#preguntas) · visita guiada
+    autogestion-dg.astro    Autogestión DG (página discreta: solo enlace en Servicios y en el pie):
+                            vídeo (public/video/, preload="none"), trámites, planes con incluye /
+                            no incluye, botones de AccioGest y aviso de condiciones
+    apertura-de-empresas.astro  Apertura de empresas en España, México y Dubái (#dubai: ¿Por qué
+                            Dubái?, estructuras, equipo local, partner Poplavsky, preguntas
+                            frecuentes). /dubai/ redirige aquí (netlify.toml 301 + `redirects` de Astro)
     derechos-humanos.astro  Derechos humanos · Summit · cita · Mi compromiso · En medios (8M + prensa 2021)
     empoderando-voces.astro Empoderando Voces + formulario «Cuéntame tu historia»
     contacto.astro          Despacho (dirección y «Cómo llegar»), WhatsApp, teléfono, email, redes y
@@ -59,8 +68,8 @@ src/
     seo/                    Fonts (tipografías autoalojadas + fallbacks), JsonLd
     ui/                     Icon, Photo (imágenes optimizadas), SocialLinks, Faq (<details>)
     home/ about/ services/ media/ contact/ ev/ dubai/   Secciones de cada página
-                            (about/Firm.astro: El despacho + equipo; about/RecentActivity.astro: agenda
-                            2026; media/PressList.astro: prensa 2021; dubai/PartnerCard.astro;
+                            (about/Firm.astro: El despacho + Nuestro equipo; about/Partners.astro:
+                            Partners de Conóceme; about/RecentActivity.astro: agenda 2026 con dos fotos; media/PressList.astro: prensa 2021; dubai/PartnerCard.astro;
                             services/Immigration.astro y ServicesFaq.astro; home/Testimonial.astro)
                             (about/globe-mount.ts + globe-config.ts + GlobeSlot.astro: globo 3D, sin React;
                             services/ServicesTour.astro: botón «¿Te guío?»)
@@ -71,7 +80,8 @@ src/
                             CircularGallery, Magnet
   data/
     site.ts                 Teléfono, WhatsApp, email, despacho, redes, navegación ← ÚNICA fuente
-    servicios.json          Catálogo: extranjería en España, asesorías, planes, Dubái ← precios aquí
+    servicios.json          Catálogo: extranjería en España, gestoría, asesorías, Autogestión DG
+                            (planes con `includes`), apertura de empresas, Dubái ← precios aquí
     faq.ts                  Preguntas frecuentes (España / Dubái) + FAQPage para JSON-LD
     medios.ts               Artículo «8 de marzo — Voces que se unen» y su transcripción; prensa de
                             2021 (PRESS_2021: medio, fecha, titular, extracto literal, enlace)
@@ -121,9 +131,9 @@ Especificación: `docs/integracion-acciogest.md`. Todo se configura en
 | Pieza | Dónde | ID |
 |---|---|---|
 | «Cuéntame tu historia» (diálogo en `/empoderando-voces/`, también `#cuentame`) | `components/ev/StoryDialog.astro` | `FORMS.historia` |
-| «Solicitar información» (diálogo en `/servicios/`: tarjetas, planes sin ID, «Solicitar cita»; y en `/dubai/`, con «Apertura de empresa en Dubái» preseleccionado) | `components/services/ServiceRequestDialog.astro` | `FORMS.servicio` |
+| «Solicitar información» (diálogo en `/servicios/`: tarjetas y «Solicitar cita»; en `/apertura-de-empresas/`, con el país preseleccionado; en `/autogestion-dg/`, planes sin ID, con `withPlans`) | `components/services/ServiceRequestDialog.astro` | `FORMS.servicio` |
 | Formulario de contacto (`/contacto/#formulario-contacto`) | `components/contact/ContactForm.astro` | `FORMS.contacto` |
-| «Contratar Plan X» → página de pago de AccioGest en pestaña nueva | `components/services/Autogestiona.astro` | `PLANES.basico/estandar/premium` |
+| «Contratar Plan X» → página de pago de AccioGest en pestaña nueva (`/autogestion-dg/`) | `components/services/AutogestionPlans.astro` | `PLANES.basico/estandar/premium` |
 | Widget de reservas en `/servicios/#reservar` (carga diferida, 760 px reservados) | `components/services/BookingSlot.astro` | `BOOKING_PLUGIN_ID` |
 
 **Poner los IDs** — editando los valores de ejemplo de `src/config/acciogest.ts` o, mejor, con
@@ -238,6 +248,10 @@ derivado de la marca), oro antiguo `--ev-gold` usado con moderación (contraste 
 Cormorant en cursiva + Barlow Condensed. Cabecera en su variante oscura translúcida
 (`BaseLayout headerTone="dark"`) sobre la portada, sin corte claro/oscuro.
 
+- Logos (`src/assets/img/ev/`, `docs/cambios-2026-10.md` §1): el principal en la firma de la
+  página y como sello sobre las fotos de la tarjeta del inicio; el secundario en la franja
+  «Empoderando Voces» del pie general (todas las páginas). Van sobre su fondo blanco original.
+  El despacho sigue con el logo DG.
 - Portada: tipográfica en móvil (el título es el LCP y no se anima); en escritorio, con la foto
   de *Education for Peace* (solo se descarga a partir de 960 px).
 - Islas de React Bits (`src/components/react-bits/`, ver `THIRD_PARTY_NOTICES.md`):
@@ -263,8 +277,9 @@ Cormorant en cursiva + Barlow Condensed. Cabecera en su variante oscura translú
 React**: lo carga un `<script>` con `import()`) + `globe-config.ts` (lugares, vista, colores y
 proyección compartidos).
 
-- México, España y Nueva York en ciruela sobre un globo marfil y lavanda, unidos por dos
-  arcos; etiquetas HTML que siguen a los puntos; pie «México · España · Nueva York».
+- México y España en ciruela sobre un globo marfil y lavanda, unidos por un arco; etiquetas HTML
+  que siguen a los puntos; pie «México · España». Nueva York ya no aparece (no trabaja allí,
+  `docs/cambios-2026-10.md` §2.5); el Summit de la ONU sigue en el resto de la web.
 - **Póster** (`src/assets/globe-poster.png`, AVIF/WebP diferido): el mismo globo renderizado
   con cobe y la misma vista (`npm run globe-poster`), así que al hidratar no hay salto. Es lo
   que se ve antes de hidratar, sin JavaScript, sin WebGL y con «reducir movimiento».
@@ -272,7 +287,7 @@ proyección compartidos).
   y solo sin «reducir movimiento»; contexto WebGL en un momento ocioso; ≤ 2× de densidad; ~30 fps en reposo; se detiene fuera de pantalla y con
   la pestaña oculta. cobe reescribe una `<style>` en cada fotograma (para CSS Anchor
   Positioning, que no usamos): se retira del documento para no recalcular estilos.
-- Movimiento: vaivén lento (±14°, 28 s) que mantiene los tres lugares a la vista y **se frena
+- Movimiento: vaivén lento (±14°, 28 s) que mantiene los dos lugares a la vista y **se frena
   y se detiene a los 5 s** sin interacción (WCAG 2.2.2); se puede girar arrastrando en
   horizontal (inercia con rozamiento, vuelve a moverse) y vuelve solo a su vista; en táctil el
   gesto vertical sigue desplazando la página.
@@ -286,9 +301,9 @@ JavaScript es un enlace a `#asesorias`. Al pulsarlo se descarga `src/scripts/tou
 driver.js y su CSS (≈ 13 KB gzip, todo en ese chunk diferido; se precarga al pasar el ratón o
 enfocar el botón).
 
-- Pasos, en el orden de la página (9): servicios de extranjería en España → asesorías → online
-  o presencial → orientación académica → Programa Autogestiona (trámites, planes, «Todos los
-  planes incluyen») → Reserva tu asesoría → preguntas frecuentes
+- Pasos, en el orden de la página (7): servicios de extranjería en España → gestoría y otros
+  trámites → asesorías → online o presencial → orientación académica → Reserva tu asesoría →
+  preguntas frecuentes (Autogestión DG ya no forma parte de la visita)
   («¿Tienes dudas?», con el botón «Solicitar información», que abre el diálogo de solicitud con
   el evento `dg:service-request`). Sin JavaScript, «¿Te guío?» lleva a `#extranjeria`.
 - Textos solo con hechos de `docs/contenido.md` y de la página (precios desde
@@ -408,8 +423,10 @@ De la cliente (ver `docs/contenido.md` §7):
 3. Alertas de la web anterior (`docs/web-anterior.md` §9): fiscalidad en Dubái (frases matizadas
    marcadas como pendientes de revisión legal), cifra «más de 1000» (no publicada), permiso del
    testimonio de Jose, nacionalidad «por matrimonio o descendencia».
-4. Permiso del equipo (Everardo Corona, Stephanie González) y de Poplavsky (logo) para publicar;
-   una foto mejor de Stephanie si existe.
+4. Permiso del equipo (Everardo Corona, Stephanie González, Mishell A. González) y de los
+   partners (Poplavsky, De la Flor Abogados, Espiga Exports, Ariel Noriega) para publicar; una
+   foto mejor de Stephanie si existe; nombre y descripción de «Bienvenido / Welcome!» (proyecto
+   de Everardo Corona, PENDIENTE); originales de los logos de Empoderando Voces sin recortar.
 5. AccioGest: faltan los 3 `FORM_ID` de formularios, los 3 de planes y el `PLUGIN_ID` de
    reservas (README → AccioGest). Hasta entonces, modo simulado con aviso visible. Si «Servicio»
    es un desplegable en AccioGest, añadir los nuevos valores (extranjería y Dubái).

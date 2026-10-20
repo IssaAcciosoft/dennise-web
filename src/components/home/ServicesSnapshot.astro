@@ -1,13 +1,17 @@
 ---
 /**
- * Resumen de servicios y precios (inicio), generado desde src/data/servicios.json, y tarjeta de
- * «Abre tu empresa en Dubái» (→ /dubai/; texto del bloque Dubái de la web anterior, §2).
+ * Resumen de servicios y precios (inicio), generado desde src/data/servicios.json: asesorías,
+ * servicios individuales (los protagonistas) y tarjeta de «Apertura de empresas» en España,
+ * México y Dubái (→ /apertura-de-empresas/; texto del bloque Dubái de la web anterior, §2).
+ * Autogestión DG NO aparece en Inicio (docs/cambios-2026-10.md §2.8: solo enlace en el pie).
  */
-import { consultations, autogestiona, dubai, formatAmount, CATALOG } from '~/lib/services';
+import { consultations, immigration, firmServices, companies, formatAmount } from '~/lib/services';
 import { BOOKING_PATH } from '~/data/site';
 import { url } from '~/lib/url';
 import Icon from '../ui/Icon.astro';
 
+// Servicios individuales: extranjería en España + gestoría y homologación de títulos.
+const services = [...immigration.services, ...firmServices.services].map((s) => s.name);
 const modalities = consultations[0]?.prices.map((p) => ({ modality: p.modality, label: p.label })) ?? [];
 ---
 
@@ -52,35 +56,31 @@ const modalities = consultations[0]?.prices.map((p) => ({ modality: p.modality, 
       </div>
 
       <div class="snapshot-card snapshot-card--program" data-reveal>
-        <h3 class="snapshot-card-title">{autogestiona.name}</h3>
-        <ul class="plan-mini" role="list">
-          {
-            autogestiona.plans.map((p) => (
-              <li class:list={{ 'is-featured': p.featured }}>
-                <span class="plan-mini-name">{p.name}</span>
-                <span class="amount">{formatAmount(p.amount)}&nbsp;€</span>
-              </li>
-            ))
-          }
+        <h3 class="snapshot-card-title">Servicios</h3>
+        <ul class="service-mini" role="list">
+          {services.map((name) => <li>{name}</li>)}
         </ul>
-        <p class="snapshot-note">{CATALOG.tax_label}</p>
+        <a class="snapshot-more" href={url('/servicios/#extranjeria')}>
+          <span>Ver todos los servicios</span>
+          <Icon name="arrow" />
+        </a>
       </div>
     </div>
 
     <article class="snapshot-dubai" data-reveal aria-labelledby="snapshot-dubai-title">
       <div class="snapshot-dubai-copy">
-        <p class="snapshot-dubai-kicker">Empresas en Dubái</p>
+        <p class="snapshot-dubai-kicker">Crea tu empresa</p>
         <h3 class="snapshot-dubai-title" id="snapshot-dubai-title">
-          <a href={url('/dubai/')}>Abre tu empresa en Dubái</a>
+          <a href={url(companies.path)}>{companies.name}</a>
         </h3>
         <p class="snapshot-dubai-text">Te ayudamos a crear tu negocio con estructura legal sólida. Constitución, apertura bancaria, fiscalidad y acompañamiento jurídico desde el primer paso.</p>
       </div>
       <div class="snapshot-dubai-side">
-        <ul class="snapshot-dubai-list" role="list" aria-label="Estructuras">
-          {dubai.structures.map((item) => <li>{item}</li>)}
+        <ul class="snapshot-dubai-list" role="list" aria-label="Países">
+          {companies.countries.map((c) => <li>{c.name}</li>)}
         </ul>
         <span class="snapshot-dubai-cta" aria-hidden="true">
-          <span>Ver Dubái</span>
+          <span>Ver apertura de empresas</span>
           <Icon name="arrow" />
         </span>
       </div>
@@ -156,38 +156,36 @@ const modalities = consultations[0]?.prices.map((p) => ({ modality: p.modality, 
   .row-duration { display: block; margin-top: .15rem; color: var(--c-plum); font-size: .76rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
   .amount { font-family: var(--ff-serif); font-size: clamp(1.45rem, 1.25rem + .8vw, 1.8rem); font-weight: 600; color: var(--c-plum); white-space: nowrap; }
 
-  .plan-mini { display: grid; }
-  .plan-mini li {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: .9rem 0;
-    border-top: 1px solid rgba(110, 29, 122, .16);
+  .service-mini { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .service-mini li {
+    padding: .45rem .85rem;
+    background: rgba(255, 255, 255, .7);
+    border: 1px solid rgba(110, 29, 122, .16);
+    border-radius: var(--radius-pill);
+    color: var(--c-ink);
+    font-size: .92rem;
+    line-height: 1.3;
   }
-  .plan-mini-name { color: var(--c-ink); font-weight: 600; }
-  .plan-mini li.is-featured .plan-mini-name::after {
-    content: "";
-    display: inline-block;
-    width: .4rem;
-    height: .4rem;
-    margin-left: .6rem;
-    vertical-align: .2rem;
-    background: var(--c-plum);
-    rotate: 45deg;
-  }
-  .snapshot-note {
-    padding-top: .8rem;
-    border-top: 1px solid rgba(110, 29, 122, .16);
-    color: var(--c-muted);
-    font-size: .78rem;
+  .snapshot-more {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    min-height: 44px;
+    margin-top: 1rem;
+    color: var(--c-plum);
     font-weight: 600;
-    letter-spacing: .14em;
-    text-transform: uppercase;
+    text-decoration: underline;
+    text-decoration-color: var(--c-line-strong);
+    text-underline-offset: .2em;
+  }
+  .snapshot-more :global(.icon) { transition: transform var(--dur) var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) {
+    .snapshot-more:hover { text-decoration-color: currentColor; }
+    .snapshot-more:hover :global(.icon) { transform: translateX(3px); }
   }
   .snapshot-actions { margin-top: clamp(2rem, 4vw, 3rem); }
 
-  /* Tarjeta de Dubái: ciruela profundo con la celosía en oro (motivo de /dubai/). Toda la
+  /* Tarjeta de Dubái: ciruela profundo con la celosía en oro (motivo de /apertura-de-empresas/). Toda la
      tarjeta es pulsable (el enlace del título se extiende con ::after). */
   .snapshot-dubai {
     --focus: var(--ev-gold);

@@ -4,6 +4,9 @@
  * anterior (docs/web-anterior.md §5 y §6) desde src/data/servicios.json → immigration.
  * - Cada servicio: «Solicitar información» abre el diálogo de solicitud (ServiceRequestDialog)
  *   con el servicio preseleccionado (data-service-request = lead_value); sin JavaScript, WhatsApp.
+ * - «Nómadas digitales · Emprendedores · Residencias» ya no son una línea de texto («También»):
+ *   son tarjetas como las demás (docs/cambios-2026-10.md §2.1). PENDIENTE: sus descripciones son
+ *   neutras y provisionales (`pending: true` en servicios.json) hasta que la cliente envíe las suyas.
  * - Visita guiada: data-tour="extranjeria" (src/scripts/tour.ts).
  */
 import { immigration } from '~/lib/services';
@@ -45,12 +48,6 @@ const [lead, ...rest] = immigration.intro;
       }
     </ul>
 
-    <div class="imm-also" data-reveal>
-      <p class="imm-also-title">{immigration.also_title}</p>
-      <ul class="imm-also-list" role="list">
-        {immigration.also.map((a) => <li>{a.name}</li>)}
-      </ul>
-    </div>
   </div>
 </section>
 
@@ -97,31 +94,4 @@ const [lead, ...rest] = immigration.intro;
   .imm-desc { color: var(--c-ink-soft); font-size: var(--fs-small); line-height: 1.65; text-wrap: pretty; }
   .imm-ask { align-self: flex-start; margin-top: auto; font-size: .95rem; }
 
-  .imm-also {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: .75rem 1.25rem;
-    margin-top: clamp(1.75rem, 3vw, 2.5rem);
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--c-line);
-  }
-  .imm-also-title {
-    color: var(--c-muted);
-    font-size: .78rem;
-    font-weight: 600;
-    letter-spacing: .18em;
-    text-transform: uppercase;
-  }
-  .imm-also-list { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem 1rem; }
-  .imm-also-list li {
-    display: inline-flex;
-    align-items: center;
-    gap: 1rem;
-    font-family: var(--ff-serif);
-    font-size: clamp(1.2rem, 1.1rem + .4vw, 1.4rem);
-    font-weight: 600;
-    color: var(--c-ink);
-  }
-  .imm-also-list li:not(:last-child)::after { content: ""; width: .35rem; height: .35rem; background: var(--c-plum); rotate: 45deg; }
 </style>

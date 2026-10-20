@@ -8,8 +8,11 @@ export const SITE = {
   name: 'Denisse González',
   /** Nombre comercial del despacho (JSON-LD LegalService, pie, contacto, páginas legales). */
   firm: 'DG Gestores y Abogados',
-  role: 'Abogada',
-  title: 'Denisse González · Abogada',
+  /** Profesión de Denisse (JSON-LD Person.jobTitle). */
+  role: 'Presidenta y fundadora de DG Gestores y Abogados · Abogada y gestora administrativa',
+  /** Texto bajo el nombre en la cabecera (docs/cambios-2026-10.md §1). */
+  brandRole: 'Gestores y Abogados',
+  title: 'Denisse González · DG Gestores y Abogados',
   description:
     'Denisse González, abogada mexicana en España: asesoría migratoria y trámites de extranjería online y presenciales, derecho internacional y derechos humanos.',
   motto: 'Escuchar. Conectar. Actuar.',
@@ -72,7 +75,8 @@ export const WA_TEXT = {
   general: 'Hola Denisse, me gustaría hacerte una consulta.',
   reserva: 'Hola Denisse, me gustaría reservar una asesoría. ¿Qué disponibilidad tienes?',
   historia: 'Hola Denisse, quiero compartir mi historia (Empoderando Voces).',
-  autogestionaDudas: 'Hola Denisse, tengo dudas sobre el Programa Autogestiona. Mi trámite es: ',
+  autogestionDudas: 'Hola Denisse, tengo dudas sobre Autogestión DG. Mi trámite es: ',
+  empresas: 'Hola Denisse, me gustaría recibir información sobre la apertura de una empresa.',
   dubai: 'Hola Denisse, me gustaría recibir información sobre la apertura de una empresa en Dubái.',
 } as const;
 
@@ -87,13 +91,20 @@ export const TEL_LINK = `tel:${PHONE.e164}`;
 export const NAV = [
   { label: 'Conóceme', path: '/conoceme/' },
   { label: 'Servicios', path: '/servicios/' },
-  { label: 'Dubái', path: '/dubai/' },
+  // Antes «Dubái» (/dubai/ redirige aquí). docs/cambios-2026-10.md §2.3.
+  { label: 'Empresas', path: '/apertura-de-empresas/' },
   { label: 'Derechos humanos', path: '/derechos-humanos/' },
   { label: 'Empoderando Voces', path: '/empoderando-voces/' },
   { label: 'Contacto', path: '/contacto/' },
 ] as const;
 
 export const BOOKING_PATH = '/servicios/#reservar';
+
+/**
+ * Enlaces del pie que NO están en la navegación principal. Autogestión DG es una página discreta:
+ * solo se enlaza desde aquí y desde /servicios/ (docs/cambios-2026-10.md §2.8).
+ */
+export const FOOTER_EXTRA = [{ label: 'Autogestión DG', path: '/autogestion-dg/' }] as const;
 
 export const LEGAL_NAV = [
   { label: 'Aviso legal', path: '/aviso-legal/' },

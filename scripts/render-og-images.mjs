@@ -3,8 +3,8 @@
  *
  * - public/og-image.jpg  → por defecto (inicio y resto): titular del hero de la cliente
  *   («Derecho que conecta personas, oportunidades y derechos»), áreas y retrato en arco.
- * - public/og-dubai.jpg  → /dubai/: «Abre tu empresa en Dubái», estructuras y el arco con la
- *   celosía de ocho puntas (mismo motivo que la portada de la página).
+ * - public/og-empresas.jpg → /apertura-de-empresas/: «Apertura de empresas», España · México ·
+ *   Dubái y el arco con la celosía de ocho puntas (mismo motivo que la portada de la página).
  *
  *   npm run og-images
  *
@@ -77,7 +77,7 @@ const pages = [
 </style>
 <div class="wrap">
   <div>
-    <div class="brand"><img src="${logo}" alt=""><div><b>Denisse González</b><span>Abogada</span></div></div>
+    <div class="brand"><img src="${logo}" alt=""><div><b>Denisse González</b><span>Gestores y Abogados</span></div></div>
     <h1>Derecho que conecta <em>personas, oportunidades y&nbsp;derechos</em></h1>
     <p class="sub">Derecho internacional · Movilidad internacional · Derechos humanos</p>
   </div>
@@ -85,7 +85,7 @@ const pages = [
 </div>`,
   },
   {
-    out: 'public/og-dubai.jpg',
+    out: 'public/og-empresas.jpg',
     html: `<style>${base}
 .brand span{letter-spacing:.22em}
 .kicker{display:flex;align-items:center;gap:14px;margin-bottom:20px;color:#6E1D7A;font-size:15px;font-weight:600;letter-spacing:.24em;text-transform:uppercase}
@@ -105,12 +105,12 @@ h1{font-size:84px}
   <div>
     <div class="brand"><img src="${logo}" alt=""><div><b>DG Gestores y Abogados</b><span>Denisse González</span></div></div>
     <p class="kicker">Crea tu empresa</p>
-    <h1>Abre tu empresa en <em>Dubái</em></h1>
-    <p class="sub">Holding · Real Estate · Trading</p>
+    <h1>Apertura de <em>empresas</em></h1>
+    <p class="sub">España · México · Dubái</p>
   </div>
   <div class="media"><div class="arch-outline"></div><div class="arch">
     <svg class="star" viewBox="0 0 100 100"><g fill="none" stroke="currentColor" stroke-width=".9"><path d="M29 29h42v42H29z"/><path d="M50 20.3 79.7 50 50 79.7 20.3 50z"/><circle cx="50" cy="50" r="12"/></g></svg>
-    <p class="legend">Dubái<span>Emiratos Árabes Unidos</span></p>
+    <p class="legend">Empresas<span>España · México · Dubái</span></p>
   </div></div>
 </div>`,
   },

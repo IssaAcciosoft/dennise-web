@@ -1,20 +1,20 @@
 ---
 /**
- * BORRADOR de condiciones de contratación (asesorías y Programa Autogestiona).
+ * BORRADOR de condiciones de contratación (asesorías y Autogestión DG).
  * Completar los [PENDIENTE] y revisarlo con la titular / asesoría legal antes de publicar.
  * Precios y servicios desde src/data/servicios.json (siempre coinciden con la web).
  */
 import LegalLayout from '~/layouts/LegalLayout.astro';
 import { PHONE, TEL_LINK, WA_TEXT, waLink, EMAIL, OFFICE } from '~/data/site';
 import { LEGAL_ID } from '~/data/legal';
-import { consultations, autogestiona, formatAmount } from '~/lib/services';
+import { consultations, autogestion, planIncludes, formatAmount } from '~/lib/services';
 import { url } from '~/lib/url';
 ---
 
 <LegalLayout
   title="Condiciones de contratación · Denisse González"
   heading="Condiciones de contratación"
-  description="Condiciones de contratación de las asesorías y del Programa Autogestiona de Denisse González: precios, pago, prestación del servicio y derecho de desistimiento."
+  description="Condiciones de contratación de las asesorías y de Autogestión DG de Denisse González: precios, pago, prestación del servicio y derecho de desistimiento."
 >
   <Fragment slot="intro">
     <p class="legal-updated">Última actualización: <span class="placeholder">[PENDIENTE: fecha de publicación]</span></p>
@@ -35,7 +35,7 @@ import { url } from '~/lib/url';
   </dl>
 
   <h2>2. Objeto</h2>
-  <p>Estas condiciones regulan la contratación, a través de esta web, de los servicios de asesoría y del {autogestiona.name}. Al reservar una asesoría o contratar un plan aceptas estas condiciones, que podrás consultar y guardar en esta página.</p>
+  <p>Estas condiciones regulan la contratación, a través de esta web, de los servicios de asesoría y de {autogestion.name}. Al reservar una asesoría o contratar un plan aceptas estas condiciones, que podrás consultar y guardar en esta página.</p>
 
   <h2>3. Servicios y precios</h2>
   <h3>Asesorías (online o presenciales)</h3>
@@ -48,17 +48,16 @@ import { url } from '~/lib/url';
       ))
     }
   </ul>
-  <h3>{autogestiona.name}</h3>
+  <h3>{autogestion.name}</h3>
   <ul>
-    {autogestiona.plans.map((p) => <li>{p.name}: {formatAmount(p.amount)} €.</li>)}
+    {autogestion.plans.map((p) => <li>{p.name}: {formatAmount(p.amount)} €. Incluye: {planIncludes(p).map((i) => i.charAt(0).toLowerCase() + i.slice(1)).join('; ')}.</li>)}
   </ul>
-  <p>{autogestiona.includes_title}: {autogestiona.includes.map((i) => i.charAt(0).toLowerCase() + i.slice(1)).join('; ')}. <span class="placeholder">[PENDIENTE: qué diferencia a cada plan]</span></p>
-  <p>Los precios se indican en euros. Los planes del {autogestiona.name} incluyen el IVA. <span class="placeholder">[PENDIENTE: confirmar si los precios de las asesorías incluyen IVA]</span></p>
+  <p>Los precios se indican en euros. Los planes de {autogestion.name} incluyen el IVA. <span class="placeholder">[PENDIENTE: confirmar si los precios de las asesorías incluyen IVA]</span></p>
 
   <h2>4. Contratación y pago</h2>
   <ul>
     <li><strong>Asesorías:</strong> se reservan en el sistema de reservas de la web, eligiendo el servicio, el día y la hora y la modalidad (online o presencial).</li>
-    <li><strong>{autogestiona.name}:</strong> cada plan se contrata en su página de pago, que se abre en una pestaña nueva.</li>
+    <li><strong>{autogestion.name}:</strong> cada plan se contrata en su página de pago, que se abre en una pestaña nueva.</li>
     <li>El pago se realiza <strong>por adelantado</strong>, con tarjeta, a través de la plataforma de pago <strong>Stripe</strong> integrada en el sistema de reservas y en las páginas de pago de AccioGest. Esta web no recibe ni guarda los datos de tu tarjeta.</li>
     <li>Confirmación de la contratación: <span class="placeholder">[PENDIENTE: confirmar con AccioGest si se envía un email de confirmación y con qué contenido]</span></li>
   </ul>
@@ -66,14 +65,14 @@ import { url } from '~/lib/url';
   <h2>5. Prestación del servicio</h2>
   <ul>
     <li><strong>Asesorías:</strong> se prestan el día y a la hora reservados, en la modalidad elegida. Online: <span class="placeholder">[PENDIENTE: herramienta de videollamada y cómo se envía el enlace]</span>. Presencial: en el despacho, {OFFICE.oneLine}.</li>
-    <li><strong>{autogestiona.name}:</strong> incluye los servicios indicados en el apartado 3 para el trámite contratado. <span class="placeholder">[PENDIENTE: proceso tras la compra (quién contacta, cómo se agenda la asesoría inicial y cómo se entrega la documentación)]</span></li>
+    <li><strong>{autogestion.name}:</strong> incluye los servicios indicados en el apartado 3 para el trámite contratado. <span class="placeholder">[PENDIENTE: proceso tras la compra (quién contacta, cómo se agenda la asesoría inicial y cómo se entrega la documentación)]</span></li>
     <li>La persona usuaria se compromete a facilitar información veraz, completa y actualizada y la documentación necesaria para el trámite.</li>
   </ul>
 
   <h2>6. Derecho de desistimiento</h2>
   <p>Si contratas como persona consumidora, tienes derecho a desistir del contrato en un plazo de <strong>14 días naturales</strong> desde su celebración, sin necesidad de justificación, conforme a los artículos 102 y siguientes del Texto Refundido de la Ley General para la Defensa de los Consumidores y Usuarios (Real Decreto Legislativo 1/2007).</p>
   <ul>
-    <li><strong>Inicio del servicio dentro del plazo:</strong> si solicitas expresamente que el servicio comience durante esos 14 días (por ejemplo, al reservar una asesoría para una fecha dentro de ese plazo o al empezar el {autogestiona.name}), y después desistes, deberás abonar la parte proporcional del servicio ya prestado (art. 108.3).</li>
+    <li><strong>Inicio del servicio dentro del plazo:</strong> si solicitas expresamente que el servicio comience durante esos 14 días (por ejemplo, al reservar una asesoría para una fecha dentro de ese plazo o al empezar {autogestion.name}), y después desistes, deberás abonar la parte proporcional del servicio ya prestado (art. 108.3).</li>
     <li><strong>Servicio completamente prestado:</strong> no podrás desistir una vez que el servicio se haya prestado por completo, si su ejecución comenzó con tu consentimiento expreso previo y con tu reconocimiento de que, en ese caso, pierdes el derecho de desistimiento (art. 103.a).</li>
     <li><strong>Cómo desistir:</strong> comunícalo de forma inequívoca a <a href={EMAIL.href}>{EMAIL.address}</a> o por WhatsApp al <a href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">{PHONE.display}</a>. Puedes usar este modelo (no es obligatorio): «Por la presente le comunico que desisto de mi contrato de prestación del siguiente servicio: […], contratado el […]. Nombre: […]. Domicilio: […]. Fecha: […]».</li>
     <li><strong>Devolución:</strong> se reembolsarán los importes que correspondan en un plazo máximo de 14 días naturales desde la comunicación, por el mismo medio de pago utilizado.</li>

@@ -1,7 +1,14 @@
 ---
 /**
- * /dubai/ — «Abre tu empresa en Dubái». Textos de la web anterior (docs/web-anterior.md §2, §5
- * y §7), tal cual, con las alertas de §9:
+ * /apertura-de-empresas/ — «Apertura de empresas» en España, México y Dubái
+ * (docs/cambios-2026-10.md §2.3 y §2.9; antes /dubai/, que redirige aquí: netlify.toml y
+ * `redirects` en astro.config.mjs).
+ * - España y México: la cliente aún no ha enviado textos. Solo frases neutras y hechos que ya
+ *   tenemos (web anterior: «Te ayudamos a crear tu negocio con estructura legal sólida»,
+ *   «Vive y emprende legalmente, estés donde estés», «Emprende con visión internacional y
+ *   seguridad»). PENDIENTE: textos de la cliente para España y México.
+ * - Dubái (#dubai) conserva su contenido: textos de la web anterior (docs/web-anterior.md §2, §5
+ *   y §7), tal cual, con las alertas de §9:
  * - 9.1 Fiscalidad: se OMITE la frase sin matices de la entradilla («sin impuestos sobre
  *   ganancias personales o empresariales») y se mantiene la versión matizada de «¿Por qué
  *   Dubái?» («en muchas zonas francas»), marcada abajo como pendiente de revisión legal.
@@ -18,10 +25,35 @@ import PartnerCard from '~/components/dubai/PartnerCard.astro';
 import ServiceRequestDialog from '~/components/services/ServiceRequestDialog.astro';
 import { PHONE, TEL_LINK, EMAIL, WA_TEXT, waLink } from '~/data/site';
 import { FAQ_DUBAI, faqJsonLd } from '~/data/faq';
-import { dubai } from '~/lib/services';
+import { dubai, companies } from '~/lib/services';
 import { url } from '~/lib/url';
 
-const requestWa = waLink(WA_TEXT.dubai);
+const requestWa = waLink(WA_TEXT.empresas);
+const dubaiWa = waLink(WA_TEXT.dubai);
+const countryWa = (name: string) => waLink(`Hola Denisse, me gustaría recibir información sobre la apertura de una empresa en ${name}.`);
+const leadOf = (id: string) => companies.countries.find((c) => c.id === id)?.lead_value ?? '';
+
+// Tarjetas de los tres países. PENDIENTE: textos de la cliente para España y México (frases
+// neutras provisionales, sin datos de plazos, costes ni requisitos).
+const countryCards = [
+  {
+    id: 'espana',
+    name: 'España',
+    text: 'Te acompañamos en la creación de tu empresa en España, con estructura legal sólida desde el primer paso.',
+  },
+  {
+    id: 'mexico',
+    name: 'México',
+    text: 'Te acompañamos en la creación de tu empresa en México, con estructura legal sólida desde el primer paso.',
+  },
+  {
+    id: 'dubai',
+    name: 'Dubái',
+    text: 'Abre tu empresa en Dubái de forma legal, segura y rápida, sin necesidad de que residas allí.',
+    detail: dubai.structures.join(' · '),
+    anchor: '#dubai',
+  },
+].map((c) => ({ ...c, lead: leadOf(c.id) }));
 
 const reasons = [
   {
@@ -48,10 +80,10 @@ const support = ['Constitución', 'Apertura bancaria', 'Fiscalidad', 'Acompañam
 ---
 
 <BaseLayout
-  title="Abre tu empresa en Dubái · DG Gestores y Abogados · Denisse González"
-  description="Abre tu empresa en Dubái sin necesidad de residir allí: holding, real estate y trading, con un equipo local y nuestro partner en Dubái. DG Gestores y Abogados, Madrid."
-  ogImage="/og-dubai.jpg"
-  ogImageAlt="Abre tu empresa en Dubái — DG Gestores y Abogados · Denisse González"
+  title="Apertura de empresas en España, México y Dubái · DG Gestores y Abogados"
+  description="Apertura de empresas en España, México y Dubái: te ayudamos a crear tu negocio con estructura legal sólida. En Dubái, holding, real estate y trading, con un equipo local y nuestro partner. DG Gestores y Abogados, Madrid."
+  ogImage="/og-empresas.jpg"
+  ogImageAlt="Apertura de empresas en España, México y Dubái — DG Gestores y Abogados"
   preloadFonts={['serif-600', 'serif-500i', 'sans-400', 'sans-600']}
 >
   <Fragment slot="head">
@@ -62,11 +94,11 @@ const support = ['Constitución', 'Apertura bancaria', 'Fiscalidad', 'Acompañam
     <div class="container dubai-hero-grid">
       <div class="dubai-hero-copy">
         <p class="eyebrow">Crea tu empresa</p>
-        <h1 class="page-title dubai-title" id="dubai-title">Abre tu empresa en <em>Dubái</em></h1>
-        <p class="lead dubai-lead">Dubái es uno de los destinos más atractivos del mundo para emprender, con un entorno empresarial moderno y estable.</p>
-        <p class="dubai-intro">En nuestro despacho, te ayudamos a abrir tu empresa en Dubái de forma legal, segura y rápida, sin necesidad de que residas allí.</p>
+        <h1 class="page-title dubai-title" id="dubai-title">Apertura de empresas <em>en España, México y Dubái</em></h1>
+        <p class="lead dubai-lead">Te ayudamos a crear tu negocio con estructura legal sólida.</p>
+        <p class="dubai-intro">Vive y emprende legalmente, estés donde estés.</p>
         <div class="btn-row dubai-actions">
-          <a class="btn btn--primary btn--lg" href={requestWa} target="_blank" rel="noopener" data-service-request={dubai.lead_value}>
+          <a class="btn btn--primary btn--lg" href={requestWa} target="_blank" rel="noopener" data-service-request="">
             <Icon name="message" />
             <span>Solicitar información</span>
           </a>
@@ -87,15 +119,48 @@ const support = ['Constitución', 'Apertura bancaria', 'Fiscalidad', 'Acompañam
             </g>
           </svg>
           <p class="dubai-arch-legend">
-            <span>Dubái</span>
-            <span class="dubai-arch-sub">Emiratos Árabes Unidos</span>
+            <span>Empresas</span>
+            <span class="dubai-arch-sub">España · México · Dubái</span>
           </p>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="section section--white dubai-why" aria-labelledby="why-title">
+  <section class="section section--white countries" aria-labelledby="countries-title">
+    <div class="container">
+      <div class="why-head">
+        <p class="eyebrow" data-reveal>{companies.name}</p>
+        <h2 class="section-title" id="countries-title" data-reveal>España, México y Dubái</h2>
+      </div>
+      <ul class="country-grid" role="list">
+        {
+          countryCards.map((c) => (
+            <li class="country-card" id={c.id === 'dubai' ? undefined : c.id} data-reveal data-spotlight>
+              <h3 class="country-name">{c.name}</h3>
+              <p class="why-text">{c.text}</p>
+              {c.detail && <p class="country-detail">{c.detail}</p>}
+              <div class="country-actions">
+                <a class="btn btn--link" href={countryWa(c.name)} target="_blank" rel="noopener" data-service-request={c.lead}>
+                  <span>
+                    Solicitar información<span class="visually-hidden">{` sobre la apertura de empresas en ${c.name}`}</span>
+                  </span>
+                  <Icon name="arrow" />
+                </a>
+                {c.anchor && (
+                  <a class="country-more" href={c.anchor}>
+                    Más sobre Dubái
+                  </a>
+                )}
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section--ivory dubai-why" id="dubai" aria-labelledby="why-title">
     <div class="container">
       <div class="why-head">
         <p class="eyebrow" data-reveal>Dubái</p>
@@ -115,7 +180,7 @@ const support = ['Constitución', 'Apertura bancaria', 'Fiscalidad', 'Acompañam
     </div>
   </section>
 
-  <section class="section section--ivory dubai-services" aria-labelledby="structures-title">
+  <section class="section section--white dubai-services" aria-labelledby="structures-title">
     <div class="container services-grid">
       <div class="services-copy">
         <p class="eyebrow" data-reveal>Servicios</p>
@@ -134,7 +199,7 @@ const support = ['Constitución', 'Apertura bancaria', 'Fiscalidad', 'Acompañam
         }
       </ul>
       <div class="support" data-reveal>
-        <h3 class="support-title">Te ayudamos a crear tu negocio con estructura legal sólida.</h3>
+        <h3 class="support-title">Cómo te acompañamos en Dubái</h3>
         <ul class="check-list support-list" role="list">
           {
             support.map((item) => (
@@ -145,6 +210,10 @@ const support = ['Constitución', 'Apertura bancaria', 'Fiscalidad', 'Acompañam
             ))
           }
         </ul>
+        <a class="btn btn--link support-ask" href={dubaiWa} target="_blank" rel="noopener" data-service-request={dubai.lead_value}>
+          <span>Solicitar información sobre Dubái</span>
+          <Icon name="arrow" />
+        </a>
       </div>
     </div>
   </section>
@@ -184,7 +253,7 @@ const support = ['Constitución', 'Apertura bancaria', 'Fiscalidad', 'Acompañam
         <h2 class="section-title" id="dubai-cta-title" data-reveal>Emprende con visión internacional y seguridad.</h2>
       </div>
       <div class="dubai-cta-actions" data-reveal>
-        <a class="btn btn--primary btn--lg btn--block" href={requestWa} target="_blank" rel="noopener" data-service-request={dubai.lead_value}>
+        <a class="btn btn--primary btn--lg btn--block" href={requestWa} target="_blank" rel="noopener" data-service-request="">
           <Icon name="message" />
           <span>Solicitar información</span>
         </a>
@@ -200,11 +269,11 @@ const support = ['Constitución', 'Apertura bancaria', 'Fiscalidad', 'Acompañam
     </div>
   </section>
 
-  <ServiceRequestDialog slot="after" kicker="Empresas en Dubái" waText={WA_TEXT.dubai} messageHint="Por ejemplo, tu situación actual o el trámite que te interesa." />
+  <ServiceRequestDialog slot="after" kicker={companies.name} waText={WA_TEXT.empresas} messageHint="Por ejemplo, en qué país quieres abrir tu empresa, tu situación actual o tu idea de negocio." />
 </BaseLayout>
 
 <script>
-  // Foco de luz en las tarjetas de «¿Por qué Dubái?» (solo ratón; global.css §6).
+  // Foco de luz en las tarjetas de países y de «¿Por qué Dubái?» (solo ratón; global.css §6).
   import { initSpotlight } from '~/scripts/spotlight';
   initSpotlight();
 </script>
@@ -236,7 +305,8 @@ const support = ['Constitución', 'Apertura bancaria', 'Fiscalidad', 'Acompañam
     pointer-events: none;
   }
   .dubai-hero-grid { display: grid; gap: clamp(2.5rem, 5vw, 4rem); align-items: center; }
-  .dubai-title { margin-bottom: 1.5rem; max-width: 7.5em; }
+  .dubai-title { margin-bottom: 1.5rem; max-width: 9em; }
+  .dubai-title em { display: block; }
   .dubai-lead { max-width: 34rem; }
   .dubai-intro { max-width: 34em; margin-top: 1rem; color: var(--c-ink-soft); text-wrap: pretty; }
   .dubai-actions { margin-top: 2rem; }
@@ -308,6 +378,50 @@ const support = ['Constitución', 'Apertura bancaria', 'Fiscalidad', 'Acompañam
     .dubai-visual { width: 100%; max-width: 400px; justify-self: end; }
   }
 
+  /* ---------- España, México y Dubái ---------- */
+  .country-grid { display: grid; gap: 1.25rem; }
+  .country-card {
+    display: flex;
+    flex-direction: column;
+    gap: .85rem;
+    padding: clamp(1.5rem, 1.2rem + 1vw, 2.25rem);
+    background: var(--c-ivory);
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius-l);
+    scroll-margin-top: 6rem;
+    transition: border-color var(--dur) var(--ease-hover), box-shadow var(--dur) var(--ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .country-card:hover { border-color: var(--c-line-strong); box-shadow: var(--shadow-s); }
+  }
+  .country-name {
+    font-family: var(--ff-serif);
+    font-size: clamp(2rem, 1.6rem + 1.4vw, 2.6rem);
+    font-weight: 500;
+    font-style: italic;
+    line-height: 1;
+    color: var(--c-plum);
+  }
+  .country-detail { color: var(--c-ink); font-size: .8rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+  .country-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem 1.5rem; margin-top: auto; padding-top: .25rem; }
+  .country-more {
+    display: inline-block;
+    padding-block: .5rem;
+    color: var(--c-ink-soft);
+    font-size: .95rem;
+    text-decoration: underline;
+    text-decoration-color: var(--c-line-strong);
+    text-underline-offset: .2em;
+  }
+  @media (hover: hover) {
+    .country-more:hover { color: var(--c-plum); text-decoration-color: currentColor; }
+  }
+  @media (min-width: 900px) {
+    .country-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; }
+  }
+  .dubai-why { scroll-margin-top: 4rem; }
+  .support-ask { margin-top: 1.5rem; justify-content: flex-start; }
+
   /* ---------- ¿Por qué Dubái? ---------- */
   .why-head { margin-bottom: clamp(2.25rem, 4vw, 3.25rem); }
   .why-grid { display: grid; gap: 1.25rem; }
@@ -316,7 +430,7 @@ const support = ['Constitución', 'Apertura bancaria', 'Fiscalidad', 'Acompañam
     flex-direction: column;
     gap: .9rem;
     padding: clamp(1.5rem, 1.2rem + 1vw, 2.25rem);
-    background: var(--c-ivory);
+    background: var(--c-white);
     border: 1px solid var(--c-line);
     border-radius: var(--radius-l);
     transition: border-color var(--dur) var(--ease-hover), box-shadow var(--dur) var(--ease-out);
@@ -367,7 +481,7 @@ const support = ['Constitución', 'Apertura bancaria', 'Fiscalidad', 'Acompañam
   }
   .support {
     padding: clamp(1.5rem, 1rem + 2vw, 2.5rem);
-    background: var(--c-white);
+    background: var(--c-ivory);
     border: 1px solid var(--c-line);
     border-radius: var(--radius-l);
   }

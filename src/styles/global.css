@@ -130,7 +130,7 @@
   --z-float: 40;
   --z-header: 50;
 
-  /* Celosía geométrica (estrella de ocho puntas): motivo de Dubái (página /dubai/, tarjeta del
+  /* Celosía geométrica (estrella de ocho puntas): motivo de Dubái (página /apertura-de-empresas/, tarjeta del
      inicio y bloque del partner). Dos tintas: oro (sobre ciruela oscuro) y ciruela (sobre claro).
      Teselas de 60 px; se usa como background-image con un degradado encima para fundirla. */
   --lattice-gold: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='none' stroke='%23DDB56C' stroke-width='.9'%3E%3Cpath d='M18 18h24v24H18zM30 13.03 46.97 30 30 46.97 13.03 30z'/%3E%3Cpath d='M30 0v13.03M30 46.97V60M0 30h13.03M46.97 30H60M0 0l18 18M60 0 42 18M60 60 42 42M0 60l18-18'/%3E%3C/g%3E%3C/svg%3E");
@@ -417,9 +417,16 @@ main:focus { outline: none; }
   .btn--on-dark:hover { --btn-bg: rgba(243, 237, 245, .12); --btn-bd: #fff; }
 }
 
+/* En línea (no flex), para que la flecha siga pegada a la última palabra si la etiqueta se parte.
+   Chrome puede partir siempre antes de un SVG en línea: el hueco de la flecha lo reserva un
+   ::after sin corte posible tras la última palabra y el icono se monta encima con margen
+   negativo (ancho neto 0), así nunca baja solo a otra línea. El relleno centra una línea en 44px. */
 .btn--link {
+  display: inline-block;
   min-height: 44px;
-  padding: .35em 0;
+  padding: max(.35em, calc((44px - 1.4em) / 2)) 0;
+  line-height: 1.4;
+  text-align: start;
   border: 0;
   border-radius: 0;
   background: none;
@@ -429,7 +436,8 @@ main:focus { outline: none; }
   box-shadow: none;
 }
 .btn--link:active { transform: none; }
-.btn--link .icon { transition: transform var(--dur) var(--ease-out); }
+.btn--link > span::after { content: "\2060"; padding-inline-end: 1.6em; }
+.btn--link .icon { margin-inline-start: -1.15em; vertical-align: -.2em; transition: transform var(--dur) var(--ease-out); }
 @media (hover: hover) and (pointer: fine) {
   .btn--link:hover { text-decoration-color: currentColor; }
   .btn--link:hover .icon { transform: translateX(3px); }

@@ -20,6 +20,15 @@ export interface AgendaItem {
 
 /** De lo más reciente a lo más antiguo. */
 export const AGENDA_2026: readonly AgendaItem[] = [
+  // docs/cambios-2026-10.md §6 (cartel de luma.com y foto suya en el escenario). Sin papel: no
+  // consta (no decir «ponente»).
+  {
+    date: '2026-10-19',
+    dateLabel: '19 oct. 2026',
+    title: 'EMLHIS Impulsa Madrid: Fundación Casa de México en España — Liderazgo, influencia y talento',
+    place: 'Madrid',
+    text: 'Dentro del 6.º Encuentro de Mujeres Líderes Hispanas (EMLHIS 2026).',
+  },
   {
     date: '2026-09-30',
     dateLabel: '30 sep. 2026',

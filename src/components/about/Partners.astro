@@ -1,0 +1,241 @@
+---
+/**
+ * «Partners» (Conóceme, tras «Nuestro equipo»; docs/cambios-2026-10.md §4). Sustituye al bloque
+ * «Partner en Dubái» del equipo; Poplavsky sigue también en /apertura-de-empresas/ (parte de
+ * Dubái, components/dubai/PartnerCard.astro).
+ *
+ * Logos sobre tarjetas claras, todos en una caja del mismo alto (object-fit: contain, sin
+ * deformar). El de Poplavsky tiene fondo negro: va sobre su propia placa negra dentro de la
+ * tarjeta. Ariel Noriega es una persona: ficha con retrato circular, como el equipo.
+ * Imágenes: scripts/prepare-recursos-2026-10.mjs (De la Flor, Espiga, «Bienvenido / Welcome!»,
+ * Ariel Noriega) y scripts/prepare-web-anterior-images.mjs (Poplavsky).
+ */
+import type { ImageMetadata } from 'astro';
+import { Picture } from 'astro:assets';
+import { SITE } from '~/data/site';
+import { url } from '~/lib/url';
+import Icon from '../ui/Icon.astro';
+import Photo from '../ui/Photo.astro';
+import deLaFlor from '~/assets/img/partners/de-la-flor-abogados.png';
+import espiga from '~/assets/img/partners/espiga-exports.png';
+import bienvenido from '~/assets/img/partners/bienvenido-welcome.png';
+import poplavsky from '~/assets/img/poplavsky-logo.jpg';
+import ariel from '~/assets/img/partners/ariel-noriega.jpg';
+
+type Partner = {
+  name: string;
+  logo: ImageMetadata;
+  alt: string;
+  text: string;
+  /** Logo con fondo propio oscuro (Poplavsky). */
+  dark?: boolean;
+  /** Ancho máximo del logo (compensa el peso visual de cada uno; por defecto 12rem). */
+  maxW?: string;
+  kicker?: string;
+  link?: { href: string; label: string };
+};
+
+const partners: Partner[] = [
+  {
+    name: 'De la Flor Abogados',
+    logo: deLaFlor,
+    alt: 'Logotipo de De la Flor Abogados',
+    maxW: '10.5rem',
+    text: 'Despacho con una larga trayectoria profesional en asesoría jurídica, fiscal, contable, financiera y laboral a empresas.',
+  },
+  {
+    name: 'Espiga Exports',
+    logo: espiga,
+    alt: 'Logotipo de Espiga Exports',
+    maxW: '12.5rem',
+    text: 'Empresa consultora para el cumplimiento de las regulaciones europeas y americanas.',
+  },
+  {
+    name: 'Poplavsky',
+    logo: poplavsky,
+    alt: 'Logotipo de Poplavsky International Offices · Dubai · UAE',
+    dark: true,
+    kicker: 'Partner en Dubái',
+    text: 'Firma colaboradora especializada en la constitución de empresas y asesoría legal para emprendedores internacionales en los Emiratos Árabes.',
+    link: { href: url('/apertura-de-empresas/#dubai'), label: 'Apertura de empresas en Dubái' },
+  },
+  // PENDIENTE (cliente): nombre y descripción del proyecto «Bienvenido / Welcome!» de Everardo
+  // Corona. Hasta entonces, solo el logo (su texto como nombre) y el pie «Proyecto de Everardo Corona».
+  {
+    name: 'Bienvenido / Welcome!',
+    logo: bienvenido,
+    alt: 'Logotipo «Bienvenido / Welcome!»',
+    maxW: '10.5rem',
+    text: 'Proyecto de Everardo Corona.',
+  },
+];
+---
+
+<section class="section section--white partners" id="partners" aria-labelledby="partners-title">
+  <div class="container">
+    <div class="partners-head">
+      <p class="eyebrow" data-reveal>{SITE.firm}</p>
+      <h2 class="section-title" id="partners-title" data-reveal>Partners</h2>
+    </div>
+
+    <ul class="partners-grid" role="list">
+      {
+        partners.map((p) => (
+          <li class="partner-card" data-reveal>
+            <div class:list={['partner-logo', { 'partner-logo--dark': p.dark }]} style={p.maxW ? `--logo-w:${p.maxW}` : undefined}>
+              <Picture
+                src={p.logo}
+                alt={p.alt}
+                widths={[240, 360, 480]}
+                sizes="240px"
+                formats={['avif', 'webp']}
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <h3 class="partner-name">{p.name}</h3>
+            {p.kicker && <p class="partner-kicker">{p.kicker}</p>}
+            <p class="partner-text">{p.text}</p>
+            {p.link && (
+              <a class="partner-link" href={p.link.href}>
+                <span>{p.link.label}</span>
+                <Icon name="arrow" />
+              </a>
+            )}
+          </li>
+        ))
+      }
+      <li class="partner-card partner-card--person" data-reveal>
+        <figure class="partner-portrait">
+          <Photo src={ariel} alt="Retrato de Ariel Noriega con traje azul marino y gafas" widths={[160, 240, 320, 430]} sizes="(min-width: 600px) 152px, 112px" />
+        </figure>
+        <div class="partner-person-copy">
+          <h3 class="partner-name">Ariel Noriega</h3>
+          <p class="partner-text">Experto en Comercio Internacional, ex diplomático y con contactos en numerosos países de América, Europa, África y Medio Oriente. Periodista durante 20 años en México, escritor galardonado con el Premio de Novela de BCS 2026. Actualmente colabora en la vertical de commodities para grupos empresariales de México, USA y España.</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<style>
+  .partners-head { max-width: 46rem; margin-bottom: clamp(2rem, 4vw, 3rem); }
+  .partners-grid { display: grid; gap: 1.25rem; }
+
+  .partner-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 1.25rem 1.25rem 1.6rem;
+    background: var(--c-ivory);
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius);
+  }
+  /* Caja del logo: mismo alto en todas las tarjetas; el logo cabe entero sin deformarse. */
+  .partner-logo {
+    display: grid;
+    place-items: center;
+    height: 7.5rem;
+    margin-bottom: 1.35rem;
+    padding: 1rem 1.25rem;
+    background: var(--c-white);
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius-s);
+  }
+  /* Poplavsky (logo sobre negro): misma caja clara que las demás, con su placa negra dentro. */
+  .partner-logo--dark { padding: .75rem; }
+  .partner-logo--dark :global(img) { border-radius: 8px; }
+  .partner-logo :global(picture) { display: contents; }
+  /* Alto máximo explícito (un % no se resuelve en la fila automática de la rejilla). */
+  .partner-logo :global(img) {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: min(100%, var(--logo-w, 12rem));
+    max-height: 5.25rem;
+    object-fit: contain;
+  }
+  .partner-logo--dark :global(img) { max-height: 5.75rem; }
+  /* Meta bajo el nombre (no encima): los nombres de las cuatro tarjetas quedan alineados. */
+  .partner-kicker {
+    margin-top: .35rem;
+    color: var(--c-plum);
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+  .partner-name {
+    font-family: var(--ff-serif);
+    font-size: clamp(1.35rem, 1.2rem + .4vw, 1.55rem);
+    font-weight: 600;
+    line-height: 1.15;
+    color: var(--c-ink);
+  }
+  .partner-text {
+    margin-top: .5rem;
+    color: var(--c-ink-soft);
+    font-size: var(--fs-small);
+    line-height: 1.6;
+    text-wrap: pretty;
+  }
+  /* En línea, con la flecha pegada a la última palabra (mismo recurso que .btn--link en
+     global.css: hueco reservado por ::after y el icono encima con margen negativo). */
+  .partner-link {
+    align-self: flex-start;
+    min-height: 44px;
+    margin-top: auto;
+    padding-top: .75rem;
+    padding-bottom: .35rem;
+    line-height: 1.5;
+    color: var(--c-plum);
+    font-size: var(--fs-small);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--c-line-strong);
+    text-underline-offset: .3em;
+  }
+  .partner-link > span::after { content: "\2060"; padding-inline-end: 1.45em; }
+  .partner-link :global(.icon) { width: 1em; height: 1em; margin-inline-start: -1em; vertical-align: -.15em; transition: transform var(--dur) var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) {
+    .partner-link:hover { text-decoration-color: currentColor; }
+    .partner-link:hover :global(.icon) { transform: translateX(2px); }
+  }
+
+  /* Ariel Noriega: retrato circular como en «Nuestro equipo» */
+  .partner-card--person {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 1.25rem 1.5rem;
+    align-items: start;
+    padding: 1.5rem;
+  }
+  .partner-portrait {
+    margin: 0;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--c-lavender-200);
+    box-shadow: 0 0 0 1px var(--c-line), 0 0 0 6px var(--c-white), 0 0 0 7px var(--c-lavender-300);
+  }
+  .partner-portrait :global(picture),
+  .partner-portrait :global(img) { width: 100%; height: 100%; }
+  .partner-portrait :global(img) { object-fit: cover; }
+  .partner-person-copy { padding-top: .35rem; }
+  .partner-person-copy .partner-text { max-width: 46rem; }
+
+  @media (max-width: 479.98px) {
+    .partner-card--person { grid-template-columns: 1fr; }
+    .partner-portrait { width: 112px; }
+  }
+  @media (min-width: 600px) {
+    .partner-card--person { grid-template-columns: 152px minmax(0, 1fr); gap: 2rem; padding: 1.75rem 2rem; }
+  }
+  @media (min-width: 640px) {
+    .partners-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
+    .partner-card--person { grid-column: 1 / -1; }
+  }
+  @media (min-width: 1100px) {
+    .partners-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+</style>

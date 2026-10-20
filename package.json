@@ -16,6 +16,7 @@
     "astro": "astro",
     "globe-poster": "node scripts/render-globe-poster.mjs",
     "web-anterior-images": "node scripts/prepare-web-anterior-images.mjs",
+    "recursos-2026-10-images": "node scripts/prepare-recursos-2026-10.mjs",
     "og-images": "node scripts/render-og-images.mjs"
   },
   "dependencies": {

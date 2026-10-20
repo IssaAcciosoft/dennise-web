@@ -7,7 +7,7 @@
  */
 import { getImage } from 'astro:assets';
 import { SITE, PHONE, SOCIALS, EMAIL, OFFICE } from '~/data/site';
-import { consultations, autogestiona, immigration, dubai, minAmount, maxAmount, formatAmount, CATALOG } from '~/lib/services';
+import { consultations, autogestion, immigration, firmServices, companies, minAmount, maxAmount, formatAmount, CATALOG } from '~/lib/services';
 import { absoluteUrl } from '~/lib/url';
 import retrato from '~/assets/img/retrato.jpg';
 
@@ -27,22 +27,21 @@ const portraitUrl = absoluteUrl(portrait.src, site);
 const sameAs = SOCIALS.map((s) => s.href);
 const currency = CATALOG.currency;
 
-const offers = [
-  ...consultations.flatMap((c) =>
-    c.prices.map((p) => ({
-      '@type': 'Offer',
-      name: `${c.name} · ${c.duration_label} (${p.label.toLowerCase()})`,
-      price: String(p.amount),
-      priceCurrency: currency,
-    })),
-  ),
-  ...autogestiona.plans.map((p) => ({
+const consultationOffers = consultations.flatMap((c) =>
+  c.prices.map((p) => ({
     '@type': 'Offer',
-    name: `${autogestiona.name} · ${p.name}`,
+    name: `${c.name} · ${c.duration_label} (${p.label.toLowerCase()})`,
     price: String(p.amount),
     priceCurrency: currency,
   })),
-];
+);
+const planOffers = autogestion.plans.map((p) => ({
+  '@type': 'Offer',
+  name: `${autogestion.name} · ${p.name}`,
+  price: String(p.amount),
+  priceCurrency: currency,
+  url: absoluteUrl('/autogestion-dg/', site),
+}));
 // Servicios sin precio publicado (se solicitan por el formulario): Offer → Service, sin price.
 const serviceOffer = (name: string) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name } });
 
@@ -63,7 +62,7 @@ const graph = {
       name: SITE.firm,
       url: home,
       description:
-        'Despacho de Denisse González en Madrid: extranjería y asesoría migratoria online y presencial, derecho internacional, derechos humanos y apertura de empresas en Dubái.',
+        'Despacho de Denisse González en Madrid: extranjería y asesoría migratoria online y presencial, gestión administrativa, homologación de títulos, derecho internacional, derechos humanos y apertura de empresas en España, México y Dubái.',
       image: portraitUrl,
       logo: absoluteUrl('/icon-512.png', site),
       telephone: PHONE.e164,
@@ -89,8 +88,18 @@ const graph = {
             name: immigration.title,
             itemListElement: immigration.services.map((s) => serviceOffer(s.name)),
           },
-          { '@type': 'OfferCatalog', name: 'Asesorías y Programa Autogestiona', itemListElement: offers },
-          { '@type': 'OfferCatalog', name: 'Apertura de empresas en Dubái', itemListElement: [serviceOffer(dubai.name)] },
+          {
+            '@type': 'OfferCatalog',
+            name: firmServices.title,
+            itemListElement: firmServices.services.map((s) => serviceOffer(s.name)),
+          },
+          { '@type': 'OfferCatalog', name: 'Asesorías', itemListElement: consultationOffers },
+          { '@type': 'OfferCatalog', name: autogestion.name, itemListElement: planOffers },
+          {
+            '@type': 'OfferCatalog',
+            name: 'Apertura de empresas en España, México y Dubái',
+            itemListElement: companies.countries.map((c) => serviceOffer(c.lead_value)),
+          },
         ],
       },
     },

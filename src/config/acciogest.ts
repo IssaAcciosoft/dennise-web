@@ -35,7 +35,7 @@ export const FORMS = {
   contacto: pick(import.meta.env.PUBLIC_ACCIOGEST_FORM_CONTACTO, 'FORM_ID_CONTACTO'),
 } as const;
 
-/** Planes del Programa Autogestiona: cada uno es una página de pago de AccioGest (Stripe). */
+/** Planes de Autogestión DG (/autogestion-dg/): cada uno es una página de pago de AccioGest (Stripe). */
 export const PLANES = {
   basico: pick(import.meta.env.PUBLIC_ACCIOGEST_PLAN_BASICO, 'FORM_ID_BASICO'),
   estandar: pick(import.meta.env.PUBLIC_ACCIOGEST_PLAN_ESTANDAR, 'FORM_ID_ESTANDAR'),
