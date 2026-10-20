@@ -66,7 +66,7 @@ const caption = PLACES.map((p) => p.label);
         }
       </ul>
     </div>
-    <button type="button" class="globe-toggle" data-globe-toggle hidden aria-pressed="false" aria-label="Pausar el giro del globo">
+    <button type="button" class="globe-toggle" data-globe-toggle hidden aria-label="Pausar el giro del globo">
       <svg class="globe-toggle-pause" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
       <svg class="globe-toggle-play" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M8 5.5v13l11-6.5z"/></svg>
     </button>
@@ -227,19 +227,27 @@ const caption = PLACES.map((p) => p.label);
     z-index: 3;
     display: inline-grid;
     place-items: center;
-    width: 2.5rem;
-    height: 2.5rem;
+    /* 44 px, como el resto de botones redondos (.dialog-close, la visita guiada). */
+    width: 44px;
+    height: 44px;
     border: 1px solid var(--c-lavender-300);
     border-radius: 50%;
     background: rgba(255, 255, 255, .85);
     color: var(--c-plum-800);
     cursor: pointer;
     opacity: 0;
-    transition: opacity 200ms var(--ease-out), transform 160ms var(--ease-out);
+    transition:
+      opacity 200ms var(--ease-out),
+      background-color var(--dur-fast) var(--ease-hover),
+      border-color var(--dur-fast) var(--ease-hover),
+      transform var(--dur-press) var(--ease-out);
   }
   .globe-toggle[hidden] { display: none; }
   [data-globe="live"] .globe-toggle { opacity: 1; }
-  .globe-toggle:active { transform: scale(.97); }
+  .globe-toggle:active { transform: scale(var(--press-scale)); }
+  @media (hover: hover) and (pointer: fine) {
+    .globe-toggle:hover { background: #fff; border-color: var(--c-plum); }
+  }
   .globe-toggle:focus-visible { outline: 2px solid var(--c-plum); outline-offset: 3px; }
   .globe-toggle[data-state="playing"] .globe-toggle-play,
   .globe-toggle[data-state="paused"] .globe-toggle-pause { display: none; }

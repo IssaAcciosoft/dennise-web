@@ -7,9 +7,12 @@
  * El FAQPage de JSON-LD lo pone la página (src/data/faq.ts → faqJsonLd).
  */
 import type { FaqItem } from '~/data/faq';
+import Icon from './Icon.astro';
 
+/** `link`: enlace opcional bajo la respuesta (p. ej., la respuesta completa en otra página). */
+type Item = FaqItem & { link?: { href: string; label: string } };
 interface Props {
-  items: FaqItem[];
+  items: Item[];
   /** Tono del fondo donde va la lista. */
   tone?: 'light' | 'dark';
   class?: string;
@@ -27,6 +30,12 @@ const { items, tone = 'light', class: className } = Astro.props;
         </summary>
         <div class="faq-a">
           <p>{item.answer}</p>
+          {item.link && (
+            <a class="btn btn--link faq-link" href={item.link.href}>
+              <span>{item.link.label}</span>
+              <Icon name="arrow" />
+            </a>
+          )}
         </div>
       </details>
     ))
@@ -108,13 +117,15 @@ const { items, tone = 'light', class: className } = Astro.props;
     line-height: 1.6;
     text-wrap: pretty;
   }
+  .faq-link { margin-top: .75rem; color: var(--faq-accent); }
   .faq-item[open] .faq-a { animation: faq-in 220ms var(--ease-out); }
   @keyframes faq-in { from { opacity: 0; translate: 0 -6px; } }
   @media (max-width: 479.98px) {
     .faq-a { padding-right: 0; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .faq-item[open] .faq-a { animation: faq-fade 200ms var(--ease-out) !important; }
+    .faq-link { margin-top: .75rem; color: var(--faq-accent); }
+  .faq-item[open] .faq-a { animation: faq-fade 200ms var(--ease-out) !important; }
     @keyframes faq-fade { from { opacity: 0; } }
   }
 </style>

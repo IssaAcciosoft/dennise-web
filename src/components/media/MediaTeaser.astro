@@ -76,8 +76,9 @@ const pressOutlets = `${names.slice(0, -1).join(', ')} y ${names[names.length - 
     box-shadow: var(--shadow-s);
     color: var(--c-ink);
     text-decoration: none;
-    transition: border-color var(--dur-fast) var(--ease-hover), box-shadow var(--dur) var(--ease-out);
+    transition: border-color var(--dur-fast) var(--ease-hover), box-shadow var(--dur) var(--ease-out), transform var(--dur-press) var(--ease-out);
   }
+  .media-card:active { transform: scale(.99); }
   .media-thumb { display: block; border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-s); }
   .media-thumb :global(img) { width: 100%; }
   .media-body { display: flex; flex-direction: column; gap: .45rem; min-width: 0; }

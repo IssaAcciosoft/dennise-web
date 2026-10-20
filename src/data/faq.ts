@@ -1,5 +1,6 @@
 /**
- * Preguntas frecuentes de la web anterior (docs/web-anterior.md §5), tal cual.
+ * Preguntas frecuentes de la web anterior (docs/web-anterior.md §5), tal cual (salvo los tipos
+ * de arraigo, actualizados al Reglamento de 2025 como la tarjeta «Arraigos»).
  * Se muestran con <details>/<summary> (components/ui/Faq.astro) y se publican también como
  * FAQPage en JSON-LD (mismo texto: lo exige schema.org / Google).
  * - /servicios/             → preguntas de España (+ enlace a /apertura-de-empresas/ para la de Dubái).
@@ -12,7 +13,8 @@ export const FAQ_SPAIN: FaqItem[] = [
     id: 'regularizarme-sin-papeles',
     question: '¿Puedo regularizarme si estoy en España sin papeles?',
     answer:
-      'Sí. Existen varias vías legales como el arraigo social, laboral o familiar. Evaluamos tu situación y te orientamos con la opción más viable.',
+      // «arraigo laboral» ya no existe (Reglamento de 2025): mismas vías que la tarjeta «Arraigos».
+      'Sí. Existen varias vías legales, como los arraigos social, sociolaboral, socioformativo, familiar o de segunda oportunidad. Evaluamos tu situación y te orientamos con la opción más viable.',
   },
   {
     id: 'traer-a-mi-familia',

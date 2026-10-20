@@ -15,8 +15,8 @@ const p = 'cf';
   <div class="container contact-form-grid">
     <div class="contact-form-intro">
       <p class="eyebrow">Formulario de contacto</p>
-      <h2 class="section-title" id="contact-form-title">Envíame un mensaje.</h2>
-      <p class="lead contact-form-lead">Cuéntame brevemente tu caso o tu consulta.</p>
+      <h2 class="section-title" id="contact-form-title">Envíanos un mensaje.</h2>
+      <p class="lead contact-form-lead">Cuéntanos brevemente tu caso o tu consulta.</p>
       <p class="contact-form-req">
         Los campos marcados con <span aria-hidden="true">*</span><span class="visually-hidden">asterisco</span> son obligatorios.
       </p>
@@ -28,7 +28,7 @@ const p = 'cf';
         idPrefix={p}
         submitLabel="Enviar mensaje"
         successTitle="¡Mensaje enviado!"
-        successText="He recibido tu mensaje correctamente."
+        successText="Hemos recibido tu mensaje correctamente."
         waText={WA_TEXT.general}
       >
         <Field name="nombre" id={`${p}-nombre`} label="Nombre" required autocomplete="name" maxlength={120} msgRequired="Escribe tu nombre." />
@@ -41,7 +41,7 @@ const p = 'cf';
           autocomplete="email"
           inputmode="email"
           maxlength={160}
-          msgRequired="Escribe tu email para que pueda responderte."
+          msgRequired="Escribe tu email para que podamos responderte."
         />
         <Field name="telefono" id={`${p}-telefono`} label="Teléfono" type="tel" autocomplete="tel" inputmode="tel" maxlength={25} full />
         <Field

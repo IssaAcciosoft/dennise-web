@@ -154,6 +154,18 @@ const altThumb = `Cartel del artículo «8 de marzo — Voces que se unen», de 
     font-weight: 600;
     cursor: pointer;
     list-style: none;
+    transition: color var(--dur-fast) var(--ease-hover);
+  }
+  /* Mismo patrón que las preguntas frecuentes (Faq.astro): color en hover y el texto entra con
+     un fundido corto (keyframes copiados: Astro limita su nombre a cada componente). */
+  @media (hover: hover) and (pointer: fine) {
+    .article-text summary:hover { color: var(--c-plum-700); }
+  }
+  .article-text[open] .article-text-body { animation: article-text-in 220ms var(--ease-out); }
+  @keyframes article-text-in { from { opacity: 0; translate: 0 -6px; } }
+  @media (prefers-reduced-motion: reduce) {
+    .article-text[open] .article-text-body { animation: article-text-fade 200ms var(--ease-out) !important; }
+    @keyframes article-text-fade { from { opacity: 0; } }
   }
   .article-text summary::-webkit-details-marker { display: none; }
   .article-text summary :global(.icon) { transition: transform var(--dur) var(--ease-out); }

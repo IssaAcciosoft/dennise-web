@@ -17,7 +17,7 @@ import onuNegro from '~/assets/img/onu-negro.jpg';
 ---
 
 <BaseLayout
-  title="Denisse González · DG Gestores y Abogados · Derecho que conecta personas, oportunidades y derechos"
+  title="Denisse González · DG Gestores y Abogados en Madrid"
   description="Denisse González, abogada mexicana en Madrid: derecho internacional, movilidad internacional y derechos humanos. Extranjería en España, gestión administrativa y apertura de empresas en España, México y Dubái."
   ogImageAlt="Denisse González · Gestores y Abogados: «Derecho que conecta personas, oportunidades y derechos». Derecho internacional · Movilidad internacional · Derechos humanos."
   preloadFonts={['serif-600', 'serif-500i', 'sans-400', 'sans-600']}
@@ -42,21 +42,22 @@ import onuNegro from '~/assets/img/onu-negro.jpg';
         Conectar · Actuar» (Ways.astro): aquí, otra frase suya de Conóceme. */}
     <p>Pero mi trayectoria no se ha construido únicamente dentro de un despacho.</p>
     <Fragment slot="actions">
+      {/* Un solo enlace a Conóceme (el menú ya lo tiene): lleva al inicio de la página, que
+          abre con la misma trayectoria que resume este bloque. */}
       <a class="btn btn--primary" href={url('/conoceme/')}>
-        <span>Conóceme</span>
-        <Icon name="arrow" />
-      </a>
-      <a class="btn btn--link" href={url('/conoceme/#trayectoria')}>
         <span>Ver mi trayectoria</span>
         <Icon name="arrow" />
       </a>
     </Fragment>
   </FeatureTeaser>
 
-  <Manifesto />
-  <Ways />
+  {/* Los servicios (la parte que contrata) suben al tercer bloque, justo después de
+      Conóceme; el testimonio (una reagrupación familiar) los sigue. Fondos alternos:
+      blanco → marfil → blanco → ciruela → blanco → marfil… */}
   <ServicesSnapshot />
   <Testimonial />
+  <Manifesto />
+  <Ways />
 
   <FeatureTeaser
     id="derechos-humanos"

@@ -5,7 +5,7 @@
  * Una sola fila a cualquier anchura (alto fijo = --header-h), así el panel del menú
  * siempre empieza justo debajo y nunca tapa el botón (v1: V1/A1/T2).
  */
-import { NAV, BOOKING_PATH, SITE } from '~/data/site';
+import { NAV, BOOKING_PATH, SITE, PHONE, TEL_LINK, WA_TEXT, waLink } from '~/data/site';
 import { url, normalizePath } from '~/lib/url';
 import LogoMark from './LogoMark.astro';
 import Icon from '../ui/Icon.astro';
@@ -37,7 +37,7 @@ const isCurrent = (path: string) => current === path;
 
     <button class="nav-toggle" type="button" popovertarget="site-nav" aria-controls="site-nav">
       <span class="nav-toggle-box" aria-hidden="true"><span></span><span></span><span></span></span>
-      <span class="nav-toggle-label">Menú</span>
+      <span class="nav-toggle-label"><span class="nav-toggle-closed">Menú</span><span class="nav-toggle-open">Cerrar</span></span>
     </button>
 
     <nav class="site-nav" id="site-nav" aria-label="Principal" popover>
@@ -57,7 +57,21 @@ const isCurrent = (path: string) => current === path;
         <Icon name="calendar" />
         <span>Reserva tu asesoría</span>
       </a>
-      <p class="nav-meta" style={`--i:${NAV.length + 1}`}>{SITE.motto}</p>
+      <ul class="nav-contact" role="list" aria-label="Contacto directo" style={`--i:${NAV.length + 1}`}>
+        <li>
+          <a href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">
+            <Icon name="whatsapp" />
+            <span>WhatsApp<span class="visually-hidden"> (se abre en una pestaña nueva)</span></span>
+          </a>
+        </li>
+        <li>
+          <a href={TEL_LINK}>
+            <Icon name="phone" />
+            <span>{PHONE.display}</span>
+          </a>
+        </li>
+      </ul>
+      <p class="nav-meta" style={`--i:${NAV.length + 2}`}>{SITE.motto}</p>
     </nav>
   </div>
 </header>
@@ -116,7 +130,7 @@ const isCurrent = (path: string) => current === path;
   .site-header {
     /* Tono claro (por defecto) */
     --hdr-bg: rgba(251, 248, 245, .92);
-    --hdr-bg-blur: rgba(251, 248, 245, .82);
+    --hdr-bg-blur: rgba(251, 248, 245, .96);
     --hdr-line: var(--c-line);
     --hdr-shadow: 0 8px 24px -18px rgba(44, 10, 50, .35);
     --hdr-fg: var(--c-ink);
@@ -138,16 +152,23 @@ const isCurrent = (path: string) => current === path;
   @supports (backdrop-filter: blur(1px)) {
     .site-header {
       background: var(--hdr-bg-blur);
-      -webkit-backdrop-filter: saturate(1.4) blur(14px);
-      backdrop-filter: saturate(1.4) blur(14px);
+      -webkit-backdrop-filter: saturate(1.4) blur(20px);
+      backdrop-filter: saturate(1.4) blur(20px);
     }
+  }
+  /* Con el menú abierto, la cabecera es opaca en ambos tonos: el panel (opaco) empieza justo
+     debajo y no debe verse contenido de la página detrás del logo. */
+  .site-header:has(.site-nav:popover-open) {
+    background: var(--hdr-panel-bg);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
   /* Tono oscuro: transparente sobre la portada oscura (sin corte claro/oscuro) y ciruela
      translúcido en cuanto se desplaza la página (animación ligada al scroll, más abajo). Sin
      scroll-driven animations: el ciruela casi opaco de siempre. */
   .site-header[data-tone="dark"] {
     --hdr-bg: rgba(31, 16, 36, .94);
-    --hdr-bg-blur: rgba(31, 16, 36, .62);
+    --hdr-bg-blur: rgba(31, 16, 36, .88);
     --hdr-line: var(--ev-line);
     --hdr-shadow: 0 10px 30px -20px rgba(0, 0, 0, .7);
     --hdr-fg: var(--ev-text);
@@ -202,13 +223,13 @@ const isCurrent = (path: string) => current === path;
       animation-range: 0 64px;
     }
     /* Con el menú abierto, la cabecera siempre tiene fondo (el panel empieza debajo). */
-    .site-header[data-tone="dark"]:has(.site-nav:popover-open) { background-color: var(--hdr-panel-bg); animation: none; }
+    .site-header[data-tone="dark"]:has(.site-nav:popover-open) { background-color: var(--hdr-panel-bg); -webkit-backdrop-filter: none; backdrop-filter: none; animation: none; }
   }
   @keyframes header-elevate-dark {
     to {
-      background-color: rgba(31, 16, 36, .62);
-      -webkit-backdrop-filter: saturate(1.4) blur(14px);
-      backdrop-filter: saturate(1.4) blur(14px);
+      background-color: rgba(31, 16, 36, .88);
+      -webkit-backdrop-filter: saturate(1.4) blur(20px);
+      backdrop-filter: saturate(1.4) blur(20px);
       border-bottom-color: var(--hdr-line);
       box-shadow: var(--hdr-shadow);
     }
@@ -274,6 +295,14 @@ const isCurrent = (path: string) => current === path;
     transition: background-color var(--dur-fast) var(--ease-hover), transform var(--dur-press) var(--ease-out);
   }
   .nav-toggle:active { transform: scale(var(--press-scale)); }
+  @media (hover: hover) and (pointer: fine) {
+    .nav-toggle:hover { background: var(--hdr-toggle-open); }
+  }
+  /* Etiqueta visible según el estado: «Menú» cerrado, «Cerrar» abierto (también es el nombre
+     accesible del botón: la etiqueta oculta no se lee). */
+  .nav-toggle-open { display: none; }
+  .site-header:has(.site-nav:popover-open) .nav-toggle-closed { display: none; }
+  .site-header:has(.site-nav:popover-open) .nav-toggle-open { display: inline; }
   .nav-toggle-box { position: relative; width: 18px; height: 12px; }
   .nav-toggle-box span {
     position: absolute;
@@ -299,6 +328,7 @@ const isCurrent = (path: string) => current === path;
     color: var(--hdr-fg);
     font-weight: 400;
     text-decoration: none;
+    transition: color var(--dur-fast) var(--ease-hover);
   }
   .nav-list a[aria-current="page"] { color: var(--hdr-accent); }
   .nav-current { display: none; }
@@ -343,6 +373,7 @@ const isCurrent = (path: string) => current === path;
        orden de la pantalla. 200 ms cada uno: los enlaces terminan antes de 300 ms. */
     .nav-list li,
     .header-cta--nav,
+    .nav-contact,
     .nav-meta {
       transition:
         opacity 200ms var(--ease-out) calc(30ms + var(--i, 5) * 25ms),
@@ -353,7 +384,7 @@ const isCurrent = (path: string) => current === path;
         transform var(--dur-press) var(--ease-out);
     }
     @starting-style {
-      .site-nav:popover-open :is(.nav-list li, .header-cta--nav, .nav-meta) { opacity: 0; translate: 0 -8px; }
+      .site-nav:popover-open :is(.nav-list li, .header-cta--nav, .nav-contact, .nav-meta) { opacity: 0; translate: 0 -8px; }
     }
     .nav-list li { border-bottom: 1px solid var(--hdr-line); }
     .nav-list a {
@@ -374,6 +405,31 @@ const isCurrent = (path: string) => current === path;
       rotate: 45deg;
     }
     .header-cta--nav { align-self: flex-start; min-height: 52px; padding-inline: 1.6rem; }
+    /* Contacto directo (el WhatsApp flotante se oculta con el menú abierto) */
+    .nav-contact {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem 1.75rem;
+      margin: -1rem 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    .nav-contact a {
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+      min-height: 44px;
+      color: var(--hdr-fg);
+      font-weight: 600;
+      text-decoration: underline;
+      text-decoration-color: var(--hdr-line);
+      text-underline-offset: .25em;
+      transition: color var(--dur-fast) var(--ease-hover), text-decoration-color var(--dur-fast) var(--ease-hover);
+    }
+    .nav-contact :global(.icon) { width: 20px; height: 20px; color: var(--hdr-accent); }
+    @media (hover: hover) and (pointer: fine) {
+      .nav-contact a:hover { color: var(--hdr-accent); text-decoration-color: currentColor; }
+    }
     .nav-meta {
       margin-top: auto;
       color: var(--hdr-fg-muted);
@@ -397,13 +453,16 @@ const isCurrent = (path: string) => current === path;
     .site-nav:popover-open { opacity: 1; transition-duration: var(--dur) !important; }
     @starting-style {
       .site-nav:popover-open { opacity: 0; }
-      .site-nav:popover-open :is(.nav-list li, .header-cta--nav, .nav-meta) { opacity: 1; translate: none; }
+      .site-nav:popover-open :is(.nav-list li, .header-cta--nav, .nav-contact, .nav-meta) { opacity: 1; translate: none; }
     }
   }
 
   @media (min-width: 600px) and (max-width: 1159.98px) {
     .header-cta--compact { display: inline-flex; }
     .header-cta--nav { display: none; }
+  }
+  @media (min-width: 1160px) {
+    .nav-contact { display: none; }
   }
 
   /* Móviles estrechos (≤ 389 px, 320 px o zoom 400 %): marca y botón compactos */

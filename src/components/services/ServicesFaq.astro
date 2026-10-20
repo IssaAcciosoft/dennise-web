@@ -1,16 +1,29 @@
 ---
 /**
  * Preguntas frecuentes de /servicios/ (web anterior, docs/web-anterior.md §5): las dos de España
- * con <details>/<summary> y la de Dubái como enlace a /apertura-de-empresas/#preguntas (allí está su respuesta).
- * El FAQPage de JSON-LD lo pone la página (solo con las preguntas que se responden aquí).
+ * y la de Dubái, todas con <details>/<summary>. La de Dubái lleva aquí solo la primera frase de
+ * su respuesta y un enlace a /apertura-de-empresas/#preguntas (allí está completa); por eso no
+ * entra en el FAQPage de JSON-LD de esta página (lo pone la página, solo con FAQ_SPAIN).
  * Visita guiada: último paso (data-tour="preguntas").
  */
 import { FAQ_SPAIN, FAQ_DUBAI } from '~/data/faq';
 import { url } from '~/lib/url';
 import Faq from '../ui/Faq.astro';
-import Icon from '../ui/Icon.astro';
 
-const dubaiQuestion = FAQ_DUBAI[0]?.question ?? '¿Puedo abrir una empresa en Dubái desde el extranjero?';
+const dubai = FAQ_DUBAI[0];
+const items = [
+  ...FAQ_SPAIN,
+  ...(dubai
+    ? [
+        {
+          ...dubai,
+          // Las dos primeras frases de la respuesta de la cliente («Sí. …»); la completa, en Apertura.
+          answer: dubai.answer.split(/(?<=\.)\s/).slice(0, 2).join(' '),
+          link: { href: url('/apertura-de-empresas/#preguntas'), label: 'Ver apertura de empresas' },
+        },
+      ]
+    : []),
+];
 ---
 
 <section class="section section--ivory services-faq" id="preguntas" aria-labelledby="services-faq-title">
@@ -18,17 +31,10 @@ const dubaiQuestion = FAQ_DUBAI[0]?.question ?? '¿Puedo abrir una empresa en Du
     <div class="faq-head">
       <p class="eyebrow" data-reveal>¿Alguna pregunta?</p>
       <h2 class="section-title" id="services-faq-title" data-reveal>Preguntas frecuentes</h2>
-      <p class="lead" data-reveal>Estas son algunas de las preguntas comunes.</p>
+      <p class="lead" data-reveal>Resolvemos las dudas más habituales.</p>
     </div>
     <div data-reveal>
-      <div data-tour="preguntas"><Faq items={FAQ_SPAIN} /></div>
-      <a class="faq-dubai" href={url('/apertura-de-empresas/#preguntas')}>
-        <span class="faq-dubai-q">{dubaiQuestion}</span>
-        <span class="faq-dubai-go">
-          <span>Respuesta en «Apertura de empresas»</span>
-          <Icon name="arrow" />
-        </span>
-      </a>
+      <div data-tour="preguntas"><Faq items={items} /></div>
     </div>
   </div>
 </section>
@@ -39,38 +45,5 @@ const dubaiQuestion = FAQ_DUBAI[0]?.question ?? '¿Puedo abrir una empresa en Du
   .faq-head .lead { max-width: 24rem; }
   @media (min-width: 960px) {
     .faq-layout { grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); }
-  }
-  .faq-dubai {
-    display: grid;
-    gap: .4rem;
-    padding: 1.35rem 0;
-    border-bottom: 1px solid var(--c-line);
-    color: var(--c-ink);
-    text-decoration: none;
-  }
-  .faq-dubai-q {
-    font-family: var(--ff-serif);
-    font-size: clamp(1.3rem, 1.15rem + .7vw, 1.65rem);
-    font-weight: 600;
-    line-height: 1.22;
-    text-wrap: pretty;
-  }
-  .faq-dubai-go {
-    display: inline-flex;
-    align-items: center;
-    gap: .5rem;
-    color: var(--c-plum);
-    font-size: .95rem;
-    font-weight: 600;
-    text-decoration: underline;
-    text-decoration-color: rgba(110, 29, 122, .35);
-    text-underline-offset: .3em;
-  }
-  .faq-dubai-go :global(.icon) { transition: transform var(--dur) var(--ease-out); }
-  .faq-dubai:focus-visible { outline-offset: 4px; border-radius: 6px; }
-  @media (hover: hover) and (pointer: fine) {
-    .faq-dubai:hover { color: var(--c-plum); }
-    .faq-dubai:hover .faq-dubai-go { text-decoration-color: currentColor; }
-    .faq-dubai:hover .faq-dubai-go :global(.icon) { transform: translateX(3px); }
   }
 </style>

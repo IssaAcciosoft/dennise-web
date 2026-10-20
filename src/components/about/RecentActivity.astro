@@ -35,7 +35,7 @@ import emlhis from '~/assets/img/emlhis-2026-denisse.jpg';
             position="50% 38%"
           />
         </div>
-        <figcaption class="activity-caption">EMLHIS Impulsa Madrid · 19 de octubre de 2026</figcaption>
+        <figcaption class="activity-caption"><span class="activity-caption-name">EMLHIS Impulsa Madrid</span><span class="activity-caption-sep"> · </span><span class="activity-caption-date">19 de octubre de 2026</span></figcaption>
       </figure>
       <figure class="activity-photo activity-photo--second" data-reveal="photo">
         <div class="activity-frame">
@@ -47,7 +47,7 @@ import emlhis from '~/assets/img/emlhis-2026-denisse.jpg';
             position="48% 50%"
           />
         </div>
-        <figcaption class="activity-caption">Franchise Innovation Summit · Madrid, 30 de septiembre de 2026</figcaption>
+        <figcaption class="activity-caption"><span class="activity-caption-name">Franchise Innovation Summit</span><span class="activity-caption-sep"> · </span><span class="activity-caption-date">Madrid, 30 de septiembre de 2026</span></figcaption>
       </figure>
     </div>
 
@@ -119,6 +119,22 @@ import emlhis from '~/assets/img/emlhis-2026-denisse.jpg';
     letter-spacing: .12em;
     line-height: 1.5;
     text-transform: uppercase;
+  }
+  /* Móvil: dos fotos de ~150 px; en versalitas con tracking el pie partía en 3-4 líneas
+     («SUMMIT ·» / «MADRID, 30 DE» / «SEPTIEMBRE…»). Aquí, el nombre del acto y debajo la
+     fecha, en caja normal. El separador sigue en el árbol de accesibilidad (recortado). */
+  @media (max-width: 599.98px) {
+    .activity-caption { margin-top: .6rem; font-size: .8rem; letter-spacing: 0; line-height: 1.4; text-transform: none; }
+    .activity-caption-name { display: block; color: var(--c-ink); }
+    .activity-caption-date { display: block; font-weight: 400; }
+    .activity-caption-sep {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
   }
 
   .activity-body { min-width: 0; }

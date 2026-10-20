@@ -10,8 +10,9 @@ import { BOOKING_PATH } from '~/data/site';
 import { url } from '~/lib/url';
 import Icon from '../ui/Icon.astro';
 
-// Servicios individuales: extranjería en España + gestoría y homologación de títulos.
-const services = [...immigration.services, ...firmServices.services].map((s) => s.name);
+// Servicios individuales: extranjería en España + gestoría y homologación de títulos. Cada chip
+// enlaza a su tarjeta en /servicios/ (id = el del catálogo, el mismo que usan las tarjetas).
+const services = [...immigration.services, ...firmServices.services].map((s) => ({ id: s.id, name: s.name }));
 const modalities = consultations[0]?.prices.map((p) => ({ modality: p.modality, label: p.label })) ?? [];
 ---
 
@@ -41,7 +42,7 @@ const modalities = consultations[0]?.prices.map((p) => ({ modality: p.modality, 
               consultations.map((c) => (
                 <tr>
                   <th scope="row">
-                    <span class="row-name">{c.name}</span>
+                    <a class="row-name" href={url(`/servicios/#${c.id}`)}>{c.name}</a>
                     <span class="row-duration">{c.duration_label}</span>
                   </th>
                   {modalities.map((m) => {
@@ -53,12 +54,22 @@ const modalities = consultations[0]?.prices.map((p) => ({ modality: p.modality, 
             }
           </tbody>
         </table>
+        <a class="snapshot-more" href={url('/servicios/#asesorias')}>
+          <span>Ver precios y reservar</span>
+          <Icon name="arrow" />
+        </a>
       </div>
 
       <div class="snapshot-card snapshot-card--program" data-reveal>
         <h3 class="snapshot-card-title">Servicios</h3>
         <ul class="service-mini" role="list">
-          {services.map((name) => <li>{name}</li>)}
+          {
+            services.map((s) => (
+              <li>
+                <a href={url(`/servicios/#${s.id}`)}>{s.name}</a>
+              </li>
+            ))
+          }
         </ul>
         <a class="snapshot-more" href={url('/servicios/#extranjeria')}>
           <span>Ver todos los servicios</span>
@@ -86,12 +97,10 @@ const modalities = consultations[0]?.prices.map((p) => ({ modality: p.modality, 
       </div>
     </article>
 
+    {/* Un solo cierre: «Ver todos los servicios» y «Ver precios y reservar» (en las tarjetas)
+        ya llevan a /servicios/. */}
     <div class="btn-row snapshot-actions" data-reveal>
-      <a class="btn btn--primary" href={url('/servicios/')}>
-        <span>Ver servicios y precios</span>
-        <Icon name="arrow" />
-      </a>
-      <a class="btn btn--ghost" href={url(BOOKING_PATH)}>
+      <a class="btn btn--primary" href={url(BOOKING_PATH)}>
         <Icon name="calendar" />
         <span>Reserva tu asesoría</span>
       </a>
@@ -116,7 +125,12 @@ const modalities = consultations[0]?.prices.map((p) => ({ modality: p.modality, 
     .snapshot-grid { grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 1.5rem; }
   }
 
+  /* Columna flexible: los dos enlaces del pie («Ver precios y reservar», «Ver todos los
+     servicios») bajan al final de cada tarjeta y quedan a la misma altura. */
   .snapshot-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
     padding: clamp(1.25rem, 1rem + 1.4vw, 2.25rem);
     background: var(--c-white);
     border: 1px solid var(--c-line);
@@ -138,6 +152,12 @@ const modalities = consultations[0]?.prices.map((p) => ({ modality: p.modality, 
   }
 
   .price-table { width: 100%; border-collapse: collapse; font-variant-numeric: lining-nums tabular-nums; }
+  /* Escritorio: la tarjeta se estira a la altura de la de «Servicios»; la tabla ocupa ese alto
+     (las filas de precios se reparten el espacio) en lugar de dejar un hueco sobre el enlace. */
+  @media (min-width: 900px) {
+    .price-table { flex: 1 0 auto; }
+    .price-table thead tr { height: 0; }
+  }
   .price-table th,
   .price-table td { padding: .9rem .5rem; border-top: 1px solid var(--c-line); text-align: right; vertical-align: middle; }
   .price-table thead th {
@@ -152,26 +172,39 @@ const modalities = consultations[0]?.prices.map((p) => ({ modality: p.modality, 
   .price-table th[scope="row"] { padding-left: 0; text-align: left; font-weight: 400; }
   .price-table td:last-child,
   .price-table thead th:last-child { padding-right: 0; }
-  .row-name { display: block; font-family: var(--ff-serif); font-size: 1.2rem; font-weight: 600; line-height: 1.2; color: var(--c-ink); }
+  .row-name { display: block; font-family: var(--ff-serif); font-size: 1.2rem; font-weight: 600; line-height: 1.2; color: var(--c-ink); text-decoration: underline; text-decoration-color: transparent; text-underline-offset: .2em; }
+  @media (hover: hover) and (pointer: fine) {
+    a.row-name:hover { color: var(--c-plum); text-decoration-color: currentColor; }
+  }
   .row-duration { display: block; margin-top: .15rem; color: var(--c-plum); font-size: .76rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
   .amount { font-family: var(--ff-serif); font-size: clamp(1.45rem, 1.25rem + .8vw, 1.8rem); font-weight: 600; color: var(--c-plum); white-space: nowrap; }
 
   .service-mini { display: flex; flex-wrap: wrap; gap: .5rem; }
-  .service-mini li {
+  /* Chips enlazados. Radio fijo (no «pill»): si una etiqueta larga parte en dos líneas
+     («Homologación y equivalencia…» en móvil), el chip sigue siendo un rectángulo suave. */
+  .service-mini a {
+    display: block;
     padding: .45rem .85rem;
     background: rgba(255, 255, 255, .7);
     border: 1px solid rgba(110, 29, 122, .16);
-    border-radius: var(--radius-pill);
+    border-radius: 1.1rem;
     color: var(--c-ink);
     font-size: .92rem;
     line-height: 1.3;
+    text-decoration: none;
+    transition: background-color var(--dur-fast) var(--ease-hover), border-color var(--dur-fast) var(--ease-hover), color var(--dur-fast) var(--ease-hover), transform var(--dur-press) var(--ease-out);
+  }
+  .service-mini a:active { transform: scale(var(--press-scale)); }
+  @media (hover: hover) and (pointer: fine) {
+    .service-mini a:hover { background: #fff; border-color: rgba(110, 29, 122, .4); color: var(--c-plum); }
   }
   .snapshot-more {
     display: inline-flex;
     align-items: center;
     gap: .5rem;
     min-height: 44px;
-    margin-top: 1rem;
+    margin-top: auto;
+    padding-top: 1rem;
     color: var(--c-plum);
     font-weight: 600;
     text-decoration: underline;
@@ -184,6 +217,9 @@ const modalities = consultations[0]?.prices.map((p) => ({ modality: p.modality, 
     .snapshot-more:hover :global(.icon) { transform: translateX(3px); }
   }
   .snapshot-actions { margin-top: clamp(2rem, 4vw, 3rem); }
+  @media (max-width: 479.98px) {
+    .snapshot-actions .btn { width: 100%; }
+  }
 
   /* Tarjeta de Dubái: ciruela profundo con la celosía en oro (motivo de /apertura-de-empresas/). Toda la
      tarjeta es pulsable (el enlace del título se extiende con ::after). */

@@ -5,7 +5,7 @@
  * - Cada servicio: «Solicitar información» abre el diálogo de solicitud (ServiceRequestDialog)
  *   con el servicio preseleccionado (data-service-request = lead_value); sin JavaScript, WhatsApp.
  * - «Nómadas digitales · Emprendedores · Residencias» ya no son una línea de texto («También»):
- *   son tarjetas como las demás (docs/cambios-2026-10.md §2.1). PENDIENTE: sus descripciones son
+ *   son tarjetas como las demás (docs/cambios-2026-10.md §2.1), bajo el subtítulo «También». PENDIENTE: sus descripciones son
  *   neutras y provisionales (`pending: true` en servicios.json) hasta que la cliente envíe las suyas.
  * - Visita guiada: data-tour="extranjeria" (src/scripts/tour.ts).
  */
@@ -15,6 +15,15 @@ import Icon from '../ui/Icon.astro';
 
 const askText = (leadValue: string) => `Hola Denisse, me gustaría recibir información sobre: ${leadValue}.`;
 const [lead, ...rest] = immigration.intro;
+// Los seis servicios principales y, bajo «También», los que eran la línea de la web anterior
+// (numeración continua: 01–09). Así 03 «Residencia para emprendedores» y 08 «Emprendedores»
+// no se leen como dos tarjetas iguales en la misma rejilla (PENDIENTE: que la cliente confirme
+// si son el mismo servicio).
+const numbered = immigration.services.map((s, i) => ({ s, n: i + 1 }));
+const groups = [
+  { title: '', items: numbered.filter(({ s }) => !s.also) },
+  { title: immigration.also_title ?? 'También', items: numbered.filter(({ s }) => s.also) },
+].filter((g) => g.items.length);
 ---
 
 <section class="section section--white immigration" id="extranjeria" aria-labelledby="extranjeria-title">
@@ -30,23 +39,32 @@ const [lead, ...rest] = immigration.intro;
       </div>
     </div>
 
-    <ul class="imm-grid" role="list">
-      {
-        immigration.services.map((s, i) => (
-          <li class="imm-card" data-service-id={s.id} data-reveal data-spotlight>
-            <span class="imm-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-            <h3 class="imm-name">{s.name}</h3>
-            <p class="imm-desc">{s.description}</p>
-            <a class="btn btn--link imm-ask" href={waLink(askText(s.lead_value))} target="_blank" rel="noopener" data-service-request={s.lead_value}>
-              <span>
-                Solicitar información<span class="visually-hidden">{` sobre ${s.name.toLowerCase()}`}</span>
-              </span>
-              <Icon name="arrow" />
-            </a>
-          </li>
-        ))
-      }
-    </ul>
+    {
+      groups.map((g) => (
+        <>
+          {g.title && (
+            <div class="imm-also-head" data-reveal>
+              <h3 class="imm-also-title" id="extranjeria-tambien">{g.title}</h3>
+            </div>
+          )}
+          <ul class:list={['imm-grid', { 'imm-grid--also': g.title }]} role="list" aria-labelledby={g.title ? 'extranjeria-tambien' : undefined}>
+            {g.items.map(({ s, n }) => (
+              <li class="imm-card" id={s.id} data-service-id={s.id} data-reveal data-spotlight>
+                <span class="imm-num" aria-hidden="true">{String(n).padStart(2, '0')}</span>
+                {g.title ? <h4 class="imm-name">{s.name}</h4> : <h3 class="imm-name">{s.name}</h3>}
+                <p class="imm-desc">{s.description}</p>
+                <a class="btn btn--link imm-ask" href={waLink(askText(s.lead_value))} target="_blank" rel="noopener" data-service-request={s.lead_value}>
+                  <span>
+                    Solicitar información<span class="visually-hidden">{` sobre ${s.name.toLowerCase()}`}</span>
+                  </span>
+                  <Icon name="arrow" />
+                </a>
+              </li>
+            ))}
+          </ul>
+        </>
+      ))
+    }
 
   </div>
 </section>
@@ -70,6 +88,24 @@ const [lead, ...rest] = immigration.intro;
   @media (min-width: 1040px) {
     .imm-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; }
   }
+  /* 680–1039 px (dos columnas): si la última tarjeta queda sola, ocupa la fila entera. */
+  @media (min-width: 680px) and (max-width: 1039.98px) {
+    .imm-grid > li:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  }
+  .imm-also-head {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-top: clamp(2.5rem, 5vw, 3.5rem);
+    margin-bottom: 1.5rem;
+  }
+  .imm-also-head::after { content: ""; flex: 1; height: 1px; background: var(--c-line); }
+  .imm-also-title {
+    font-family: var(--ff-serif);
+    font-size: var(--fs-h3);
+    font-weight: 600;
+    line-height: 1.1;
+  }
   .imm-card {
     display: flex;
     flex-direction: column;
@@ -83,7 +119,7 @@ const [lead, ...rest] = immigration.intro;
   @media (hover: hover) and (pointer: fine) {
     .imm-card:hover { border-color: var(--c-line-strong); box-shadow: var(--shadow-s); }
   }
-  .imm-num { color: var(--c-plum); font-size: .78rem; font-weight: 600; letter-spacing: .2em; }
+  .imm-num { color: var(--c-plum); font-size: .78rem; font-weight: 600; letter-spacing: .2em; font-variant-numeric: tabular-nums; }
   .imm-name {
     font-family: var(--ff-serif);
     font-size: var(--fs-h4);

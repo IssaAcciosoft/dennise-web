@@ -51,6 +51,8 @@ export function initLeadForm(rootEl: HTMLElement | null): LeadFormController | n
   const resultMock = q('[data-result-mock]');
   const idleLabel = submitLabel.textContent ?? 'Enviar';
   const waHref = whatsappLink(root.dataset.waText || undefined);
+  // Voz del formulario (LeadForm.astro): «nosotros» salvo en «Cuéntame tu historia».
+  const we = root.dataset.voice !== 'me';
   // El botón nace desactivado (LeadForm.astro): sin este script no se puede enviar nada.
   submitBtn.disabled = false;
 
@@ -165,7 +167,7 @@ export function initLeadForm(rootEl: HTMLElement | null): LeadFormController | n
       a.target = '_blank';
       a.rel = 'noopener';
       a.className = 'form-status-link';
-      a.textContent = 'Escríbeme por WhatsApp';
+      a.textContent = we ? 'Escríbenos por WhatsApp' : 'Escríbeme por WhatsApp';
       status.append(a);
     }
   }
@@ -289,7 +291,7 @@ export function initLeadForm(rootEl: HTMLElement | null): LeadFormController | n
         return;
       }
       case 'unavailable':
-        setStatus('Este formulario no está disponible en este momento. Mientras tanto, puedes contactarme por WhatsApp.', 'error', true);
+        setStatus(`Este formulario no está disponible en este momento. Mientras tanto, puedes ${we ? 'contactarnos' : 'contactarme'} por WhatsApp.`, 'error', true);
         return;
       case 'rate_limited':
         setStatus(

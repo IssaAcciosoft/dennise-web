@@ -3,8 +3,8 @@
  * Conóceme. Bloque principal «de la fundadora» (estructura de la referencia «Conoce a la fundadora», de
  * bread-communion.com, adaptada a la marca): a la izquierda antetítulo, retrato, nombre
  * completo, tres líneas con datos suyos, frase destacada y dos líneas de cierre; a la derecha
- * el titular y sus párrafos en primera persona (tal cual, docs/contenido.md → CONÓCEME) y
- * «Trayectoria reciente». Debajo: Mi propósito, Actividad reciente (agenda 2026), Experiencia, Mi trayectoria, el globo y
+ * el titular y sus párrafos en primera persona (tal cual, docs/contenido.md → CONÓCEME).
+ * «Trayectoria reciente» (solo 2024–2026) va bajo la tarjeta en escritorio y tras el texto en móvil. Debajo: Mi propósito, Actividad reciente (agenda 2026), Experiencia, Mi trayectoria, el globo y
  * «El despacho».
  *
  * El retrato es el MISMO archivo que el del hero del inicio: la transición entre páginas lo
@@ -28,28 +28,23 @@ import retrato from '~/assets/img/despacho-retrato.jpg';
 const roles = [
   `Presidenta y fundadora de ${SITE.firm}`,
   'Abogada y gestora administrativa · Extranjería y movilidad internacional',
-  'Directora Ejecutiva de Jóvenes por los Derechos Humanos',
+  'Directora ejecutiva de Jóvenes por los Derechos Humanos España',
   'Delegada · International Human Rights Summit 2026',
 ];
 
 // Trayectoria reciente (docs/contenido.md → MI TRAYECTORIA y DERECHOS HUMANOS), de lo más
-// reciente a lo más antiguo.
+// reciente a lo más antiguo. Solo 2024–2026: Poplavsky (2020–2023) y el Centro de Justicia para
+// la Mujer (2018–2019) ya están en «Mi trayectoria», más abajo, y con ellos esta columna acababa
+// ~350 px por debajo del texto en escritorio (VISUAL-04).
 const recent: { title: string; role: string; from: string; to?: string }[] = [
   { title: 'International Human Rights Summit, Nueva York', role: 'Delegada', from: '2026' },
-  { title: 'Jóvenes por los Derechos Humanos', role: 'Directora Ejecutiva', from: '2026' },
+  { title: 'Jóvenes por los Derechos Humanos España', role: 'Directora ejecutiva', from: '2026' },
   { title: 'Embajada de México en España', role: 'Litigio estratégico', from: '2024' },
-  { title: 'Poplavsky International Law Offices', role: 'Directora Legal México', from: '2020', to: '2023' },
-  {
-    title: 'Centro de Justicia para la Mujer',
-    role: 'Asesoría legal a mujeres víctimas de violencia de género',
-    from: '2018',
-    to: '2019',
-  },
 ];
 ---
 
 <BaseLayout
-  title="Conóceme · Denisse González, abogada y gestora administrativa"
+  title="Conóceme a Denisse González · DG Gestores y Abogados"
   description="Denisse González, abogada mexicana con formación jurídica internacional y experiencia profesional entre México y España: trayectoria, experiencia y propósito."
   preloadFonts={['serif-600', 'serif-500', 'sans-400', 'sans-600']}
 >
@@ -87,28 +82,31 @@ const recent: { title: string; role: string; from: string; to?: string }[] = [
         <div class="prose founder-prose">
           <p>Soy Denisse González, abogada mexicana con formación jurídica internacional y experiencia profesional desarrollada entre México y España.</p>
           <p>Mi trayectoria comenzó en la práctica jurídica y la litigación, y con el tiempo fue incorporando nuevas dimensiones: el derecho internacional, la movilidad internacional, la gestión administrativa, las relaciones institucionales y la defensa y promoción de los derechos humanos.</p>
-          <p>He trabajado en despachos jurídicos, en asesoría migratoria y en instituciones como la Embajada de México en España, donde colaboré en litigio estratégico. También he ejercido como abogada litigante en materias civil, penal y de amparo, y como Directora Legal México en Poplavsky International Law Offices, participando en la representación de demandas internacionales.</p>
+          <p>He trabajado en despachos jurídicos, en asesoría migratoria y en instituciones como la Embajada de México en España, donde colaboré en litigio estratégico. También he ejercido como abogada litigante en materias civil, penal y de amparo, y como directora legal para México en Poplavsky International Law Offices, participando en la representación de demandas internacionales.</p>
           <p>Pero mi trayectoria no se ha construido únicamente dentro de un despacho.</p>
           <p>Una parte esencial de mi camino ha estado vinculada al trabajo con personas y comunidades. Desde mis primeras prácticas en el Centro de Justicia para la Mujer, donde participé en la asesoría legal a mujeres víctimas de violencia de género, hasta mi actual participación en iniciativas de derechos humanos.</p>
           <p>Hoy entiendo el derecho como una herramienta para conectar personas con oportunidades, instituciones con comunidades y derechos con realidades concretas.</p>
-          <p>Mi formación también refleja esa visión: Derecho, una Maestría en Derecho con especialización en Litigación Oral, un Máster en Derecho Internacional, Comercio y Relaciones Internacionales, formación en Negociación en NYU y un Máster en Gestión Administrativa.</p>
+          <p>Mi formación también refleja esa visión: Derecho, una Maestría en Derecho con especialización en Litigios Orales, un Máster en Derecho Internacional, Comercio y Relaciones Internacionales, formación en Negociación en NYU y un Máster en Gestión Administrativa.</p>
         </div>
+      </div>
 
-        <div class="founder-recent">
-          <h2 class="founder-label" id="recent-title">Trayectoria reciente</h2>
-          <ul class="recent-list" role="list" aria-labelledby="recent-title">
-            {
-              recent.map((item) => (
-                <li>
-                  <strong class="recent-title">{item.title}</strong>
-                  <span class="recent-role">
-                    {item.role} (<time datetime={item.from}>{item.from}</time>{item.to && <>–<time datetime={item.to}>{item.to}</time></>})
-                  </span>
-                </li>
-              ))
-            }
-          </ul>
-        </div>
+      {/* Hermano de la columna del texto (no hijo): en móvil va después del texto, como
+          antes; en escritorio ocupa la columna de la foto bajo la tarjeta, que se quedaba
+          vacía mientras el texto seguía (~700 px). */}
+      <div class="founder-recent">
+        <h2 class="founder-label" id="recent-title">Trayectoria reciente</h2>
+        <ul class="recent-list" role="list" aria-labelledby="recent-title">
+          {
+            recent.map((item) => (
+              <li>
+                <strong class="recent-title">{item.title}</strong>
+                <span class="recent-role">
+                  {item.role} (<time datetime={item.from}>{item.from}</time>{item.to && <>–<time datetime={item.to}>{item.to}</time></>})
+                </span>
+              </li>
+            ))
+          }
+        </ul>
       </div>
     </div>
   </section>
@@ -186,7 +184,8 @@ const recent: { title: string; role: string; from: string; to?: string }[] = [
   .founder-name {
     margin-top: clamp(1.75rem, 1.4rem + 1vw, 2.25rem);
     font-family: var(--ff-serif);
-    font-size: clamp(2.15rem, 1.7rem + 1.6vw, 3.1rem);
+    /* Por debajo del H1 (.founder-title): nombre < titular ≥ títulos de sección. */
+    font-size: clamp(1.8rem, 1.5rem + 1vw, 2.4rem);
     font-weight: 500;
     line-height: 1.04;
     letter-spacing: -.012em;
@@ -228,9 +227,10 @@ const recent: { title: string; role: string; from: string; to?: string }[] = [
     max-width: 17em;
     margin-bottom: clamp(1.5rem, 1.2rem + 1vw, 2rem);
     font-family: var(--ff-serif);
-    font-size: clamp(1.95rem, 1.5rem + 1.6vw, 2.85rem);
+    /* Escala de H1 (a la par de los .section-title de la página, no por debajo). */
+    font-size: clamp(2.4rem, 1.6rem + 2.6vw, 3.6rem);
     font-weight: 500;
-    line-height: 1.12;
+    line-height: 1.08;
     letter-spacing: -.01em;
     color: var(--c-ink);
     text-wrap: balance;
@@ -250,7 +250,6 @@ const recent: { title: string; role: string; from: string; to?: string }[] = [
   }
   .founder-recent {
     max-width: 38rem;
-    margin-top: clamp(2.5rem, 2rem + 2vw, 3.5rem);
     padding-top: clamp(2rem, 1.6rem + 1.4vw, 2.75rem);
     border-top: 1px solid var(--c-line);
   }
@@ -269,9 +268,15 @@ const recent: { title: string; role: string; from: string; to?: string }[] = [
   @media (min-width: 960px) {
     .founder-grid {
       grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+      grid-template-areas: "card story" "recent story";
+      grid-template-rows: auto 1fr;
       column-gap: clamp(3.5rem, 7vw, 7.5rem);
+      row-gap: 0;
       align-items: start;
     }
+    .founder-card { grid-area: card; }
+    .founder-story { grid-area: story; }
+    .founder-recent { grid-area: recent; max-width: 23rem; margin-top: 2rem; padding-top: 1.75rem; }
     /* El titular a la altura de la foto, como en la referencia */
     .founder-story { padding-top: calc(1.5rem + .8rem * 1.4); }
   }
@@ -307,6 +312,9 @@ const recent: { title: string; role: string; from: string; to?: string }[] = [
     .purpose-label { padding-top: .7rem; }
   }
 
+  /* El globo y «El despacho» comparten fondo blanco: sin la mitad del padding inferior, el
+     paso entre las dos secciones no parece un hueco (sobre todo en móvil). */
+  .crossing { padding-bottom: calc(var(--section-pad) / 2); }
   .crossing-grid { display: grid; gap: clamp(2.5rem, 6vw, 5rem); align-items: center; }
   .crossing-copy .section-title { margin-bottom: 1.5rem; max-width: 7.7em; }
   .crossing-copy .lead { max-width: 36rem; }

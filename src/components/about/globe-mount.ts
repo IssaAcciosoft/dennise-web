@@ -31,6 +31,12 @@ const IDLE_FRAME_MS = 1000 / 30 - 2;
 const RETURN_AFTER_MS = 2200;
 const MAX_VELOCITY = 0.005; // rad/ms (un golpe rápido no lo hace girar sin control)
 const SETTLE_MS = 1500; // al pausar, el vaivén se frena durante este tramo
+// Giro máximo respecto a la vista (vaivén incluido): más allá de ~0,5 rad uno de los dos lugares
+// pasa detrás de la esfera y el arco queda flotando fuera. Al arrastrar más, el globo cede con
+// resistencia (goma, RUBBER) y al soltar vuelve al límite; la inercia se detiene en él.
+const TURN_LIMIT = 0.5;
+const RUBBER = 0.25;
+const SNAP_BACK_MS = 140; // constante de tiempo de la vuelta al límite
 
 const wrapAngle = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
 const smoothstep = (a: number, b: number, x: number) => {
@@ -114,8 +120,21 @@ export function mountGlobe(host: HTMLElement, slot: HTMLElement | null, reduced 
   let swayed = autoplay ? 0 : SETTLE_MS; // ms frenando desde la pausa
   let settled = false;
 
+  const swayAt = () => VIEW.sway * Math.sin((clock / VIEW.swayPeriod) * Math.PI * 2);
+  // Margen del arrastre para que vaivén + arrastre no pasen de ±TURN_LIMIT.
+  const lowBound = () => -TURN_LIMIT - swayAt();
+  const highBound = () => TURN_LIMIT - swayAt();
+  const rubber = (raw: number) => {
+    const lo = lowBound();
+    const hi = highBound();
+    if (raw > hi) return hi + (raw - hi) * RUBBER;
+    if (raw < lo) return lo + (raw - lo) * RUBBER;
+    return raw;
+  };
+  let rawOffset = 0; // desplazamiento del puntero sin resistencia (solo durante el arrastre)
+
   const draw = (now: number) => {
-    const phi = VIEW.phi + VIEW.sway * Math.sin((clock / VIEW.swayPeriod) * Math.PI * 2) + offset;
+    const phi = VIEW.phi + swayAt() + offset;
     globe.update({ phi });
     placeLabels(phi);
     lastDraw = now;
@@ -145,7 +164,16 @@ export function mountGlobe(host: HTMLElement, slot: HTMLElement | null, reduced 
     if (!active && now - lastDraw < IDLE_FRAME_MS) return;
 
     if (!dragging) {
-      if (Math.abs(velocity) > 1e-5) {
+      const lo = lowBound();
+      const hi = highBound();
+      if (offset > hi || offset < lo) {
+        // Fuera del límite (tras la goma o por la inercia): sin inercia, vuelta suave al borde.
+        velocity = 0;
+        const edge = offset > hi ? hi : lo;
+        offset = edge + (offset - edge) * Math.exp(-dt / SNAP_BACK_MS);
+        if (Math.abs(offset - edge) < 1e-4) offset = edge;
+        lastInteraction = now;
+      } else if (Math.abs(velocity) > 1e-5) {
         offset += velocity * dt;
         velocity *= Math.pow(0.93, dt / 16.67); // rozamiento
         if (Math.abs(velocity) <= 1e-5) {
@@ -201,6 +229,10 @@ export function mountGlobe(host: HTMLElement, slot: HTMLElement | null, reduced 
     lastX = e.clientX;
     lastMove = e.timeStamp;
     velocity = 0;
+    // Inverso de rubber(): si el globo aún vuelve del límite, el arrastre sigue sin salto.
+    const lo = lowBound();
+    const hi = highBound();
+    rawOffset = offset > hi ? hi + (offset - hi) / RUBBER : offset < lo ? lo + (offset - lo) / RUBBER : offset;
     canvas.setPointerCapture(e.pointerId);
     slot?.setAttribute('data-dragging', '');
     // La interacción vuelve a poner en marcha el bucle (el vaivén solo si no está en pausa).
@@ -213,7 +245,8 @@ export function mountGlobe(host: HTMLElement, slot: HTMLElement | null, reduced 
     if (!dragging || e.pointerId !== pointerId) return;
     const delta = ((e.clientX - lastX) / size) * Math.PI; // todo el ancho = media vuelta
     const dt = Math.max(1, e.timeStamp - lastMove);
-    offset += delta;
+    rawOffset += delta;
+    offset = rubber(rawOffset);
     velocity = Math.max(-MAX_VELOCITY, Math.min(MAX_VELOCITY, velocity * 0.2 + (delta / dt) * 0.8));
     lastX = e.clientX;
     lastMove = e.timeStamp;
@@ -231,7 +264,7 @@ export function mountGlobe(host: HTMLElement, slot: HTMLElement | null, reduced 
   const toggle = slot?.querySelector<HTMLButtonElement>('[data-globe-toggle]') ?? null;
   const paint = () => {
     if (!toggle) return;
-    toggle.setAttribute('aria-pressed', String(!autoplay));
+    // Etiqueta cambiante (Pausar / Reanudar) sin aria-pressed: las dos a la vez se contradecían.
     toggle.dataset.state = autoplay ? 'playing' : 'paused';
     const label = autoplay ? 'Pausar el giro del globo' : 'Reanudar el giro del globo';
     toggle.setAttribute('aria-label', label);

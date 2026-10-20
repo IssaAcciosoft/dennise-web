@@ -17,7 +17,7 @@ import Icon from '../ui/Icon.astro';
   <a class="wa-float is-hidden" href={waLink(WA_TEXT.general)} target="_blank" rel="noopener" aria-label="Escríbeme por WhatsApp" data-wa-float>
     <Icon name="whatsapp" />
   </a>
-  <noscript><style>.wa-float.is-hidden { opacity: 1 !important; visibility: visible !important; transform: none !important; }</style></noscript>
+  <noscript><style>.wa-float.is-hidden { opacity: 1 !important; visibility: visible !important; translate: none !important; scale: none !important; } @media (max-width: 699.98px) { .site-footer { padding-bottom: calc(6rem + env(safe-area-inset-bottom)) !important; } }</style></noscript>
 </aside>
 
 <script>
@@ -64,25 +64,29 @@ import Icon from '../ui/Icon.astro';
     background: var(--c-plum);
     color: #fff;
     box-shadow: 0 12px 28px -8px rgba(44, 10, 50, .55), 0 0 0 4px rgba(255, 255, 255, .7);
+    /* Propiedades sueltas: la elevación (translate) y la pulsación (scale) se suman en vez de
+       pisarse, y la pulsación usa la duración y la escala del sistema. */
     transition:
-      transform var(--dur) var(--ease-out),
+      translate var(--dur) var(--ease-out),
+      scale var(--dur-press) var(--ease-out),
       opacity var(--dur) var(--ease-out),
       visibility 0s,
       background-color var(--dur-fast) var(--ease-hover);
   }
   .wa-float :global(.icon) { width: 28px; height: 28px; }
-  .wa-float:active { transform: scale(.95); }
   .wa-float:focus-visible { border-radius: 50%; }
   @media (hover: hover) and (pointer: fine) {
-    .wa-float:hover { background: var(--c-plum-700); color: #fff; transform: translateY(-2px); }
+    .wa-float:hover { background: var(--c-plum-700); color: #fff; translate: 0 -2px; }
   }
+  .wa-float:active { scale: var(--press-scale); }
   .wa-float.is-hidden,
   :global(html:has(dialog[open])) .wa-float,
   :global(html:has(#site-nav:popover-open)) .wa-float {
     opacity: 0;
     visibility: hidden;
-    transform: translateY(16px) scale(.9);
-    transition: transform var(--dur) var(--ease-out), opacity var(--dur) var(--ease-out), visibility 0s linear var(--dur);
+    translate: 0 16px;
+    scale: .9;
+    transition: translate var(--dur) var(--ease-out), scale var(--dur) var(--ease-out), opacity var(--dur) var(--ease-out), visibility 0s linear var(--dur);
   }
   @media (max-width: 599.98px) {
     .wa-float { width: 52px; height: 52px; }

@@ -31,11 +31,17 @@ import despacho from '~/assets/img/despacho.jpg';
         <p class="lead services-lead">Expertos en extranjería. Tu tranquilidad y confianza son nuestra prioridad. Contáctanos hoy y deja tu caso en manos profesionales.</p>
         {/* Su frase (Facebook, 10/09/2026; docs/redes-sociales.md §6) */}
         <p class="services-trust">No solo somos extranjería. <em>Somos humanidad.</em></p>
-        <div class="services-meta">
-          <ul class="pill-row" role="list">
-            <li class="pill"><Icon name="monitor" />Online</li>
-            <li class="pill"><Icon name="handshake" />Presencial</li>
-          </ul>
+        {/* Modalidades: dato (texto con icono), no botones. Acción principal: reservar; la visita
+            guiada queda como acción secundaria, separada de los datos. */}
+        <ul class="services-modes" role="list" aria-label="Modalidades">
+          <li><Icon name="monitor" />Online</li>
+          <li><Icon name="handshake" />Presencial</li>
+        </ul>
+        <div class="services-actions">
+          <a class="btn btn--primary" href="#reservar">
+            <span>Reserva tu asesoría</span>
+            <Icon name="arrow" />
+          </a>
           <ServicesTour />
         </div>
       </div>
@@ -47,22 +53,38 @@ import despacho from '~/assets/img/despacho.jpg';
     </div>
   </section>
 
+  {/* Índice de la página (larga): atajos a cada bloque. Fuera del hero para que, en escritorio
+      (≥ 1160 px), se quede fijo bajo la cabecera mientras se recorre la página. En móvil es una
+      fila que se desliza en horizontal (sin partir etiquetas). */}
+  <nav class="services-index" aria-label="En esta página">
+    <div class="container">
+      <ul role="list">
+        <li><a href="#extranjeria">Extranjería</a></li>
+        <li><a href="#gestoria">Gestoría</a></li>
+        <li><a href="#asesorias">Asesorías y precios</a></li>
+        <li><a href="#reservar">Reservar</a></li>
+        <li><a href="#preguntas">Preguntas frecuentes</a></li>
+      </ul>
+    </div>
+  </nav>
+
   <Immigration />
 
   <FirmServices />
 
   <section class="section section--ivory services-block" id="asesorias" aria-labelledby="asesorias-title">
     <div class="container">
-      <div class="block-head" data-reveal>
-        <h2 class="block-title" id="asesorias-title">Asesorías</h2>
-        <p class="block-sub">Precios por sesión, online o presencial.</p>
+      <div class="block-head">
+        <p class="eyebrow" data-reveal>Precios</p>
+        <h2 class="section-title" id="asesorias-title" data-reveal>Asesorías</h2>
+        <p class="lead block-sub" data-reveal>Precios por sesión, online o presencial.</p>
       </div>
       <Consultations />
       {/* Autogestión DG: página aparte y discreta; desde aquí, solo este enlace sobrio
           (docs/cambios-2026-10.md §2.8). Los protagonistas son los servicios individuales. */}
       <p class="self-service" data-reveal>
         ¿Prefieres gestionar tu trámite tú mismo?{' '}
-        <a href={url(AUTOGESTION_PATH)}>{autogestion.name}<span aria-hidden="true">&nbsp;→</span></a>
+        <a href={url(AUTOGESTION_PATH)}><span class="self-service-label">{autogestion.name}</span><Icon name="arrow" /></a>
       </p>
     </div>
   </section>
@@ -82,7 +104,7 @@ import despacho from '~/assets/img/despacho.jpg';
 
 <style>
   .services-hero {
-    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5.5rem) clamp(1.5rem, 1rem + 2vw, 3rem);
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5.5rem) clamp(2.5rem, 2rem + 2vw, 3.5rem);
     background:
       radial-gradient(60rem 40rem at 100% 0%, rgba(232, 221, 236, .85), transparent 62%),
       var(--c-ivory);
@@ -102,7 +124,74 @@ import despacho from '~/assets/img/despacho.jpg';
     color: var(--c-ink);
   }
   .services-trust em { font-style: normal; color: var(--c-plum); }
-  .services-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.25rem; }
+  .services-modes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .35rem 0;
+    margin-bottom: 1.5rem;
+    color: var(--c-ink-soft);
+    font-size: .95rem;
+    font-weight: 600;
+  }
+  .services-modes li { display: inline-flex; align-items: center; gap: .45rem; }
+  .services-modes li + li::before { content: "·"; margin-inline: .75rem; color: var(--c-muted); }
+  .services-modes :global(.icon) { width: 1.15rem; height: 1.15rem; color: var(--c-plum); }
+  .services-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.25rem; }
+  /* Móvil: las dos acciones apiladas con el mismo ancho (VISUAL-22). */
+  @media (max-width: 479.98px) {
+    .services-actions > .btn,
+    .services-actions > :global(.tour-btn) { width: 100%; justify-content: center; }
+    .services-actions > :global(.tour-btn) { min-height: 50px; }
+  }
+  .services-index { padding-bottom: clamp(1rem, .5rem + 2vw, 2rem); background: var(--c-ivory); }
+  .services-index ul {
+    display: flex;
+    gap: 0 1.75rem;
+    padding-top: .5rem;
+    border-top: 1px solid var(--c-line);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .services-index ul::-webkit-scrollbar { display: none; }
+  /* Fila deslizable: un fundido a la derecha avisa de que hay más; el relleno final deja que
+     el último enlace salga del fundido al llegar al final. */
+  @media (max-width: 1159.98px) {
+    .services-index ul {
+      padding-right: 2.5rem;
+      -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 2.5rem), transparent);
+      mask-image: linear-gradient(90deg, #000 calc(100% - 2.5rem), transparent);
+    }
+  }
+  .services-index li { flex: none; }
+  .services-index a {
+    display: inline-flex;
+    white-space: nowrap;
+    align-items: center;
+    min-height: 44px;
+    color: var(--c-ink-soft);
+    font-size: .95rem;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--c-line-strong);
+    text-underline-offset: .3em;
+    transition: color var(--dur-fast) var(--ease-hover), text-decoration-color var(--dur-fast) var(--ease-hover);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .services-index a:hover { color: var(--c-plum); text-decoration-color: currentColor; }
+  }
+  /* Escritorio: el índice se queda bajo la cabecera; los anclajes dejan sitio para los dos. */
+  @media (min-width: 1160px) {
+    .services-index {
+      position: sticky;
+      top: var(--header-h);
+      z-index: 20;
+      padding-bottom: 0;
+      border-bottom: 1px solid var(--c-line);
+    }
+    .services-index ul { border-top: 0; padding-top: 0; }
+    :global(html:has(.services-index)) { scroll-padding-top: calc(var(--header-h) + 44px + 12px); }
+  }
   .services-media { position: relative; isolation: isolate; width: min(100% - 1.5rem, 320px); justify-self: center; }
   .services-media :global(img) { width: 100%; border-radius: var(--radius); }
   .frame--offset::before {
@@ -112,6 +201,10 @@ import despacho from '~/assets/img/despacho.jpg';
     background: var(--c-lavender-200);
     border-radius: var(--radius);
     z-index: -1;
+  }
+  /* Móvil: el fondo desplazado de la foto no invade el margen lateral (16 px). */
+  @media (max-width: 639.98px) {
+    .frame--offset::before { inset: 1rem -.75rem -.75rem 1rem; }
   }
   @media (min-width: 700px) {
     .services-intro { grid-template-columns: minmax(0, 1.3fr) minmax(0, .7fr); }
@@ -126,33 +219,29 @@ import despacho from '~/assets/img/despacho.jpg';
     color: var(--c-muted);
     font-size: var(--fs-small);
   }
+  /* Enlace sobrio (§2.8): texto subrayado + la misma flecha SVG que el resto, fuera del subrayado. */
   .self-service a {
-    display: inline-block;
-    padding-block: .35rem;
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    min-height: 44px;
+    vertical-align: middle;
     color: var(--c-plum);
     font-weight: 600;
+    text-decoration: none;
+  }
+  .self-service-label {
     text-decoration: underline;
     text-decoration-color: var(--c-line-strong);
     text-underline-offset: .2em;
+    transition: text-decoration-color var(--dur-fast) var(--ease-hover);
   }
-  @media (hover: hover) {
-    .self-service a:hover { text-decoration-color: currentColor; }
+  .self-service a :global(.icon) { width: 1.1rem; height: 1.1rem; transition: transform var(--dur) var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) {
+    .self-service a:hover .self-service-label { text-decoration-color: currentColor; }
+    .self-service a:hover :global(.icon) { transform: translateX(3px); }
   }
-  .block-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: .5rem 2rem;
-    padding-bottom: 1.25rem;
-    margin-bottom: 2rem;
-    border-bottom: 1px solid var(--c-line);
-  }
-  .block-title {
-    font-family: var(--ff-serif);
-    font-size: var(--fs-h3);
-    font-weight: 600;
-    line-height: 1.1;
-  }
-  .block-sub { color: var(--c-muted); font-size: var(--fs-small); }
+  .block-head { margin-bottom: clamp(2rem, 4vw, 3rem); }
+  .block-head .section-title { margin-bottom: 1rem; }
+  .block-sub { max-width: 34rem; }
 </style>

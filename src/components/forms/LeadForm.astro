@@ -42,10 +42,16 @@ const {
 } = Astro.props;
 
 const mock = !isConfigured(FORMS[formKey]);
+/* Voz (regla de persona, docs/pulido-pendiente.md COPY-12): «yo» (Denisse) en el formulario
+ * personal de Empoderando Voces; «nosotros» (el despacho) en los comerciales (servicio, contacto). */
+const we = formKey !== 'historia';
+const V = we
+  ? { consent: 'Necesitamos tu consentimiento para poder recibir tus datos.', write: 'Escríbenos por WhatsApp', writeLc: 'escríbenos por WhatsApp', call: 'llámanos al', notReach: 'los envíos no nos llegan', contact: 'Para contactarnos ahora', notReached: 'este envío no nos ha llegado' }
+  : { consent: 'Necesito tu consentimiento para poder recibir tus datos.', write: 'Escríbeme por WhatsApp', writeLc: 'escríbeme por WhatsApp', call: 'llámame al', notReach: 'los envíos no me llegan', contact: 'Para contactarme ahora', notReached: 'este envío no me ha llegado' };
 const btnClass = variant === 'ev' ? 'btn--ev' : 'btn--primary';
 ---
 
-<div class:list={['lead-box', `lead-box--${variant}`]} data-lead={formKey} data-wa-text={waText} data-success-text={successText}>
+<div class:list={['lead-box', `lead-box--${variant}`]} data-lead={formKey} data-wa-text={waText} data-success-text={successText} data-voice={we ? 'we' : 'me'}>
   {/* method="post": aunque el script no llegue a ejecutarse (JS desactivado, bloqueado o un
       fragmento que falla), los datos nunca acaban en la URL (historial, registros, Referer).
       El botón nace desactivado y lo activa initLeadForm() (src/scripts/lead-form.ts). */}
@@ -62,7 +68,7 @@ const btnClass = variant === 'ev' ? 'btn--ev' : 'btn--primary';
             value="sí"
             required
             aria-describedby={`${idPrefix}-consentimiento-error`}
-            data-msg-required="Necesito tu consentimiento para poder recibir tus datos."
+            data-msg-required={V.consent}
           />
           <span>
             He leído y acepto la <a href={url('/politica-privacidad/')} target="_blank" rel="noopener">política de privacidad<span class="visually-hidden"> (se abre en una pestaña nueva)</span></a> y {CONSENT[formKey]}
@@ -90,7 +96,7 @@ const btnClass = variant === 'ev' ? 'btn--ev' : 'btn--primary';
 
     <noscript>
       <p class="form-noscript">
-        Para enviar el formulario necesitas JavaScript. <a href={waLink(waText)} target="_blank" rel="noopener">Escríbeme por WhatsApp</a> o llámame al{' '}
+        Para enviar el formulario necesitas JavaScript. <a href={waLink(waText)} target="_blank" rel="noopener">{V.write}</a> o {V.call}{' '}
         <a href={TEL_LINK}>{PHONE.display}</a>.
       </p>
     </noscript>
@@ -98,8 +104,8 @@ const btnClass = variant === 'ev' ? 'btn--ev' : 'btn--primary';
     {
       mock && (
         <p class="form-mock" data-form-mock>
-          <strong>Modo de prueba:</strong> este formulario todavía no está conectado y los envíos no me llegan. Para contactarme ahora,{' '}
-          <a href={waLink(waText)} target="_blank" rel="noopener">escríbeme por WhatsApp</a>.
+          <strong>Modo de prueba:</strong> este formulario todavía no está conectado y {V.notReach}. {V.contact},{' '}
+          <a href={waLink(waText)} target="_blank" rel="noopener">{V.writeLc}</a>.
         </p>
       )
     }
@@ -110,7 +116,7 @@ const btnClass = variant === 'ev' ? 'btn--ev' : 'btn--primary';
     <h3 class="lead-result-title" tabindex="-1" data-result-title>{successTitle}</h3>
     <p class="lead-result-text" data-result-text></p>
     <p class="lead-result-mock" data-result-mock hidden>
-      Modo de prueba: el formulario aún no está conectado a AccioGest, así que este envío no me ha llegado.
+      Modo de prueba: el formulario aún no está conectado a AccioGest, así que {V.notReached}.
     </p>
     <div class="lead-result-actions">
       {inDialog && (
@@ -187,6 +193,10 @@ const btnClass = variant === 'ev' ? 'btn--ev' : 'btn--primary';
     line-height: 1.5;
   }
   .form-noscript a { color: var(--c-plum); font-weight: 600; }
+  @media (hover: hover) and (pointer: fine) {
+    .form-mock a:hover,
+    .form-noscript a:hover { color: var(--c-plum-700); text-decoration-color: currentColor; }
+  }
 
   .lead-result { padding-block: .5rem; text-align: center; }
   .lead-result:focus { outline: none; }

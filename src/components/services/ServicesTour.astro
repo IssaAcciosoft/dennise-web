@@ -1,6 +1,6 @@
 ---
 /**
- * «¿Te guío?» — botón discreto que abre la visita guiada de /servicios/ (src/scripts/tour.ts).
+ * «¿Te guiamos?» — botón discreto que abre la visita guiada de /servicios/ (src/scripts/tour.ts).
  * - Está en el HTML desde el principio (sin saltos de diseño) y nunca arranca solo.
  * - Sin JavaScript es un enlace a #extranjeria (primer paso de la visita). Con JavaScript,
  *   botón: al pulsarlo se descargan driver.js y su CSS (import() dinámico); al pasar el ratón
@@ -11,7 +11,7 @@ import Icon from '../ui/Icon.astro';
 
 <a class="tour-btn" href="#extranjeria" data-tour-start>
   <span class="tour-btn-icon"><Icon name="route" /></span>
-  <span>¿Te guío?</span>
+  <span>¿Te guiamos?</span>
 </a>
 
 <script>
@@ -19,7 +19,7 @@ import Icon from '../ui/Icon.astro';
   if (btn) {
     btn.setAttribute('role', 'button');
     btn.setAttribute('aria-haspopup', 'dialog');
-    btn.setAttribute('aria-label', '¿Te guío? Visita guiada por los servicios');
+    btn.setAttribute('aria-label', '¿Te guiamos? Visita guiada por los servicios');
     let loader: Promise<typeof import('~/scripts/tour')> | null = null;
     const load = () => (loader ??= import('~/scripts/tour'));
     const start = async (e: Event) => {

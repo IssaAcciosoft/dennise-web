@@ -7,6 +7,7 @@
     "id": "extranjeria",
     "eyebrow": "Vive en España de manera legal",
     "title": "Servicios de extranjería en España",
+    "also_title": "También",
     "intro": [
       "En nuestro despacho te ayudamos a regularizar tu situación en España con soluciones legales claras, actualizadas y adaptadas a tu caso.",
       "Acompañamos a personas extranjeras en todo su proceso migratorio, desde la primera consulta hasta la resolución final."
@@ -53,21 +54,24 @@
         "name": "Nómadas digitales",
         "description": "Te orientamos sobre la residencia para nómadas digitales y te acompañamos en su solicitud.",
         "lead_value": "Extranjería · Nómadas digitales",
-        "pending": true
+        "pending": true,
+        "also": true
       },
       {
         "id": "emprendedores",
         "name": "Emprendedores",
         "description": "Si quieres emprender en España, te acompañamos con los trámites de extranjería de tu proyecto, desde la primera consulta.",
         "lead_value": "Extranjería · Emprendedores",
-        "pending": true
+        "pending": true,
+        "also": true
       },
       {
         "id": "residencias",
         "name": "Residencias",
         "description": "Te orientamos sobre la autorización de residencia que corresponde a tu caso y gestionamos su solicitud.",
         "lead_value": "Extranjería · Residencias",
-        "pending": true
+        "pending": true,
+        "also": true
       }
     ]
   },
@@ -240,7 +244,7 @@
   },
   "firm_services": {
     "id": "gestoria",
-    "eyebrow": "Gestores y abogados",
+    "eyebrow": "Gestores y Abogados",
     "title": "Gestoría y otros trámites",
     "services": [
       {

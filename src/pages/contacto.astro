@@ -8,7 +8,7 @@ import { url } from '~/lib/url';
 ---
 
 <BaseLayout
-  title="Contacto · Denisse González, abogada · DG Gestores y Abogados"
+  title="Contacto · DG Gestores y Abogados"
   description="Contacta con Denisse González (DG Gestores y Abogados): +34 670 647 593, lic.denissegb@icloud.com y despacho en C/ Eraso 31, 28028 Madrid. Asesorías online y presenciales."
 >
   <section class="contact-page" aria-labelledby="contact-title" data-wa-hide>
@@ -19,23 +19,6 @@ import { url } from '~/lib/url';
         {/* Textos de la web anterior (docs/web-anterior.md §1): «su consulta» → «tu consulta». */}
         <p class="lead contact-lead">Ponte en contacto con nuestro despacho para consultas sobre extranjería, regularización o apertura de empresas en España, México y Dubái.</p>
         <p class="contact-response"><Icon name="clock" />Esperamos responder tu consulta en menos de 24&nbsp;horas.</p>
-
-        <address class="contact-office" aria-labelledby="office-title">
-          <p class="contact-office-label">Despacho</p>
-          <p class="contact-office-name" id="office-title">{OFFICE.name}</p>
-          <p class="contact-office-lines">
-            <span>{OFFICE.street} <span class="nowrap">({OFFICE.neighborhood})</span></span>
-            <span>{OFFICE.postalCode} {OFFICE.locality}</span>
-          </p>
-          <p class="contact-office-note">Asesorías online y presenciales.</p>
-          <a class="btn btn--ghost btn--sm contact-office-map" href={OFFICE.mapsUrl} target="_blank" rel="noopener">
-            <Icon name="pin" />
-            <span>Cómo llegar</span>
-            <span class="visually-hidden"> (Google Maps, se abre en una pestaña nueva)</span>
-          </a>
-        </address>
-
-        <p class="contact-tagline">{SITE.tagline}</p>
       </div>
 
       <div class="contact-panel">
@@ -43,7 +26,7 @@ import { url } from '~/lib/url';
           <span class="contact-card-icon"><Icon name="whatsapp" /></span>
           <span class="contact-card-text">
             <span class="contact-card-label">WhatsApp</span>
-            <span class="contact-card-value">Escríbeme por WhatsApp</span>
+            <span class="contact-card-value">Escríbenos por WhatsApp</span>
           </span>
           <Icon name="arrow" class="contact-card-arrow" />
         </a>
@@ -67,7 +50,7 @@ import { url } from '~/lib/url';
           <span class="contact-card-icon"><Icon name="message" /></span>
           <span class="contact-card-text">
             <span class="contact-card-label">Formulario</span>
-            <span class="contact-card-value">Envíame un mensaje</span>
+            <span class="contact-card-value">Envíanos un mensaje</span>
           </span>
           <Icon name="arrow" class="contact-card-arrow" />
         </a>
@@ -81,7 +64,7 @@ import { url } from '~/lib/url';
         </a>
 
         <div class="contact-social">
-          <p class="contact-social-title">Sígueme en redes</p>
+          <p class="contact-social-title">Síguenos en redes</p>
           <SocialLinks />
         </div>
 
@@ -92,6 +75,27 @@ import { url } from '~/lib/url';
             <Icon name="arrow" />
           </a>
         </div>
+      </div>
+
+      {/* Despacho y lema: en móvil, después de las vías de contacto (que van justo tras la
+          entradilla, en la primera pantalla); en escritorio, en la columna izquierda. */}
+      <div class="contact-aside">
+        <address class="contact-office" aria-labelledby="office-title">
+          <p class="contact-office-label">Despacho</p>
+          <p class="contact-office-name" id="office-title">{OFFICE.name}</p>
+          <p class="contact-office-lines">
+            <span>{OFFICE.street} <span class="nowrap">({OFFICE.neighborhood})</span></span>
+            <span>{OFFICE.postalCode} {OFFICE.locality}</span>
+          </p>
+          <p class="contact-office-note">Asesorías online y presenciales.</p>
+          <a class="btn btn--ghost btn--sm contact-office-map" href={OFFICE.mapsUrl} target="_blank" rel="noopener">
+            <Icon name="pin" />
+            <span>Cómo llegar</span>
+            <span class="visually-hidden"> (Google Maps, se abre en una pestaña nueva)</span>
+          </a>
+        </address>
+
+        <p class="contact-tagline">{SITE.tagline}</p>
       </div>
     </div>
   </section>
@@ -110,7 +114,18 @@ import { url } from '~/lib/url';
     overflow: clip;
   }
   /* minmax(0, 1fr): la columna nunca se ensancha por el teléfono (sin cortes a 320 px). */
-  .contact-grid { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr); gap: 3rem; }
+  .contact-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "intro" "panel" "aside";
+    gap: 2.5rem;
+  }
+  .contact-intro { grid-area: intro; }
+  .contact-panel { grid-area: panel; }
+  .contact-aside { grid-area: aside; }
+  .contact-aside > .contact-office { margin-top: 0; }
   .contact-intro .page-title { margin-bottom: 1.25rem; }
   .contact-lead { max-width: 34rem; }
   .contact-response {
@@ -236,11 +251,26 @@ import { url } from '~/lib/url';
   .contact-story strong { display: block; color: var(--ev-text); font-weight: 600; }
   .contact-story .btn--link { color: var(--ev-gold); text-decoration-color: rgba(242, 179, 61, .5); }
   @media (min-width: 900px) {
-    .contact-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); align-items: start; column-gap: 5rem; }
+    .contact-grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      grid-template-rows: auto 1fr;
+      grid-template-areas: "intro panel" "aside panel";
+      align-items: start;
+      column-gap: 5rem;
+      row-gap: 2rem;
+    }
+  }
+  /* Móvil: las tarjetas de contacto sin la tarjeta blanca que las envuelve (doble relleno):
+     más ancho para el texto, títulos en una línea. */
+  @media (max-width: 559.98px) {
+    .contact-panel { padding: 0; background: none; box-shadow: none; border-radius: 0; gap: .75rem; }
+    .contact-card { background: var(--c-white); border-color: transparent; box-shadow: var(--shadow-s); padding: .9rem 1rem; gap: .85rem; }
+    .contact-card-value { font-size: 1.25rem; }
+    .contact-card-value--email { font-size: 1.1rem; }
+    .contact-social { padding-inline: 0; }
   }
   /* 320–359 px (o zoom 400 %): panel y tarjetas más compactos para que quepa el teléfono. */
   @media (max-width: 359.98px) {
-    .contact-panel { padding: 1rem; }
     .contact-card { gap: .75rem; padding: .85rem .9rem; }
     .contact-card-icon { width: 2.5rem; height: 2.5rem; }
   }

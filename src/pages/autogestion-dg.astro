@@ -5,7 +5,8 @@
  * ni se promociona en Inicio; se llega desde un enlace sobrio en /servicios/ y otro en el pie.
  * - Vídeo de Denisse explicando Autogestión DG (public/video/, comprimido con ffmpeg desde
  *   _originales/recursos-2026-10/video-autogestion-dg.mp4): póster (fotograma 0:39,6),
- *   preload="none" (no se descarga nada hasta pulsar play), controles nativos, sin autoplay.
+ *   preload="none" (no se descarga nada hasta pulsar play), botón de play propio sobre el póster
+ *   (los controles nativos aparecen al empezar; sin JS se ven desde el principio), sin autoplay.
  *   Lleva los subtítulos incrustados en la imagen (de la propia pieza); no hay pista de texto.
  *   PENDIENTE: transcripción o subtítulos (.vtt) si la cliente los facilita.
  * - Trámites, planes (incluye / no incluye), botones de AccioGest y aviso de condiciones:
@@ -58,12 +59,12 @@ const prices = autogestion.plans.map((p) => `${formatAmount(p.amount)} €`);
           </a>
         </div>
         <p class="ag-back">
-          ¿Prefieres que el despacho se encargue de todo? <a href={url('/servicios/')}>Ver servicios</a>
+          ¿Prefieres que nos encarguemos de&nbsp;todo? <a href={url('/servicios/')}>Ver servicios</a>
         </p>
       </div>
 
       <figure class="ag-video" aria-labelledby="ag-video-caption">
-        <div class="ag-video-frame">
+        <div class="ag-video-frame" data-wa-hide>
           <video
             controls
             preload="none"
@@ -78,10 +79,33 @@ const prices = autogestion.plans.map((p) => `${formatAmount(p.amount)} €`);
             <source src={VIDEO.mp4} type="video/mp4" />
             <a href={VIDEO.mp4}>Descargar el vídeo (MP4)</a>
           </video>
+          <button type="button" class="ag-video-play" aria-label="Reproducir el vídeo: Denisse González explica qué es Autogestión DG" hidden>
+            <Icon name="play" />
+          </button>
+          <script is:inline>
+            // Sin JS el vídeo conserva los controles nativos. Con JS, el póster queda limpio
+            // (sin la barra gris) y un botón centrado inicia el vídeo; los controles nativos
+            // vuelven en cuanto empieza. Va en línea para que no se vea la barra ni un instante.
+            (function () {
+              var s = document.currentScript, f = s && s.parentElement;
+              var v = f && f.querySelector('video'), b = f && f.querySelector('.ag-video-play');
+              if (!v || !b) return;
+              v.controls = false;
+              b.hidden = false;
+              function start() { v.controls = true; b.hidden = true; }
+              b.addEventListener('click', function () {
+                start();
+                var p = v.play();
+                if (p && p.catch) p.catch(function () {});
+                v.focus();
+              });
+              v.addEventListener('play', start);
+            })();
+          </script>
         </div>
         <figcaption class="ag-video-caption" id="ag-video-caption">
           <span class="ag-video-title">Denisse explica qué es {autogestion.name}</span>
-          <span class="ag-video-meta">Vídeo · {VIDEO.duration} · con sonido y subtítulos en la imagen</span>
+          <span class="ag-video-meta">Vídeo · {VIDEO.duration} · subtitulado</span>
           <span class="ag-video-summary" id="ag-video-summary">
             En este vídeo, Denisse González presenta {autogestion.name}, la opción para gestionar tu propio trámite de extranjería con el apoyo del despacho. Debajo tienes por escrito los trámites disponibles y lo que incluye cada plan.
           </span>
@@ -115,14 +139,16 @@ const prices = autogestion.plans.map((p) => `${formatAmount(p.amount)} €`);
       var(--c-ivory);
   }
   .ag-hero-grid { display: grid; gap: clamp(2.5rem, 5vw, 4rem); align-items: center; }
-  .ag-title { margin-bottom: 1.25rem; }
+  .ag-title { margin-bottom: 1.25rem; text-wrap: balance; }
   .ag-lead { max-width: 30rem; }
   .ag-intro { max-width: 34em; margin-top: 1rem; color: var(--c-ink-soft); text-wrap: pretty; }
   .ag-actions { margin-top: 2rem; }
-  .ag-back { margin-top: 1.5rem; color: var(--c-muted); font-size: var(--fs-small); }
+  .ag-back { margin-top: 1.5rem; color: var(--c-muted); font-size: var(--fs-small); text-wrap: pretty; }
+  /* Objetivo táctil de 44 px sin abrir el interlineado (el margen negativo anula el relleno). */
   .ag-back a {
     display: inline-block;
-    padding-block: .35rem;
+    padding-block: .7rem;
+    margin-block: -.7rem;
     color: var(--c-plum);
     font-weight: 600;
     text-decoration: underline;
@@ -154,6 +180,10 @@ const prices = autogestion.plans.map((p) => `${formatAmount(p.amount)} €`);
     border-radius: var(--radius-l);
     z-index: -1;
   }
+  /* Móvil: el fondo desplazado no invade el margen lateral (16 px). */
+  @media (max-width: 639.98px) {
+    .ag-video-frame::before { inset: 1rem -.75rem -.75rem 1rem; }
+  }
   .ag-video video {
     display: block;
     width: 100%;
@@ -164,6 +194,33 @@ const prices = autogestion.plans.map((p) => `${formatAmount(p.amount)} €`);
     border-radius: var(--radius-l);
     box-shadow: var(--shadow);
   }
+  .ag-video-play {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    display: grid;
+    place-items: center;
+    width: 72px;
+    height: 72px;
+    padding: 0 0 0 4px;           /* centra ópticamente el triángulo */
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .92);
+    color: var(--c-plum);
+    box-shadow: 0 10px 30px -8px rgba(44, 10, 50, .55);
+    cursor: pointer;
+    translate: -50% -50%;
+    transition: scale var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-hover);
+  }
+  .ag-video-play[hidden] { display: none; }
+  .ag-video-play :global(svg) { width: 30px; height: 30px; }
+  .ag-video-play:active { scale: var(--press-scale, .97); }
+  .ag-video-play:focus-visible { outline: 3px solid var(--c-white); outline-offset: 3px; }
+  @media (hover: hover) {
+    .ag-video-play:hover { background: var(--c-white); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ag-video-play { transition: none; }
+  }
   .ag-video-caption { display: grid; gap: .3rem; padding-top: .5rem; }
   .ag-video-title { font-family: var(--ff-serif); font-size: 1.3rem; font-weight: 600; line-height: 1.2; color: var(--c-ink); }
   .ag-video-meta {
@@ -172,11 +229,15 @@ const prices = autogestion.plans.map((p) => `${formatAmount(p.amount)} €`);
     font-weight: 600;
     letter-spacing: .14em;
     text-transform: uppercase;
+    text-wrap: balance;
   }
   .ag-video-summary { margin-top: .35rem; color: var(--c-ink-soft); font-size: var(--fs-small); line-height: 1.6; text-wrap: pretty; }
 
   @media (min-width: 900px) {
-    .ag-hero-grid { grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr); }
-    .ag-video { width: 100%; max-width: 340px; justify-self: end; margin-right: 1rem; }
+    /* El vídeo (9:16) es mucho más alto que el texto: el texto arriba, alineado con el vídeo
+       (no centrado en todo el bloque, que dejaba un hueco grande sobre el antetítulo). */
+    .ag-hero-grid { grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr); align-items: start; }
+    .ag-hero-copy { padding-top: clamp(1rem, 4vw, 4rem); }
+    .ag-video { width: 100%; max-width: 290px; justify-self: end; margin-right: 1rem; }
   }
 </style>

@@ -295,8 +295,17 @@ const team: Member[] = [
     .member { grid-template-columns: 152px minmax(0, 1fr); gap: 2rem; }
     .member-photo--initials span { font-size: 3.4rem; }
   }
+  /* Escritorio: Denisse (fundadora) a todo el ancho, con sus dos párrafos en dos columnas para
+     no alargar las líneas; Everardo y Stephanie, debajo, en dos columnas. Con tres fichas en una
+     rejilla de 2 quedaba Stephanie sola y una celda vacía a su lado. */
   @media (min-width: 1024px) {
     .team-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .member:first-child {
+      grid-column: 1 / -1;
+      padding-bottom: clamp(2rem, 4vw, 3rem);
+      border-bottom: 1px solid var(--c-line);
+    }
+    .member:first-child .member-bio { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem clamp(2rem, 4vw, 3.5rem); }
   }
 
 </style>

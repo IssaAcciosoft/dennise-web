@@ -39,7 +39,7 @@ const countries = companies.countries.map((c) => c.name);
     <ul class="firm-list" role="list" data-tour="gestoria">
       {
         firmServices.services.map((s) => (
-          <li class="firm-card" data-service-id={s.id} data-reveal data-spotlight>
+          <li class="firm-card" id={s.id} data-service-id={s.id} data-reveal data-spotlight>
             <h3 class="firm-name">{s.name}</h3>
             <p class="firm-desc">{s.description}</p>
             <a class="btn btn--link firm-ask" href={waLink(askText(s.lead_value))} target="_blank" rel="noopener" data-service-request={s.lead_value}>

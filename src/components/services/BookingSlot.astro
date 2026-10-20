@@ -84,7 +84,7 @@ const requestWa = waLink(WA_TEXT.reserva);
           </noscript>
           <p class="booking-alt">
             ¿Tienes dudas antes de reservar?{' '}
-            <a href={requestWa} target="_blank" rel="noopener">Escríbeme por WhatsApp</a>.
+            <a href={requestWa} target="_blank" rel="noopener">Escríbenos por WhatsApp</a>.
           </p>
         </>
       ) : (
@@ -274,10 +274,9 @@ const requestWa = waLink(WA_TEXT.reserva);
   .booking-noscript { max-width: 960px; margin: 1.25rem auto 0; color: var(--c-muted); font-size: var(--fs-small); text-align: center; }
 
   /* ---------- Panel sin configurar ---------- */
+  /* Mismo ancho que el resto de bloques de /servicios/ (todo el contenedor). */
   .booking-card {
     display: grid;
-    max-width: 1040px;
-    margin-inline: auto;
     overflow: hidden;
     border: 1px solid var(--c-line);
     border-radius: var(--radius-l);

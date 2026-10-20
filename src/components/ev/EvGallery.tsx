@@ -2,8 +2,8 @@
  * Galería inmersiva de Empoderando Voces (React Bits · CircularGallery, WebGL con ogl).
  *
  * Mejora progresiva sobre la lista estática que pinta Astro ([data-ev-strip], con <img> y
- * texto alternativo): antes de hidratar, sin JavaScript, sin WebGL o con «reducir movimiento»
- * esa lista es la galería (desplazable con el dedo, el trackpad o el teclado).
+ * texto alternativo): antes de hidratar, sin JavaScript, sin WebGL, con «reducir movimiento»
+ * o por debajo de 480 px esa lista es la galería (desplazable con el dedo, el trackpad o el teclado).
  * Cuando la primera foto está en la GPU, el lienzo se funde encima y la lista pasa a ser solo
  * para lectores de pantalla (sigue en el árbol de accesibilidad; deja de ser enfocable).
  * Botones «anterior / siguiente» siempre visibles y una región aria-live que anuncia la foto.
@@ -14,15 +14,32 @@
  * los mismos archivos que ya eligió cada <img> de la lista (currentSrc: AVIF o WebP, 450 o
  * 600 px según la pantalla): una sola descarga por foto.
  */
-import { lazy, Suspense, useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import type { CircularGalleryHandle, GalleryItem } from '../react-bits/CircularGallery/CircularGallery';
 import { usePrefersReducedMotion } from '../islands/hooks';
 
 const CircularGallery = lazy(() => import('../react-bits/CircularGallery/CircularGallery'));
 
+/** `wideHidden`: la foto ya está en la portada en escritorio (≥ 960 px); allí no se repite en
+ *  la galería (la lista estática la oculta con CSS: li[data-wide-hidden]). */
+export type EvGalleryItem = GalleryItem & { wideHidden?: boolean };
 interface Props {
-  items: GalleryItem[];
+  items: EvGalleryItem[];
 }
+
+const WIDE = '(min-width: 960px)';
+const NARROW = '(max-width: 479.98px)';
+const useMedia = (query: string) => {
+  const [on, setOn] = useState(false); // false en SSR y primer render
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const sync = () => setOn(mq.matches);
+    sync();
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  }, [query]);
+  return on;
+};
 
 const Arrow = ({ dir }: { dir: 'prev' | 'next' }) => (
   <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
@@ -45,35 +62,53 @@ export default function EvGallery({ items }: Props) {
   const [index, setIndex] = useState(0);
   const [announce, setAnnounce] = useState('');
   const interacted = useRef(false);
-  const n = items.length;
+  const wide = useMedia(WIDE);
+  // Móvil: sin WebGL (ver abajo); la lista estática es la galería.
+  const narrow = useMedia(NARROW);
+  const list = useMemo(() => (wide ? items.filter((it) => !it.wideHidden) : items), [items, wide]);
+  const n = list.length;
 
   const host = () => layerRef.current?.closest<HTMLElement>('[data-ev-gallery]') ?? null;
 
   // Texturas: el archivo que el navegador eligió para cada foto de la lista (srcset).
   const [glItems, setGlItems] = useState<GalleryItem[] | null>(null);
   useEffect(() => {
-    if (reduced) return;
-    const imgs = Array.from(host()?.querySelectorAll<HTMLImageElement>('[data-ev-strip] img') ?? []);
-    if (imgs.length !== items.length) {
-      setGlItems(items);
+    // Móvil (< 480 px): la lista con scroll-snap ES la galería (foto ≈ 80 % del ancho). La curva
+    // WebGL dejaba la foto central en ≈ 62 % y su relevo se veía como doble imagen.
+    if (reduced || window.matchMedia(NARROW).matches) {
+      setGlItems(null);
       return;
     }
+    const all = Array.from(host()?.querySelectorAll<HTMLImageElement>('[data-ev-strip] img') ?? []);
+    const isWide = window.matchMedia(WIDE).matches;
+    const keep = (it: EvGalleryItem) => !(isWide && it.wideHidden);
+    const shown = items.filter(keep);
+    if (all.length !== items.length) {
+      setGlItems(shown.map(({ image, text }) => ({ image, text })));
+      return;
+    }
+    const imgs = all.filter((_, i) => keep(items[i]));
     let alive = true;
     const urlOf = (img: HTMLImageElement, i: number) =>
       new Promise<string>((resolve) => {
-        const done = () => resolve(img.currentSrc || items[i].image);
+        const done = () => resolve(img.currentSrc || shown[i].image);
         if (img.complete && img.naturalWidth) return done();
         img.loading = 'eager'; // la galería las necesita todas: que no esperen al scroll
         img.addEventListener('load', done, { once: true });
-        img.addEventListener('error', () => resolve(items[i].image), { once: true });
+        img.addEventListener('error', () => resolve(shown[i].image), { once: true });
       });
     Promise.all(imgs.map(urlOf)).then((urls) => {
-      if (alive) setGlItems(items.map((item, i) => ({ ...item, image: urls[i] })));
+      if (alive) setGlItems(shown.map((item, i) => ({ text: item.text, image: urls[i] })));
     });
     return () => {
       alive = false;
     };
-  }, [reduced, items]);
+  }, [reduced, items, wide, narrow]);
+
+  // Si la ventana pasa a móvil con el lienzo ya montado, se vuelve a la lista.
+  useEffect(() => {
+    if (narrow) setGlOn(false);
+  }, [narrow]);
 
   useEffect(() => {
     const el = host();
@@ -88,9 +123,9 @@ export default function EvGallery({ items }: Props) {
   const onIndexChange = useCallback(
     (i: number) => {
       setIndex(i);
-      if (interacted.current) setAnnounce(`Foto ${i + 1} de ${n}: ${items[i]?.text ?? ''}`);
+      if (interacted.current) setAnnounce(`Foto ${i + 1} de ${n}: ${list[i]?.text ?? ''}`);
     },
-    [items, n],
+    [list, n],
   );
 
   const step = (delta: number) => {
@@ -101,12 +136,12 @@ export default function EvGallery({ items }: Props) {
     }
     const strip = host()?.querySelector<HTMLElement>('[data-ev-strip]');
     if (!strip) return;
-    const first = strip.querySelector<HTMLElement>('li');
+    const first = Array.from(strip.querySelectorAll<HTMLElement>('li')).find((li) => li.offsetWidth > 0);
     const gap = parseFloat(getComputedStyle(strip).columnGap) || 0;
     const w = first ? first.getBoundingClientRect().width + gap : strip.clientWidth * 0.8;
     const target = Math.max(0, Math.min(n - 1, Math.round(strip.scrollLeft / w) + delta));
     strip.scrollTo({ left: target * w, behavior: reduced ? 'auto' : 'smooth' });
-    setAnnounce(`Foto ${target + 1} de ${n}: ${items[target]?.text ?? ''}`);
+    setAnnounce(`Foto ${target + 1} de ${n}: ${list[target]?.text ?? ''}`);
   };
 
   const onKey = (e: KeyboardEvent) => {
@@ -122,7 +157,7 @@ export default function EvGallery({ items }: Props) {
   return (
     <>
       <div ref={layerRef} className="ev-gallery-gl" aria-hidden="true">
-        {!reduced && glItems && (
+        {!reduced && !narrow && glItems && (
           <Suspense fallback={null}>
             <CircularGallery
               ref={galleryRef}

@@ -50,12 +50,15 @@ export type CatalogService = {
   lead_value: string;
   pending?: boolean;
 };
-export type ImmigrationService = CatalogService;
+/** `also: true` → bajo el subtítulo «También» (`also_title`) de la sección: la línea «Nómadas
+ *  digitales · Emprendedores · Residencias» de la web anterior, hoy tarjetas (§2.1). */
+export type ImmigrationService = CatalogService & { also?: boolean };
 export type Immigration = {
   id: string;
   eyebrow: string;
   title: string;
   intro: string[];
+  also_title?: string;
   services: ImmigrationService[];
 };
 /** Gestión administrativa y homologación de títulos (docs/cambios-2026-10.md §2.4 y §2.12). */

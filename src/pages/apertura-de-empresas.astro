@@ -4,8 +4,8 @@
  * (docs/cambios-2026-10.md §2.3 y §2.9; antes /dubai/, que redirige aquí: netlify.toml y
  * `redirects` en astro.config.mjs).
  * - España y México: la cliente aún no ha enviado textos. Solo frases neutras y hechos que ya
- *   tenemos (web anterior: «Te ayudamos a crear tu negocio con estructura legal sólida»,
- *   «Vive y emprende legalmente, estés donde estés», «Emprende con visión internacional y
+ *   tenemos (web anterior: «Te ayudamos a crear tu negocio con estructura legal sólida» y
+ *   «Emprende con visión internacional y
  *   seguridad»). PENDIENTE: textos de la cliente para España y México.
  * - Dubái (#dubai) conserva su contenido: textos de la web anterior (docs/web-anterior.md §2, §5
  *   y §7), tal cual, con las alertas de §9:
@@ -34,17 +34,18 @@ const countryWa = (name: string) => waLink(`Hola Denisse, me gustaría recibir i
 const leadOf = (id: string) => companies.countries.find((c) => c.id === id)?.lead_value ?? '';
 
 // Tarjetas de los tres países. PENDIENTE: textos de la cliente para España y México (frases
-// neutras provisionales, sin datos de plazos, costes ni requisitos).
+// neutras provisionales, sin datos de plazos, costes ni requisitos ni servicios concretos;
+// «estructura legal sólida» queda solo en la entradilla para no repetirla).
 const countryCards = [
   {
     id: 'espana',
     name: 'España',
-    text: 'Te acompañamos en la creación de tu empresa en España, con estructura legal sólida desde el primer paso.',
+    text: 'Te acompañamos en la creación de tu empresa en España desde el primer paso.',
   },
   {
     id: 'mexico',
     name: 'México',
-    text: 'Te acompañamos en la creación de tu empresa en México, con estructura legal sólida desde el primer paso.',
+    text: 'Si quieres emprender en México, te asesoramos para abrir allí tu empresa.',
   },
   {
     id: 'dubai',
@@ -66,6 +67,7 @@ const reasons = [
   },
   {
     title: 'Imagen, credibilidad e internacionalización',
+    // Texto de la cliente, tal cual (docs/web-anterior.md §7).
     text: 'Tener tu empresa en Dubái abre puertas en mercados globales, mejora tu posicionamiento y establece tu empresa en una ubicación estratégica entre Europa, Asia y África.',
   },
   {
@@ -81,7 +83,7 @@ const support = ['Constitución', 'Apertura bancaria', 'Fiscalidad', 'Acompañam
 
 <BaseLayout
   title="Apertura de empresas en España, México y Dubái · DG Gestores y Abogados"
-  description="Apertura de empresas en España, México y Dubái: te ayudamos a crear tu negocio con estructura legal sólida. En Dubái, holding, real estate y trading, con un equipo local y nuestro partner. DG Gestores y Abogados, Madrid."
+  description="Apertura de empresas en España, México y Dubái: te ayudamos a crear tu negocio. En Dubái, holding, real estate y trading, con un equipo local y nuestro partner. DG Gestores y Abogados, Madrid."
   ogImage="/og-empresas.jpg"
   ogImageAlt="Apertura de empresas en España, México y Dubái — DG Gestores y Abogados"
   preloadFonts={['serif-600', 'serif-500i', 'sans-400', 'sans-600']}
@@ -96,7 +98,6 @@ const support = ['Constitución', 'Apertura bancaria', 'Fiscalidad', 'Acompañam
         <p class="eyebrow">Crea tu empresa</p>
         <h1 class="page-title dubai-title" id="dubai-title">Apertura de empresas <em>en España, México y Dubái</em></h1>
         <p class="lead dubai-lead">Te ayudamos a crear tu negocio con estructura legal sólida.</p>
-        <p class="dubai-intro">Vive y emprende legalmente, estés donde estés.</p>
         <div class="btn-row dubai-actions">
           <a class="btn btn--primary btn--lg" href={requestWa} target="_blank" rel="noopener" data-service-request="">
             <Icon name="message" />
@@ -140,6 +141,13 @@ const support = ['Constitución', 'Apertura bancaria', 'Fiscalidad', 'Acompañam
               <h3 class="country-name">{c.name}</h3>
               <p class="why-text">{c.text}</p>
               {c.detail && <p class="country-detail">{c.detail}</p>}
+              {/* «Más sobre Dubái» va con el texto: el enlace principal queda abajo, a la misma
+                  altura en las tres tarjetas. */}
+              {c.anchor && (
+                <a class="country-more" href={c.anchor}>
+                  Más sobre Dubái
+                </a>
+              )}
               <div class="country-actions">
                 <a class="btn btn--link" href={countryWa(c.name)} target="_blank" rel="noopener" data-service-request={c.lead}>
                   <span>
@@ -147,11 +155,6 @@ const support = ['Constitución', 'Apertura bancaria', 'Fiscalidad', 'Acompañam
                   </span>
                   <Icon name="arrow" />
                 </a>
-                {c.anchor && (
-                  <a class="country-more" href={c.anchor}>
-                    Más sobre Dubái
-                  </a>
-                )}
               </div>
             </li>
           ))
@@ -177,6 +180,14 @@ const support = ['Constitución', 'Apertura bancaria', 'Fiscalidad', 'Acompañam
           ))
         }
       </ul>
+      {/* Una sola pregunta (de la web anterior): acordeón dentro de Dubái, sin bloque propio de
+          «Preguntas frecuentes» (UX10). Su FAQPage de JSON-LD sigue en el <head>. */}
+      <div class="dubai-faq" id="preguntas" data-reveal>
+        <Faq items={FAQ_DUBAI} />
+        <p class="faq-cross">
+          ¿Tu consulta es sobre extranjería en España? <a href={url('/servicios/#preguntas')}>Preguntas frecuentes de extranjería</a>
+        </p>
+      </div>
     </div>
   </section>
 
@@ -226,22 +237,6 @@ const support = ['Constitución', 'Apertura bancaria', 'Fiscalidad', 'Acompañam
       </div>
       <div data-reveal>
         <PartnerCard link="external" headingId="dubai-partner-title" />
-      </div>
-    </div>
-  </section>
-
-  <section class="section section--ivory dubai-faq" id="preguntas" aria-labelledby="dubai-faq-title">
-    <div class="container faq-layout">
-      <div class="faq-head">
-        <p class="eyebrow" data-reveal>¿Alguna pregunta?</p>
-        <h2 class="section-title" id="dubai-faq-title" data-reveal>Preguntas frecuentes</h2>
-      </div>
-      <div data-reveal>
-        <Faq items={FAQ_DUBAI} />
-        <a class="faq-cross" href={url('/servicios/#preguntas')}>
-          <span>¿Tu consulta es sobre extranjería en España? <strong>Preguntas frecuentes de extranjería</strong></span>
-          <Icon name="arrow" />
-        </a>
       </div>
     </div>
   </section>
@@ -308,7 +303,6 @@ const support = ['Constitución', 'Apertura bancaria', 'Fiscalidad', 'Acompañam
   .dubai-title { margin-bottom: 1.5rem; max-width: 9em; }
   .dubai-title em { display: block; }
   .dubai-lead { max-width: 34rem; }
-  .dubai-intro { max-width: 34em; margin-top: 1rem; color: var(--c-ink-soft); text-wrap: pretty; }
   .dubai-actions { margin-top: 2rem; }
 
   .dubai-visual {
@@ -405,7 +399,8 @@ const support = ['Constitución', 'Apertura bancaria', 'Fiscalidad', 'Acompañam
   .country-detail { color: var(--c-ink); font-size: .8rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
   .country-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem 1.5rem; margin-top: auto; padding-top: .25rem; }
   .country-more {
-    display: inline-block;
+    align-self: flex-start;
+    margin-top: -.5rem;
     padding-block: .5rem;
     color: var(--c-ink-soft);
     font-size: .95rem;
@@ -470,7 +465,7 @@ const support = ['Constitución', 'Apertura bancaria', 'Fiscalidad', 'Acompañam
     padding: 1.1rem 0 1.2rem;
     border-bottom: 1px solid var(--c-line-strong);
   }
-  .structure-num { color: var(--c-plum); font-size: .78rem; font-weight: 600; letter-spacing: .2em; }
+  .structure-num { flex: 0 0 auto; min-width: 2.6ch; color: var(--c-plum); font-size: .78rem; font-weight: 600; letter-spacing: .2em; font-variant-numeric: tabular-nums; }
   .structure-name {
     font-family: var(--ff-serif);
     font-size: clamp(2rem, 1.5rem + 2.2vw, 3.2rem);
@@ -533,32 +528,21 @@ const support = ['Constitución', 'Apertura bancaria', 'Fiscalidad', 'Acompañam
   }
   .local-close::before { content: ""; flex: none; width: .45rem; height: .45rem; border: 1px solid currentColor; rotate: 45deg; }
 
-  /* ---------- Preguntas frecuentes ---------- */
-  .faq-layout { display: grid; gap: 2rem clamp(3rem, 6vw, 6rem); }
-  .faq-head .section-title { max-width: 8em; }
-  .faq-cross {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1.25rem;
-    min-height: 44px;
-    margin-top: 1.5rem;
-    padding: 1.1rem 1.25rem;
-    border-radius: var(--radius);
-    background: var(--c-lavender);
-    color: var(--c-ink-soft);
-    text-decoration: none;
-    transition: background-color var(--dur-fast) var(--ease-hover);
+  /* ---------- Pregunta de Dubái (dentro de «¿Por qué Dubái?») ---------- */
+  .dubai-faq { max-width: 52rem; margin-top: clamp(2.5rem, 2rem + 2vw, 3.5rem); scroll-margin-top: 4rem; }
+  .faq-cross { margin-top: 1.25rem; color: var(--c-muted); font-size: var(--fs-small); text-wrap: pretty; }
+  .faq-cross a {
+    display: inline-block;
+    padding-block: .7rem;
+    margin-block: -.7rem;
+    color: var(--c-plum);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--c-line-strong);
+    text-underline-offset: .2em;
   }
-  .faq-cross strong { display: block; color: var(--c-plum); font-weight: 600; }
-  .faq-cross :global(.icon) { flex: none; color: var(--c-plum); transition: transform var(--dur) var(--ease-out); }
-  .faq-cross:focus-visible { border-radius: var(--radius); }
   @media (hover: hover) and (pointer: fine) {
-    .faq-cross:hover { background: var(--c-lavender-200); color: var(--c-ink-soft); }
-    .faq-cross:hover :global(.icon) { transform: translateX(3px); }
-  }
-  @media (min-width: 960px) {
-    .faq-layout { grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); }
+    .faq-cross a:hover { text-decoration-color: currentColor; }
   }
 
   /* ---------- Contacto ---------- */
@@ -579,15 +563,19 @@ const support = ['Constitución', 'Apertura bancaria', 'Fiscalidad', 'Acompañam
     box-shadow: var(--shadow);
   }
   .dubai-cta-direct { display: flex; flex-wrap: wrap; justify-content: center; gap: .25rem 1.75rem; padding-top: .5rem; }
+  /* Mismo estilo que el teléfono de ContactCta (serif 1,45rem); el email, algo menor. */
   .dubai-cta-direct a {
     display: inline-flex;
     align-items: center;
-    gap: .5rem;
-    min-height: 44px;
+    gap: .6rem;
+    min-height: 48px;
     color: var(--c-ink);
+    font-family: var(--ff-serif);
+    font-size: 1.45rem;
     font-weight: 600;
     text-decoration: none;
   }
+  .dubai-cta-direct a[href^="mailto:"] { font-size: 1.25rem; }
   .dubai-cta-direct :global(.icon) { color: var(--c-plum); }
   @media (hover: hover) {
     .dubai-cta-direct a:hover { color: var(--c-plum); }

@@ -55,14 +55,16 @@ const ALT = {
 // Galería: recortes 3:4 en AVIF y WebP, a 450 y 600 px de ancho (la lista estática los elige con
 // srcset/sizes). La galería WebGL usa como textura el archivo que el navegador ya eligió para
 // cada <img> (currentSrc) → una sola descarga por foto.
-type GalleryPhoto = { src: ImageMetadata; text: string; alt: string; position?: string };
+// Sin repetir fotos de la misma página: YHRI y el atril del Summit ya son las fotos grandes de
+// «Lo que quiero conocer» y «Tu voz importa», así que no están aquí. Education for Peace (la
+// foto de la portada en escritorio) solo sale en la galería por debajo de 960 px, donde la
+// portada es tipográfica (`wideHidden`); en escritorio no se repite a unos cientos de px.
+type GalleryPhoto = { src: ImageMetadata; text: string; alt: string; position?: string; wideHidden?: boolean };
 const galleryPhotos: GalleryPhoto[] = [
-  { src: educationPeace, text: 'Education for Peace 2026', alt: ALT.educationPeace },
-  { src: yhri, text: 'YHRI Summit · Naciones Unidas', alt: ALT.yhri },
   { src: hilton, text: 'One UN Plaza · Nueva York', alt: ALT.hilton },
-  { src: summitAtril, text: 'International Human Rights Summit', alt: ALT.summitAtril },
   { src: kit, text: 'Kit de delegada', alt: ALT.kit, position: 'right' },
   { src: onuBlanco, text: 'Naciones Unidas', alt: ALT.onuBlanco },
+  { src: educationPeace, text: 'Education for Peace 2026', alt: ALT.educationPeace, wideHidden: true },
 ];
 const GALLERY_WIDTHS = [450, 600];
 // Ancho de cada foto de la lista = alto de la galería (--gallery-h) × 3/4.
@@ -86,7 +88,7 @@ const gallery = await Promise.all(
     return { ...p, url: webp[webp.length - 1].src, avifSet: srcset(avif), webpSet: srcset(webp) };
   }),
 );
-const glItems = gallery.map((g) => ({ image: g.url, text: g.text }));
+const glItems = gallery.map((g) => ({ image: g.url, text: g.text, wideHidden: g.wideHidden }));
 
 // Foto de la portada (solo escritorio, ≥ 960 px, donde es el LCP: eager + fetchpriority high).
 // En pantallas estrechas la portada es tipográfica: la primera <source> (imagen vacía en
@@ -110,7 +112,7 @@ const memories = [
 ---
 
 <BaseLayout
-  title="Empoderando Voces · Cuéntame tu historia · Denisse González"
+  title="Empoderando Voces · DG Gestores y Abogados"
   description="Empoderando Voces: historias reales, personas reales, voces que merecen un espacio. Si tienes una historia que merece ser escuchada, cuéntamela."
   preloadFonts={['serif-500i', 'cond-500', 'sans-400', 'sans-600']}
   bodyClass="theme-ev"
@@ -214,11 +216,11 @@ const memories = [
         <h2 class="ev-label" id="ev-gallery-title" data-reveal>Nueva York · 2026</h2>
         <p class="ev-gallery-note" data-reveal>20th International Human Rights Summit · Naciones Unidas</p>
       </div>
-      <div class="ev-gallery" data-ev-gallery>
+      <div class="ev-gallery" data-ev-gallery data-wa-hide>
         <ul class="ev-strip" role="list" tabindex="0" aria-label="Fotografías en Nueva York y en las Naciones Unidas" data-ev-strip>
           {
             gallery.map((g) => (
-              <li>
+              <li data-wide-hidden={g.wideHidden ? '' : undefined}>
                 <figure>
                   <picture>
                     <source type="image/avif" srcset={g.avifSet} sizes={GALLERY_SIZES} />
@@ -643,15 +645,20 @@ const memories = [
     gap: 1rem;
     height: var(--gallery-h);
     margin: 0;
-    padding: 0 var(--gutter) .75rem;
+    /* La primera foto arranca alineada con el título y el contador (borde del contenedor);
+       solo sangra hacia la derecha. */
+    padding: 0 var(--gutter) .75rem max(var(--gutter), calc((100% - var(--container)) / 2 + var(--gutter)));
     list-style: none;
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
-    scroll-padding-inline: var(--gutter);
+    scroll-padding-inline: max(var(--gutter), calc((100% - var(--container)) / 2 + var(--gutter))) var(--gutter);
     scrollbar-width: thin;
     scrollbar-color: rgba(221, 181, 108, .45) transparent;
-    transition: opacity 500ms var(--ease-out);
+    transition: opacity 160ms var(--ease-out);
+  }
+  @media (min-width: 960px) {
+    .ev-strip li[data-wide-hidden] { display: none; }
   }
   .ev-strip:focus-visible { outline-offset: -3px; }
   .ev-strip li { flex: none; height: 100%; scroll-snap-align: start; }
@@ -682,7 +689,9 @@ const memories = [
     height: var(--gallery-h);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 700ms var(--ease-out);
+    /* Relevo sin doble imagen: la lista se apaga en 160 ms y el lienzo (otro tamaño y otra
+       posición) entra después, nunca los dos a la vez. */
+    transition: opacity 500ms var(--ease-out) 160ms;
   }
   .ev-gallery :global(.circular-gallery) {
     position: absolute;
@@ -690,6 +699,16 @@ const memories = [
     overflow: hidden;
     cursor: grab;
     touch-action: pan-y;
+    /* Solo la foto central y sus dos vecinas: las de los extremos (copias del bucle, con tres
+       fotos) y sus pies cortados se ocultan del todo en los bordes en lugar de verse a medias.
+       El tamaño de las fotos depende del alto de la galería, así que la máscara también. */
+    --gl-mask: linear-gradient(90deg,
+      transparent calc(50% - var(--gallery-h) * .89),
+      #000 calc(50% - var(--gallery-h) * .8),
+      #000 calc(50% + var(--gallery-h) * .8),
+      transparent calc(50% + var(--gallery-h) * .89));
+    -webkit-mask-image: var(--gl-mask);
+    mask-image: var(--gl-mask);
     -webkit-user-select: none;
     user-select: none;
   }

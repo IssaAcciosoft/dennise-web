@@ -2,7 +2,7 @@
  * Visita guiada de /servicios/ con driver.js (MIT; este fragmento diferido, con el CSS, pesa
  * ≈ 13 KB gzip).
  *
- * Se carga SOLO al pulsar «¿Te guío?» (import() dinámico desde ServicesTour.astro): ni el JS
+ * Se carga SOLO al pulsar «¿Te guiamos?» (import() dinámico desde ServicesTour.astro): ni el JS
  * ni el CSS de driver.js están en la carga inicial. Nunca arranca sola.
  *
  * Recorrido (en el orden de la página, sin saltos atrás): servicios de extranjería en España →
@@ -16,7 +16,7 @@
  *
  * Accesibilidad: cada paso es un role="dialog" con título y descripción; el foco va al botón
  * «Siguiente»; Tab queda dentro del paso; ← → para navegar; Esc cierra; al cerrar, el foco
- * vuelve a «¿Te guío?». Movimiento (Emil): tarjeta 200 ms ease-out desde 0,97 y origen en el
+ * vuelve a «¿Te guiamos?». Movimiento (Emil): tarjeta 200 ms ease-out desde 0,97 y origen en el
  * lado del elemento; foco del escenario 300 ms; con «reducir movimiento», sin desplazamiento
  * suave ni animación del escenario (solo un fundido corto).
  */
@@ -36,7 +36,10 @@ function injectStyles(): void {
 }
 
 const lcFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
-const euros = (n: number | undefined) => (n === undefined ? '' : `${formatAmount(n)} €`);
+/** Espacio de no separación: «60 €», «1 hora» y «30 min» nunca se parten entre dos líneas. */
+const NBSP = '\u00A0';
+const keep = (s: string | undefined) => (s ?? '').replace(/ /g, NBSP);
+const euros = (n: number | undefined) => (n === undefined ? '' : `${formatAmount(n)}${NBSP}€`);
 const priceOf = (id: string, modality: string) =>
   consultations.find((c) => c.id === id)?.prices.find((p) => p.modality === modality)?.amount;
 
@@ -50,19 +53,22 @@ const isNarrow = () => window.matchMedia('(max-width: 599.98px)').matches;
  * pantalla. Se retiran al cerrar la visita.
  */
 const proxies: HTMLElement[] = [];
-function proxyFor(selector: string, rows: string, count: number): () => Element {
+function proxyFor(selector: string, rows: string, count: number, head?: string): () => Element {
   let made: HTMLElement | null = null;
   return () => {
     if (made?.isConnected) return made;
     const box = document.querySelector<HTMLElement>(selector);
     const items = box ? Array.from(box.querySelectorAll<HTMLElement>(rows)).slice(0, count) : [];
     if (!box || !items.length) return box ?? document.body;
-    const a = box.getBoundingClientRect();
+    // Con «head», el bloque empieza en el título de la sección (el que nombra la tarjeta).
+    const headEl = head ? document.querySelector<HTMLElement>(head) : null;
+    const a = (headEl ?? box).getBoundingClientRect();
     // Además, que quepa con la tarjeta (≈ 240 px) bajo la cabecera en pantallas bajas.
     const header = document.querySelector('.site-header')?.getBoundingClientRect().height ?? 0;
     const room = window.innerHeight - header - 14 - 2 * 10 - 12 - 240;
-    const fitting = items.filter((it, i) => i === 0 || it.getBoundingClientRect().bottom - a.top <= room);
-    const last = fitting[fitting.length - 1].getBoundingClientRect();
+    const fitting = items.filter((it, i) => (i === 0 && !headEl) || it.getBoundingClientRect().bottom - a.top <= room);
+    // Si ni la primera fila cabe junto al título (p. ej. hay una foto entre medias), solo el título.
+    const last = (fitting.length ? fitting[fitting.length - 1] : headEl!).getBoundingClientRect();
     const el = document.createElement('div');
     el.className = 'dg-tour-proxy';
     el.setAttribute('aria-hidden', 'true');
@@ -85,7 +91,7 @@ function buildSteps(): DriveStep[] {
   const narrow = isNarrow();
   const main = consultations.find((c) => c.id === 'asesoria-migratoria-60') ?? consultations[0];
   const academic = consultations.find((c) => c.id.startsWith('orientacion'));
-  const durations = consultations.filter((c) => c.name === main.name).map((c) => c.duration_label);
+  const durations = consultations.filter((c) => c.name === main.name).map((c) => keep(c.duration_label));
   const placeholder = document.querySelector('[data-booking-placeholder]');
 
   const immServices = immigration.services.map((s) => s.name);
@@ -98,7 +104,7 @@ function buildSteps(): DriveStep[] {
       },
     },
     {
-      element: narrow ? proxyFor('[data-tour="gestoria"]', '.firm-card', 2) : '[data-tour="gestoria"]',
+      element: narrow ? proxyFor('[data-tour="gestoria"]', '.firm-card', 2, '#gestoria .firm-head') : '[data-tour="gestoria"]',
       popover: {
         title: firmServices.title,
         description: `${firmServices.services.map((s, i) => (i ? lcFirst(s.name) : s.name)).join(' y ')}. Y ${lcFirst(companies.name)} en ${companies.countries.map((c) => c.name).join(', ').replace(/, ([^,]*)$/, ' y $1')}.`,
@@ -115,7 +121,7 @@ function buildSteps(): DriveStep[] {
       element: `[data-service-id="${main.id}"] .price-pair`,
       popover: {
         title: 'Online o presencial',
-        description: `Cada asesoría tiene su precio online y presencial. Por ejemplo, ${lcFirst(main.name)} de ${main.duration_label}: ${euros(priceOf(main.id, 'online'))} online o ${euros(priceOf(main.id, 'presencial'))} presencial.`,
+        description: `Cada asesoría tiene su precio online y presencial. Por ejemplo, ${lcFirst(main.name)} de ${keep(main.duration_label)}: ${euros(priceOf(main.id, 'online'))} online o ${euros(priceOf(main.id, 'presencial'))} presencial.`,
       },
     },
     academic
@@ -123,7 +129,7 @@ function buildSteps(): DriveStep[] {
           element: narrow ? `[data-service-id="${academic.id}"] .consult-main` : `[data-service-id="${academic.id}"]`,
           popover: {
             title: 'Orientación académica',
-            description: `${academic.description ?? ''} ${academic.duration_label}: ${euros(priceOf(academic.id, 'online'))} online o ${euros(priceOf(academic.id, 'presencial'))} presencial.`.trim(),
+            description: `${academic.description ?? ''} ${keep(academic.duration_label)}: ${euros(priceOf(academic.id, 'online'))} online o ${euros(priceOf(academic.id, 'presencial'))} presencial.`.trim(),
           },
         }
       : null,
@@ -140,7 +146,7 @@ function buildSteps(): DriveStep[] {
       element: '[data-tour="preguntas"]',
       popover: {
         title: '¿Tienes dudas?',
-        description: 'Aquí tienes las preguntas frecuentes. Y en cada servicio de extranjería y en cada asesoría encontrarás «Solicitar información»: cuéntame qué necesitas y me pondré en contacto contigo.',
+        description: 'Aquí tienes las preguntas frecuentes. Y en cada servicio de extranjería y en cada asesoría encontrarás «Solicitar información»: cuéntanos qué necesitas y nos pondremos en contacto contigo.',
       },
     },
   ];
@@ -161,13 +167,31 @@ function placeUnderHeader(el: Element | undefined): void {
 }
 
 /**
- * Móvil: antes de pasar de paso, desplaza la página con suavidad hasta el siguiente bloque
- * (en vez de saltar de golpe) y resuelve al terminar. Con movimiento reducido, sin animación.
+ * Escritorio: la misma posición en la que driver.js dejaría el elemento (scrollIntoView: centrado,
+ * o arriba bajo la cabecera si es más alto que la pantalla, con el scroll-padding-top de <html>).
+ * Si ya se ve entero, no se mueve (driver.js tampoco). Así, tras este desplazamiento, driver.js
+ * no vuelve a desplazar la página y la tarjeta no da saltos.
+ */
+function desktopTarget(el: Element): number {
+  const r = el.getBoundingClientRect();
+  const vh = window.innerHeight;
+  if (r.top >= 0 && r.left >= 0 && r.bottom <= vh && r.right <= window.innerWidth) return window.scrollY;
+  const pad = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+  const max = document.documentElement.scrollHeight - vh;
+  const top = (el as HTMLElement).offsetHeight > vh ? r.top - pad : r.top + r.height / 2 - (pad + (vh - pad) / 2);
+  return Math.round(Math.min(max, Math.max(0, top + window.scrollY)));
+}
+
+/**
+ * Antes de pasar de paso (y antes del primero), desplaza la página con suavidad hasta el bloque
+ * (en vez de saltar de golpe) y resuelve al terminar: la tarjeta aparece con la página quieta.
+ * Móvil: el bloque justo bajo la cabecera. Escritorio: donde lo pondría driver.js.
+ * Con movimiento reducido, sin animación.
  */
 function glideTo(selector: DriveStep['element'], reduced: boolean): Promise<void> {
   const el = typeof selector === 'string' ? document.querySelector(selector) : null;
-  if (!el || !isNarrow()) return Promise.resolve();
-  const top = topUnderHeader(el);
+  if (!el) return Promise.resolve();
+  const top = isNarrow() ? topUnderHeader(el) : desktopTarget(el);
   if (Math.abs(window.scrollY - top) < 2) return Promise.resolve();
   if (reduced) {
     window.scrollTo({ top, behavior: 'instant' });
@@ -202,7 +226,7 @@ function stripDriverAria(el: Element | undefined): void {
 let active: Driver | null = null;
 
 export function startTour(trigger: HTMLElement): void {
-  if (active?.isActive()) return;
+  if (active) return;
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // La visita es una acción explícita: lo que aún espera su aparición al hacer scroll se
@@ -235,10 +259,11 @@ export function startTour(trigger: HTMLElement): void {
     smoothScroll: !reduced,
     duration: 300,
     onHighlightStarted: (el) => placeUnderHeader(el),
-    // Móvil: desplazamiento suave entre pasos; la tarjeta se oculta mientras la página se mueve.
+    // Desplazamiento suave entre pasos (a cualquier anchura); la tarjeta se oculta mientras la
+    // página se mueve y aparece cuando ya está quieta.
     onNextClick: (_el, _step, { driver: d }) => {
       const i = d.getActiveIndex() ?? 0;
-      if (!isNarrow() || i >= steps.length - 1) return d.moveNext();
+      if (i >= steps.length - 1) return d.moveNext();
       document.body.classList.add('dg-tour-moving');
       glideTo(steps[i + 1].element, reduced).then(() => {
         document.body.classList.remove('dg-tour-moving');
@@ -247,7 +272,7 @@ export function startTour(trigger: HTMLElement): void {
     },
     onPrevClick: (_el, _step, { driver: d }) => {
       const i = d.getActiveIndex() ?? 0;
-      if (!isNarrow() || i <= 0) return d.movePrevious();
+      if (i <= 0) return d.movePrevious();
       document.body.classList.add('dg-tour-moving');
       glideTo(steps[i - 1].element, reduced).then(() => {
         document.body.classList.remove('dg-tour-moving');
@@ -288,7 +313,7 @@ export function startTour(trigger: HTMLElement): void {
           returnFocus = trigger;
           tour.destroy();
           // Abre el diálogo «Solicitar información» (ServiceRequestDialog); al cerrarlo, el foco
-          // vuelve a «¿Te guío?».
+          // vuelve a «¿Te guiamos?».
           document.dispatchEvent(new CustomEvent('dg:service-request', { detail: { trigger } }));
         });
         popover.description.after(cta);
@@ -310,5 +335,8 @@ export function startTour(trigger: HTMLElement): void {
 
   active = tour;
   document.documentElement.setAttribute('data-tour-active', '');
-  tour.drive();
+  // Primer paso: la página llega a su sitio antes de que aparezca la tarjeta.
+  glideTo(steps[0]?.element, reduced).then(() => {
+    if (active === tour) tour.drive();
+  });
 }

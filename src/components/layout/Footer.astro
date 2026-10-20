@@ -2,6 +2,8 @@
 import { NAV, FOOTER_EXTRA, LEGAL_NAV, SITE, PHONE, TEL_LINK, WA_TEXT, waLink, EMAIL, OFFICE } from '~/data/site';
 import { url, normalizePath } from '~/lib/url';
 import logo from '~/assets/logo/dg-logo.svg?url';
+// Variante clara del logo (mismos trazos, colores de la cabecera oscura) para el pie oscuro de EV.
+import logoDark from '~/assets/logo/dg-logo-dark.svg?url';
 import SocialLinks from '../ui/SocialLinks.astro';
 import Photo from '../ui/Photo.astro';
 // Logo secundario de Empoderando Voces (docs/cambios-2026-10.md §1): franja en el pie general.
@@ -15,14 +17,18 @@ const { logoEager = false } = Astro.props;
 const year = new Date().getFullYear();
 const current = normalizePath(Astro.url.pathname);
 const here = (path: string) => (current === path ? 'page' : undefined);
+// En /empoderando-voces/ la página ya cierra con el logo de EV y el lema «Escuchar. Conectar.
+// Actuar.»: el pie no repite ni el lema ni la franja de EV (que enlazaría a la propia página).
+// Allí el pie es oscuro (tokens --ev-*), continuación de la página, sin corte a lavanda.
+const onEv = current === '/empoderando-voces/';
 ---
 
-<footer class="site-footer" data-wa-hide>
+<footer class="site-footer" data-wa-hide data-tone={onEv ? 'dark' : undefined}>
   <div class="container footer-grid">
     <div class="footer-brand">
       <a class="footer-logo" href={url('/')}>
         <img
-          src={logo}
+          src={onEv ? logoDark : logo}
           width="656"
           height="494"
           alt="Denisse González — volver al inicio"
@@ -31,16 +37,20 @@ const here = (path: string) => (current === path ? 'page' : undefined);
           decoding="async"
         />
       </a>
-      <p class="footer-motto">{SITE.motto}</p>
-      <a class="footer-ev" href={url('/empoderando-voces/')} aria-current={here('/empoderando-voces/')}>
-        <span class="footer-ev-logo">
-          <Photo src={evLogo} alt="" widths={[120, 180]} sizes="60px" />
-        </span>
-        <span class="footer-ev-text">
-          <span class="footer-ev-name">Empoderando Voces</span>
-          <span class="footer-ev-sub">Afirmando la Dignidad</span>
-        </span>
-      </a>
+      {!onEv && <p class="footer-motto">{SITE.motto}</p>}
+      {
+        !onEv && (
+          <a class="footer-ev" href={url('/empoderando-voces/')}>
+            <span class="footer-ev-logo">
+              <Photo src={evLogo} alt="" widths={[120, 180]} sizes="60px" />
+            </span>
+            <span class="footer-ev-text">
+              <span class="footer-ev-name">Empoderando Voces</span>
+              <span class="footer-ev-sub">Afirmando la Dignidad</span>
+            </span>
+          </a>
+        )
+      }
     </div>
 
     <nav class="footer-nav" aria-label="Pie de página">
@@ -60,7 +70,7 @@ const here = (path: string) => (current === path ? 'page' : undefined);
         <li><a href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">WhatsApp</a></li>
         <li><a href={TEL_LINK}>{PHONE.display}</a></li>
         <li><a class="footer-email" href={EMAIL.href}>{EMAIL.user}<wbr />@{EMAIL.domain}</a></li>
-        <li>Asesorías online y presenciales</li>
+        <li class="footer-contact-note">Asesorías online y presenciales</li>
       </ul>
       <address class="footer-address">
         <span class="footer-address-name">{OFFICE.name}</span>
@@ -68,7 +78,7 @@ const here = (path: string) => (current === path ? 'page' : undefined);
         <span>{OFFICE.postalCode} {OFFICE.locality}</span>
         <a href={OFFICE.mapsUrl} target="_blank" rel="noopener">Cómo llegar<span class="visually-hidden"> (Google Maps, se abre en una pestaña nueva)</span></a>
       </address>
-      <SocialLinks variant="icons" class="footer-social" />
+      <SocialLinks variant="icons" tone={onEv ? 'dark' : 'light'} class="footer-social" />
     </div>
   </div>
 
@@ -114,14 +124,17 @@ const here = (path: string) => (current === path ? 'page' : undefined);
     background: var(--c-white);
     border: 1px solid var(--c-line);
     border-radius: 14px;
+    transition: border-color var(--dur-fast) var(--ease-hover), transform var(--dur-press) var(--ease-out);
   }
   .site-footer a.footer-ev { text-decoration: none; }
+  .site-footer a.footer-ev:active { transform: scale(.99); }
+  .footer-ev-name { transition: color var(--dur-fast) var(--ease-hover); }
   .footer-ev-logo { width: 60px; flex: none; }
   .footer-ev-logo :global(img) { display: block; width: 100%; height: auto; }
   .footer-ev-text { display: grid; gap: .1rem; line-height: 1.3; }
   .footer-ev-name { color: var(--c-ink); font-family: var(--ff-serif); font-size: 1.15rem; font-weight: 600; }
   .footer-ev-sub { color: var(--c-muted); font-size: .72rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
-  @media (hover: hover) {
+  @media (hover: hover) and (pointer: fine) {
     .site-footer a.footer-ev:hover { text-decoration: none; border-color: var(--c-line-strong); }
     .site-footer a.footer-ev:hover .footer-ev-name { color: var(--c-plum); }
   }
@@ -136,11 +149,31 @@ const here = (path: string) => (current === path ? 'page' : undefined);
   .footer-nav ul,
   .footer-contact-list { display: grid; gap: .2rem; }
   .footer-extra { margin-top: .6rem; padding-top: .6rem; border-top: 1px solid var(--c-line); }
-  .site-footer a { color: var(--c-ink-soft); text-decoration: none; }
+  /* Subrayado presente pero transparente: en hover, color y subrayado se funden a la vez. */
+  .site-footer a {
+    color: var(--c-ink-soft);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: .2em;
+    transition: color var(--dur-fast) var(--ease-hover), text-decoration-color var(--dur-fast) var(--ease-hover);
+  }
   .footer-nav a,
-  .footer-contact-list a { display: inline-block; padding-block: .3rem; }
-  @media (hover: hover) {
-    .site-footer a:hover { color: var(--c-plum); text-decoration: underline; }
+  .footer-contact-list a,
+  .footer-contact-note { display: inline-block; padding-block: .3rem; }
+  /* Móvil: enlaces apilados con objetivo táctil de 44 px (MOBILE-17). */
+  @media (max-width: 699.98px) {
+    .footer-nav a,
+    .footer-contact-list a,
+    .footer-address a,
+    .footer-legal a { display: inline-flex; align-items: center; min-height: 44px; padding-block: 0; }
+    .footer-nav ul,
+    .footer-contact-list { gap: 0; }
+    .footer-legal { gap: 0 1.5rem; }
+  }
+  /* Texto informativo, no enlace: se distingue de WhatsApp, teléfono y email. */
+  .footer-contact-note { color: var(--c-muted); font-style: italic; }
+  @media (hover: hover) and (pointer: fine) {
+    .site-footer a:hover { color: var(--c-plum); text-decoration-color: currentColor; }
   }
   .footer-address {
     display: grid;
@@ -158,6 +191,7 @@ const here = (path: string) => (current === path ? 'page' : undefined);
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
+    align-items: baseline;
     gap: .75rem 2rem;
     padding-top: 1.5rem;
     font-size: .875rem;
@@ -175,11 +209,29 @@ const here = (path: string) => (current === path ? 'page' : undefined);
   .site-footer a[aria-current="page"] { color: var(--c-plum); font-weight: 600; }
   .footer-legal a { display: inline-block; padding-block: .25rem; text-decoration: underline; text-decoration-color: var(--c-line-strong); }
 
+  /* ---------- Pie oscuro (Empoderando Voces) ---------- */
+  .site-footer[data-tone="dark"] {
+    --c-line: var(--ev-line);
+    --c-line-strong: rgba(221, 181, 108, .45);
+    background: linear-gradient(180deg, var(--ev-bg), var(--ev-bg-2));
+    color: var(--ev-muted);
+    border-top: 1px solid var(--ev-line);
+  }
+  .site-footer[data-tone="dark"] :is(.footer-nav, .footer-contact-list, .footer-address, .footer-legal) a { color: var(--ev-text); }
+  .site-footer[data-tone="dark"] .footer-title { color: var(--ev-gold); }
+  .site-footer[data-tone="dark"] .footer-address-name { color: var(--ev-text); }
+  .site-footer[data-tone="dark"] .footer-contact-note { color: var(--ev-faint); }
+  .site-footer[data-tone="dark"] :is(.footer-nav, .footer-legal) a[aria-current="page"] { color: var(--ev-gold); }
+  @media (hover: hover) and (pointer: fine) {
+    .site-footer[data-tone="dark"] :is(.footer-nav, .footer-contact-list, .footer-address, .footer-legal) a:hover { color: var(--ev-gold-2); }
+  }
+
   @media (min-width: 700px) {
     .footer-grid { grid-template-columns: 1.3fr 1fr 1fr; }
   }
+  /* El WhatsApp flotante se oculta sobre el pie ([data-wa-hide]): no hace falta reservarle
+     sitio. Sin JavaScript (siempre visible), WhatsAppFloat.astro añade ese espacio en <noscript>. */
   @media (max-width: 699.98px) {
-    /* Espacio para el botón flotante de WhatsApp */
-    .site-footer { padding-bottom: calc(6rem + env(safe-area-inset-bottom)); }
+    .site-footer { padding-bottom: calc(2.5rem + env(safe-area-inset-bottom)); }
   }
 </style>

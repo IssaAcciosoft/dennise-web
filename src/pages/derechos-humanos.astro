@@ -6,11 +6,12 @@ import PressList from '~/components/media/PressList.astro';
 import ContactCta from '~/components/contact/ContactCta.astro';
 import onuNegro from '~/assets/img/onu-negro.jpg';
 import yhri from '~/assets/img/yhri-asamblea.jpg';
-import summitAtril from '~/assets/img/summit-atril.jpg';
+// Cita: One UN Plaza (la foto del atril del Summit ya es la de «Tu voz importa» en Empoderando Voces).
+import hilton from '~/assets/img/hilton-spain.jpg';
 ---
 
 <BaseLayout
-  title="Derechos humanos · Denisse González, abogada"
+  title="Derechos humanos · DG Gestores y Abogados"
   description="El compromiso de Denisse González con los derechos humanos: educación y sensibilización, delegada en el 20th International Human Rights Summit (Nueva York, 2026), publicaciones y prensa."
   preloadFonts={['serif-600', 'serif-500i', 'sans-400', 'sans-600']}
 >
@@ -77,11 +78,11 @@ import summitAtril from '~/assets/img/summit-atril.jpg';
       <div class="quote-band" data-reveal>
         <figure class="quote-photo">
           <Photo
-            src={summitAtril}
-            alt="Denisse González en un atril con micrófono frente al cartel del 20th International Human Rights Summit 2026"
-            widths={[360, 490]}
+            src={hilton}
+            alt="Denisse González con una banda «Spain» en el vestíbulo de One UN Plaza, en Nueva York, entre banderas"
+            widths={[360, 540, 720]}
             sizes="(min-width: 600px) 40vw, calc(100vw - 2rem)"
-            position="70% 40%"
+            position="50% 35%"
           />
         </figure>
         <figure class="quote">
@@ -264,6 +265,11 @@ import summitAtril from '~/assets/img/summit-atril.jpg';
   .pledge-list em { font-style: italic; font-weight: 500; color: var(--c-plum); }
   .pledge-body { max-width: 44rem; margin: clamp(2.5rem, 5vw, 3.5rem) auto 0; color: var(--c-ink-soft); }
   .pledge-body p + p { margin-top: 1rem; }
+  /* Móvil: los párrafos largos centrados (4-5 líneas en ~330 px) se leían mal; solo los
+     titulares cortos, la lista y el cierre siguen centrados. */
+  @media (max-width: 767.98px) {
+    .pledge-body { text-align: left; }
+  }
   .pledge-close {
     display: inline-flex;
     flex-direction: column;

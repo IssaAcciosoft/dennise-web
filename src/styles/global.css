@@ -185,10 +185,18 @@ img, picture, svg, video { display: block; max-width: 100%; }
 img { height: auto; }
 
 h1, h2, h3, h4, p, ul, ol, dl, dd, figure, blockquote { margin: 0; }
+/* Sin palabras sueltas en la última línea de los párrafos (los títulos usan balance). Con
+   :where() no pesa nada: cualquier componente puede cambiarlo. */
+:where(p, li, dd, figcaption, blockquote) { text-wrap: pretty; }
 :where(ul, ol)[role="list"] { list-style: none; padding: 0; }
 
-a { color: var(--c-plum); text-decoration-thickness: 1px; text-underline-offset: .2em; }
-@media (hover: hover) {
+a {
+  color: var(--c-plum);
+  text-decoration-thickness: 1px;
+  text-underline-offset: .2em;
+  transition: color var(--dur-fast) var(--ease-hover), text-decoration-color var(--dur-fast) var(--ease-hover);
+}
+@media (hover: hover) and (pointer: fine) {
   a:hover { color: var(--c-plum-700); }
 }
 
@@ -384,7 +392,9 @@ main:focus { outline: none; }
   background: var(--btn-bg);
   color: var(--btn-fg);
   font-family: var(--ff-sans);
-  font-size: 1rem;
+  /* 1.03rem (no 1rem) y .97rem en --sm: en pantallas 1x, Barlow 600 a 15–16 px exactos funde el
+     acento de la «í» con el palo («asesoría» se leía «asesoria»); a estos tamaños se ve. */
+  font-size: 1.03rem;
   font-weight: 600;
   line-height: 1.15;
   letter-spacing: .02em;
@@ -444,7 +454,7 @@ main:focus { outline: none; }
 }
 
 .btn--lg { min-height: 56px; padding: .95em 1.9em; font-size: 1.04rem; }
-.btn--sm { min-height: 44px; padding: .6em 1.15em; font-size: .92rem; }
+.btn--sm { min-height: 44px; padding: .6em 1.15em; font-size: .97rem; }
 .btn--block { width: 100%; }
 
 .btn--ev {
@@ -806,6 +816,17 @@ html:active-view-transition-type(ev-morph)::view-transition-new(root) {
 html:active-view-transition-type(ev-morph)::view-transition-group(site-header) {
   animation-delay: calc(var(--dur-morph) * .3);
 }
+/* Cambio de tono de la cabecera (clara ↔ oscura) en un relevo corto, cuando el panel oscuro ya
+   cubre (o aún cubre, al volver) la zona de la cabecera: sin el fundido largo de dos cabeceras
+   translúcidas que dejaba una franja gris malva a media transición. */
+html:active-view-transition-type(ev-morph, ev-return)::view-transition-old(site-header) {
+  mix-blend-mode: normal;
+  animation: vt-out 90ms var(--ease-out) calc(var(--dur-morph) * .45) both;
+}
+html:active-view-transition-type(ev-morph, ev-return)::view-transition-new(site-header) {
+  mix-blend-mode: normal;
+  animation: vt-fade-in 140ms var(--ease-out) calc(var(--dur-morph) * .45) both;
+}
 
 /* Retrato compartido entre el inicio y Conóceme (clase «portrait»; nombre «portrait-<foto>»).
    El nombre lo pone el script de BaseLayout (pageswap/pagereveal) SOLO en la foto que se ve en
@@ -831,6 +852,30 @@ html:active-view-transition-type(ev-morph)::view-transition-group(site-header) {
 ::view-transition-new(*.portrait) { animation-name: vt-fade-in; }
 ::view-transition-old(*.portrait):only-child { mix-blend-mode: normal; animation: vt-out var(--dur-exit) var(--ease-out) both; }
 ::view-transition-new(*.portrait):only-child { mix-blend-mode: normal; animation: vt-in var(--dur-page) var(--ease-out) both; }
+/* Forma: las dos instantáneas se recortan juntas (image-pair) y el recorte pasa del arco del
+   inicio (.hero-arch: semicírculo arriba, 4:5) al rectángulo redondeado de Conóceme
+   (.founder-frame: --radius-s), o al revés. Se lee como UNA foto que cambia de forma, sin las
+   esquinas cuadradas de la otra asomando durante el fundido. El sentido lo marca BaseLayout. */
+::view-transition-image-pair(*.portrait) { overflow: clip; }
+html:active-view-transition-type(portrait-to-about)::view-transition-image-pair(*.portrait) {
+  animation: vt-portrait-to-rect var(--dur-portrait) var(--ease-in-out) both;
+}
+html:active-view-transition-type(portrait-to-home)::view-transition-image-pair(*.portrait) {
+  animation: vt-portrait-to-arch var(--dur-portrait) var(--ease-in-out) both;
+}
+@keyframes vt-portrait-to-rect {
+  from { border-radius: 50% 50% 4px 4px / 40% 40% 4px 4px; }
+  to { border-radius: var(--radius-s); }
+}
+@keyframes vt-portrait-to-arch {
+  from { border-radius: var(--radius-s); }
+  to { border-radius: 50% 50% 4px 4px / 40% 40% 4px 4px; }
+}
+/* La página nueva entra cuando el retrato ya ha cruzado la mitad del recorrido: la foto no pasa
+   por encima del texto ya visible de la otra columna. */
+html:active-view-transition-type(portrait-to-about, portrait-to-home)::view-transition-new(root) {
+  animation-delay: calc(var(--dur-portrait) * .45);
+}
 
 /* Indicador de la página actual en la navegación de escritorio (Header: .nav-current): la
    línea se desliza de un enlace al siguiente en lugar de apagarse y encenderse. */
@@ -856,6 +901,7 @@ html:active-view-transition-type(ev-morph)::view-transition-group(site-header) {
   ::view-transition-new(*.portrait) { mix-blend-mode: normal; }
   ::view-transition-old(*.portrait) { animation: vt-out var(--dur-exit) var(--ease-out) both !important; }
   ::view-transition-new(*.portrait) { animation: vt-fade-in var(--dur-page) var(--ease-out) both !important; }
+  ::view-transition-image-pair(*.portrait) { animation: none !important; }
 }
 
 /* 9. Aparición al hacer scroll y movimiento reducido ====================== */
