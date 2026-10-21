@@ -35,6 +35,8 @@ const SETTLE_MS = 1500; // al pausar, el vaivén se frena durante este tramo
 // pasa detrás de la esfera y el arco queda flotando fuera. Al arrastrar más, el globo cede con
 // resistencia (goma, RUBBER) y al soltar vuelve al límite; la inercia se detiene en él.
 const TURN_LIMIT = 0.5;
+// Hacia el lado de España el giro se limita antes: España queda siempre en la cara visible.
+const TURN_LIMIT_HIGH = 0.3;
 const RUBBER = 0.25;
 const SNAP_BACK_MS = 140; // constante de tiempo de la vuelta al límite
 
@@ -123,7 +125,7 @@ export function mountGlobe(host: HTMLElement, slot: HTMLElement | null, reduced 
   const swayAt = () => VIEW.sway * Math.sin((clock / VIEW.swayPeriod) * Math.PI * 2);
   // Margen del arrastre para que vaivén + arrastre no pasen de ±TURN_LIMIT.
   const lowBound = () => -TURN_LIMIT - swayAt();
-  const highBound = () => TURN_LIMIT - swayAt();
+  const highBound = () => TURN_LIMIT_HIGH - swayAt();
   const rubber = (raw: number) => {
     const lo = lowBound();
     const hi = highBound();

@@ -967,3 +967,10 @@ html:active-view-transition-type(portrait-to-about, portrait-to-home)::view-tran
   [data-reveal-state] :is(picture, img) { animation: none !important; }
   body { background: #fff; }
 }
+
+/* Pantallas muy estrechas (≤ 380 px): botones algo más compactos para que la etiqueta quepa en
+   una línea (WhatsApp, contacto, reservas…). */
+@media (max-width: 380px) {
+  .btn { gap: .5em; padding-inline: 1.1em; font-size: .97rem; }
+  .btn--sm { padding-inline: .95em; }
+}

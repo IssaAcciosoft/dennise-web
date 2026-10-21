@@ -129,7 +129,7 @@ function buildSteps(): DriveStep[] {
           element: narrow ? `[data-service-id="${academic.id}"] .consult-main` : `[data-service-id="${academic.id}"]`,
           popover: {
             title: 'Orientación académica',
-            description: `${academic.description ?? ''} ${keep(academic.duration_label)}: ${euros(priceOf(academic.id, 'online'))} online o ${euros(priceOf(academic.id, 'presencial'))} presencial.`.trim(),
+            description: `Búsqueda del centro de estudios y matrícula, junto al trámite de visado o estancia de estudios. ${keep(academic.duration_label)}: ${euros(priceOf(academic.id, 'online'))} online o ${euros(priceOf(academic.id, 'presencial'))} presencial.`.trim(),
           },
         }
       : null,
