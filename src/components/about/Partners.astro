@@ -59,14 +59,6 @@ const partners: Partner[] = [
     text: 'Firma colaboradora especializada en la constitución de empresas y asesoría legal para emprendedores internacionales en los Emiratos Árabes.',
     link: { href: url('/apertura-de-empresas/#dubai'), label: 'Apertura de empresas en Dubái' },
   },
-  // PENDIENTE (cliente): nombre y descripción del proyecto «Bienvenido / Welcome!» de Ariel Noriega.
-  {
-    name: 'Bienvenido / Welcome!',
-    logo: bienvenido,
-    alt: 'Logotipo «Bienvenido / Welcome!»',
-    maxW: '10.5rem',
-    text: 'Proyecto de Ariel Noriega.',
-  },
 ];
 ---
 
@@ -111,6 +103,13 @@ const partners: Partner[] = [
         <div class="partner-person-copy">
           <h3 class="partner-name">Ariel Noriega</h3>
           <p class="partner-text">Experto en Comercio Internacional, exdiplomático y con contactos en numerosos países de América, Europa, África y Medio Oriente. Periodista durante 20 años en México, escritor galardonado con el Premio de Novela de BCS 2026. Actualmente colabora en la vertical de commodities para grupos empresariales de México, EE.&nbsp;UU. y España.</p>
+        </div>
+        {/* Proyecto de Ariel Noriega. PENDIENTE (cliente): nombre y descripción del proyecto. */}
+        <div class="partner-project">
+          <div class="partner-logo partner-logo--inline" style="--logo-w:10.5rem">
+            <Picture src={bienvenido} alt="Logotipo «Bienvenido / Welcome!», proyecto de Ariel Noriega" widths={[240, 360, 480]} sizes="240px" formats={['avif', 'webp']} loading="lazy" decoding="async" />
+          </div>
+          <p class="partner-project-label">Proyecto de Ariel Noriega</p>
         </div>
       </li>
     </ul>
@@ -235,6 +234,19 @@ const partners: Partner[] = [
     .partner-card--person { grid-column: 1 / -1; }
   }
   @media (min-width: 1100px) {
-    .partners-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .partners-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+
+  /* Ariel Noriega + su proyecto «Bienvenido / Welcome!» en la misma ficha. */
+  .partner-project { display: grid; justify-items: start; gap: .6rem; align-self: center; }
+  .partner-logo--inline { width: min(100%, 15rem); margin-bottom: 0; }
+  .partner-project-label { color: var(--c-muted); font-size: var(--fs-small); }
+  @media (max-width: 599.98px) { .partner-project { margin-top: 1.25rem; } }
+  @media (min-width: 600px) {
+    .partner-card--person { grid-template-columns: 152px minmax(0, 1fr) auto; }
+  }
+  @media (min-width: 600px) and (max-width: 899.98px) {
+    .partner-card--person { grid-template-columns: 152px minmax(0, 1fr); }
+    .partner-project { grid-column: 2; }
   }
 </style>
