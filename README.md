@@ -249,7 +249,7 @@ Cormorant en cursiva + Barlow Condensed. Cabecera en su variante oscura translú
 (`BaseLayout headerTone="dark"`) sobre la portada, sin corte claro/oscuro.
 
 - Logos (`src/assets/img/ev/`, `docs/cambios-2026-10.md` §1): el principal en la firma de la
-  página y como sello sobre las fotos de la tarjeta del inicio; el secundario en la franja
+  página y como sello sobre las fotos de la tarjeta del inicio; el principal también en la franja
   «Empoderando Voces» del pie general (todas las páginas). Van sobre su fondo blanco original.
   El despacho sigue con el logo DG.
 - Portada: tipográfica en móvil (el título es el LCP y no se anima); en escritorio, con la foto

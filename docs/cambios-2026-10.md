@@ -16,7 +16,7 @@ Esta especificación prevalece sobre `docs/contenido.md` y `docs/web-anterior.md
   `logo-ev-secundario.png` = el de las siluetas):
   - El principal es el **logo de Empoderando Voces**: va en la página `/empoderando-voces/` (hero o
     firma) y en la tarjeta de Empoderando Voces de Inicio. El despacho sigue con el logo DG.
-  - El secundario se usa en algún pie de página (p. ej. el pie de `/empoderando-voces/` o una franja
+  - El secundario ya no se usa (20/10: la cliente prefiere el principal también en el pie).
     "Empoderando Voces" en el footer general).
 
 ## 2. Nota amarilla, punto por punto

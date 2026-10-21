@@ -6,7 +6,7 @@ import logo from '~/assets/logo/dg-logo.svg?url';
 import logoDark from '~/assets/logo/dg-logo-dark.svg?url';
 import SocialLinks from '../ui/SocialLinks.astro';
 import Photo from '../ui/Photo.astro';
-// Logo secundario de Empoderando Voces (docs/cambios-2026-10.md §1): franja en el pie general.
+// Logo principal de Empoderando Voces en la franja del pie (la cliente pidió quitar el de las siluetas).
 import evLogo from '~/assets/img/ev/logo-ev-principal.png';
 
 interface Props {
@@ -114,7 +114,7 @@ const onEv = current === '/empoderando-voces/';
     font-size: 1.35rem;
     color: var(--c-plum);
   }
-  /* Franja de Empoderando Voces (logo secundario sobre su fondo blanco) */
+  /* Franja de Empoderando Voces (logo principal sobre su fondo blanco) */
   .footer-ev {
     display: inline-flex;
     align-items: center;
