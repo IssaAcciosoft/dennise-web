@@ -1,10 +1,11 @@
 ---
-/** Enlaces a redes sociales. `pills`: icono + usuario; `icons`: solo icono (44 × 44). */
+/** Enlaces a redes sociales. `pills`: icono + usuario; `icons`: solo icono (44 × 44);
+ * `cards`: tarjetas grandes con el color de cada red y llamada a seguir (Contacto). */
 import { SOCIALS, SITE } from '~/data/site';
 import Icon from './Icon.astro';
 
 interface Props {
-  variant?: 'pills' | 'icons';
+  variant?: 'pills' | 'icons' | 'cards';
   tone?: 'light' | 'dark';
   class?: string;
 }
@@ -14,15 +15,28 @@ const { variant = 'pills', tone = 'light', class: className } = Astro.props;
 <ul class:list={['social-list', `social-list--${variant}`, `social-list--${tone}`, className]} role="list">
   {
     SOCIALS.map((s) => (
-      <li>
+      <li data-net={s.id}>
         <a
           href={s.href}
           target="_blank"
           rel="noopener"
           aria-label={`${s.label} de ${SITE.name}${s.handle.startsWith('@') ? ` (${s.handle})` : ''}`}
         >
-          <Icon name={s.id} />
-          {variant === 'pills' && <span aria-hidden="true">{s.handle}</span>}
+          {variant === 'cards' ? (
+            <>
+              <span class="social-badge" aria-hidden="true"><Icon name={s.id} /></span>
+              <span class="social-text" aria-hidden="true">
+                <span class="social-net">{s.label}</span>
+                <span class="social-handle">{s.handle.startsWith('@') ? s.handle : 'Denisse Gonzalez International Legal Consulting'}</span>
+              </span>
+              <span class="social-cta" aria-hidden="true">Seguir</span>
+            </>
+          ) : (
+            <>
+              <Icon name={s.id} />
+              {variant === 'pills' && <span aria-hidden="true">{s.handle}</span>}
+            </>
+          )}
         </a>
       </li>
     ))
@@ -52,5 +66,50 @@ const { variant = 'pills', tone = 'light', class: className } = Astro.props;
   @media (hover: hover) and (pointer: fine) {
     .social-list a:hover { background: var(--c-plum); border-color: var(--c-plum); color: #fff; text-decoration: none; }
     .social-list--dark a:hover { background: var(--ev-gold); border-color: var(--ev-gold); color: var(--ev-bg); }
+  }
+
+  /* ---------- Tarjetas (Contacto) ---------- */
+  .social-list--cards { display: grid; gap: .75rem; }
+  .social-list--cards a {
+    justify-content: flex-start;
+    gap: .9rem;
+    width: 100%;
+    min-height: 68px;
+    padding: .7rem 1rem .7rem .7rem;
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius);
+    background: var(--c-white);
+    color: var(--c-ink);
+    transition: border-color var(--dur-fast) var(--ease-hover), box-shadow var(--dur) var(--ease-out), transform var(--dur-press) var(--ease-out);
+  }
+  .social-badge {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    color: #fff;
+    background: var(--net-bg);
+  }
+  .social-badge :global(.icon) { width: 24px; height: 24px; }
+  li[data-net="instagram"] { --net-bg: radial-gradient(circle at 30% 107%, #fdf497 0%, #fd5949 45%, #d6249f 60%, #285AEB 90%); --net-c: #C1358B; }
+  li[data-net="tiktok"] { --net-bg: #111; --net-c: #111; }
+  li[data-net="facebook"] { --net-bg: #1877F2; --net-c: #1464D2; }
+  .social-text { display: grid; flex: 1 1 auto; min-width: 0; line-height: 1.25; }
+  .social-net { font-weight: 600; font-size: 1rem; }
+  .social-handle { overflow: hidden; color: var(--c-muted); font-size: .86rem; text-overflow: ellipsis; white-space: nowrap; }
+  .social-cta {
+    flex: 0 0 auto;
+    padding: .4rem .9rem;
+    border-radius: var(--radius-pill);
+    background: var(--net-c);
+    color: #fff;
+    font-size: .82rem;
+    font-weight: 600;
+    letter-spacing: .02em;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .social-list--cards a:hover { background: var(--c-white); color: var(--c-ink); border-color: var(--net-c); box-shadow: 0 12px 26px -16px rgba(44, 10, 50, .45); transform: translateY(-2px); }
   }
 </style>

@@ -82,10 +82,13 @@ import despacho from '~/assets/img/despacho.jpg';
       <Consultations />
       {/* Autogestión DG: página aparte y discreta; desde aquí, solo este enlace sobrio
           (docs/cambios-2026-10.md §2.8). Los protagonistas son los servicios individuales. */}
-      <p class="self-service" data-reveal>
-        ¿Prefieres gestionar tu trámite tú mismo?{' '}
-        <a href={url(AUTOGESTION_PATH)}><span class="self-service-label">{autogestion.name}</span><Icon name="arrow" /></a>
-      </p>
+      <div class="self-service" data-reveal>
+        <div class="self-service-copy">
+          <p class="self-service-q">¿Prefieres gestionar tu trámite tú mismo?</p>
+          <p class="self-service-sub">{autogestion.name}: gestiona tu propio trámite de extranjería con nuestro apoyo.</p>
+        </div>
+        <a class="btn btn--outline self-service-btn" href={url(AUTOGESTION_PATH)}><span>Ver {autogestion.name}</span><Icon name="arrow" /></a>
+      </div>
     </div>
   </section>
 
@@ -213,34 +216,28 @@ import despacho from '~/assets/img/despacho.jpg';
 
   .services-block { padding-top: clamp(3rem, 2rem + 4vw, 5rem); padding-bottom: clamp(2rem, 4vw, 3rem); }
   .self-service {
-    margin-top: clamp(1.75rem, 3vw, 2.5rem);
-    padding-top: 1.25rem;
-    border-top: 1px solid var(--c-line);
-    color: var(--c-muted);
-    font-size: var(--fs-small);
-  }
-  /* Enlace sobrio (§2.8): texto subrayado + la misma flecha SVG que el resto, fuera del subrayado. */
-  .self-service a {
-    display: inline-flex;
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: .35rem;
-    min-height: 44px;
-    vertical-align: middle;
-    color: var(--c-plum);
+    justify-content: space-between;
+    gap: 1rem 2rem;
+    margin-top: clamp(2rem, 3.5vw, 2.75rem);
+    padding: clamp(1.35rem, 1rem + 1vw, 1.9rem) clamp(1.35rem, 1rem + 1.5vw, 2.25rem);
+    border: 1px solid var(--c-lavender-300);
+    border-radius: var(--radius-l);
+    background: var(--c-lavender);
+  }
+  .self-service-copy { flex: 1 1 22rem; min-width: 0; }
+  .self-service-q {
+    font-family: var(--ff-serif);
+    font-size: clamp(1.4rem, 1.2rem + .8vw, 1.85rem);
     font-weight: 600;
-    text-decoration: none;
+    line-height: 1.15;
+    color: var(--c-ink);
   }
-  .self-service-label {
-    text-decoration: underline;
-    text-decoration-color: var(--c-line-strong);
-    text-underline-offset: .2em;
-    transition: text-decoration-color var(--dur-fast) var(--ease-hover);
-  }
-  .self-service a :global(.icon) { width: 1.1rem; height: 1.1rem; transition: transform var(--dur) var(--ease-out); }
-  @media (hover: hover) and (pointer: fine) {
-    .self-service a:hover .self-service-label { text-decoration-color: currentColor; }
-    .self-service a:hover :global(.icon) { transform: translateX(3px); }
-  }
+  .self-service-sub { margin-top: .4rem; color: var(--c-ink-soft); font-size: var(--fs-body, 1.05rem); }
+  .self-service-btn { flex: 0 0 auto; }
+  @media (max-width: 599.98px) { .self-service-btn { width: 100%; } }
   .block-head { margin-bottom: clamp(2rem, 4vw, 3rem); }
   .block-head .section-title { margin-bottom: 1rem; }
   .block-sub { max-width: 34rem; }

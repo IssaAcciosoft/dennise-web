@@ -65,7 +65,8 @@ import { url } from '~/lib/url';
 
         <div class="contact-social">
           <p class="contact-social-title">Síguenos en redes</p>
-          <SocialLinks />
+          <p class="contact-social-sub">Novedades de extranjería, consejos y derechos humanos.</p>
+          <SocialLinks variant="cards" />
         </div>
 
         <div class="contact-story">
@@ -227,13 +228,13 @@ import { url } from '~/lib/url';
   }
   .contact-social { padding: 1.25rem .25rem .25rem; }
   .contact-social-title {
-    margin-bottom: .75rem;
-    color: var(--c-muted);
-    font-size: .75rem;
+    font-family: var(--ff-serif);
+    font-size: clamp(1.3rem, 1.15rem + .6vw, 1.6rem);
     font-weight: 600;
-    letter-spacing: .16em;
-    text-transform: uppercase;
+    line-height: 1.15;
+    color: var(--c-ink);
   }
+  .contact-social-sub { margin: .3rem 0 1rem; color: var(--c-muted); font-size: var(--fs-small); }
   .contact-story {
     --focus: var(--ev-gold);
     display: flex;
