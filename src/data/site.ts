@@ -9,12 +9,12 @@ export const SITE = {
   /** Nombre comercial del despacho (JSON-LD LegalService, pie, contacto, páginas legales). */
   firm: 'DG Gestores y Abogados',
   /** Profesión de Denisse (JSON-LD Person.jobTitle). */
-  role: 'Presidenta y fundadora de DG Gestores y Abogados · Abogada y gestora administrativa',
+  role: 'Presidenta y fundadora de DG Gestores y Abogados · Abogada titulada en México y gestora administrativa titulada en España',
   /** Texto bajo el nombre en la cabecera (docs/cambios-2026-10.md §1). */
   brandRole: 'Gestores y Abogados',
   title: 'Denisse González · DG Gestores y Abogados',
   description:
-    'Denisse González, abogada mexicana en España: asesoría migratoria y trámites de extranjería online y presenciales, derecho internacional y derechos humanos.',
+    'Denisse González, abogada titulada en México y gestora administrativa titulada en España: asesoría migratoria y trámites de extranjería online y presenciales, derecho internacional y derechos humanos.',
   motto: 'Escuchar. Conectar. Actuar.',
   tagline: 'Un trámite puede cambiar tu vida.',
   locale: 'es_ES',
