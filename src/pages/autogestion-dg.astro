@@ -32,12 +32,13 @@ const VIDEO = {
   height: 720,
   duration: '4 min 29 s',
 };
-const prices = autogestion.plans.map((p) => `${formatAmount(p.amount)} €`);
+// Solo los precios visibles (AccioGest puede ocultar alguno con mostrar_precio: false).
+const prices = autogestion.plans.flatMap((p) => (p.amount === null ? [] : [`${formatAmount(p.amount)} €`]));
 ---
 
 <BaseLayout
   title="Autogestión DG · DG Gestores y Abogados"
-  description={`${autogestion.tagline}: formularios, presentación del expediente y acceso a las notificaciones, con asesoría inicial y resolución de dudas según el plan. Planes de ${prices.join(', ').replace(/, ([^,]*)$/, ' y $1')} (${CATALOG.tax_label}).`}
+  description={`${autogestion.tagline}: formularios, presentación del expediente y acceso a las notificaciones, con asesoría inicial y resolución de dudas según el plan.${prices.length ? ` Planes de ${prices.join(', ').replace(/, ([^,]*)$/, ' y $1')} (${CATALOG.tax_label}).` : ''}`}
 >
   <section class="ag-hero" aria-labelledby="ag-title">
     <div class="container ag-hero-grid">

@@ -86,12 +86,14 @@
         {
           "modality": "online",
           "label": "Online",
-          "amount": 60
+          "amount": 60,
+          "acciogest_id": null
         },
         {
           "modality": "presencial",
           "label": "Presencial",
-          "amount": 80
+          "amount": 80,
+          "acciogest_id": null
         }
       ],
       "bookable": true,
@@ -107,12 +109,14 @@
         {
           "modality": "online",
           "label": "Online",
-          "amount": 30
+          "amount": 30,
+          "acciogest_id": null
         },
         {
           "modality": "presencial",
           "label": "Presencial",
-          "amount": 50
+          "amount": 50,
+          "acciogest_id": null
         }
       ],
       "bookable": true,
@@ -128,12 +132,14 @@
         {
           "modality": "online",
           "label": "Online",
-          "amount": 45
+          "amount": 45,
+          "acciogest_id": null
         },
         {
           "modality": "presencial",
           "label": "Presencial",
-          "amount": 65
+          "amount": 65,
+          "acciogest_id": null
         }
       ],
       "bookable": true,
@@ -162,6 +168,7 @@
           "id": "basico",
           "name": "Plan Básico",
           "amount": 121,
+          "acciogest_id": null,
           "featured": false,
           "form_key": "basico",
           "lead_value": "Autogestión DG · Plan Básico",
@@ -175,6 +182,7 @@
           "id": "estandar",
           "name": "Plan Estándar",
           "amount": 200,
+          "acciogest_id": null,
           "featured": false,
           "form_key": "estandar",
           "lead_value": "Autogestión DG · Plan Estándar",
@@ -189,6 +197,7 @@
           "id": "premium",
           "name": "Plan Premium",
           "amount": 300,
+          "acciogest_id": null,
           "featured": false,
           "form_key": "premium",
           "lead_value": "Autogestión DG · Plan Premium",

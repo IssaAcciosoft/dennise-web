@@ -1,7 +1,11 @@
 ---
 /**
  * Asesorías (precios online y presencial) desde src/data/servicios.json.
- * - «Reservar» lleva a #reservar (widget de reservas, docs/integracion-acciogest.md §1).
+ * - «Reservar» lleva a #reservar (widget de reservas, docs/integracion-acciogest.md §1). Si la
+ *   asesoría está enlazada con AccioGest (`booking`, desde acciogest_id), lleva sus servicios por
+ *   modalidad en data-booking-services y el widget se abre con ese servicio (online por defecto;
+ *   un botón con data-booking-modality="presencial" elegiría el presencial). BookingSlot.astro.
+ * - Precios ocultos en AccioGest (mostrar_precio=false) no se muestran; la tarjeta, sí.
  * - «Solicitar información» abre el diálogo de solicitud (ServiceRequestDialog) con el servicio
  *   preseleccionado (data-service-request = lead_value). Sin JavaScript abre WhatsApp.
  */
@@ -29,23 +33,25 @@ const modalityIcon: Record<string, IconName> = { online: 'monitor', presencial: 
           {c.description && <p class="consult-desc">{c.description}</p>}
         </div>
         <div class="consult-side">
-          <dl class="price-pair">
-            {c.prices.map((p) => (
-              <div class="price-item">
-                <dt>
-                  <Icon name={modalityIcon[p.modality] ?? 'check'} />
-                  {p.label}
-                </dt>
-                <dd>
-                  <span class="price">{formatAmount(p.amount)}</span>
-                  <span class="currency">€</span>
-                </dd>
-              </div>
-            ))}
-          </dl>
+          {c.prices.length > 0 && (
+            <dl class="price-pair">
+              {c.prices.map((p) => (
+                <div class="price-item">
+                  <dt>
+                    <Icon name={modalityIcon[p.modality] ?? 'check'} />
+                    {p.label}
+                  </dt>
+                  <dd>
+                    <span class="price">{formatAmount(p.amount)}</span>
+                    <span class="currency">€</span>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          )}
           <div class="consult-actions">
             {c.bookable && (
-              <a class="btn btn--outline btn--block" href="#reservar" data-book-service={c.id} data-lead-value={c.lead_value}>
+              <a class="btn btn--outline btn--block" href="#reservar" data-book-service={c.id} data-lead-value={c.lead_value} data-booking-services={c.booking.length ? JSON.stringify(Object.fromEntries(c.booking.map((b) => [b.modality, b.acciogest_id]))) : undefined}>
                 <Icon name="calendar" />
                 <span>
                   Reservar <span class="visually-hidden">{`${c.name.toLowerCase()} de ${c.duration_label}`}</span>

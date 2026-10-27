@@ -43,14 +43,15 @@ import { url } from '~/lib/url';
     {
       consultations.map((c) => (
         <li>
-          {c.name} · {c.duration_label}: {c.prices.map((p) => `${p.label.toLowerCase()} ${formatAmount(p.amount)} €`).join(' · ')}.
+          {c.name} · {c.duration_label}:{' '}
+          {c.prices.length ? c.prices.map((p) => `${p.label.toLowerCase()} ${formatAmount(p.amount)} €`).join(' · ') : 'el precio se indica al reservar'}.
         </li>
       ))
     }
   </ul>
   <h3>{autogestion.name}</h3>
   <ul>
-    {autogestion.plans.map((p) => <li>{p.name}: {formatAmount(p.amount)} €. Incluye: {planIncludes(p).map((i) => i.charAt(0).toLowerCase() + i.slice(1)).join('; ')}.</li>)}
+    {autogestion.plans.map((p) => <li>{p.name}: {p.amount !== null ? `${formatAmount(p.amount)} €` : 'el precio se indica en su página de pago'}. Incluye: {planIncludes(p).map((i) => i.charAt(0).toLowerCase() + i.slice(1)).join('; ')}.</li>)}
   </ul>
   <p>Los precios se indican en euros. Los planes de {autogestion.name} incluyen el IVA. <span class="placeholder">[PENDIENTE: confirmar si los precios de las asesorías incluyen IVA]</span></p>
 

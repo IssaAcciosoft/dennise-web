@@ -25,7 +25,7 @@ import { driver, type DriveStep, type Driver, type PopoverDOM } from 'driver.js'
 // estilos, Astro lo incrustaría en el HTML de /servicios/ (carga inicial).
 import driverCss from 'driver.js/dist/driver.css?inline';
 import tourCss from '~/styles/tour.css?inline';
-import { consultations, immigration, firmServices, companies, formatAmount } from '~/lib/services';
+import { consultations, immigration, firmServices, companies, formatAmount, type Consultation } from '~/lib/services';
 
 function injectStyles(): void {
   if (document.getElementById('dg-tour-styles')) return;
@@ -35,13 +35,24 @@ function injectStyles(): void {
   document.head.append(style);
 }
 
+/**
+ * driver.js pinta title y description con innerHTML, y llevan textos del catálogo de AccioGest
+ * (nombres de asesorías): todo se escapa como texto plano (nunca HTML).
+ */
+const esc = (s: string | undefined) =>
+  (s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+
 const lcFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 /** Espacio de no separación: «60 €», «1 hora» y «30 min» nunca se parten entre dos líneas. */
 const NBSP = '\u00A0';
 const keep = (s: string | undefined) => (s ?? '').replace(/ /g, NBSP);
-const euros = (n: number | undefined) => (n === undefined ? '' : `${formatAmount(n)}${NBSP}€`);
-const priceOf = (id: string, modality: string) =>
-  consultations.find((c) => c.id === id)?.prices.find((p) => p.modality === modality)?.amount;
+const euros = (n: number) => `${formatAmount(n)}${NBSP}€`;
+/**
+ * «60 € online o 80 € presencial», solo con los precios visibles (AccioGest puede ocultar
+ * alguno con `mostrar_precio: false`): «60 € online» si falta uno, '' si no hay ninguno.
+ */
+const pricePhrase = (c: Consultation) =>
+  c.prices.map((p) => `${euros(p.amount)} ${p.label.toLowerCase()}`).join(' o ');
 
 /** Móviles: el paso y su tarjeta deben caber a la vez en la pantalla (sin taparse). */
 const isNarrow = () => window.matchMedia('(max-width: 599.98px)').matches;
@@ -93,6 +104,8 @@ function buildSteps(): DriveStep[] {
   const academic = consultations.find((c) => c.id.startsWith('orientacion'));
   const durations = consultations.filter((c) => c.name === main.name).map((c) => keep(c.duration_label));
   const placeholder = document.querySelector('[data-booking-placeholder]');
+  const mainPrices = pricePhrase(main);
+  const academicPrices = academic ? pricePhrase(academic) : '';
 
   const immServices = immigration.services.map((s) => s.name);
   const steps: (DriveStep | null)[] = [
@@ -117,19 +130,22 @@ function buildSteps(): DriveStep[] {
         description: `${main.name} de ${durations.join(' o de ')}${academic ? ` y ${lcFirst(academic.name)}` : ''}. Precios por sesión.`,
       },
     },
-    {
-      element: `[data-service-id="${main.id}"] .price-pair`,
-      popover: {
-        title: 'Online o presencial',
-        description: `Cada asesoría tiene su precio online y presencial. Por ejemplo, ${lcFirst(main.name)} de ${keep(main.duration_label)}: ${euros(priceOf(main.id, 'online'))} online o ${euros(priceOf(main.id, 'presencial'))} presencial.`,
-      },
-    },
+    // Sin precios visibles no hay .price-pair: el paso no se muestra.
+    mainPrices
+      ? {
+          element: `[data-service-id="${main.id}"] .price-pair`,
+          popover: {
+            title: 'Online o presencial',
+            description: `Cada asesoría tiene su precio online y presencial. Por ejemplo, ${lcFirst(main.name)} de ${keep(main.duration_label)}: ${mainPrices}.`,
+          },
+        }
+      : null,
     academic
       ? {
           element: narrow ? `[data-service-id="${academic.id}"] .consult-main` : `[data-service-id="${academic.id}"]`,
           popover: {
             title: 'Orientación académica',
-            description: `Búsqueda del centro de estudios y matrícula, junto al trámite de visado o estancia de estudios. ${keep(academic.duration_label)}: ${euros(priceOf(academic.id, 'online'))} online o ${euros(priceOf(academic.id, 'presencial'))} presencial.`.trim(),
+            description: `Búsqueda del centro de estudios y matrícula, junto al trámite de visado o estancia de estudios. ${keep(academic.duration_label)}${academicPrices ? `: ${academicPrices}` : ''}.`,
           },
         }
       : null,
@@ -152,6 +168,7 @@ function buildSteps(): DriveStep[] {
   ];
   return steps
     .filter((s): s is DriveStep => Boolean(s && (!s.element || typeof s.element !== 'string' || document.querySelector(s.element))))
+    .map((s) => ({ ...s, popover: { ...s.popover, title: esc(s.popover?.title), description: esc(s.popover?.description) } }))
     .map((s) => (narrow ? { ...s, popover: { ...s.popover, side: 'bottom' as const, align: 'start' as const } } : s));
 }
 

@@ -16,8 +16,11 @@ import Icon from '../ui/Icon.astro';
 
 // «Trámites disponibles en:» (lista de la cliente) como título de sección, sin el «en:» final.
 const procedures = program.procedures_title.replace(/\s+en:?$/, '');
-const planMessage = (name: string, amount: number) =>
-  `Hola Denisse, me interesa el ${name} (${formatAmount(amount)} €, ${CATALOG.tax_label}) de ${program.name}. Mi trámite es: `;
+// amount null = precio oculto en AccioGest (mostrar_precio: false): sin importe en el texto.
+const planMessage = (name: string, amount: number | null) =>
+  amount === null
+    ? `Hola Denisse, me interesa el ${name} de ${program.name}. Mi trámite es: `
+    : `Hola Denisse, me interesa el ${name} (${formatAmount(amount)} €, ${CATALOG.tax_label}) de ${program.name}. Mi trámite es: `;
 ---
 
 <section class="section section--white ag-procedures" id="tramites" aria-labelledby="tramites-title">
@@ -53,11 +56,17 @@ const planMessage = (name: string, amount: number) =>
           return (
             <li class="plan-card" data-plan-key={plan.form_key} data-reveal data-spotlight>
               <h3 class="plan-name">{plan.name}</h3>
-              <p class="plan-price">
-                <span class="price">{formatAmount(plan.amount)}</span>
-                <span class="currency">€</span>
-              </p>
-              <p class="plan-vat">{CATALOG.tax_label}</p>
+              {plan.amount !== null ? (
+                <>
+                  <p class="plan-price">
+                    <span class="price">{formatAmount(plan.amount)}</span>
+                    <span class="currency">€</span>
+                  </p>
+                  <p class="plan-vat">{CATALOG.tax_label}</p>
+                </>
+              ) : (
+                <p class="plan-vat">Precio al contratar</p>
+              )}
               <ul class="plan-features" role="list" id={listId} aria-label={`Qué incluye el ${plan.name}`}>
                 {program.features.map((f) =>
                   included.has(f.label) ? (

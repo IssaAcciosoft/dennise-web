@@ -1,0 +1,6 @@
+{
+  "_comment": "PRUEBA (ACCIOGEST_MOCK_CATALOG): forma SUPUESTA de GET /form-builder/public/{PLAN_FORM_ID}, un formulario por plan (TODO AccioGest: confirmar el campo de pago).",
+  "basico": { "id": "mock-plan-basico", "name": "Plan Básico", "fields": [ { "label": "Nombre", "type": "text", "is_required": true }, { "label": "Pago", "type": "payment", "is_required": true, "config": { "amount": 125 } } ] },
+  "estandar": { "id": "mock-plan-estandar", "name": "Plan Estándar", "fields": [ { "label": "Pago", "type": "pago", "precio": "210,00" } ] },
+  "premium": { "id": "mock-plan-premium", "name": "Plan Premium", "fields": [ { "label": "Pago", "type": "stripe_payment", "settings": { "amount_cents": 31000 } } ] }
+}

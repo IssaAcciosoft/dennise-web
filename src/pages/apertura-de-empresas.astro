@@ -27,6 +27,7 @@ import { PHONE, TEL_LINK, EMAIL, WA_TEXT, waLink } from '~/data/site';
 import { FAQ_DUBAI, faqJsonLd } from '~/data/faq';
 import { dubai, companies } from '~/lib/services';
 import { url } from '~/lib/url';
+import { safeJson } from '~/lib/json';
 
 const requestWa = waLink(WA_TEXT.empresas);
 const dubaiWa = waLink(WA_TEXT.dubai);
@@ -89,7 +90,7 @@ const support = ['Constitución', 'Apertura bancaria', 'Fiscalidad', 'Acompañam
   preloadFonts={['serif-600', 'serif-500i', 'sans-400', 'sans-600']}
 >
   <Fragment slot="head">
-    <script type="application/ld+json" is:inline set:html={JSON.stringify(faqJsonLd(FAQ_DUBAI))} />
+    <script type="application/ld+json" is:inline set:html={safeJson(faqJsonLd(FAQ_DUBAI))} />
   </Fragment>
 
   <section class="dubai-hero" aria-labelledby="dubai-title">

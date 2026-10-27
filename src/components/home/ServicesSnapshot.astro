@@ -5,7 +5,7 @@
  * México y Dubái (→ /apertura-de-empresas/; texto del bloque Dubái de la web anterior, §2).
  * Autogestión DG NO aparece en Inicio (docs/cambios-2026-10.md §2.8: solo enlace en el pie).
  */
-import { consultations, immigration, firmServices, companies, formatAmount } from '~/lib/services';
+import { consultations, modalities, immigration, firmServices, companies, formatAmount } from '~/lib/services';
 import { BOOKING_PATH } from '~/data/site';
 import { url } from '~/lib/url';
 import Icon from '../ui/Icon.astro';
@@ -13,7 +13,6 @@ import Icon from '../ui/Icon.astro';
 // Servicios individuales: extranjería en España + gestoría y homologación de títulos. Cada chip
 // enlaza a su tarjeta en /servicios/ (id = el del catálogo, el mismo que usan las tarjetas).
 const services = [...immigration.services, ...firmServices.services].map((s) => ({ id: s.id, name: s.name }));
-const modalities = consultations[0]?.prices.map((p) => ({ modality: p.modality, label: p.label })) ?? [];
 ---
 
 <section class="section section--ivory snapshot" id="servicios" aria-labelledby="snapshot-title">

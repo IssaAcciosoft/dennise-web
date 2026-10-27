@@ -12,6 +12,7 @@ import ServicesFaq from '~/components/services/ServicesFaq.astro';
 import { FAQ_SPAIN, faqJsonLd } from '~/data/faq';
 import { autogestion, AUTOGESTION_PATH } from '~/lib/services';
 import { url } from '~/lib/url';
+import { safeJson } from '~/lib/json';
 import despacho from '~/assets/img/despacho.jpg';
 ---
 
@@ -20,7 +21,7 @@ import despacho from '~/assets/img/despacho.jpg';
   description="Extranjería en España (arraigos, reagrupación familiar, nacionalidad, estudios, nómadas digitales…), gestión administrativa, homologación de títulos y asesoría migratoria online y presencial: precios y reserva de asesorías."
 >
   <Fragment slot="head">
-    <script type="application/ld+json" is:inline set:html={JSON.stringify(faqJsonLd(FAQ_SPAIN))} />
+    <script type="application/ld+json" is:inline set:html={safeJson(faqJsonLd(FAQ_SPAIN))} />
   </Fragment>
 
   <section class="services-hero" aria-labelledby="services-title">

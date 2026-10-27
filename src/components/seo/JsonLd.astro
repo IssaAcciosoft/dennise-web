@@ -7,8 +7,9 @@
  */
 import { getImage } from 'astro:assets';
 import { SITE, PHONE, SOCIALS, EMAIL, OFFICE } from '~/data/site';
-import { consultations, autogestion, immigration, firmServices, companies, minAmount, maxAmount, formatAmount, CATALOG } from '~/lib/services';
+import { consultations, autogestion, immigration, firmServices, companies, minAmount, maxAmount, allAmounts, formatAmount, CATALOG } from '~/lib/services';
 import { absoluteUrl } from '~/lib/url';
+import { safeJson } from '~/lib/json';
 import retrato from '~/assets/img/retrato.jpg';
 
 interface Props {
@@ -35,11 +36,11 @@ const consultationOffers = consultations.flatMap((c) =>
     priceCurrency: currency,
   })),
 );
+// Plan con el precio oculto en AccioGest (amount null): Offer sin price.
 const planOffers = autogestion.plans.map((p) => ({
   '@type': 'Offer',
   name: `${autogestion.name} · ${p.name}`,
-  price: String(p.amount),
-  priceCurrency: currency,
+  ...(p.amount !== null ? { price: String(p.amount), priceCurrency: currency } : {}),
   url: absoluteUrl('/autogestion-dg/', site),
 }));
 // Servicios sin precio publicado (se solicitan por el formulario): Offer → Service, sin price.
@@ -76,7 +77,7 @@ const graph = {
         addressCountry: OFFICE.country,
       },
       hasMap: OFFICE.mapsUrl,
-      priceRange: `${formatAmount(minAmount)} € – ${formatAmount(maxAmount)} €`,
+      ...(allAmounts.length ? { priceRange: `${formatAmount(minAmount)} € – ${formatAmount(maxAmount)} €` } : {}),
       sameAs,
       founder: { '@id': `${home}#denisse` },
       hasOfferCatalog: {
@@ -138,4 +139,4 @@ const graph = {
 };
 ---
 
-<script type="application/ld+json" is:inline set:html={JSON.stringify(graph)} />
+<script type="application/ld+json" is:inline set:html={safeJson(graph)} />

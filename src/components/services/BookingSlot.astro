@@ -10,12 +10,18 @@
  *      - si no, cuando la sección se acerca a la pantalla (IntersectionObserver, 1200 px antes).
  *    El widget (iframe) hace servicio, día y hora, modalidad, datos, RGPD y pago con Stripe:
  *    la web NO implementa pagos ni disponibilidad.
+ *    Fase A (docs/integracion-acciogest.md → «Fase A»):
+ *      - «Reservar» en una tarjeta enlazada (data-booking-services) → &service={acciogest_id}
+ *        (online por defecto); si el widget ya estaba cargado, se recarga con ese servicio;
+ *      - mensajes del iframe (solo de bookingMessageOrigins() y de un iframe del contenedor):
+ *        'acciogest:booking:height' → alto del contenedor (760 px mínimo por CSS, máx. 6000);
+ *        'acciogest:booking:done'   → /gracias/?tipo=reserva (con &cita= si llega citaId).
  *  Sin configurar (PLUGIN_ID de ejemplo): panel con lo que incluye la reserva, «Solicitar cita»
  *  (diálogo de solicitud, ServiceRequestDialog) y WhatsApp. Cero peticiones a terceros.
  * ============================================================================
  */
 import { PHONE, TEL_LINK, WA_TEXT, waLink } from '~/data/site';
-import { bookingScriptUrl } from '~/config/acciogest';
+import { BOOKING_MAX_HEIGHT, BOOKING_MESSAGES, bookingMessageOrigins, BOOKING_MIN_HEIGHT, bookingScriptUrl } from '~/config/acciogest';
 import { consultations } from '~/lib/services';
 import { url } from '~/lib/url';
 import Icon, { type IconName } from '../ui/Icon.astro';
@@ -38,6 +44,14 @@ const includes: { icon: IconName; title: string; text: string }[] = [
   { icon: 'lock', title: 'Pago seguro con tarjeta', text: 'La asesoría se paga al reservar.' },
 ];
 const requestWa = waLink(WA_TEXT.reserva);
+// Configuración del script del cliente (sin «define:vars», que lo convertiría en inline).
+const widgetConfig = JSON.stringify({
+  origins: bookingMessageOrigins(),
+  messages: BOOKING_MESSAGES,
+  min: BOOKING_MIN_HEIGHT,
+  max: BOOKING_MAX_HEIGHT,
+  thanks: url('/gracias/?tipo=reserva'),
+});
 ---
 
 <section class="section section--white booking" id="reservar" aria-labelledby="booking-title" data-wa-hide>
@@ -53,7 +67,7 @@ const requestWa = waLink(WA_TEXT.reserva);
           {/* El aviso de error ocupa el mismo hueco reservado (760 px): nunca queda una caja vacía
               ni hay saltos de diseño si el calendario no llega. */}
           <div class="booking-frame">
-            <div class="booking-widget" id="acciogest-booking" data-booking-src={scriptSrc} />
+            <div class="booking-widget" id="acciogest-booking" data-booking-src={scriptSrc} data-booking-config={widgetConfig} />
             <div class="booking-error" data-booking-error role="status" hidden>
               <span class="booking-error-icon" aria-hidden="true"><Icon name="calendar" /></span>
               <p class="booking-error-text">No se ha podido cargar el sistema de reservas. Puedes solicitar tu cita o escribirme por WhatsApp.</p>
@@ -148,16 +162,45 @@ const requestWa = waLink(WA_TEXT.reserva);
   // Se da por cargado cuando aparece su iframe (no con un temporizador). Si el script falla, o
   // carga pero no pinta nada (pluginId incorrecto, error interno…), se muestra «Solicitar cita»
   // + WhatsApp en el mismo hueco reservado.
+  type WidgetConfig = { origins: string[]; messages: { height: string; done: string }; min: number; max: number; thanks: string };
   const host = document.getElementById('acciogest-booking');
-  const src = host?.dataset.bookingSrc;
-  if (host && src) {
+  const baseSrc = host?.dataset.bookingSrc;
+  if (host && baseSrc) {
+    let config: WidgetConfig | null = null;
+    try {
+      config = JSON.parse(host.dataset.bookingConfig ?? 'null') as WidgetConfig | null;
+    } catch {
+      /* sin configuración: no se escuchan mensajes */
+    }
     let io: IntersectionObserver | undefined;
-    let injected = false;
+    /** Servicio con el que se abre el widget (acciogest_id) y el que tiene el cargado ahora. */
+    let service = '';
+    let loadedService: string | null = null; // null = aún no inyectado
+    let script: HTMLScriptElement | null = null;
+    let cleanup: (() => void) | null = null;
+    /** Último alto pedido por el iframe (0 = ninguno) y su rAF pendiente: se reinician al recargar. */
+    let frameHeight = 0;
+    let raf = 0;
     const LOAD_TIMEOUT_MS = 15000; // desde que se inyecta el script
     const RENDER_TIMEOUT_MS = 8000; // desde que el script ha cargado
+    const srcFor = (id: string) => (id ? `${baseSrc}&service=${encodeURIComponent(id)}` : baseSrc);
+    const errorBox = document.querySelector<HTMLElement>('[data-booking-error]');
     const inject = () => {
-      if (injected) return;
-      injected = true;
+      if (loadedService === service) return;
+      // Recarga con otro servicio: fuera el iframe y el script anteriores.
+      // TODO (AccioGest): confirmar que su script admite cargarse otra vez en la misma página.
+      if (loadedService !== null) {
+        cleanup?.();
+        script?.remove();
+        host.replaceChildren();
+        host.style.removeProperty('height');
+        // El iframe nuevo empieza sin alto: su primer mensaje debe aplicarse aunque pida el
+        // mismo alto que el anterior (si no, el filtro de micro-saltos lo descartaría).
+        cancelAnimationFrame(raf);
+        frameHeight = 0;
+        if (errorBox) errorBox.hidden = true;
+      }
+      loadedService = service;
       io?.disconnect();
       host.dataset.state = 'loading';
       let settled = false;
@@ -169,24 +212,27 @@ const requestWa = waLink(WA_TEXT.reserva);
         mo.disconnect();
         window.clearTimeout(timer);
         host.dataset.state = state;
-        if (state === 'error') {
-          const box = document.querySelector<HTMLElement>('[data-booking-error]');
-          if (box) box.hidden = false;
-        }
+        if (state === 'error' && errorBox) errorBox.hidden = false;
       };
       const mo = new MutationObserver(() => hasFrame() && settle('ready'));
       mo.observe(host, { childList: true, subtree: true });
       timer = window.setTimeout(() => settle(hasFrame() ? 'ready' : 'error'), LOAD_TIMEOUT_MS);
-      const script = document.createElement('script');
-      script.src = src;
-      script.async = true;
-      script.onload = () => {
+      const el = document.createElement('script');
+      el.src = srcFor(service);
+      el.async = true;
+      el.onload = () => {
         if (settled) return;
         window.clearTimeout(timer);
         timer = window.setTimeout(() => settle(hasFrame() ? 'ready' : 'error'), RENDER_TIMEOUT_MS);
       };
-      script.onerror = () => settle('error');
-      host.after(script); // mismo sitio que en el código de AccioGest: justo después del contenedor
+      el.onerror = () => settle('error');
+      cleanup = () => {
+        settled = true;
+        mo.disconnect();
+        window.clearTimeout(timer);
+      };
+      script = el;
+      host.after(el); // mismo sitio que en el código de AccioGest: justo después del contenedor
     };
     const wantsBooking = () => location.hash === '#reservar';
     // Un script async insertado antes del evento «load» lo retrasa hasta que termina: si
@@ -207,8 +253,56 @@ const requestWa = waLink(WA_TEXT.reserva);
 
     window.addEventListener('hashchange', () => wantsBooking() && inject());
     document.addEventListener('click', (e) => {
-      if ((e.target as Element | null)?.closest('a[href$="#reservar"]')) inject();
+      const target = e.target as Element | null;
+      // «Reservar» de una tarjeta → abrir el widget con su servicio de AccioGest; una tarjeta sin
+      // servicios enlazados (sin data-booking-services) lo abre SIN servicio, no con el anterior.
+      const bookCard = target?.closest<HTMLElement>('[data-book-service]');
+      if (bookCard) service = '';
+      const card = target?.closest<HTMLElement>('[data-booking-services]');
+      if (card) {
+        try {
+          const ids = JSON.parse(card.dataset.bookingServices ?? '{}') as Record<string, unknown>;
+          const wanted = card.dataset.bookingModality;
+          const id = (wanted && ids[wanted]) || ids.online || Object.values(ids)[0];
+          if (typeof id === 'string' && id) service = id;
+        } catch {
+          /* atributo mal formado: se abre sin servicio */
+        }
+      }
+      if (target?.closest('a[href$="#reservar"]')) inject();
     });
+
+    // Mensajes del iframe: solo de los orígenes permitidos y de un iframe de este contenedor.
+    if (config && config.origins.length) {
+      const allowed = new Set(config.origins);
+      const { min, max, messages } = config;
+      let leaving = false;
+      const fromOurFrame = (source: MessageEventSource | null) =>
+        Boolean(source) && [...host.querySelectorAll('iframe')].some((f) => f.contentWindow === source);
+      window.addEventListener('message', (e: MessageEvent) => {
+        if (!allowed.has(e.origin) || !fromOurFrame(e.source)) return;
+        const data: unknown = e.data;
+        if (typeof data !== 'object' || data === null) return;
+        const msg = data as Record<string, unknown>;
+        if (msg.type === messages.height) {
+          const h = Number(msg.height);
+          if (!Number.isFinite(h) || h <= 0) return;
+          const next = Math.round(Math.min(max, Math.max(min, h)));
+          if (Math.abs(next - frameHeight) < 2) return; // sin micro-saltos
+          frameHeight = next;
+          cancelAnimationFrame(raf);
+          raf = requestAnimationFrame(() => {
+            host.style.height = `${frameHeight}px`;
+            host.querySelectorAll('iframe').forEach((f) => (f.style.height = `${frameHeight}px`));
+          });
+        } else if (msg.type === messages.done && !leaving) {
+          leaving = true;
+          const cita = typeof msg.citaId === 'string' || typeof msg.citaId === 'number' ? String(msg.citaId) : '';
+          const safe = /^[A-Za-z0-9_-]{1,64}$/.test(cita) ? `&cita=${encodeURIComponent(cita)}` : '';
+          window.location.assign(`${config.thanks}${safe}`);
+        }
+      });
+    }
   }
 </script>
 

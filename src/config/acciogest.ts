@@ -18,7 +18,9 @@
  *         PUBLIC_ACCIOGEST_FORM_CONTACTO
  *         PUBLIC_ACCIOGEST_PLAN_BASICO          PUBLIC_ACCIOGEST_PLAN_ESTANDAR
  *         PUBLIC_ACCIOGEST_PLAN_PREMIUM         PUBLIC_ACCIOGEST_BOOKING_PLUGIN_ID
+ *         PUBLIC_ACCIOGEST_WIDGET_ORIGINS       (opcional, orígenes extra del iframe de reservas)
  *  Son IDs públicos (van en el HTML/JS de la web): no son secretos.
+ *  (La URL del build hook de Netlify SÍ es secreta y nunca va aquí: README → AccioGest.)
  * ============================================================================
  */
 import { PHONE } from '~/data/site';
@@ -119,8 +121,35 @@ export function isConfigured(id: string | null | undefined): id is string {
 export const planPageUrl = (key: PlanKey): string | null =>
   isConfigured(PLANES[key]) ? `${ACCIOGEST_API}/form-builder/public/${encodeURIComponent(PLANES[key])}/page` : null;
 
-/** Script del widget de reservas. */
-export const bookingScriptUrl = (): string | null =>
+/**
+ * Script del widget de reservas. `service` = acciogest_id del servicio que abre ya elegido
+ * (`&service=`; servicios.json → consultations[].prices[].acciogest_id).
+ */
+export const bookingScriptUrl = (service?: string | null): string | null =>
   isConfigured(BOOKING_PLUGIN_ID)
-    ? `${ACCIOGEST_API}/plugin-citas-embed.js?pluginId=${encodeURIComponent(BOOKING_PLUGIN_ID)}`
+    ? `${ACCIOGEST_API}/plugin-citas-embed.js?pluginId=${encodeURIComponent(BOOKING_PLUGIN_ID)}` +
+      (service ? `&service=${encodeURIComponent(service)}` : '')
     : null;
+
+/** Mensajes que el iframe de reservas envía a la web (window.parent.postMessage). */
+export const BOOKING_MESSAGES = { height: 'acciogest:booking:height', done: 'acciogest:booking:done' } as const;
+
+/**
+ * Orígenes desde los que se aceptan esos mensajes: el de ACCIOGEST_API y, si el iframe se sirve
+ * desde otro dominio, los de PUBLIC_ACCIOGEST_WIDGET_ORIGINS (separados por comas).
+ * TODO (AccioGest): confirmar desde qué origen se sirve el iframe del widget.
+ */
+export const bookingMessageOrigins = (): string[] =>
+  [ACCIOGEST_API, ...String(import.meta.env.PUBLIC_ACCIOGEST_WIDGET_ORIGINS ?? '').split(',')]
+    .map((value) => {
+      try {
+        return value.trim() ? new URL(value.trim()).origin : '';
+      } catch {
+        return '';
+      }
+    })
+    .filter((origin, i, all) => origin && origin !== 'null' && all.indexOf(origin) === i);
+
+/** Alto del widget de reservas: mínimo reservado (sin CLS) y máximo aceptado de un mensaje. */
+export const BOOKING_MIN_HEIGHT = 760;
+export const BOOKING_MAX_HEIGHT = 6000;

@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
 import { fileURLToPath } from 'node:url';
+import acciogestCatalog from './src/integrations/acciogest-catalog.mjs';
 
 /**
  * URL pública del sitio (canonical, Open Graph, JSON-LD, sitemap y robots.txt).
@@ -53,6 +54,9 @@ export default defineConfig({
     inlineStylesheets: 'always',
   },
   integrations: [
+    // Catálogo de AccioGest al compilar (precios, nombres y duraciones de las asesorías y planes),
+    // con la última copia buena si AccioGest no responde. docs/integracion-acciogest.md → «Fase A».
+    acciogestCatalog(),
     // Islas de React: hidratar SIEMPRE con client:visible / client:idle (nunca client:load
     // salvo que sea imprescindible). Ver README → «Islas de React».
     react(),

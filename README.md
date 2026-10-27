@@ -15,6 +15,7 @@ npm run build        # compila la web estática en dist/
 npm run preview      # sirve dist/ para revisarla
 npm run check        # comprobación de tipos y de los componentes (astro check)
 npm run icons        # regenera los iconos PNG a partir del logotipo (revisar el resultado)
+npm run mock:acciogest -- --port 4322 [--dist dist]  # AccioGest de PRUEBA (catálogo, planes, widget)
 npm run globe-poster # regenera el póster del globo de Conóceme (necesita Playwright + Chromium)
 npm run og-images    # regenera public/og-image.jpg y public/og-empresas.jpg (Playwright + Chromium)
 npm run web-anterior-images # recortes del equipo y logo del partner desde _originales/web-anterior/
@@ -82,12 +83,16 @@ src/
     site.ts                 Teléfono, WhatsApp, email, despacho, redes, navegación ← ÚNICA fuente
     servicios.json          Catálogo: extranjería en España, gestoría, asesorías, Autogestión DG
                             (planes con `includes`), apertura de empresas, Dubái ← precios aquí
+                            (`acciogest_id` en cada precio y plan: ver «AccioGest»)
+    acciogest-catalogo.last.json  Última copia buena del catálogo de AccioGest (la escribe la
+                            compilación; no se edita a mano)
     faq.ts                  Preguntas frecuentes (España / Dubái) + FAQPage para JSON-LD
     medios.ts               Artículo «8 de marzo — Voces que se unen» y su transcripción; prensa de
                             2021 (PRESS_2021: medio, fecha, titular, extracto literal, enlace)
     actividad.ts            Agenda 2026 y campañas informativas de Conóceme (docs/redes-sociales.md §4)
     legal.ts                Textos de consentimiento + datos de la titular (NIE: solo páginas legales)
   config/acciogest.ts       IDs de AccioGest, etiquetas de los campos, versión de la política
+  integrations/acciogest-catalog.mjs  Catálogo de AccioGest al compilar (con copia de respaldo)
   lib/                      Utilidades (rutas con base, catálogo de servicios)
   scripts/                  JS del cliente: diálogos (dialog.ts), cliente de AccioGest
                             (acciogest.ts), controlador de formularios (lead-form.ts),
@@ -105,7 +110,9 @@ _originales/                Originales sin tocar: NO se publican (no están en s
 ## Dónde se edita cada cosa
 
 - **Precios y servicios:** `src/data/servicios.json`. Inicio y Servicios se generan desde aquí
-  al compilar (no hay precios escritos a mano en las páginas). JSON-LD también.
+  al compilar (no hay precios escritos a mano en las páginas). JSON-LD también. Con
+  `BOOKING_PLUGIN_ID` configurado, los precios enlazados (`acciogest_id`) los manda AccioGest
+  (ver «AccioGest → Catálogo»).
 - **Teléfono, WhatsApp, email, dirección del despacho y redes:** `src/data/site.ts` (`PHONE`,
   `EMAIL`, `OFFICE`; si cambia algo, solo aquí: cabecera, pie, contacto, JSON-LD y legales).
 - **Datos legales de la titular (nombre completo y NIE):** `src/data/legal.ts` → `LEGAL_ID`.
@@ -174,8 +181,52 @@ envían. Los textos de las casillas de consentimiento están en `src/data/legal.
 atrás con `Retry-After` (60 s si no se puede leer) y botón bloqueado · sin red o > 15 s →
 mensaje y se conservan los datos. Campo trampa `website`: si llega relleno se finge éxito.
 
-**Página `/gracias/`** (`?tipo=plan&plan=basico|estandar|premium` o `?tipo=reserva`): hay que
-configurarla en AccioGest como URL de redirección tras el pago/la reserva, si lo permite.
+**Página `/gracias/`** (`?tipo=plan&plan=basico|estandar|premium` o `?tipo=reserva`). Cada
+formulario de plan en AccioGest lleva como URL de redirección
+`https://DOMINIO/gracias/?tipo=plan&plan=basico` (y `estandar`, `premium`); AccioGest añade
+`&response_id=…&pago=ok`. Con `pago` distinto de `ok` se muestra «El pago no se ha completado»
+con «Volver a intentarlo» y WhatsApp. Tras una reserva, el widget avisa a la web
+(`acciogest:booking:done`) y la web lleva a `/gracias/?tipo=reserva`.
+
+### Catálogo de AccioGest (fase A)
+
+Especificación: `docs/integracion-acciogest.md` → «Fase A». **En desarrollo en AccioGest:
+mantener el modo simulado** (IDs de ejemplo) hasta que avisen de que está en pruebas.
+
+- **`acciogest_id`** (`src/data/servicios.json`): id del servicio en AccioGest en cada
+  `consultations[].prices[]` (online y presencial son servicios distintos, cada uno con su id) y
+  en cada plan. `null` = sin enlazar: se usa el precio del JSON. Lo da Denisse/AccioGest; se
+  escribe tal cual (texto o número).
+- Al compilar con `BOOKING_PLUGIN_ID` configurado se descarga
+  `{API}/plugin-citas/public/{BOOKING_PLUGIN_ID}/catalogo` (8 s como máximo) y se mezclan por
+  `acciogest_id` nombre, descripción, duración y precio con IVA (`precio_bruto`);
+  `mostrar_precio: false` oculta ese precio. Los planes con `PLANES.<plan>` configurado toman su
+  importe del campo de pago de su formulario. Los bloques sin precio siguen en el JSON.
+- Si AccioGest no responde, aviso en el log de la compilación y se usa la **última copia buena**
+  (`src/data/acciogest-catalogo.last.json`, o la caché de Netlify si es más reciente); si no hay,
+  `servicios.json`. Tras compilar en local con los IDs reales, versionar ese archivo.
+- **Pruebas**: `ACCIOGEST_MOCK_CATALOG=1 PUBLIC_ACCIOGEST_BOOKING_PLUGIN_ID=demo npm run build`
+  (fixture `scripts/acciogest-mock/`, sin red; enlaza los `acciogest_id: null` con ids de
+  prueba). Widget y mensajes del iframe: `npm run mock:acciogest -- --port 4322 --dist dist`
+  tras compilar con `PUBLIC_ACCIOGEST_API=http://127.0.0.1:4322` y abrir
+  `http://localhost:4322/servicios/#reservar`.
+- Orígenes permitidos para los mensajes del widget: el de `PUBLIC_ACCIOGEST_API` y, si el iframe
+  se sirve desde otro dominio, `PUBLIC_ACCIOGEST_WIDGET_ORIGINS` (separados por comas).
+
+### Build hook (recompilar cuando cambie un servicio)
+
+AccioGest llamará a un build hook de Netlify cuando Denisse cambie un servicio publicado (los
+cambios seguidos se juntan en una sola llamada). Para crearlo:
+
+1. Netlify → el sitio → **Site configuration → Build & deploy → Continuous deployment → Build
+   hooks → Add build hook**.
+2. Nombre: `AccioGest catálogo`; rama: **la rama de producción** (la que publica la web).
+3. Guardar y copiar la URL (`https://api.netlify.com/build_hooks/…`).
+4. Enviarla a AccioGest **por un canal privado**. Es un **secreto** (quien la tenga puede lanzar
+   compilaciones): **nunca** se escribe en el repositorio, en `netlify.toml`, en el código ni en
+   documentos compartidos. Si se filtra, se borra el hook en Netlify y se crea otro.
+
+Prueba manual: `curl -X POST -d '{}' "<URL del hook>"` → aparece un despliegue nuevo en Netlify.
 
 ## Sistema de movimiento
 
@@ -427,8 +478,10 @@ De la cliente (ver `docs/contenido.md` §7):
    partners (Poplavsky, De la Flor Abogados, Espiga Exports, Ariel Noriega) para publicar; una
    foto mejor de Stephanie si existe; nombre y descripción de «Bienvenido / Welcome!» (proyecto
    de Everardo Corona, PENDIENTE); originales de los logos de Empoderando Voces sin recortar.
-5. AccioGest: faltan los 3 `FORM_ID` de formularios, los 3 de planes y el `PLUGIN_ID` de
-   reservas (README → AccioGest). Hasta entonces, modo simulado con aviso visible. Si «Servicio»
+5. AccioGest: faltan los 3 `FORM_ID` de formularios, los 3 de planes, el `PLUGIN_ID` de
+   reservas y los `acciogest_id` de cada precio y plan (README → AccioGest). Hasta que AccioGest
+   avise de que la fase A está en pruebas, modo simulado con aviso visible. Pendiente de la
+   cliente: modelo de cobro de los planes (único / mensual / plazos) y correos de las cuentas. Si «Servicio»
    es un desplegable en AccioGest, añadir los nuevos valores (extranjería y Dubái).
    Revisar las páginas legales (`[PENDIENTE]`), en especial las condiciones de contratación
    (borrador) y el proceso tras la compra de un plan.
