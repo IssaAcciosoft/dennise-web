@@ -434,9 +434,9 @@ ver `docs/web-anterior.md`; ya están en la web: /dubai/, /servicios/, /conoceme
 integración de formularios (AccioGest).
 
 1. Qué diferencia los planes Básico / Estándar / Premium.
-2. Colegiación en España (colegio y nº de colegiada), si aplica: el aviso legal debe indicarlo
-   para profesiones reguladas (LSSI art. 10). Si no está colegiada en España, revisar cómo se
-   presenta el título de "abogada".
+2. ~~Colegiación~~ — resuelto 05/11: gestora administrativa colegiada en el Ilustre Colegio Oficial de
+   Gestores Administrativos de Madrid, n.º 4008; abogada en México con cédula profesional 11982479
+   (no colegiada en España como abogada).
 3. Proceso después del pago (quién contacta, plazo, documentación, hoja de encargo) y política de
    cancelación y reembolso.
 4. Plataforma de videollamada de las asesorías online.
