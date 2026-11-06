@@ -53,20 +53,21 @@ import { url } from '~/lib/url';
   <ul>
     {autogestion.plans.map((p) => <li>{p.name}: {p.amount !== null ? `${formatAmount(p.amount)} €` : 'el precio se indica en su página de pago'}. Incluye: {planIncludes(p).map((i) => i.charAt(0).toLowerCase() + i.slice(1)).join('; ')}.</li>)}
   </ul>
-  <p>Los precios se indican en euros. Los planes de {autogestion.name} incluyen el IVA. <span class="placeholder">[PENDIENTE: confirmar si los precios de las asesorías incluyen IVA]</span></p>
+  <p>Los precios se indican en euros. Todos los precios publicados (asesorías y planes de {autogestion.name}) incluyen el IVA correspondiente (21&nbsp;%).</p>
 
   <h2>4. Contratación y pago</h2>
   <ul>
-    <li><strong>Asesorías:</strong> se reservan en el sistema de reservas de la web, eligiendo el servicio, el día y la hora y la modalidad (online o presencial).</li>
+    <li><strong>Asesorías:</strong> se reservan en el sistema de reservas de la web, eligiendo el servicio, el día y la hora y la modalidad (online o presencial), o bien por WhatsApp al <a href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">{PHONE.display}</a>, acordando el día, la hora y la modalidad.</li>
     <li><strong>{autogestion.name}:</strong> cada plan se contrata en su página de pago, que se abre en una pestaña nueva.</li>
+    <li>Las asesorías online se pagan <strong>antes de la cita</strong>. <span class="placeholder">[PENDIENTE: confirmar cuándo se pagan las asesorías presenciales]</span></li>
     <li>El pago se realiza <strong>por adelantado</strong>, con tarjeta, a través de la plataforma de pago <strong>Stripe</strong> integrada en el sistema de reservas y en las páginas de pago de AccioGest. Esta web no recibe ni guarda los datos de tu tarjeta.</li>
     <li>Confirmación de la contratación: <span class="placeholder">[PENDIENTE: confirmar con AccioGest si se envía un email de confirmación y con qué contenido]</span></li>
   </ul>
 
   <h2>5. Prestación del servicio</h2>
   <ul>
-    <li><strong>Asesorías:</strong> se prestan el día y a la hora reservados, en la modalidad elegida. Online: <span class="placeholder">[PENDIENTE: herramienta de videollamada y cómo se envía el enlace]</span>. Presencial: en el despacho, {OFFICE.oneLine}.</li>
-    <li><strong>{autogestion.name}:</strong> incluye los servicios indicados en el apartado 3 para el trámite contratado. <span class="placeholder">[PENDIENTE: proceso tras la compra (quién contacta, cómo se agenda la asesoría inicial y cómo se entrega la documentación)]</span></li>
+    <li><strong>Asesorías:</strong> se prestan el día y a la hora reservados, en la modalidad elegida. Online: por <strong>Zoom</strong>; el enlace de acceso se envía una vez confirmado el pago. Las asesorías las atiende directamente Denisse González. Presencial: en el despacho, {OFFICE.oneLine}.</li>
+    <li><strong>{autogestion.name}:</strong> incluye los servicios indicados en el apartado 3 para el trámite contratado. Tras la contratación, la documentación se envía a través de la aplicación habilitada para ello y desde allí se hace el seguimiento del trámite. Las citas se organizan mediante calendario.</li>
     <li>La persona usuaria se compromete a facilitar información veraz, completa y actualizada y la documentación necesaria para el trámite.</li>
   </ul>
 
@@ -81,10 +82,11 @@ import { url } from '~/lib/url';
   <p><span class="placeholder">[PENDIENTE: confirmar con AccioGest cómo recoge el sistema de reservas y la página de pago la solicitud expresa de inicio del servicio y el reconocimiento de pérdida del derecho (casilla en el momento de la compra)]</span></p>
 
   <h2>7. Cancelación y cambio de cita</h2>
-  <p><span class="placeholder">[PENDIENTE: plazo para cancelar una asesoría con reembolso, posibilidad y forma de cambiar la cita, y qué ocurre si no se asiste]</span></p>
+  <p>Una vez realizado el pago, las asesorías no se cancelan ni se reembolsan, sin perjuicio del derecho de desistimiento de las personas consumidoras en los términos del apartado 6.</p>
+  <p>Puedes solicitar un <strong>cambio de fecha</strong> para reagendar tu cita, sujeto a disponibilidad, por WhatsApp al <a href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">{PHONE.display}</a> o en <a href={EMAIL.href}>{EMAIL.address}</a>. <span class="placeholder">[PENDIENTE: con cuánta antelación se puede pedir el cambio y qué ocurre si no se asiste a la cita]</span></p>
 
   <h2>8. Facturación</h2>
-  <p>Se emitirá la factura correspondiente a cada servicio contratado. <span class="placeholder">[PENDIENTE: quién y cómo la emite (AccioGest o la titular), cómo se envía y qué datos fiscales hay que facilitar]</span></p>
+  <p>Se emitirá la factura correspondiente a cada servicio contratado. La factura se emite a través de AccioGest, el sistema de gestión del despacho. Si necesitas una factura a nombre de una empresa o con tus datos fiscales, indícanos tu nombre o razón social, NIF/NIE y domicilio.</p>
 
   <h2>9. Responsabilidad</h2>
   <p>Los servicios se prestan con la diligencia profesional exigible. La resolución de los procedimientos corresponde a la Administración competente, por lo que no puede garantizarse un resultado concreto. La prestadora no responde de los retrasos o resoluciones que dependan de la Administración ni de los perjuicios derivados de información o documentación incompleta, inexacta o facilitada fuera de plazo por la persona usuaria. Nada de lo anterior limita los derechos que la normativa de consumo reconoce a las personas consumidoras. <span class="placeholder">[PENDIENTE: revisar con la titular]</span></p>

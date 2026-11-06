@@ -489,3 +489,15 @@ integración de formularios (AccioGest).
      portada del inicio, en Conóceme y en «Nuestro equipo».
    - «Desde mis primeras prácticas en el Centro de Justicia para la Mujer» (Conóceme) se mantiene:
      es su texto y no se refiere a la Embajada. Si tampoco quiere ahí la palabra, que lo diga.
+
+## 8. Respuestas de la cliente (06/11/2026)
+
+- IVA: todos los precios publicados incluyen el IVA (21 %).
+- Cancelaciones: las asesorías no se cancelan ni se reembolsan una vez pagadas; se puede pedir cambio
+  de fecha, sujeto a disponibilidad. (En la web se mantiene a salvo el derecho de desistimiento legal
+  de los consumidores; pendiente: antelación para el cambio y qué pasa si no se asiste.)
+- Contratación: cita por WhatsApp (día, hora y modalidad); online se paga antes y se envía el enlace.
+  Planes: documentación por la aplicación habilitada, seguimiento y citas por calendario.
+- Videollamada: Zoom, atendida por ella.
+- Facturas: a través de AccioGest.
+- Conservación de datos de quien no contrata: 1 año.
