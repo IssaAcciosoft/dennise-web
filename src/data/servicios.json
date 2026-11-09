@@ -167,7 +167,7 @@
         {
           "id": "basico",
           "name": "Plan Básico",
-          "amount": 121,
+          "amount": 242,
           "acciogest_id": null,
           "featured": false,
           "form_key": "basico",
@@ -181,7 +181,7 @@
         {
           "id": "estandar",
           "name": "Plan Estándar",
-          "amount": 200,
+          "amount": 315,
           "acciogest_id": null,
           "featured": false,
           "form_key": "estandar",
@@ -196,7 +196,7 @@
         {
           "id": "premium",
           "name": "Plan Premium",
-          "amount": 300,
+          "amount": 425,
           "acciogest_id": null,
           "featured": false,
           "form_key": "premium",

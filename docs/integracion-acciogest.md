@@ -12,7 +12,7 @@ documento es la especificación que sigue el código (`src/config/acciogest.ts`,
 |---|---|---|
 | Reservas de asesorías (con pago previo) | Widget de AccioGest embebido (iframe): servicio, día y hora, modalidad, datos, RGPD y pago con Stripe | Falta `BOOKING_PLUGIN_ID` |
 | Catálogo de servicios | `src/data/servicios.json` + catálogo público de AccioGest al compilar, mezclado por `acciogest_id` (fase A) | Hecho; en desarrollo en AccioGest |
-| Planes Autogestión DG (121 / 200 / 300 €) | Página pública de formulario de pago de AccioGest, en pestaña nueva; el precio, del campo de pago del formulario (fase A) | Faltan los 3 `FORM_ID` |
+| Planes Autogestión DG (242 / 315 / 425 €) | Página pública de formulario de pago de AccioGest, en pestaña nueva; el precio, del campo de pago del formulario (fase A) | Faltan los 3 `FORM_ID` |
 | Leads: solicitud de servicio, "Cuéntame tu historia", contacto | HTML propio + `fetch` POST al form-builder público | Faltan los 3 `FORM_ID` |
 | Captcha | No existe en AccioGest; no se usa. Se usa un campo honeypot | — |
 
