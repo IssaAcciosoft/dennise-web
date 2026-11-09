@@ -157,3 +157,7 @@ Lo que lleva guion es lo que incluye cada plan:
   influencia y talento"**, dentro del 6.º Encuentro de Mujeres Líderes Hispanas (EMLHIS 2026),
   **lunes 19 de octubre de 2026**, Madrid, con la foto de Denisse en el escenario. No inventar su
   papel (no decir "ponente"); basta con el nombre del evento, la fecha y el lugar.
+
+## Actualización 09/11/2026
+
+Nuevos precios de Autogestión DG (IVA incluido): Básico 242 €, Estándar 315 €, Premium 425 €. Sustituyen a 121 / 200 / 300 €.
