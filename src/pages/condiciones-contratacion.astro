@@ -1,7 +1,7 @@
 ---
 /**
- * BORRADOR de condiciones de contratación (asesorías y Autogestión DG).
- * Completar los [PENDIENTE] y revisarlo con la titular / asesoría legal antes de publicar.
+ * Condiciones de contratación (asesorías y Autogestión DG). Aprobadas por la titular el 10/11/2026.
+ * Pendientes de AccioGest: comentarios PENDIENTE.
  * Precios y servicios desde src/data/servicios.json (siempre coinciden con la web).
  */
 import LegalLayout from '~/layouts/LegalLayout.astro';
@@ -17,10 +17,7 @@ import { url } from '~/lib/url';
   description="Condiciones de contratación de las asesorías y de Autogestión DG de DG Gestores y Abogados (Denisse González): precios, pago, prestación del servicio y derecho de desistimiento."
 >
   <Fragment slot="intro">
-    <p class="legal-updated">Última actualización: <span class="placeholder">[PENDIENTE: fecha de publicación]</span></p>
-    <p class="legal-notice">
-      <strong>BORRADOR — no publicar sin revisar.</strong> Estas condiciones están pendientes de revisión por la titular y su asesoría legal. Los datos marcados como <span class="placeholder">[PENDIENTE]</span> deben completarse antes de publicar la web.
-    </p>
+    <p class="legal-updated">Última actualización: 10 de noviembre de 2026</p>
   </Fragment>
 
   <h2>1. Prestadora del servicio</h2>
@@ -61,7 +58,7 @@ import { url } from '~/lib/url';
     <li><strong>{autogestion.name}:</strong> cada plan se contrata en su página de pago, que se abre en una pestaña nueva.</li>
     <li>Las asesorías online se pagan <strong>antes de la cita</strong>. Las asesorías presenciales acordadas por WhatsApp se pagan en el despacho.</li>
     <li>El pago se realiza <strong>por adelantado</strong>, con tarjeta, a través de la plataforma de pago <strong>Stripe</strong> integrada en el sistema de reservas y en las páginas de pago de AccioGest. Esta web no recibe ni guarda los datos de tu tarjeta.</li>
-    <li>Confirmación de la contratación: <span class="placeholder">[PENDIENTE: confirmar con AccioGest si se envía un email de confirmación y con qué contenido]</span></li>
+    <li>Confirmación de la contratación: {/* PENDIENTE: confirmar con AccioGest si se envía un email de confirmación y con qué contenido */}</li>
   </ul>
 
   <h2>5. Prestación del servicio</h2>
@@ -79,7 +76,7 @@ import { url } from '~/lib/url';
     <li><strong>Cómo desistir:</strong> comunícalo de forma inequívoca a <a href={EMAIL.href}>{EMAIL.address}</a> o por WhatsApp al <a href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">{PHONE.display}</a>. Puedes usar este modelo (no es obligatorio): «Por la presente le comunico que desisto de mi contrato de prestación del siguiente servicio: […], contratado el […]. Nombre: […]. Domicilio: […]. Fecha: […]».</li>
     <li><strong>Devolución:</strong> se reembolsarán los importes que correspondan en un plazo máximo de 14 días naturales desde la comunicación, por el mismo medio de pago utilizado.</li>
   </ul>
-  <p><span class="placeholder">[PENDIENTE: confirmar con AccioGest cómo recoge el sistema de reservas y la página de pago la solicitud expresa de inicio del servicio y el reconocimiento de pérdida del derecho (casilla en el momento de la compra)]</span></p>
+  {/* PENDIENTE: confirmar con AccioGest cómo recoge el sistema de reservas y la página de pago la solicitud expresa de inicio del servicio y el reconocimiento de pérdida del derecho (casilla en el momento de la compra) */}
 
   <h2>7. Cancelación y cambio de cita</h2>
   <p>Una vez realizado el pago, las asesorías no se cancelan ni se reembolsan, sin perjuicio del derecho de desistimiento de las personas consumidoras en los términos del apartado 6.</p>
@@ -89,13 +86,13 @@ import { url } from '~/lib/url';
   <p>Se emitirá la factura correspondiente a cada servicio contratado. La factura se emite a través de AccioGest, el sistema de gestión del despacho. Si necesitas una factura a nombre de una empresa o con tus datos fiscales, indícanos tu nombre o razón social, NIF/NIE y domicilio.</p>
 
   <h2>9. Responsabilidad</h2>
-  <p>Los servicios se prestan con la diligencia profesional exigible. La resolución de los procedimientos corresponde a la Administración competente, por lo que no puede garantizarse un resultado concreto. La prestadora no responde de los retrasos o resoluciones que dependan de la Administración ni de los perjuicios derivados de información o documentación incompleta, inexacta o facilitada fuera de plazo por la persona usuaria. Nada de lo anterior limita los derechos que la normativa de consumo reconoce a las personas consumidoras. <span class="placeholder">[PENDIENTE: revisar con la titular]</span></p>
+  <p>Los servicios se prestan con la diligencia profesional exigible. La resolución de los procedimientos corresponde a la Administración competente, por lo que no puede garantizarse un resultado concreto. La prestadora no responde de los retrasos o resoluciones que dependan de la Administración ni de los perjuicios derivados de información o documentación incompleta, inexacta o facilitada fuera de plazo por la persona usuaria. Nada de lo anterior limita los derechos que la normativa de consumo reconoce a las personas consumidoras.</p>
 
   <h2>10. Protección de datos</h2>
   <p>El tratamiento de los datos personales se describe en la <a href={url('/politica-privacidad/')}>política de privacidad</a>.</p>
 
   <h2>11. Ley aplicable y jurisdicción</h2>
-  <p>Estas condiciones se rigen por la legislación española. Si contratas como persona consumidora, podrás acudir a los juzgados y tribunales de tu domicilio. <span class="placeholder">[PENDIENTE: revisar con la titular; hojas de reclamaciones y sistemas de resolución extrajudicial aplicables]</span></p>
+  <p>Estas condiciones se rigen por la legislación española. Si contratas como persona consumidora, podrás acudir a los juzgados y tribunales de tu domicilio.</p>
 
   <p>Más información: <a href={url('/aviso-legal/')}>aviso legal</a>.</p>
 </LegalLayout>

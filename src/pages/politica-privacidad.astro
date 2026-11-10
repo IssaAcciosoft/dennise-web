@@ -1,6 +1,6 @@
 ---
 /**
- * Borrador pendiente de revisión: completar los datos [PENDIENTE] antes de publicar.
+ * Revisada y aprobada por la titular el 10/11/2026. Pendientes de AccioGest: comentarios PENDIENTE.
  * La versión (POLICY_VERSION, src/config/acciogest.ts) se envía con cada formulario como
  * «Versión política»: si cambia el contenido de esta política, cambiar también la versión.
  * Los textos de consentimiento de los formularios salen de src/data/legal.ts (los mismos).
@@ -17,8 +17,7 @@ const consentLabel = (key: keyof typeof CONSENT) => `He leído y acepto la polí
 
 <LegalLayout title="Política de privacidad · DG Gestores y Abogados" heading="Política de privacidad" description="Política de privacidad del sitio web de DG Gestores y Abogados (Denisse González): qué datos se tratan, con qué finalidad y cómo ejercer tus derechos.">
   <Fragment slot="intro">
-    <p class="legal-updated">Versión {POLICY_VERSION} · Última actualización: <span class="placeholder">[PENDIENTE: fecha de publicación]</span></p>
-    <p class="legal-notice"><strong>Borrador pendiente de revisión.</strong> Redactado conforme al Reglamento (UE) 2016/679 (RGPD) y a la Ley Orgánica 3/2018 (LOPDGDD). Los datos marcados como <span class="placeholder">[PENDIENTE]</span> deben completarse antes de publicar la web.</p>
+    <p class="legal-updated">Versión {POLICY_VERSION} · Última actualización: 10 de noviembre de 2026</p>
   </Fragment>
 
   <h2>1. Responsable del tratamiento</h2>
@@ -53,7 +52,7 @@ const consentLabel = (key: keyof typeof CONSENT) => `He leído y acepto la polí
   <h3>Datos que acompañan a los formularios</h3>
   <ul>
     <li>La confirmación de tu consentimiento y la versión de esta política que has aceptado (versión {POLICY_VERSION}), para poder acreditarlo.</li>
-    <li>Si has llegado a la web desde un enlace de una campaña o red social, el origen de la visita (parámetros <code>utm_source</code>, <code>utm_medium</code> y <code>utm_campaign</code> del enlace), para saber por qué canal llegan las consultas. Este dato se guarda temporalmente en tu navegador (<code>sessionStorage</code>), no se envía a nadie hasta que mandas un formulario y se borra al cerrar la pestaña. <span class="placeholder">[PENDIENTE: valorar con la asesoría legal si este almacenamiento requiere consentimiento previo según el art. 22.2 LSSI]</span></li>
+    <li>Si has llegado a la web desde un enlace de una campaña o red social, el origen de la visita (parámetros <code>utm_source</code>, <code>utm_medium</code> y <code>utm_campaign</code> del enlace), para saber por qué canal llegan las consultas. Este dato se guarda temporalmente en tu navegador (<code>sessionStorage</code>), no se envía a nadie hasta que mandas un formulario y se borra al cerrar la pestaña. {/* PENDIENTE: valorar con la asesoría legal si este almacenamiento requiere consentimiento previo según el art. 22.2 LSSI */}</li>
     <li>Un campo oculto antispam: si se rellena (lo hacen los programas automáticos), el formulario no se envía.</li>
   </ul>
 
@@ -72,21 +71,21 @@ const consentLabel = (key: keyof typeof CONSENT) => `He leído y acepto la polí
   <ul>
     <li><strong>Solicitudes y mensajes</strong> (formularios de solicitud de información y contacto): el tiempo necesario para atenderlos y, después, <strong>un año</strong> si no llegas a contratar ningún servicio, salvo que se convierta en una relación profesional.</li>
     <li><strong>Historias</strong> (Empoderando Voces): hasta que retires tu consentimiento o solicites su supresión.</li>
-    <li><strong>Reservas, contrataciones y facturas</strong>: mientras dure la relación profesional y, después, durante los plazos legales (por ejemplo, seis años para la documentación contable según el Código de Comercio y los plazos de prescripción fiscales). <span class="placeholder">[PENDIENTE: confirmar plazos con la asesoría]</span></li>
+    <li><strong>Reservas, contrataciones y facturas</strong>: mientras dure la relación profesional y, después, durante los plazos legales (por ejemplo, seis años para la documentación contable según el Código de Comercio y los plazos de prescripción fiscales). {/* PENDIENTE: confirmar plazos con la asesoría */}</li>
   </ul>
 
   <h2>5. Destinatarios y encargados del tratamiento</h2>
   <p>No se ceden datos a terceros salvo obligación legal. Para el funcionamiento de la web intervienen los siguientes proveedores:</p>
   <ul>
-    <li><strong>AccioGest</strong>, como <strong>encargado del tratamiento</strong>: recibe y almacena los formularios de la web (historias, solicitudes y contacto) y gestiona el sistema de reservas y las páginas de contratación de los planes. <span class="placeholder">[PENDIENTE: razón social, domicilio y país de AccioGest, y firma del contrato de encargo del tratamiento (art. 28 RGPD)]</span></li>
-    <li><strong>Stripe</strong>, para el cobro con tarjeta de las reservas y los planes a través de las páginas y el sistema de reservas de AccioGest. Stripe trata los datos del pago conforme a su propia política de privacidad. <span class="placeholder">[PENDIENTE: confirmar la entidad de Stripe y su condición (encargado o responsable independiente)]</span></li>
+    <li><strong>AccioGest</strong>, como <strong>encargado del tratamiento</strong>: recibe y almacena los formularios de la web (historias, solicitudes y contacto) y gestiona el sistema de reservas y las páginas de contratación de los planes. {/* PENDIENTE: razón social, domicilio y país de AccioGest, y firma del contrato de encargo del tratamiento (art. 28 RGPD) */}</li>
+    <li><strong>Stripe</strong>, para el cobro con tarjeta de las reservas y los planes a través de las páginas y el sistema de reservas de AccioGest. Stripe trata los datos del pago conforme a su propia política de privacidad. {/* PENDIENTE: confirmar la entidad de Stripe y su condición (encargado o responsable independiente) */}</li>
     <li><strong>WhatsApp (Meta):</strong> cuando eliges escribir por WhatsApp, el mensaje se transmite a través de ese servicio, sujeto a su propia política de privacidad.</li>
     <li><strong>Alojamiento web:</strong> Netlify, Inc. (Estados Unidos), que sirve las páginas de la web. No recibe los datos de los formularios, que se envían directamente a AccioGest.</li>
   </ul>
   <p>Las tipografías de la web se sirven desde el propio sitio: no se realizan peticiones a servidores de terceros (como Google Fonts) al visitarla. La web solo se comunica con AccioGest cuando envías un formulario o cuando se carga el sistema de reservas.</p>
 
   <h2>6. Transferencias internacionales</h2>
-  <p>Algunos de estos proveedores pueden tratar datos fuera del Espacio Económico Europeo. En tal caso, las transferencias se amparan en el Marco de Privacidad de Datos UE-EE. UU. o en cláusulas contractuales tipo aprobadas por la Comisión Europea. <span class="placeholder">[PENDIENTE: verificar para cada proveedor]</span></p>
+  <p>Algunos de estos proveedores pueden tratar datos fuera del Espacio Económico Europeo. En tal caso, las transferencias se amparan en el Marco de Privacidad de Datos UE-EE. UU. o en cláusulas contractuales tipo aprobadas por la Comisión Europea. {/* PENDIENTE: verificar para cada proveedor */}</p>
 
   <h2>7. Tus derechos</h2>
   <p>Puedes ejercer tus derechos de acceso, rectificación, supresión, oposición, limitación del tratamiento y portabilidad, así como retirar tu consentimiento en cualquier momento, escribiendo a <a href={EMAIL.href}>{EMAIL.address}</a>, por correo postal a {OFFICE.oneLine} o por WhatsApp al {PHONE.display}, indicando el derecho que deseas ejercer.</p>
