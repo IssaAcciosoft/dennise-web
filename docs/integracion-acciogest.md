@@ -481,14 +481,16 @@ Resueltas (respuestas de AccioGest 19-11, `docs/respuestas-acciogest-2026-11-19.
 
 Siguen abiertas:
 
-1. **AccioGest (la semana que viene)**: los IDs (3 formularios, 3 planes, plugin), los 6
+1. **AccioGest (la semana que viene)**: los IDs (3 formularios, 3 planes, plugin), el enlace del
+   portal de Stripe (`PUBLIC_STRIPE_PORTAL_URL`), los 6
    `plugin_citas_services.id`, la API en producción, `montaje-619.sql`, el horario, el webhook,
    la revisión legal (muro-legal) y el aviso para publicar (activan los planes mensuales justo
    antes).
-2. **Denisse**: activar el portal de cliente de Stripe (cancelar «al final del periodo», que es lo
-   que dicen las condiciones) y los recibos por correo (la frase «Recibirás el recibo de cada
-   pago…» solo es cierta con ellos). Si usa Zoom o Google con su propia cuenta para otras cosas,
-   avisar a AccioGest. Si quiere cobrar entero algún trámite, ese trámite necesita su precio aparte.
+2. ~~**Denisse**~~ → resuelto (AccioGest 19-11): con Denisse solo habla AccioGest. Stripe
+   (claves, portal de cliente con cancelación al final del periodo, recibos por correo) lo
+   configuran con ella; el enlace del portal llega con los IDs. Horario: lunes a viernes de 9 a
+   18 (lo cambia AccioGest si hace falta; no afecta a la web). Zoom y Google se quedan como en la
+   propuesta. Si algún día quiere cobrar entero algún trámite, ese trámite necesita precio aparte.
 3. ~~**Abogado**~~ → resuelto (19-11): art. 108.4; si desiste dentro de los 14 días paga solo la
    parte de la cuota por los días transcurridos y se le devuelve el resto; la baja surte efecto al
    terminar el mes pagado. La casilla «Desistimiento» no cambia.

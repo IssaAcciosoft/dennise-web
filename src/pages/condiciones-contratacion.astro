@@ -4,7 +4,6 @@
  * Cambios del handoff de AccioGest del 19-11-2026 (planes de cuota mensual, §1) y cambios finales
  * del 19-11 (art. 108.4, desistimiento de la cuota por días, baja al final del mes pagado):
  * pasan por la revisión legal (muro-legal, en AccioGest) y se publican el mismo día que los planes.
- * Pendientes: comentarios PENDIENTE.
  * Precios y servicios desde src/data/servicios.json (siempre coinciden con la web).
  */
 import LegalLayout from '~/layouts/LegalLayout.astro';
@@ -70,7 +69,7 @@ const feeList = planAmounts.every((a): a is number => a !== null)
     <li><strong>{autogestion.name}:</strong> cada plan se contrata en la propia web, con una cuota mensual que se cobra con tarjeta, a través de Stripe, el día de la contratación y el mismo día de cada mes siguiente hasta que te des de baja. {feeList ? `El importe de la cuota es el indicado en el apartado 3 (${feeList}).` : 'El importe de la cuota es el indicado en el apartado 3.'}</li>
     <li>Las asesorías online se pagan <strong>antes de la cita</strong>. Las asesorías presenciales acordadas por WhatsApp se pagan en el despacho.</li>
     <li>El pago se realiza <strong>por adelantado</strong>, con tarjeta, a través de la plataforma de pago <strong>Stripe</strong> integrada en el sistema de reservas y en el proceso de contratación de los planes. Esta web no recibe ni guarda los datos de tu tarjeta.</li>
-    <li>Confirmación de la contratación: Recibirás el recibo de cada pago de Stripe en el correo que indiques al contratar. En el caso de las asesorías, recibirás además un correo de confirmación de la cita. {/* PENDIENTE (Denisse): solo es cierto si activa en Stripe los recibos por correo (Configuración → Correos electrónicos de clientes). Confirmarlo antes de publicar. */}</li>
+    <li>Confirmación de la contratación: Recibirás el recibo de cada pago de Stripe en el correo que indiques al contratar. En el caso de las asesorías, recibirás además un correo de confirmación de la cita. {/* Recibos por correo de Stripe: los activa AccioGest con Denisse (19-11), junto con el portal de cliente (cancelar «al final del periodo»). */}</li>
   </ul>
 
   <h2>5. Prestación del servicio</h2>
