@@ -12,8 +12,8 @@
  *
  *  Dos formas de poner los IDs:
  *    1. Editar los valores de ejemplo de este archivo, o
- *    2. Variables de entorno al compilar (tienen prioridad), p. ej. en GitHub → Settings →
- *       Secrets and variables → Actions → Variables (ver README → AccioGest):
+ *    2. Variables de entorno al compilar (tienen prioridad), en Netlify → Site configuration →
+ *       Environment variables (ver README → AccioGest; el hosting es Netlify):
  *         PUBLIC_ACCIOGEST_API                  (por defecto https://api.acciogest.com)
  *         PUBLIC_ACCIOGEST_FORM_SERVICIO        PUBLIC_ACCIOGEST_FORM_HISTORIA
  *         PUBLIC_ACCIOGEST_FORM_CONTACTO
@@ -21,9 +21,9 @@
  *         PUBLIC_ACCIOGEST_PLAN_PREMIUM         PUBLIC_ACCIOGEST_BOOKING_PLUGIN_ID
  *         PUBLIC_STRIPE_PORTAL_URL              (portal de cliente de Stripe de Denisse:
  *                                                https://billing.stripe.com/p/login/…)
- *         PUBLIC_ACCIOGEST_WIDGET_ORIGINS       (opcional, orígenes extra del iframe de reservas)
+ *         PUBLIC_ACCIOGEST_WIDGET_ORIGINS       (no hace falta: el iframe se sirve desde la API)
  *  Todos los IDs son números enteros (el del plugin es su id, no el token). Se leen AL COMPILAR:
- *  tras cambiarlos en Netlify, «Clear cache and deploy site».
+ *  tras cambiarlos en Netlify, Deploys → Trigger deploy → «Clear cache and deploy site».
  *  Son IDs públicos (van en el HTML/JS de la web): no son secretos.
  *  (La URL del build hook de Netlify SÍ es secreta y nunca va aquí: README → AccioGest.)
  * ============================================================================
@@ -139,11 +139,21 @@ export function isConfigured(id: string | null | undefined): id is string {
   return /^\d+$/.test(value) && !PLACEHOLDER.test(value);
 }
 
-/** POST que crea la sesión de pago de Stripe de un plan (null = ID de ejemplo: modo simulado). */
+/** POST que crea la sesión de pago de Stripe de un plan (null = ID de ejemplo). */
 export const checkoutSessionUrl = (key: PlanKey): string | null =>
   isConfigured(PLANES[key])
     ? `${ACCIOGEST_API}/form-builder/public/${encodeURIComponent(PLANES[key])}/create-checkout-session`
     : null;
+
+/**
+ * Modo simulado de la contratación: solo mientras NINGÚN plan tiene ID real (WEB-INTEGRACION
+ * 12-11 §0). Con una configuración parcial, un plan sin ID no simula una compra: su botón se
+ * queda en WhatsApp y no abre el diálogo (§1, `checkoutOn`).
+ */
+export const PLAN_CHECKOUT_MOCK: boolean = (Object.keys(PLANES) as PlanKey[]).every((k) => !isConfigured(PLANES[k]));
+
+/** ¿Abre el diálogo de contratación el botón de este plan? (ID real, o todo en modo simulado). */
+export const planCheckoutEnabled = (key: PlanKey): boolean => checkoutSessionUrl(key) !== null || PLAN_CHECKOUT_MOCK;
 
 /**
  * Portal de cliente de Stripe de Denisse (baja de los planes, recibos, tarjeta). Solo se acepta
@@ -164,8 +174,14 @@ export function stripePortalUrl(value: string | undefined = import.meta.env.PUBL
 export const STRIPE_PORTAL_URL: string | null = stripePortalUrl();
 
 /**
- * Script del widget de reservas. `service` = acciogest_id del servicio que abre ya elegido
- * (`&service=`; servicios.json → consultations[].prices[].acciogest_id).
+ * Script del widget de reservas (WEB-INTEGRACION 12-11 §4):
+ *   {API}/plugin-citas-embed.js?pluginId=<plugin_citas_config.id>&service=<plugin_citas_services.id>
+ * - `pluginId` = plugin_citas_config.id (número entero), NO el plugin_token.
+ * - `service` (opcional) = plugin_citas_services.id del servicio que abre ya elegido: un número
+ *   entero (p. ej. 41) del plugin, guardado como texto en servicios.json →
+ *   consultations[].prices[].acciogest_id. No es un uuid ni un id de catálogo. El widget ignora un
+ *   service que no sea de ese plugin.
+ * - Sin `autoHeight=1`: la altura la ajusta solo la web (mensaje `height`, mínimo 760 px).
  */
 export const bookingScriptUrl = (service?: string | null): string | null =>
   isConfigured(BOOKING_PLUGIN_ID)
@@ -177,9 +193,9 @@ export const bookingScriptUrl = (service?: string | null): string | null =>
 export const BOOKING_MESSAGES = { height: 'acciogest:booking:height', done: 'acciogest:booking:done' } as const;
 
 /**
- * Orígenes desde los que se aceptan esos mensajes: el de ACCIOGEST_API y, si el iframe se sirve
- * desde otro dominio, los de PUBLIC_ACCIOGEST_WIDGET_ORIGINS (separados por comas).
- * TODO (AccioGest): confirmar desde qué origen se sirve el iframe del widget.
+ * Orígenes desde los que se aceptan esos mensajes: el de ACCIOGEST_API. El iframe se sirve desde
+ * https://api.acciogest.com (WEB-INTEGRACION 12-11 §4 y §5), así que PUBLIC_ACCIOGEST_WIDGET_ORIGINS
+ * no hace falta; se mantiene solo por si algún día se sirviera desde otro dominio (separados por comas).
  */
 export const bookingMessageOrigins = (): string[] =>
   [ACCIOGEST_API, ...String(import.meta.env.PUBLIC_ACCIOGEST_WIDGET_ORIGINS ?? '').split(',')]

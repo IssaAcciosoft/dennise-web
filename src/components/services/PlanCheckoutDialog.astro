@@ -22,12 +22,26 @@
  *
  *  Planes con el precio oculto en AccioGest (amount null) no entran aquí: sin importe no hay
  *  texto de «Desistimiento» que aceptar (AutogestionPlans.astro les deja la solicitud de info).
+ *  Tampoco entran los planes sin ID real cuando ya hay alguno configurado (planCheckoutEnabled):
+ *  el modo simulado solo existe mientras TODOS los IDs son de ejemplo (WEB-INTEGRACION 12-11 §0).
+ *
+ *  Antes del botón y en la misma pantalla (WEB-INTEGRACION 12-11 §1, ley de consumo): plan e
+ *  importe («Plan Estándar · 315 € al mes (IVA incluido)»), cuándo se cobra, cómo darse de baja
+ *  (portal de Stripe solo si PUBLIC_STRIPE_PORTAL_URL es válido, §6.3) y enlace a las condiciones.
  * ============================================================================
  */
-import { autogestion, planFeeLabel, CATALOG } from '~/lib/services';
-import { PLANES, PLAN_FIELD_LABELS, checkoutSessionUrl, type PlanKey } from '~/config/acciogest';
+import { autogestion, formatAmount, CATALOG } from '~/lib/services';
+import {
+  PLANES,
+  PLAN_FIELD_LABELS,
+  PLAN_CHECKOUT_MOCK,
+  STRIPE_PORTAL_URL,
+  checkoutSessionUrl,
+  planCheckoutEnabled,
+  type PlanKey,
+} from '~/config/acciogest';
 import { PLAN_PRIVACY_TEXT, PLAN_LEGAL_NAME, planDesistimientoText, LINK_PHRASES, linkParts } from '~/data/consent';
-import { WA_TEXT, waLink, PHONE, TEL_LINK } from '~/data/site';
+import { WA_TEXT, waLink, PHONE, TEL_LINK, EMAIL } from '~/data/site';
 import { url } from '~/lib/url';
 import FormDialog from '../forms/FormDialog.astro';
 import Field from '../forms/Field.astro';
@@ -36,14 +50,15 @@ import Icon from '../ui/Icon.astro';
 const p = 'pc';
 const isPlanKey = (k: string): k is PlanKey => k in PLANES;
 const plans = autogestion.plans
-  .filter((plan) => plan.amount !== null && isPlanKey(plan.form_key))
+  .filter((plan) => plan.amount !== null && isPlanKey(plan.form_key) && planCheckoutEnabled(plan.form_key))
   .map((plan) => {
     const key = plan.form_key as PlanKey;
     const amount = plan.amount as number;
     return {
       key,
       name: plan.name,
-      fee: planFeeLabel(amount),
+      // Texto propio de la web: «315 € al mes (IVA incluido)» (AccioGest y Stripe dicen «€/mes»).
+      fee: `${formatAmount(amount)} € al mes (${CATALOG.tax_label})`,
       // Nombre legal fijo (no el del catálogo de AccioGest): ver PLAN_LEGAL_NAME.
       desist: planDesistimientoText(PLAN_LEGAL_NAME[key], amount),
       endpoint: checkoutSessionUrl(key),
@@ -55,6 +70,7 @@ const config = JSON.stringify({
   plans: Object.fromEntries(plans.map((pl) => [pl.key, { name: pl.name, fee: pl.fee, desist: pl.desist, endpoint: pl.endpoint }])),
   labels: PLAN_FIELD_LABELS,
   privacy: PLAN_PRIVACY_TEXT,
+  mock: PLAN_CHECKOUT_MOCK,
   thanks: url('/gracias/'),
   wa: waLink(WA_TEXT.autogestionDudas),
 });
@@ -72,8 +88,20 @@ const [privBefore, privLink, privAfter] = linkParts(PLAN_PRIVACY_TEXT, LINK_PHRA
   <div class="plan-checkout" data-plan-checkout-root data-config={config}>
     <p class="plan-summary" data-plan-summary hidden>
       <span class="plan-summary-name" data-plan-summary-name></span>
-      <span class="plan-summary-fee"><span data-plan-summary-fee></span> · {CATALOG.tax_label}</span>
+      <span class="plan-summary-sep" aria-hidden="true">·</span>
+      <span class="plan-summary-fee" data-plan-summary-fee></span>
     </p>
+    <div class="plan-info">
+      <p><strong>Se cobra cada mes con tu tarjeta hasta que te des de baja. Primer cobro: hoy.</strong></p>
+      {/* PENDIENTE (Denisse): cuándo surte efecto la baja (condiciones, apartado 7). No se indica aquí hasta que lo confirme. */}
+      <p>
+        Cómo darte de baja: podrás darte de baja cuando quieras
+        {STRIPE_PORTAL_URL ? <> desde tu <a href={STRIPE_PORTAL_URL} target="_blank" rel="noopener" aria-describedby={`${p}-newtab`}>portal de cliente</a> de Stripe o</> : ''}{' '}
+        escribiéndonos por WhatsApp al <a href={waLink(WA_TEXT.autogestionDudas)} target="_blank" rel="noopener" aria-describedby={`${p}-newtab`}>{PHONE.display}</a> o a{' '}
+        <a href={EMAIL.href}>{EMAIL.address}</a>. Más información en las{' '}
+        <a href={url('/condiciones-contratacion/')} target="_blank" rel="noopener" aria-describedby={`${p}-newtab`}>condiciones de contratación</a>.
+      </p>
+    </div>
 
     {/* method="post": sin script, los datos nunca acaban en la URL. El botón nace desactivado. */}
     <form class="plan-form" method="post" novalidate data-plan-form>
@@ -158,7 +186,7 @@ const [privBefore, privLink, privAfter] = linkParts(PLAN_PRIVACY_TEXT, LINK_PHRA
       <div class="plan-actions">
         <button class="btn btn--primary plan-submit" type="submit" disabled data-submit>
           <Icon name="lock" />
-          <span data-submit-label>Continuar al pago</span>
+          <span data-submit-label>Pagar y contratar</span>
         </button>
         <p class="plan-note">Pago con tarjeta a través de Stripe. Esta web no recibe ni guarda los datos de tu tarjeta.</p>
       </div>
@@ -187,15 +215,19 @@ const [privBefore, privLink, privAfter] = linkParts(PLAN_PRIVACY_TEXT, LINK_PHRA
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    justify-content: space-between;
-    gap: .25rem 1rem;
-    margin-bottom: 1.5rem;
+    gap: .25rem .5rem;
+    margin-bottom: 1rem;
     padding: .9rem 1.1rem;
     border: 1px solid rgba(110, 29, 122, .16);
     border-radius: 12px;
     background: var(--c-white);
   }
   .plan-summary[hidden] { display: none; }
+  .plan-summary-sep { color: var(--c-muted); }
+  .plan-info { margin-bottom: 1.5rem; color: var(--c-ink-soft); font-size: .92rem; line-height: 1.55; }
+  .plan-info > * + * { margin-top: .5rem; }
+  .plan-info strong { color: var(--c-ink); font-weight: 600; }
+  .plan-info a { color: var(--c-plum); font-weight: 600; overflow-wrap: anywhere; }
   .plan-summary-name { color: var(--c-plum); font-weight: 600; letter-spacing: .04em; }
   .plan-summary-fee { color: var(--c-ink); font-weight: 600; }
   .plan-grid { display: grid; gap: 1.25rem; }

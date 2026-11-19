@@ -199,15 +199,13 @@ export function linkedServiceIds(json, mock) {
  * ============================================================================
  *  Cuota mensual de un plan desde GET /form-builder/public/{PLAN_FORM_ID}
  * ============================================================================
- *  Handoff de AccioGest del 19-11-2026 (§3): «el importe de los planes se lee de la RAÍZ del
- *  JSON del formulario, no de un campo» (AccioGest lo muestra como «315,00 €/mes»).
- *  PREGUNTA ABIERTA (AccioGest): nombre exacto de la clave de la raíz (WEB-INTEGRACION.md no está
- *  disponible aquí), si es con IVA incluido (la web lo muestra como «IVA incluido») y si viene en
- *  euros o en céntimos. Mientras tanto, lectura tolerante y AISLADA en esta función:
- *    1. raíz: amount / precio / importe / price (y precio_bruto), número o texto numérico
- *       («315», "315.00", "315,00"), en euros; también *_cents / importe_centimos (÷ 100);
- *    2. solo si la raíz no trae importe: el criterio anterior (campo de pago en fields[]), por si
- *       la API aún responde con la forma vieja.
+ *  WEB-INTEGRACION 12-11 §3 y handoff 19-11 §3: el importe está en la RAÍZ del JSON del
+ *  formulario, no en un campo:
+ *    { "payment_enabled": true, "payment_amount": 315, "payment_currency": "EUR",
+ *      "payment_interval": "month", "payment_concept": "…", "payment_button_text": "…", "fields": […] }
+ *  `payment_amount` es un número en euros, tal cual se cobra (sin céntimos), y solo se lee si
+ *  `payment_enabled === true`. Respaldo (la spec permite dejarlo): el campo de pago de fields[],
+ *  la forma anterior de la API.
  *  Si no hay importe → undefined (se usa la última copia buena o servicios.json, con aviso).
  * ============================================================================
  * @param {unknown} json
@@ -216,6 +214,11 @@ export function linkedServiceIds(json, mock) {
 export function extractPlanAmount(json) {
   if (!isObj(json)) return undefined;
   const j = /** @type {Record<string, any>} */ (json);
+  // AccioGest: importe en la raíz del JSON (no en fields[]).
+  if (j.payment_enabled === true) {
+    const root = toNumber(j.payment_amount);
+    if (root !== undefined && root > 0) return root;
+  }
   /** @param {Record<string, unknown>} o @param {string[]} keys */
   const amountIn = (o, keys) => {
     for (const key of keys) {
@@ -224,12 +227,6 @@ export function extractPlanAmount(json) {
     }
     return undefined;
   };
-  const ROOT_KEYS = ['amount', 'precio', 'importe', 'price', 'precio_bruto', 'amount_cents', 'price_cents', 'importe_centimos'];
-  for (const where of [j, j.data, j.form]) {
-    if (!isObj(where)) continue;
-    const n = amountIn(where, ROOT_KEYS);
-    if (n !== undefined) return n;
-  }
   // Forma anterior (fase A): importe en el campo de pago del formulario.
   const fields = [j.fields, j.data?.fields, j.form?.fields, j.form?.data?.fields].find(Array.isArray) ?? [];
   const FIELD_KEYS = ['precio_bruto', 'amount', 'precio', 'price', 'importe', 'monto', 'amount_cents', 'price_cents', 'importe_centimos'];
@@ -247,11 +244,22 @@ export function extractPlanAmount(json) {
 }
 
 /**
+ * Aviso de compilación si el plan aún no es mensual en AccioGest (WEB-INTEGRACION 12-11 §3):
+ * `payment_interval` es "month" en los mensuales y null en los de pago único.
+ * @param {unknown} json respuesta de GET /form-builder/public/{id}
+ * @param {string} key form_key del plan
+ * @returns {string | null}
+ */
+export function planIntervalWarning(json, key) {
+  const interval = isObj(json) ? /** @type {Record<string, unknown>} */ (json).payment_interval : undefined;
+  return interval === 'month' ? null : `⚠ El plan «${key}» no es mensual en AccioGest: falta aplicar planes-mensuales-619.sql`;
+}
+
+/**
  * Control de cordura del importe de un plan leído de AccioGest frente al de servicios.json
  * (`reference`). Ese importe va a la cuota visible y al texto legal «Desistimiento»
- * («cuota de N € al mes»), así que un importe en céntimos con una clave sin «cents» (p. ej.
- * `amount: 24200`, convención de Stripe) no puede publicarse.
- * PREGUNTA ABIERTA (AccioGest): la clave y las unidades del importe (ver extractPlanAmount()).
+ * («cuota de N € al mes»). `payment_amount` viene en euros (WEB-INTEGRACION 12-11 §3); esta
+ * comprobación queda como salvaguarda por si llegara en céntimos (convención de Stripe).
  *  - ≈ 100 × reference (entre 50× y 200×) → error: se descarta (última copia buena o
  *    servicios.json), porque casi seguro son céntimos.
  *  - Diferencia de más del 25 % → aviso, pero se usa (un cambio de precio en AccioGest es posible).
@@ -407,8 +415,10 @@ export default function acciogestCatalog(options = {}) {
             const url = `${api}/form-builder/public/${encodeURIComponent(formId)}`;
             try {
               const json = mock === 'fixture' ? JSON.parse(readFileSync(join(MOCK_DIR, 'plan-form.json'), 'utf8'))[key] : await getJson(url);
+              const interval = planIntervalWarning(json, key);
+              if (interval) warn(`${interval} (${url}).`);
               const amount = extractPlanAmount(json);
-              if (amount === undefined) throw new Error('no se encuentra el importe del campo de pago');
+              if (amount === undefined) throw new Error('no se encuentra el importe (payment_amount con payment_enabled = true)');
               const check = checkPlanAmount(amount, referencePlanAmount(ours, key));
               if (check.error) throw new Error(check.error);
               if (check.warning) warn(`⚠ Plan «${key}» (${url}): ${check.warning}.`);

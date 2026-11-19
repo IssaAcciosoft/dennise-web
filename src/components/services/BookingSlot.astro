@@ -12,8 +12,12 @@
  *    la web NO implementa pagos ni disponibilidad.
  *    Fase A (docs/integracion-acciogest.md → «Fase A»):
  *      - «Reservar» en una tarjeta enlazada (data-booking-services) → &service={acciogest_id}
- *        (online por defecto); si el widget ya estaba cargado, se recarga con ese servicio;
- *      - mensajes del iframe (solo de bookingMessageOrigins() y de un iframe del contenedor):
+ *        (= plugin_citas_services.id, online por defecto); si el widget ya estaba cargado, se
+ *        cambia de servicio sin recargar con window.AccioGestBooking.setService(id)
+ *        (WEB-INTEGRACION 12-11 §4); solo si el script no lo expone (versión vieja en caché), se
+ *        quita y se vuelve a inyectar (funciona, pero deja escuchas duplicadas);
+ *      - mensajes del iframe (origen https://api.acciogest.com = bookingMessageOrigins(), y de un
+ *        iframe del contenedor):
  *        'acciogest:booking:height' → alto del contenedor (760 px mínimo por CSS, máx. 6000);
  *        'acciogest:booking:done'   → /gracias/?tipo=reserva (con &cita= si llega citaId).
  *  Handoff de AccioGest del 19-11-2026 §3: TODA reserva lleva servicio (sin él la API la
@@ -165,6 +169,14 @@ const widgetConfig = JSON.stringify({
 </section>
 
 <script>
+  import { bookingThanksUrl, setServiceInPlace } from '~/lib/acciogest-helpers.mjs';
+
+  declare global {
+    interface Window {
+      AccioGestBooking?: { setService: (id: string | number | null) => void };
+    }
+  }
+
   // «Reservar» en una tarjeta → el «Solicitar cita» del panel queda con ese servicio elegido.
   const request = document.querySelector<HTMLElement>('[data-booking-request]');
   if (request) {
@@ -218,8 +230,17 @@ const widgetConfig = JSON.stringify({
         return;
       }
       if (loadedService === service) return;
-      // Recarga con otro servicio: fuera el iframe y el script anteriores.
-      // TODO (AccioGest): confirmar que su script admite cargarse otra vez en la misma página.
+      // Widget ya cargado: se cambia de servicio sin recargar el script ni la página.
+      if (loadedService !== null && setServiceInPlace(window.AccioGestBooking, service)) {
+        loadedService = service;
+        cancelAnimationFrame(raf);
+        frameHeight = 0;
+        host.style.removeProperty('height');
+        if (errorBox) errorBox.hidden = true;
+        return;
+      }
+      // Respaldo (script viejo sin setService): fuera el iframe y el script anteriores y se
+      // vuelve a inyectar. Funciona, pero deja escuchas duplicadas.
       if (loadedService !== null) {
         cleanup?.();
         script?.remove();
@@ -330,15 +351,7 @@ const widgetConfig = JSON.stringify({
         } else if (msg.type === messages.done && !leaving) {
           leaving = true;
           // citaId: entero positivo (número, o texto de dígitos). Si no, sin &cita=.
-          const raw = msg.citaId;
-          const cita =
-            typeof raw === 'number' && Number.isSafeInteger(raw) && raw > 0
-              ? String(raw)
-              : typeof raw === 'string' && /^\d{1,18}$/.test(raw) && /[1-9]/.test(raw)
-                ? raw
-                : '';
-          const safe = cita ? `&cita=${encodeURIComponent(cita)}` : '';
-          window.location.assign(`${config.thanks}${safe}`);
+          window.location.assign(bookingThanksUrl(config.thanks, msg.citaId));
         }
       });
     }

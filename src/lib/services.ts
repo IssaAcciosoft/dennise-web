@@ -2,8 +2,12 @@
  * Catálogo de servicios: src/data/servicios.json + catálogo de AccioGest al compilar
  * (docs/integracion-acciogest.md → «Fase A»). TODA la web lee el catálogo desde aquí.
  *
- * Cada precio de una asesoría (consultations[].prices[]) y cada plan llevan `acciogest_id`
- * (null = aún sin enlazar). Si BOOKING_PLUGIN_ID está configurado, la compilación descarga el
+ * Cada precio de una asesoría (consultations[].prices[]) lleva `acciogest_id` = el
+ * plugin_citas_services.id del servicio en el plugin de citas, como texto (null = aún sin
+ * enlazar). Los planes se quedan con `acciogest_id: null`: su importe sale de la raíz del
+ * formulario del plan (payment_amount), no del plugin (WEB-INTEGRACION 12-11 §4). La ruta
+ * /catalogo no existe en la API: con el plugin configurado da 404, la compilación avisa y todo
+ * sale de servicios.json, sin marcar ningún id como despublicado. Si BOOKING_PLUGIN_ID está configurado, la compilación descarga el
  * catálogo de AccioGest (src/integrations/acciogest-catalog.mjs → `virtual:acciogest-catalog`)
  * y aquí se mezcla por `acciogest_id`: nombre → name, descripcion → description, duracion_min →
  * duration_minutes (y duration_label), precio_bruto → amount (IVA incluido, como tax_included).
@@ -26,6 +30,7 @@ import catalog from '~/data/servicios.json';
 // con su PLANES.<plan> configurado (mismos IDs que src/config/acciogest.ts; no se importa aquí
 // para no añadir ese módulo al JS de la visita guiada, que también lee este archivo).
 import remote from 'virtual:acciogest-catalog';
+import { unpublishedIn } from './acciogest-helpers.mjs';
 
 export type Price = {
   modality: string;
@@ -150,7 +155,7 @@ function mergeCatalog(raw: RawCatalog): { consultations: Consultation[]; program
   // última copia buena, que también fue una respuesta válida) se ha despublicado o borrado en
   // AccioGest → como `mostrar_precio: false` (sin precio, nunca el precio viejo del JSON) y fuera
   // del widget. La integración avisa en el log de la compilación.
-  const gone = (id: string | null) => Boolean(live) && id !== null && !byId.has(id);
+  const gone = unpublishedIn(live);
 
   const consultations = raw.consultations.map((c): Consultation => {
     const linked = c.prices.map((p) => {
@@ -158,7 +163,8 @@ function mergeCatalog(raw: RawCatalog): { consultations: Consultation[]; program
       return { price: p, id, remote: id ? byId.get(id) : undefined };
     });
     // Nombre, descripción y duración de la tarjeta: del primer servicio enlazado (online primero).
-    // TODO (AccioGest): confirmar que online y presencial tienen el mismo nombre/duración.
+    // Online y presencial son servicios distintos del plugin; sin catálogo (hoy /catalogo da
+    // 404) nombre y duración salen de servicios.json.
     const head = linked.find((l) => l.remote)?.remote;
     const minutes = head?.duracion_min ?? c.duration_minutes;
     return {
@@ -185,7 +191,8 @@ function mergeCatalog(raw: RawCatalog): { consultations: Consultation[]; program
       // Mismo criterio que las asesorías: `mostrar_precio: false` o un id que no está en el
       // catálogo (despublicado) ocultan el precio (amount: null), aunque el formulario de
       // pago tenga importe (la página de pago de AccioGest lo enseña al contratar).
-      // Si se ve: campo de pago del formulario del plan > catálogo > servicios.json.
+      // Si se ve: payment_amount de la raíz del formulario del plan (o su campo de pago) >
+      // catálogo > servicios.json.
       // (Los ids de prueba `mock-plan-…` no están en el fixture: ahí no cuenta como despublicado.)
       const hidden = fromCatalog?.mostrar_precio === false || (ownId(plan.acciogest_id) !== null && gone(id));
       return {

@@ -83,7 +83,7 @@ src/
     site.ts                 Teléfono, WhatsApp, email, despacho, redes, navegación ← ÚNICA fuente
     servicios.json          Catálogo: extranjería en España, gestoría, asesorías, Autogestión DG
                             (planes con `includes`), apertura de empresas, Dubái ← precios aquí
-                            (`acciogest_id` en cada precio y plan: ver «AccioGest»)
+                            (`acciogest_id` en cada precio de asesoría; planes: null. Ver «AccioGest»)
     acciogest-catalogo.last.json  Última copia buena del catálogo de AccioGest (la escribe la
                             compilación; no se edita a mano)
     faq.ts                  Preguntas frecuentes (España / Dubái) + FAQPage para JSON-LD
@@ -143,9 +143,10 @@ Especificación: `docs/integracion-acciogest.md`. Todo se configura en
 | «Contratar Plan X» → diálogo de contratación propio → pago de Stripe (cuota mensual, `/autogestion-dg/`) | `components/services/AutogestionPlans.astro`, `PlanCheckoutDialog.astro`, `scripts/plan-checkout.ts` | `PLANES.basico/estandar/premium` |
 | Widget de reservas en `/servicios/#reservar` (carga diferida, 760 px reservados) | `components/services/BookingSlot.astro` | `BOOKING_PLUGIN_ID` |
 
-**Poner los IDs** — con variables de entorno al compilar (en Netlify: Site configuration →
-Environment variables; en GitHub: Settings → Secrets and variables → Actions → Variables, el
-workflow ya las pasa) o editando los valores de ejemplo de `src/config/acciogest.ts`. Las 8
+**Poner los IDs** — con variables de entorno al compilar en **Netlify** (el hosting de la web:
+Site configuration → Environment variables; WEB-INTEGRACION 12-11 §5) o editando los valores de
+ejemplo de `src/config/acciogest.ts`. (Si algún día se publica con el workflow de GitHub Pages,
+irían en Settings → Secrets and variables → Actions → Variables, que el workflow ya pasa.) Las 8
 variables (handoff de AccioGest del 19-11-2026 §4):
 
 ```
@@ -154,7 +155,8 @@ PUBLIC_ACCIOGEST_PLAN_BASICO     PUBLIC_ACCIOGEST_PLAN_ESTANDAR   PUBLIC_ACCIOGE
 PUBLIC_ACCIOGEST_BOOKING_PLUGIN_ID                                PUBLIC_STRIPE_PORTAL_URL
 ```
 
-(y, opcionales, `PUBLIC_ACCIOGEST_API` y `PUBLIC_ACCIOGEST_WIDGET_ORIGINS`). Todos los IDs son
+(`PUBLIC_ACCIOGEST_API` y `PUBLIC_ACCIOGEST_WIDGET_ORIGINS` no hacen falta: la API y el iframe
+de reservas son `https://api.acciogest.com`). Todos los IDs son
 **números enteros**; el del plugin es su **id, no el token**. `PUBLIC_STRIPE_PORTAL_URL` es el
 enlace del portal de cliente de Stripe de Denisse (`https://billing.stripe.com/p/login/…`): si no
 empieza así, no se muestra ningún enlace. **Se leen al compilar**: tras definirlas o cambiarlas
@@ -166,10 +168,13 @@ Son IDs públicos (acaban en el HTML/JS), no secretos. Ejemplo local:
 **Modo simulado** — mientras un ID tenga su valor de ejemplo (`FORM_ID_…` / `PLUGIN_ID`):
 - formularios: no se envía nada; la respuesta se simula (~700 ms, misma forma que la API) y el
   formulario muestra un aviso visible de «Modo de prueba» con WhatsApp como alternativa;
-- planes: «Contratar» abre el diálogo de contratación, que simula `create-checkout-session` (no
-  se cobra nada, aviso visible) y lleva a `/gracias/?tipo=plan&plan=…&pago=ok&response_id=mock`;
-  errores de prueba con `?acciogest_mock=400` (falta «Desistimiento»), `400-rgpd`, `400-tel`,
-  `403`, `404`, `429`, `500`, `network`, `timeout`, `bad-url`;
+- planes (solo mientras **ninguno** tiene ID real; con alguno configurado, un plan sin ID se
+  queda en WhatsApp): «Contratar» abre el diálogo de contratación, que simula
+  `create-checkout-session` (no se cobra nada, aviso visible) y lleva a
+  `/gracias/?tipo=plan&plan=…&pago=ok&response_id=mock`; errores de prueba con
+  `?acciogest_mock=400` (falta «Desistimiento»), `400-rgpd`, `400-tel`, `400-email`,
+  `400-tel-invalido`, `400-email-sub`, `400-config`, `403`, `404`, `429`, `500`, `502`,
+  `network`, `timeout`, `bad-url`;
 - reservas: panel con lo que incluye la reserva, «Solicitar cita» y WhatsApp.
 
 Errores de prueba (solo en modo simulado), añadiendo a la URL: `?acciogest_mock=400`,
@@ -186,7 +191,8 @@ las obligatorias que no se envían y de las obligatorias en AccioGest pero opcio
 con enlaces, se envía sin ellos). Ya **no** se envía `Versión política`. `utm_source` /
 `utm_medium` / `utm_campaign` (de la URL de llegada, guardadas en `sessionStorage` durante la
 visita) van en la **raíz** del cuerpo, no dentro de `response_data`. `Teléfono` se limpia con
-`cleanPhone()` (solo `+`, dígitos, espacios, guiones y paréntesis). Los campos opcionales vacíos
+`cleanPhone()` (`+` solo al principio, dígitos, espacios, guiones y paréntesis; los puntos
+pasan a espacios); se valida el valor limpio (al menos 6 dígitos). Los campos opcionales vacíos
 no se envían.
 
 **Respuestas**: 201 → muestra el `message` de AccioGest y resetea · 400 → marca los campos
@@ -209,16 +215,25 @@ Especificación: `docs/handoff-acciogest-2026-11-19.md` y `docs/integracion-acci
 (ese día pasa los planes a mensuales); los textos legales nuevos se publican el mismo día y
 antes pasan por la revisión legal de AccioGest (muro-legal).
 
-- «Contratar» → `PlanCheckoutDialog.astro` (Nombre, Email, Teléfono y dos casillas obligatorias
-  sin marcar: «Consentimiento RGPD» y «Desistimiento», con el nombre y la cuota del plan) →
-  `POST {API}/form-builder/public/{PLAN_ID}/create-checkout-session` → `url` de Stripe (solo se
-  sigue si es https en `checkout.stripe.com` u otro subdominio de `stripe.com`).
-- 400 → marca los campos (`missing_fields`) y explica «Desistimiento» · 403/404 → no disponible
-  + WhatsApp · 429 → botón bloqueado 60 s con cuenta atrás · red / > 15 s → mensaje, sin perder
-  datos. Campo trampa y guardia de doble envío.
-- Importe de cada plan: de la raíz de `GET /form-builder/public/{PLAN_ID}` al compilar
-  (`extractPlanAmount()`); se muestra «242 €/mes» en toda la web (JSON-LD: `UnitPriceSpecification`
-  con `unitCode: MON`).
+- «Contratar» → `PlanCheckoutDialog.astro` («Plan X · N € al mes (IVA incluido)», «Se cobra cada
+  mes con tu tarjeta hasta que te des de baja. Primer cobro: hoy.», «Cómo darte de baja: …» con
+  enlace a las condiciones; Nombre, Email, Teléfono y dos casillas obligatorias sin marcar:
+  «Consentimiento RGPD» y «Desistimiento», con el nombre y la cuota del plan; botón «Pagar y
+  contratar») → `POST {API}/form-builder/public/{PLAN_ID}/create-checkout-session` (con
+  `referrerPolicy: 'no-referrer-when-downgrade'`, para que cancelar en Stripe vuelva a
+  `/autogestion-dg/`) → 200 `{ url, sessionId, response_id }` → `url` de Stripe (solo si es https
+  en `checkout.stripe.com`).
+- Errores (tabla de WEB-INTEGRACION 12-11 §1): 400 con `missing_fields` → marca los campos y
+  explica «Desistimiento» · 400 de email/teléfono → marca el campo con el mensaje de AccioGest ·
+  otro 400 (configuración) → «Este plan no se puede contratar online ahora mismo» + WhatsApp ·
+  403/404 → no disponible + WhatsApp · 429 → botón bloqueado 60 s con cuenta atrás · 502/500 →
+  el mensaje del servidor y reintento · red / > 15 s → mensaje, sin perder datos. Campo trampa y
+  guardia de doble envío.
+- Importe de cada plan: `payment_amount` (euros, con `payment_enabled === true`) de la raíz de
+  `GET /form-builder/public/{PLAN_ID}` al compilar (`extractPlanAmount()`; respaldo: el campo de
+  pago de `fields[]`); aviso en el log si `payment_interval` no es `"month"`. Se muestra «242 € al
+  mes» en las tarjetas y «242 €/mes» en el resto (JSON-LD: `UnitPriceSpecification` con
+  `unitCode: MON`).
 - Reservas: el widget nunca se carga sin `&service=` (por defecto, la primera asesoría
   reservable enlazada); sin ninguna enlazada, se ve el panel de «Solicitar cita».
 
@@ -227,15 +242,20 @@ antes pasan por la revisión legal de AccioGest (muro-legal).
 Especificación: `docs/integracion-acciogest.md` → «Fase A». **En desarrollo en AccioGest:
 mantener el modo simulado** (IDs de ejemplo) hasta que avisen de que está en pruebas.
 
-- **`acciogest_id`** (`src/data/servicios.json`): id del servicio en AccioGest en cada
-  `consultations[].prices[]` (online y presencial son servicios distintos, cada uno con su id) y
-  en cada plan. `null` = sin enlazar: se usa el precio del JSON. Lo da Denisse/AccioGest; se
-  escribe tal cual (texto o número).
-- Al compilar con `BOOKING_PLUGIN_ID` configurado se descarga
-  `{API}/plugin-citas/public/{BOOKING_PLUGIN_ID}/catalogo` (8 s como máximo) y se mezclan por
-  `acciogest_id` nombre, descripción, duración y precio con IVA (`precio_bruto`);
-  `mostrar_precio: false` oculta ese precio. Los planes con `PLANES.<plan>` configurado toman su
-  importe del campo de pago de su formulario. Los bloques sin precio siguen en el JSON.
+- **`acciogest_id`** (`src/data/servicios.json`): en cada `consultations[].prices[]`, el
+  `plugin_citas_services.id` del servicio en el plugin de citas, como texto (p. ej. `"41"`;
+  online y presencial son servicios distintos, cada uno con su id). No es un uuid ni un id de
+  catálogo. `null` = sin enlazar; **sin ninguno enlazado no se carga el widget**. Los da AccioGest
+  tras montar la empresa (hoy no existen). Los planes se quedan con `acciogest_id: null` (su
+  importe sale de su formulario).
+- Al compilar con `BOOKING_PLUGIN_ID` configurado se pide
+  `{API}/plugin-citas/public/{BOOKING_PLUGIN_ID}/catalogo` (8 s como máximo). **Esa ruta no existe
+  en la API**: el 404 y el aviso «No se ha podido leer el catálogo de AccioGest» en el log son lo
+  previsto, y nombres, duraciones y precios salen de `servicios.json` (sin marcar ningún id como
+  despublicado). Si existiera, se mezclarían por `acciogest_id` nombre, descripción, duración y
+  precio con IVA (`precio_bruto`; `mostrar_precio: false` oculta ese precio). Los planes con
+  `PLANES.<plan>` configurado toman su importe de `payment_amount` en la raíz de su formulario.
+  Los bloques sin precio siguen en el JSON.
 - Si AccioGest no responde, aviso en el log de la compilación y se usa la **última copia buena**
   (`src/data/acciogest-catalogo.last.json`, o la caché de Netlify si es más reciente); si no hay,
   `servicios.json`. Tras compilar en local con los IDs reales, versionar ese archivo.
@@ -244,8 +264,11 @@ mantener el modo simulado** (IDs de ejemplo) hasta que avisen de que está en pr
   prueba). Widget y mensajes del iframe: `npm run mock:acciogest -- --port 4322 --dist dist`
   tras compilar con `PUBLIC_ACCIOGEST_API=http://127.0.0.1:4322` y abrir
   `http://localhost:4322/servicios/#reservar`.
-- Orígenes permitidos para los mensajes del widget: el de `PUBLIC_ACCIOGEST_API` y, si el iframe
-  se sirve desde otro dominio, `PUBLIC_ACCIOGEST_WIDGET_ORIGINS` (separados por comas).
+- Orígenes permitidos para los mensajes del widget: el de `PUBLIC_ACCIOGEST_API`
+  (`https://api.acciogest.com`, desde donde se sirve el iframe; `PUBLIC_ACCIOGEST_WIDGET_ORIGINS`
+  no hace falta). Cambiar de servicio con el widget ya cargado usa
+  `window.AccioGestBooking.setService(id)`, sin recargar; quitar y volver a inyectar el script
+  queda solo como respaldo.
 
 ### Build hook (recompilar cuando cambie un servicio)
 
@@ -472,8 +495,13 @@ evitan saltos al cambiar de fuente; valores calculados con `@capsizecss/unpack`.
 
 ## Publicación
 
-**GitHub Pages** (incluido): `.github/workflows/deploy.yml` compila con `withastro/action` y
-publica en cada push a `main` (o a mano desde Actions → «Run workflow»).
+**Netlify** (el hosting de la web, `https://denisseg.netlify.app`; `netlify.toml`): comando
+`npm run build`, carpeta `dist/`. Las variables de compilación (`SITE_URL` y las de AccioGest) van
+en **Site configuration → Environment variables**; tras cambiarlas, **Deploys → Trigger deploy →
+Clear cache and deploy site** (se leen al compilar).
+
+**GitHub Pages** (alternativa, incluida): `.github/workflows/deploy.yml` compila con
+`withastro/action` y publica en cada push a `main` (o a mano desde Actions → «Run workflow»).
 
 1. Settings → Pages → Source: **GitHub Actions**.
 2. Settings → Secrets and variables → Actions → **Variables**:
@@ -484,8 +512,8 @@ publica en cada push a `main` (o a mano desde Actions → «Run workflow»).
    - `BASE_PATH` = solo si la web va en un subdirectorio (`/dennise-web` en
      `usuario.github.io/dennise-web` sin dominio propio).
 
-**Otro alojamiento (Netlify, Vercel, servidor propio):** comando `npm run build`, carpeta
-`dist/`, con las mismas variables de entorno.
+**Otro alojamiento (Vercel, servidor propio):** comando `npm run build`, carpeta `dist/`, con las
+mismas variables de entorno.
 
 **Caché.** Los archivos de `/_astro/` (JS, CSS, tipografías e imágenes) llevan un hash en el
 nombre y se pueden guardar en caché un año (`immutable`). `public/_headers` lo configura en
@@ -513,7 +541,8 @@ De la cliente (ver `docs/contenido.md` §7):
    foto mejor de Stephanie si existe; nombre y descripción de «Bienvenido / Welcome!» (proyecto
    de Everardo Corona, PENDIENTE); originales de los logos de Empoderando Voces sin recortar.
 5. AccioGest: faltan los 3 `FORM_ID` de formularios, los 3 de planes, el `PLUGIN_ID` de
-   reservas, `PUBLIC_STRIPE_PORTAL_URL` y los `acciogest_id` de cada precio y plan (README →
+   reservas, `PUBLIC_STRIPE_PORTAL_URL` y los 6 `acciogest_id` (`plugin_citas_services.id`) de
+   las asesorías, sin los que no hay widget de reservas (README →
    AccioGest). Hasta entonces, modo simulado con aviso visible. Planes: cuota mensual (handoff
    19-11); pendiente de Denisse confirmar cuándo surte efecto la baja y activar el portal y los
    recibos en Stripe; pendiente del abogado «servicio completamente prestado» y la parte

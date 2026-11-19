@@ -5,13 +5,16 @@
  * Ningún plan destacado (§5). Planes de CUOTA MENSUAL (handoff de AccioGest del 19-11-2026 §3):
  * - «Contratar Plan X» abre el diálogo de contratación propio (PlanCheckoutDialog.astro +
  *   src/scripts/plan-checkout.ts, data-plan-checkout), que crea la sesión de pago de Stripe en
- *   AccioGest. Con el ID del plan de ejemplo, el diálogo funciona en modo simulado.
+ *   AccioGest. Solo si el plan tiene ID real (planCheckoutEnabled); mientras TODOS los IDs son de
+ *   ejemplo, el diálogo funciona en modo simulado. Un plan sin ID con otros ya configurados se
+ *   queda con el enlace a WhatsApp (WEB-INTEGRACION 12-11 §1, `checkoutOn`).
  * - Sin JavaScript, el botón es un enlace a WhatsApp.
  * - Plan con el precio oculto en AccioGest (amount null): no hay texto de «Desistimiento» que
  *   aceptar, así que abre «Solicitar información» con el plan preseleccionado (data-service-request).
  */
 import { autogestion as program, planIncludes, planFeeLabel, formatAmount, CATALOG } from '~/lib/services';
 import { WA_TEXT, waLink } from '~/data/site';
+import { planCheckoutEnabled, PLANES, type PlanKey } from '~/config/acciogest';
 import { url } from '~/lib/url';
 import Icon from '../ui/Icon.astro';
 
@@ -22,6 +25,7 @@ const planMessage = (name: string, amount: number | null) =>
   amount === null
     ? `Hola Denisse, me interesa el ${name} de ${program.name}. Mi trámite es: `
     : `Hola Denisse, me interesa el ${name} (${planFeeLabel(amount)}, ${CATALOG.tax_label}) de ${program.name}. Mi trámite es: `;
+const checkoutOn = (key: string) => key in PLANES && planCheckoutEnabled(key as PlanKey);
 ---
 
 <section class="section section--white ag-procedures" id="tramites" aria-labelledby="tramites-title">
@@ -60,9 +64,10 @@ const planMessage = (name: string, amount: number | null) =>
                 <>
                   <p class="plan-price">
                     <span class="price">{formatAmount(plan.amount)}</span>
-                    <span class="currency">€/mes</span>
+                    <span class="currency">€ al mes</span>
                   </p>
-                  <p class="plan-vat">{CATALOG.tax_label}</p>
+                  {/* PENDIENTE (Denisse): la baja tiene que coincidir con el apartado 7 de las condiciones (cuándo surte efecto). */}
+                  <p class="plan-vat">{CATALOG.tax_label} · cuota mensual, cancelas cuando quieras</p>
                 </>
               ) : (
                 <p class="plan-vat">Precio al contratar</p>
@@ -96,7 +101,7 @@ const planMessage = (name: string, amount: number | null) =>
                   rel="noopener"
                   data-plan-cta={plan.form_key}
                   data-lead-value={plan.lead_value}
-                  data-plan-checkout={plan.form_key}
+                  data-plan-checkout={checkoutOn(plan.form_key) ? plan.form_key : undefined}
                 >
                   <span>Contratar {plan.name}</span>
                 </a>
@@ -121,7 +126,7 @@ const planMessage = (name: string, amount: number | null) =>
 
     <div class="plan-foot" data-reveal>
       <p class="plan-terms">
-        Cuota mensual, pago seguro con tarjeta. Al contratar aceptas las{' '}
+        Pago seguro con tarjeta, cuota mensual. Al contratar aceptas las{' '}
         <a href={url('/condiciones-contratacion/')}>condiciones de contratación</a>.
       </p>
       <a class="btn btn--link" href={waLink(WA_TEXT.autogestionDudas)} target="_blank" rel="noopener">

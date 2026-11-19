@@ -10,7 +10,8 @@
  * - Claves de response_data = etiquetas EXACTAS (FIELD_LABELS en src/config/acciogest.ts).
  * - sí/no en minúscula; «Consentimiento RGPD» = TEXTO EXACTO de la casilla (src/data/consent.ts,
  *   handoff 19-11-2026 §2). Ya no se envía «Versión política».
- * - «Teléfono» limpio con cleanPhone(): solo +, dígitos, espacios, guiones y paréntesis.
+ * - «Teléfono» limpio con cleanPhone(): «+» solo al principio, dígitos, espacios, guiones y
+ *   paréntesis (los puntos pasan a espacios).
  * - UTM (utm_source / utm_medium / utm_campaign) de la URL de llegada, guardadas en
  *   sessionStorage para toda la visita (las captura también BaseLayout en cada página). Van en
  *   la RAÍZ del cuerpo, no dentro de response_data (handoff §3).
@@ -119,12 +120,15 @@ function normaliseValue(value: FieldValue): string {
 const META_FIELDS = new Set(['consentimiento']);
 
 /**
- * Teléfono para AccioGest (handoff §3): solo puede llevar «+», dígitos, espacios, guiones y
- * paréntesis. Se quita todo lo demás (puntos, letras, emojis…) y se normalizan los espacios.
+ * Teléfono para AccioGest (WEB-INTEGRACION 12-11 §1 y §2; handoff §3): «+» solo al principio y
+ * después solo dígitos, espacios, guiones y paréntesis. Los puntos pasan a espacios
+ * («600.123.456» → «600 123 456»), se quita cualquier «+» que no sea el primer carácter y todo
+ * lo demás (letras, emojis…), y se normalizan los espacios.
  */
 export function cleanPhone(value: string): string {
-  return value
-    .replace(/[^+\d\s()-]/g, '')
+  const t = value.trim().replace(/\./g, ' ').replace(/(?!^)\+/g, '');
+  return t
+    .replace(/[^\d\s()+-]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 }
