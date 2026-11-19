@@ -93,12 +93,12 @@ const [privBefore, privLink, privAfter] = linkParts(PLAN_PRIVACY_TEXT, LINK_PHRA
     </p>
     <div class="plan-info">
       <p><strong>Se cobra cada mes con tu tarjeta hasta que te des de baja. Primer cobro: hoy.</strong></p>
-      {/* PENDIENTE (Denisse): cuándo surte efecto la baja (condiciones, apartado 7). No se indica aquí hasta que lo confirme. */}
       <p>
         Cómo darte de baja: podrás darte de baja cuando quieras
         {STRIPE_PORTAL_URL ? <> desde tu <a href={STRIPE_PORTAL_URL} target="_blank" rel="noopener" aria-describedby={`${p}-newtab`}>portal de cliente</a> de Stripe o</> : ''}{' '}
         escribiéndonos por WhatsApp al <a href={waLink(WA_TEXT.autogestionDudas)} target="_blank" rel="noopener" aria-describedby={`${p}-newtab`}>{PHONE.display}</a> o a{' '}
-        <a href={EMAIL.href}>{EMAIL.address}</a>. Más información en las{' '}
+        <a href={EMAIL.href}>{EMAIL.address}</a>. La baja surte efecto al terminar el mes ya pagado: no se
+        cobra la cuota siguiente y conservas el servicio hasta esa fecha. Más información en las{' '}
         <a href={url('/condiciones-contratacion/')} target="_blank" rel="noopener" aria-describedby={`${p}-newtab`}>condiciones de contratación</a>.
       </p>
     </div>

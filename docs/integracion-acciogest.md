@@ -485,14 +485,13 @@ Siguen abiertas:
    `plugin_citas_services.id`, la API en producción, `montaje-619.sql`, el horario, el webhook,
    la revisión legal (muro-legal) y el aviso para publicar (activan los planes mensuales justo
    antes).
-2. **Denisse**: cuándo surte efecto la baja («al terminar el mes que ya has pagado») y que
-   coincida con el portal de Stripe; activar el portal de cliente y los recibos por correo
-   (la frase «Recibirás el recibo de cada pago…» solo es cierta con ellos). AccioGest no envía
-   correo de confirmación de los planes ni el enlace del portal, ni puede dar de baja desde su
-   lado (solo el portal de Stripe o Denisse) (WEB-INTEGRACION 12-11 §6.3, Incoherencias #10 y #12).
-   Si usa Zoom o Google con su propia cuenta para otras cosas, avisar a AccioGest.
-3. **Abogado**: qué es «servicio completamente prestado» en una cuota mensual y cómo se calcula
-   la parte proporcional (no se ha inventado ninguna definición).
+2. **Denisse**: activar el portal de cliente de Stripe (cancelar «al final del periodo», que es lo
+   que dicen las condiciones) y los recibos por correo (la frase «Recibirás el recibo de cada
+   pago…» solo es cierta con ellos). Si usa Zoom o Google con su propia cuenta para otras cosas,
+   avisar a AccioGest. Si quiere cobrar entero algún trámite, ese trámite necesita su precio aparte.
+3. ~~**Abogado**~~ → resuelto (19-11): art. 108.4; si desiste dentro de los 14 días paga solo la
+   parte de la cuota por los días transcurridos y se le devuelve el resto; la baja surte efecto al
+   terminar el mes pagado. La casilla «Desistimiento» no cambia.
 4. **Prueba en una vista previa**: las vueltas de Stripe de los planes van a
    `https://dggestoresyabogados.com/gracias/…` (configuradas en AccioGest), no a la vista previa;
    la cancelación sí vuelve a la página de origen (`Referer`).

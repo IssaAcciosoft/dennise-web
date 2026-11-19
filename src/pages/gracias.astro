@@ -63,7 +63,7 @@ const variantScript = `(function(){try{var q=new URLSearchParams(location.search
         <p class="lead thanks-fee" data-plan-fee-line hidden>Cuota: <strong data-plan-fee></strong> ({CATALOG.tax_label}).</p>
         <p class="lead">Tu plan es de cuota mensual: se cobra con tarjeta, a través de Stripe, el día de la contratación y el mismo día de cada mes siguiente hasta que te des de baja.</p>
         <p class="thanks-portal">
-          Puedes darte de baja en cualquier momento{STRIPE_PORTAL_URL ? <> desde tu <a href={STRIPE_PORTAL_URL} target="_blank" rel="noopener">portal de cliente de Stripe</a> o</> : ''} escribiéndonos por WhatsApp al <a href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">{PHONE.display}</a> o a <a href={EMAIL.href}>{EMAIL.address}</a>. Más información en las <a href={url('/condiciones-contratacion/')}>condiciones de contratación</a>.
+          Puedes darte de baja en cualquier momento{STRIPE_PORTAL_URL ? <> desde tu <a href={STRIPE_PORTAL_URL} target="_blank" rel="noopener">portal de cliente de Stripe</a> o</> : ''} escribiéndonos por WhatsApp al <a href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">{PHONE.display}</a> o a <a href={EMAIL.href}>{EMAIL.address}</a>. La baja surte efecto al terminar el mes ya pagado: no se cobra la cuota siguiente y conservas el servicio hasta esa fecha. Más información en las <a href={url('/condiciones-contratacion/')}>condiciones de contratación</a>.
         </p>
         {
           autogestion.plans.map((plan) => (

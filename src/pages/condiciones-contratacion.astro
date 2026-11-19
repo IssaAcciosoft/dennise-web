@@ -1,8 +1,9 @@
 ---
 /**
  * Condiciones de contratación (asesorías y Autogestión DG). Aprobadas por la titular el 10/11/2026.
- * Cambios del handoff de AccioGest del 19-11-2026 (planes de cuota mensual, §1): PENDIENTES DE
- * REVISIÓN LEGAL (muro-legal, en AccioGest); se publican el mismo día que los planes mensuales.
+ * Cambios del handoff de AccioGest del 19-11-2026 (planes de cuota mensual, §1) y cambios finales
+ * del 19-11 (art. 108.4, desistimiento de la cuota por días, baja al final del mes pagado):
+ * pasan por la revisión legal (muro-legal, en AccioGest) y se publican el mismo día que los planes.
  * Pendientes: comentarios PENDIENTE.
  * Precios y servicios desde src/data/servicios.json (siempre coinciden con la web).
  */
@@ -82,18 +83,17 @@ const feeList = planAmounts.every((a): a is number => a !== null)
   <h2>6. Derecho de desistimiento</h2>
   <p>Si contratas como persona consumidora, tienes derecho a desistir del contrato en un plazo de <strong>14 días naturales</strong> desde su celebración, sin necesidad de justificación, conforme a los artículos 102 y siguientes del Texto Refundido de la Ley General para la Defensa de los Consumidores y Usuarios (Real Decreto Legislativo 1/2007).</p>
   <ul>
-    <li><strong>Inicio del servicio dentro del plazo:</strong> si solicitas expresamente que el servicio comience durante esos 14 días (por ejemplo, al reservar una asesoría para una fecha dentro de ese plazo o al empezar {autogestion.name}), y después desistes, deberás abonar la parte proporcional del servicio ya prestado (art. 108.3).</li>
-    <li><strong>Planes de cuota mensual:</strong> el plazo de 14 días se cuenta desde la primera cuota. Si desistes dentro de ese plazo, tras haber pedido que el servicio empiece de inmediato, pagarás la parte proporcional del servicio ya prestado hasta ese momento. Las cuotas siguientes se pagan por el servicio del mes que comienza, y solo puedes dejar de pagarlas dándote de baja como se explica en el apartado 7.</li>
+    <li><strong>Inicio del servicio dentro del plazo:</strong> si solicitas expresamente que el servicio comience durante esos 14 días (por ejemplo, al reservar una asesoría para una fecha dentro de ese plazo o al empezar {autogestion.name}), y después desistes, deberás abonar la parte proporcional del servicio ya prestado (art. 108.4).</li>
+    <li><strong>Planes de cuota mensual:</strong> el plazo de 14 días se cuenta desde la primera cuota. Si desistes dentro de ese plazo, tras haber pedido que el servicio empiece de inmediato, pagarás solo la parte de esa cuota que corresponde a los días ya transcurridos y se te devolverá el resto. Las cuotas siguientes se pagan por el servicio del mes que comienza, y solo puedes dejar de pagarlas dándote de baja como se explica en el apartado 7.</li>
     <li><strong>Servicio completamente prestado:</strong> no podrás desistir una vez que el servicio se haya prestado por completo, si su ejecución comenzó con tu consentimiento expreso previo y con tu reconocimiento de que, en ese caso, pierdes el derecho de desistimiento (art. 103.a).</li>
     <li><strong>Cómo desistir:</strong> comunícalo de forma inequívoca a <a href={EMAIL.href}>{EMAIL.address}</a> o por WhatsApp al <a href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">{PHONE.display}</a>. Puedes usar este modelo (no es obligatorio): «Por la presente le comunico que desisto de mi contrato de prestación del siguiente servicio: […], contratado el […]. Nombre: […]. Domicilio: […]. Fecha: […]».</li>
     <li><strong>Devolución:</strong> se reembolsarán los importes que correspondan en un plazo máximo de 14 días naturales desde la comunicación, por el mismo medio de pago utilizado.</li>
   </ul>
-  {/* PENDIENTE (abogado): qué es «servicio completamente prestado» en una cuota mensual y cómo se calcula la parte proporcional. No se ha inventado ninguna definición: el texto de este apartado se deja como está hasta su respuesta. */}
 
   <h2>7. Cancelación y cambio de cita</h2>
   <p>Una vez realizado el pago, las asesorías no se cancelan ni se reembolsan, sin perjuicio del derecho de desistimiento de las personas consumidoras en los términos del apartado 6.</p>
   <p><strong>Baja de los planes mensuales.</strong> Puedes darte de baja en cualquier momento, sin penalización y sin necesidad de justificarlo, desde tu {STRIPE_PORTAL_URL ? <a href={STRIPE_PORTAL_URL} target="_blank" rel="noopener">portal de cliente de Stripe</a> : 'portal de cliente de Stripe'}, o escribiéndonos por WhatsApp al <a href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">{PHONE.display}</a> o a <a href={EMAIL.href}>{EMAIL.address}</a>. La baja surte efecto al terminar el mes que ya has pagado: no se cobrará la cuota siguiente y conservas el servicio hasta esa fecha. No se reembolsan cuotas ya pagadas por meses ya iniciados, sin perjuicio del derecho de desistimiento del apartado 6.</p>
-  {/* PENDIENTE (Denisse): confirmar «al terminar el mes que ya has pagado»; debe coincidir con lo que configure en el portal de cliente de Stripe (cancelar «al final del periodo»). El enlace del portal solo aparece si PUBLIC_STRIPE_PORTAL_URL es válido (src/config/acciogest.ts). */}
+  {/* El enlace del portal solo aparece si PUBLIC_STRIPE_PORTAL_URL es válido (src/config/acciogest.ts). La baja al final del periodo debe coincidir con el ajuste del portal de cliente de Stripe (cancelar «al final del periodo»). */}
   <p>Puedes solicitar un <strong>cambio de fecha</strong> para reagendar tu cita, sujeto a disponibilidad, por WhatsApp al <a href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">{PHONE.display}</a> o en <a href={EMAIL.href}>{EMAIL.address}</a>. El día anterior a la cita te enviamos un mensaje de confirmación. Si no te presentas a la cita sin haber pedido el cambio, la sesión se da por realizada y no se reembolsa.</p>
 
   <h2>8. Facturación</h2>
