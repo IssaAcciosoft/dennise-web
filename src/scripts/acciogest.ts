@@ -333,6 +333,9 @@ export async function submitLead(
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetch(`${ACCIOGEST_API}/form-builder/public/${encodeURIComponent(FORMS[formKey])}/submit`, {
+      // AccioGest saca la página de origen del Referer (respuestas 19-11): ruta completa solo en
+      // las llamadas a AccioGest, sin cambiar la política de toda la web (netlify.toml).
+      referrerPolicy: 'no-referrer-when-downgrade',
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify(buildRequestBody(data)),

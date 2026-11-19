@@ -8,29 +8,19 @@ import acciogestCatalog from './src/integrations/acciogest-catalog.mjs';
 /**
  * URL pública del sitio (canonical, Open Graph, JSON-LD, sitemap y robots.txt).
  *
- * ⚠️ PLACEHOLDER: el dominio definitivo está PENDIENTE. Hasta entonces se usa
- * `https://denissegonzalez.example`. Para publicar, compila con la variable de entorno
- * SITE_URL (p. ej. `SITE_URL=https://www.midominio.es npm run build`) o define la variable
- * de repositorio SITE_URL en GitHub (Settings → Secrets and variables → Actions → Variables).
+ * Dominio definitivo: https://dggestoresyabogados.com (AccioGest, 19-11-2026; las direcciones
+ * de vuelta de los planes y los enlaces de las casillas en AccioGest ya usan este dominio).
+ * - Producción y compilaciones locales: ese dominio (o SITE_URL si se define).
+ * - Netlify, vistas previas de ramas y pull requests: DEPLOY_PRIME_URL, para que el canonical
+ *   y el sitemap de la vista previa no apunten a producción.
  *
  * BASE_PATH solo hace falta si la web se sirve en un subdirectorio (p. ej. GitHub Pages sin
  * dominio propio: `https://usuario.github.io/dennise-web/` → BASE_PATH=/dennise-web).
  */
-export const SITE_URL_PLACEHOLDER = 'https://denissegonzalez.example';
-// En integración continua (CI=true: GitHub Actions, Netlify, Cloudflare Pages, Vercel…) el
-// dominio es obligatorio: nunca se publica una web con canonical/sitemap al marcador.
-// En Netlify, si no se ha definido SITE_URL, se usa la URL que Netlify asigna al sitio
-// (URL en producción; DEPLOY_PRIME_URL en vistas previas de ramas y pull requests).
-const NETLIFY_URL = process.env.NETLIFY
-  ? process.env.CONTEXT === 'production'
-    ? process.env.URL
-    : process.env.DEPLOY_PRIME_URL || process.env.URL
-  : undefined;
-const RESOLVED_SITE_URL = process.env.SITE_URL || NETLIFY_URL;
-if (process.env.CI && !RESOLVED_SITE_URL) {
-  throw new Error('SITE_URL es obligatoria al publicar (dominio definitivo, p. ej. https://www.dominio.es).');
-}
-const SITE_URL = RESOLVED_SITE_URL || SITE_URL_PLACEHOLDER;
+export const PRODUCTION_SITE_URL = 'https://dggestoresyabogados.com';
+const NETLIFY_PREVIEW_URL =
+  process.env.NETLIFY && process.env.CONTEXT !== 'production' ? process.env.DEPLOY_PRIME_URL : undefined;
+const SITE_URL = process.env.SITE_URL || NETLIFY_PREVIEW_URL || PRODUCTION_SITE_URL;
 const BASE_PATH = process.env.BASE_PATH || '/';
 
 // Páginas fuera del sitemap (también llevan <meta name="robots" content="noindex">).

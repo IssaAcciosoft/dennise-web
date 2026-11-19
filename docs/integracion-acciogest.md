@@ -456,32 +456,43 @@ Resueltas (WEB-INTEGRACION 12-11):
   `acciogest_id`); los planes quedan con `acciogest_id: null`; `/catalogo` no existe (404 previsto,
   se usa `servicios.json`) (WEB-INTEGRACION 12-11 §4).
 
+Resueltas (respuestas de AccioGest 19-11, `docs/respuestas-acciogest-2026-11-19.md`):
+
+- ~~UTM «cuando abres el formulario»~~ → la frase del handoff no vale para esta web («cuando
+  abres» era su página alojada). Sustituida por la de AccioGest: «… se envía a AccioGest, junto
+  con la página de origen, solo cuando envías un formulario o contratas un plan, sin cookies y sin
+  identificarte». No se envía nada al abrir ni se pasan UTM al widget.
+- ~~«Página de origen» en los leads~~ → del `Referer`: `referrerPolicy: 'no-referrer-when-downgrade'`
+  también en el `fetch` de `/submit`, sin cambiar la política de toda la web.
+- ~~`utm_content` / `utm_term`~~ → opcionales; se queda con las tres.
+- ~~Plan con el precio oculto~~ → correcto que abra «Solicitar información».
+- ~~Tarjeta sin id~~ → con el widget activo, esa tarjeta no ofrece «Reservar» con otro servicio:
+  «Reservar por WhatsApp». Online y presencial son servicios distintos, cada uno con su id: si la
+  tarjeta tiene los dos, un botón por modalidad (`Consultations.astro`).
+- ~~Valor de las casillas~~ → clave = etiqueta exacta, valor = texto de la casilla sin el markdown
+  de los enlaces (ya era así: `src/data/consent.ts`).
+- ~~Zoom y Google~~ → propuesta de AccioGest puesta en la política (apartados 5 y 6), pendiente de
+  muro-legal: Zoom Communications, Inc. (EE. UU.), encargado de Denisse; Google Ireland Limited
+  (posible acceso de Google LLC), subencargado de AccioGest; Marco de Privacidad UE-EE. UU. y
+  cláusulas tipo.
+- **Dominio definitivo**: `https://dggestoresyabogados.com` (comprado por AccioGest). Las vueltas de
+  los planes y los enlaces de las casillas en AccioGest ya lo usan. `astro.config.mjs` lo usa en
+  producción; hay que conectarlo en Netlify como dominio principal con HTTPS.
+
 Siguen abiertas:
 
-1. **UTM «cuando abres el formulario»** (frase de la política de privacidad): la web solo los
-   envía al enviar un formulario o al contratar (no al abrirlo, y la URL del widget de reservas
-   no lleva `utm_*`); ¿se espera que la web los envíe al abrir un formulario o que los pase al
-   widget, o los registra AccioGest por su cuenta? Para muro-legal: el apartado 5 de la política
-   dice «La web solo se comunica con AccioGest cuando envías un formulario, cuando contratas un
-   plan o cuando se carga el sistema de reservas», que no incluye «al abrir»; las dos frases
-   llevan un comentario PENDIENTE (no visible). Según la respuesta, añadir «cuando abres un
-   formulario» al apartado 5 o pedir que se cambie la frase del handoff (que no se toca).
-   (WEB-INTEGRACION menciona también `utm_content` y `utm_term`; la web envía solo las tres que
-   nombra la frase exacta de la política del HANDOFF.)
-2. **«Página de origen» en los leads** (política de privacidad): WEB-INTEGRACION no dice nada de
-   un campo de página de origen en `/submit`; los leads siguen con la política del sitio (el
-   `Referer` llega sin ruta). ¿Se toma de esa cabecera? No se ha inventado ningún campo.
-3. **Plan con el precio oculto** (`mostrar_precio: false`): sin importe no hay texto de
-   «Desistimiento»; hoy su «Contratar» abre «Solicitar información». Confirmar.
-4. **Reservas**: servicio por defecto cuando una tarjeta no tiene `acciogest_id` (hoy, la primera
-   asesoría reservable enlazada); ¿lo prefieren así o que esa tarjeta no ofrezca «Reservar»? Y
-   los 6 `plugin_citas_services.id` para `servicios.json` (sin ellos no hay widget).
-5. **Denisse**: cuándo surte efecto la baja («al terminar el mes que ya has pagado») y que
+1. **AccioGest (la semana que viene)**: los IDs (3 formularios, 3 planes, plugin), los 6
+   `plugin_citas_services.id`, la API en producción, `montaje-619.sql`, el horario, el webhook,
+   la revisión legal (muro-legal) y el aviso para publicar (activan los planes mensuales justo
+   antes).
+2. **Denisse**: cuándo surte efecto la baja («al terminar el mes que ya has pagado») y que
    coincida con el portal de Stripe; activar el portal de cliente y los recibos por correo
    (la frase «Recibirás el recibo de cada pago…» solo es cierta con ellos). AccioGest no envía
    correo de confirmación de los planes ni el enlace del portal, ni puede dar de baja desde su
    lado (solo el portal de Stripe o Denisse) (WEB-INTEGRACION 12-11 §6.3, Incoherencias #10 y #12).
-6. **Abogado**: qué es «servicio completamente prestado» en una cuota mensual y cómo se calcula
+   Si usa Zoom o Google con su propia cuenta para otras cosas, avisar a AccioGest.
+3. **Abogado**: qué es «servicio completamente prestado» en una cuota mensual y cómo se calcula
    la parte proporcional (no se ha inventado ninguna definición).
-7. Política de privacidad: entidades de Zoom y de Google (correo), su condición y transferencias
-   internacionales.
+4. **Prueba en una vista previa**: las vueltas de Stripe de los planes van a
+   `https://dggestoresyabogados.com/gracias/…` (configuradas en AccioGest), no a la vista previa;
+   la cancelación sí vuelve a la página de origen (`Referer`).

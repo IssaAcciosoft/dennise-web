@@ -495,7 +495,8 @@ evitan saltos al cambiar de fuente; valores calculados con `@capsizecss/unpack`.
 
 ## Publicación
 
-**Netlify** (el hosting de la web, `https://denisseg.netlify.app`; `netlify.toml`): comando
+**Netlify** (el hosting de la web; dominio principal `https://dggestoresyabogados.com`, antes
+`https://denisseg.netlify.app`; `netlify.toml`): comando
 `npm run build`, carpeta `dist/`. Las variables de compilación (`SITE_URL` y las de AccioGest) van
 en **Site configuration → Environment variables**; tras cambiarlas, **Deploys → Trigger deploy →
 Clear cache and deploy site** (se leen al compilar).
@@ -505,10 +506,10 @@ Clear cache and deploy site** (se leen al compilar).
 
 1. Settings → Pages → Source: **GitHub Actions**.
 2. Settings → Secrets and variables → Actions → **Variables**:
-   - `SITE_URL` = dominio definitivo, p. ej. `https://www.dominio.es` (**obligatorio**: canonical,
-     Open Graph, JSON-LD, sitemap y robots.txt usan URLs absolutas). Sin ella el workflow se
-     detiene con un error («Check SITE_URL») y `astro.config.mjs` no compila en CI (`CI=true`);
-     en local se usa el marcador `https://denissegonzalez.example`. Solo se publica desde `main`.
+   - `SITE_URL` = `https://dggestoresyabogados.com` (o el que corresponda: canonical, Open
+     Graph, JSON-LD, sitemap y robots.txt usan URLs absolutas). El workflow exige la variable
+     («Check SITE_URL»); sin ella, `astro.config.mjs` usa `https://dggestoresyabogados.com`.
+     Solo se publica desde `main`.
    - `BASE_PATH` = solo si la web va en un subdirectorio (`/dennise-web` en
      `usuario.github.io/dennise-web` sin dominio propio).
 
@@ -555,7 +556,8 @@ De la cliente (ver `docs/contenido.md` §7):
    se indica «IVA incluido» en los planes.
 8. Idiomas de atención y zona en la que presta servicio (JSON-LD `knowsLanguage`, `areaServed`).
 9. Validar la transcripción del artículo «8 de marzo — Voces que se unen».
-10. Dominio definitivo (`SITE_URL`).
+10. ~~Dominio definitivo~~: `https://dggestoresyabogados.com` (AccioGest, 19-11). Conectarlo en
+    Netlify como dominio principal con HTTPS.
 11. Redes sociales (`docs/contenido.md` §7, punto 9): enlace de TikTok de su bio de Instagram,
     original del retrato del despacho, sede de C/ Santa Catalina 7 y SANDIN & Asociados.
 
