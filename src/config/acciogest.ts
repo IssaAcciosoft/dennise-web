@@ -5,7 +5,8 @@
  *  ÚNICO sitio donde se ponen los IDs. Mientras un ID tenga su valor de ejemplo
  *  (FORM_ID_… / PLUGIN_ID), esa pieza funciona en MODO SIMULADO:
  *    - formularios: se simula la respuesta de la API (no se envía nada) y se avisa;
- *    - planes: «Contratar» abre el formulario de solicitud en lugar del pago;
+ *    - planes: el diálogo de contratación simula create-checkout-session (no se cobra nada) y
+ *      lleva a /gracias/?tipo=plan&…&pago=ok&response_id=mock;
  *    - reservas: se muestra un panel con «Solicitar cita» y WhatsApp.
  *  Al poner los IDs reales, pasa a producción sin tocar nada más.
  *
@@ -18,7 +19,11 @@
  *         PUBLIC_ACCIOGEST_FORM_CONTACTO
  *         PUBLIC_ACCIOGEST_PLAN_BASICO          PUBLIC_ACCIOGEST_PLAN_ESTANDAR
  *         PUBLIC_ACCIOGEST_PLAN_PREMIUM         PUBLIC_ACCIOGEST_BOOKING_PLUGIN_ID
+ *         PUBLIC_STRIPE_PORTAL_URL              (portal de cliente de Stripe de Denisse:
+ *                                                https://billing.stripe.com/p/login/…)
  *         PUBLIC_ACCIOGEST_WIDGET_ORIGINS       (opcional, orígenes extra del iframe de reservas)
+ *  Todos los IDs son números enteros (el del plugin es su id, no el token). Se leen AL COMPILAR:
+ *  tras cambiarlos en Netlify, «Clear cache and deploy site».
  *  Son IDs públicos (van en el HTML/JS de la web): no son secretos.
  *  (La URL del build hook de Netlify SÍ es secreta y nunca va aquí: README → AccioGest.)
  * ============================================================================
@@ -37,7 +42,12 @@ export const FORMS = {
   contacto: pick(import.meta.env.PUBLIC_ACCIOGEST_FORM_CONTACTO, 'FORM_ID_CONTACTO'),
 } as const;
 
-/** Planes de Autogestión DG (/autogestion-dg/): cada uno es una página de pago de AccioGest (Stripe). */
+/**
+ * Planes de Autogestión DG (/autogestion-dg/), cuota mensual (handoff 19-11-2026 §3): id del
+ * formulario de cada plan en AccioGest. El diálogo de contratación (PlanCheckoutDialog.astro +
+ * src/scripts/plan-checkout.ts) hace POST {API}/form-builder/public/{id}/create-checkout-session
+ * y lleva a la página de pago de Stripe que devuelve AccioGest.
+ */
 export const PLANES = {
   basico: pick(import.meta.env.PUBLIC_ACCIOGEST_PLAN_BASICO, 'FORM_ID_BASICO'),
   estandar: pick(import.meta.env.PUBLIC_ACCIOGEST_PLAN_ESTANDAR, 'FORM_ID_ESTANDAR'),
@@ -55,12 +65,11 @@ export type PlanKey = keyof typeof PLANES;
  * Clave = nombre interno del campo en el HTML (atributo name) · valor = etiqueta en AccioGest.
  * Si AccioGest cambia una etiqueta, se cambia solo aquí. Compruébalas con ?acciogest_debug=1.
  */
+// Desde el handoff del 19-11-2026: «Consentimiento RGPD» lleva como valor el TEXTO de la
+// casilla (src/data/consent.ts), ya no se envía «Versión política» y los utm_* van en la raíz
+// del cuerpo, no dentro de response_data.
 const COMMON = {
   consentimiento: 'Consentimiento RGPD',
-  politica: 'Versión política',
-  utm_source: 'utm_source',
-  utm_medium: 'utm_medium',
-  utm_campaign: 'utm_campaign',
 } as const;
 
 export const FIELD_LABELS = {
@@ -95,13 +104,26 @@ export const FIELD_LABELS = {
 } as const satisfies Record<FormKey, Record<string, string>>;
 
 /**
- * Versión de la política de privacidad que se acepta al enviar un formulario
- * (se envía como «Versión política»). Cambiarla aquí al publicar una política nueva:
- * la página /politica-privacidad/ la muestra desde esta misma constante.
+ * Diálogo de contratación de un plan: etiquetas EXACTAS de `response_data` (handoff §2).
+ * Clave = name del campo en el HTML · valor = etiqueta en AccioGest.
  */
-export const POLICY_VERSION = '2026-10';
+export const PLAN_FIELD_LABELS = {
+  nombre: 'Nombre',
+  email: 'Email',
+  telefono: 'Teléfono',
+  rgpd: 'Consentimiento RGPD',
+  desistimiento: 'Desistimiento',
+} as const;
 
-/** UTM que se envían con cada lead (de la URL de llegada; se guardan para toda la visita). */
+/**
+ * Versión de la política de privacidad. Desde el handoff del 19-11-2026 YA NO se envía con los
+ * formularios (se guarda el texto de la casilla y la fecha): solo la muestra la página
+ * /politica-privacidad/. Cambiarla aquí al publicar una política nueva.
+ */
+export const POLICY_VERSION = '2026-11';
+
+/** UTM que se envían con cada lead y cada contratación, en la RAÍZ del cuerpo (de la URL de
+ *  llegada; se guardan para toda la visita). */
 export const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign'] as const;
 /** Clave en sessionStorage (la usan BaseLayout y src/scripts/acciogest.ts). */
 export const UTM_STORAGE_KEY = 'dg:utm';
@@ -114,12 +136,32 @@ const PLACEHOLDER = /^(FORM_ID_[A-Z_]*|PLUGIN_ID)$/;
 /** true si el ID es real: no vacío y no es un valor de ejemplo (FORM_ID_… / PLUGIN_ID). */
 export function isConfigured(id: string | null | undefined): id is string {
   const value = (id ?? '').trim();
-  return value !== '' && !PLACEHOLDER.test(value);
+  return /^\d+$/.test(value) && !PLACEHOLDER.test(value);
 }
 
-/** Página pública de pago de un plan (se abre en una pestaña nueva). */
-export const planPageUrl = (key: PlanKey): string | null =>
-  isConfigured(PLANES[key]) ? `${ACCIOGEST_API}/form-builder/public/${encodeURIComponent(PLANES[key])}/page` : null;
+/** POST que crea la sesión de pago de Stripe de un plan (null = ID de ejemplo: modo simulado). */
+export const checkoutSessionUrl = (key: PlanKey): string | null =>
+  isConfigured(PLANES[key])
+    ? `${ACCIOGEST_API}/form-builder/public/${encodeURIComponent(PLANES[key])}/create-checkout-session`
+    : null;
+
+/**
+ * Portal de cliente de Stripe de Denisse (baja de los planes, recibos, tarjeta). Solo se acepta
+ * un enlace que empiece por https://billing.stripe.com/p/login/ (handoff §4); cualquier otro
+ * valor (o vacío) → null y no se muestra ningún enlace.
+ */
+const STRIPE_PORTAL_PREFIX = 'https://billing.stripe.com/p/login/';
+export function stripePortalUrl(value: string | undefined = import.meta.env.PUBLIC_STRIPE_PORTAL_URL): string | null {
+  const v = String(value ?? '').trim();
+  if (!v.startsWith(STRIPE_PORTAL_PREFIX) || v.length <= STRIPE_PORTAL_PREFIX.length || /[\s"'<>]/.test(v)) return null;
+  try {
+    const u = new URL(v);
+    return u.protocol === 'https:' && u.hostname === 'billing.stripe.com' ? u.href : null;
+  } catch {
+    return null;
+  }
+}
+export const STRIPE_PORTAL_URL: string | null = stripePortalUrl();
 
 /**
  * Script del widget de reservas. `service` = acciogest_id del servicio que abre ya elegido

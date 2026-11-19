@@ -16,8 +16,9 @@
  * enseña el texto nuevo (label) con el mismo valor y la compilación avisa para revisarlo a mano.
  * Ids que la web no conoce se
  * ignoran; nunca se quita un elemento de servicios.json. Los bloques sin precio (immigration,
- * firm_services, companies, dubai) salen solo del JSON. Los planes toman su importe del campo
- * de pago de su formulario (GET /form-builder/public/{PLAN_FORM_ID}) si su ID está configurado.
+ * firm_services, companies, dubai) salen solo del JSON. Los planes toman su importe (cuota
+ * MENSUAL, IVA incluido) de la raíz del JSON de su formulario (GET /form-builder/public/{PLAN_FORM_ID},
+ * extractPlanAmount() de la integración) si su ID está configurado.
  * Sin IDs (modo simulado) todo sale de servicios.json, como siempre.
  */
 import catalog from '~/data/servicios.json';
@@ -256,6 +257,8 @@ export function serviceOptions({ withPlans = false } = {}): (Group | Option)[] {
 
 const nf = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 2 });
 export const formatAmount = (amount: number) => nf.format(amount);
+/** Cuota de un plan (desde el handoff del 19-11-2026 los planes son mensuales): «242 €/mes». */
+export const planFeeLabel = (amount: number) => `${formatAmount(amount)} €/mes`;
 
 export const allAmounts = [
   ...consultations.flatMap((c) => c.prices.map((p) => p.amount)),

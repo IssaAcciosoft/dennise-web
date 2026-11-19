@@ -2,15 +2,16 @@
 /**
  * Autogestión DG (/autogestion-dg/): trámites disponibles, planes con lo que incluye y lo que no
  * incluye cada uno (docs/cambios-2026-10.md §5, desde servicios.json) y aviso de condiciones.
- * Ningún plan destacado (§5). docs/integracion-acciogest.md §3, sin cambios:
- * - «Contratar Plan X» con el ID del plan configurado (PLANES en src/config/acciogest.ts) →
- *   página de pago de AccioGest {API}/form-builder/public/{FORM_ID}/page en pestaña nueva.
- * - Sin ID (valor de ejemplo) → abre el diálogo «Solicitar información» con el plan
- *   preseleccionado (data-service-request); sin JavaScript, WhatsApp.
+ * Ningún plan destacado (§5). Planes de CUOTA MENSUAL (handoff de AccioGest del 19-11-2026 §3):
+ * - «Contratar Plan X» abre el diálogo de contratación propio (PlanCheckoutDialog.astro +
+ *   src/scripts/plan-checkout.ts, data-plan-checkout), que crea la sesión de pago de Stripe en
+ *   AccioGest. Con el ID del plan de ejemplo, el diálogo funciona en modo simulado.
+ * - Sin JavaScript, el botón es un enlace a WhatsApp.
+ * - Plan con el precio oculto en AccioGest (amount null): no hay texto de «Desistimiento» que
+ *   aceptar, así que abre «Solicitar información» con el plan preseleccionado (data-service-request).
  */
-import { autogestion as program, planIncludes, formatAmount, CATALOG } from '~/lib/services';
+import { autogestion as program, planIncludes, planFeeLabel, formatAmount, CATALOG } from '~/lib/services';
 import { WA_TEXT, waLink } from '~/data/site';
-import { planPageUrl, type PlanKey } from '~/config/acciogest';
 import { url } from '~/lib/url';
 import Icon from '../ui/Icon.astro';
 
@@ -20,7 +21,7 @@ const procedures = program.procedures_title.replace(/\s+en:?$/, '');
 const planMessage = (name: string, amount: number | null) =>
   amount === null
     ? `Hola Denisse, me interesa el ${name} de ${program.name}. Mi trámite es: `
-    : `Hola Denisse, me interesa el ${name} (${formatAmount(amount)} €, ${CATALOG.tax_label}) de ${program.name}. Mi trámite es: `;
+    : `Hola Denisse, me interesa el ${name} (${planFeeLabel(amount)}, ${CATALOG.tax_label}) de ${program.name}. Mi trámite es: `;
 ---
 
 <section class="section section--white ag-procedures" id="tramites" aria-labelledby="tramites-title">
@@ -51,7 +52,6 @@ const planMessage = (name: string, amount: number | null) =>
       {
         program.plans.map((plan) => {
           const included = new Set(planIncludes(plan));
-          const payUrl = planPageUrl(plan.form_key as PlanKey);
           const listId = `plan-${plan.id}-incluye`;
           return (
             <li class="plan-card" data-plan-key={plan.form_key} data-reveal data-spotlight>
@@ -60,7 +60,7 @@ const planMessage = (name: string, amount: number | null) =>
                 <>
                   <p class="plan-price">
                     <span class="price">{formatAmount(plan.amount)}</span>
-                    <span class="currency">€</span>
+                    <span class="currency">€/mes</span>
                   </p>
                   <p class="plan-vat">{CATALOG.tax_label}</p>
                 </>
@@ -88,11 +88,17 @@ const planMessage = (name: string, amount: number | null) =>
                   ),
                 )}
               </ul>
-              {payUrl ? (
-                <a class="btn btn--block btn--outline" href={payUrl} target="_blank" rel="noopener" data-plan-cta={plan.form_key} data-lead-value={plan.lead_value}>
+              {plan.amount !== null ? (
+                <a
+                  class="btn btn--block btn--outline"
+                  href={waLink(planMessage(plan.name, plan.amount))}
+                  target="_blank"
+                  rel="noopener"
+                  data-plan-cta={plan.form_key}
+                  data-lead-value={plan.lead_value}
+                  data-plan-checkout={plan.form_key}
+                >
                   <span>Contratar {plan.name}</span>
-                  <Icon name="external" />
-                  <span class="visually-hidden"> (pago seguro en AccioGest, se abre en una pestaña nueva)</span>
                 </a>
               ) : (
                 <a
@@ -115,7 +121,7 @@ const planMessage = (name: string, amount: number | null) =>
 
     <div class="plan-foot" data-reveal>
       <p class="plan-terms">
-        Pago seguro con tarjeta. Al contratar aceptas las{' '}
+        Cuota mensual, pago seguro con tarjeta. Al contratar aceptas las{' '}
         <a href={url('/condiciones-contratacion/')}>condiciones de contratación</a>.
       </p>
       <a class="btn btn--link" href={waLink(WA_TEXT.autogestionDudas)} target="_blank" rel="noopener">

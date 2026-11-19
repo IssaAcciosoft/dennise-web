@@ -9,7 +9,7 @@
  * sin que la persona lo sepa.
  */
 import { FORMS, isConfigured, type FormKey } from '~/config/acciogest';
-import { CONSENT } from '~/data/legal';
+import { CONSENT_TEXT, LINK_PHRASES, linkParts } from '~/data/consent';
 import { waLink, PHONE, TEL_LINK } from '~/data/site';
 import { url } from '~/lib/url';
 import Icon from '../ui/Icon.astro';
@@ -49,6 +49,11 @@ const V = we
   ? { consent: 'Necesitamos tu consentimiento para poder recibir tus datos.', write: 'Escríbenos por WhatsApp', writeLc: 'escríbenos por WhatsApp', call: 'llámanos al', notReach: 'los envíos no nos llegan', contact: 'Para contactarnos ahora', notReached: 'este envío no nos ha llegado' }
   : { consent: 'Necesito tu consentimiento para poder recibir tus datos.', write: 'Escríbeme por WhatsApp', writeLc: 'escríbeme por WhatsApp', call: 'llámame al', notReach: 'los envíos no me llegan', contact: 'Para contactarme ahora', notReached: 'este envío no me ha llegado' };
 const btnClass = variant === 'ev' ? 'btn--ev' : 'btn--primary';
+// Texto EXACTO de la casilla (src/data/consent.ts): se muestra tal cual, con el enlace en
+// «política de privacidad», y es el valor que se envía como «Consentimiento RGPD». El aviso
+// «se abre en una pestaña nueva» va fuera de la etiqueta (aria-describedby del enlace) para que
+// el texto de la casilla no cambie.
+const [consentBefore, consentLink, consentAfter] = linkParts(CONSENT_TEXT[formKey], LINK_PHRASES.privacy);
 ---
 
 <div class:list={['lead-box', `lead-box--${variant}`]} data-lead={formKey} data-wa-text={waText} data-success-text={successText} data-voice={we ? 'we' : 'me'}>
@@ -71,10 +76,11 @@ const btnClass = variant === 'ev' ? 'btn--ev' : 'btn--primary';
             data-msg-required={V.consent}
           />
           <span>
-            He leído y acepto la <a href={url('/politica-privacidad/')} target="_blank" rel="noopener">política de privacidad<span class="visually-hidden"> (se abre en una pestaña nueva)</span></a> y {CONSENT[formKey]}
+            <span data-consent-text>{consentBefore}<a href={url('/politica-privacidad/')} target="_blank" rel="noopener" aria-describedby={`${idPrefix}-newtab`}>{consentLink}</a>{consentAfter}</span>
             <span class="req" aria-hidden="true">*</span>
           </span>
         </label>
+        <span id={`${idPrefix}-newtab`} hidden>Se abre en una pestaña nueva</span>
         <p class="field-error" id={`${idPrefix}-consentimiento-error`} data-error-for="consentimiento"></p>
       </div>
 

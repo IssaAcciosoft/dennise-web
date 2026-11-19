@@ -1,6 +1,8 @@
 # Integración web ↔ AccioGest
 
-Fuente: respuestas del equipo de AccioGest (02/10/2026 y, para la fase A, 27/10/2026). Este
+Fuente: respuestas del equipo de AccioGest (02/10/2026; fase A, 27/10/2026; planes mensuales,
+handoff del 19/11/2026 en `docs/handoff-acciogest-2026-11-19.md`, que **prevalece** sobre lo
+anterior donde no coincidan: ver «Planes mensuales (handoff 19-11)» al final). Este
 documento es la especificación que sigue el código (`src/config/acciogest.ts`,
 `src/scripts/acciogest.ts`, `src/scripts/lead-form.ts`, `src/data/servicios.json`,
 `src/integrations/acciogest-catalog.mjs`, `src/lib/services.ts`). Resumen de uso: README →
@@ -12,7 +14,7 @@ documento es la especificación que sigue el código (`src/config/acciogest.ts`,
 |---|---|---|
 | Reservas de asesorías (con pago previo) | Widget de AccioGest embebido (iframe): servicio, día y hora, modalidad, datos, RGPD y pago con Stripe | Falta `BOOKING_PLUGIN_ID` |
 | Catálogo de servicios | `src/data/servicios.json` + catálogo público de AccioGest al compilar, mezclado por `acciogest_id` (fase A) | Hecho; en desarrollo en AccioGest |
-| Planes Autogestión DG (242 / 315 / 425 €) | Página pública de formulario de pago de AccioGest, en pestaña nueva; el precio, del campo de pago del formulario (fase A) | Faltan los 3 `FORM_ID` |
+| Planes Autogestión DG (242 / 315 / 425 €/mes, cuota mensual) | Diálogo propio (`PlanCheckoutDialog.astro` + `plan-checkout.ts`) → `create-checkout-session` → Stripe; el importe, de la raíz del JSON del formulario (handoff 19-11) | Faltan los 3 IDs; no publicar hasta que AccioGest lo diga |
 | Leads: solicitud de servicio, "Cuéntame tu historia", contacto | HTML propio + `fetch` POST al form-builder público | Faltan los 3 `FORM_ID` |
 | Captcha | No existe en AccioGest; no se usa. Se usa un campo honeypot | — |
 
@@ -25,7 +27,8 @@ export const ACCIOGEST_API = 'https://api.acciogest.com';
 export const FORMS = { servicio: 'FORM_ID_SERVICIO', historia: 'FORM_ID_HISTORIA', contacto: 'FORM_ID_CONTACTO' };
 export const PLANES = { basico: 'FORM_ID_BASICO', estandar: 'FORM_ID_ESTANDAR', premium: 'FORM_ID_PREMIUM' };
 export const BOOKING_PLUGIN_ID = 'PLUGIN_ID';
-export const POLICY_VERSION = '2026-10';
+export const POLICY_VERSION = '2026-11'; // solo se muestra en /politica-privacidad/; ya no se envía
+// + PUBLIC_STRIPE_PORTAL_URL → STRIPE_PORTAL_URL (null si no empieza por https://billing.stripe.com/p/login/)
 ```
 
 Cada ID se puede dar también con una variable de entorno al compilar (tiene prioridad):
@@ -70,7 +73,11 @@ precios, nombres y duraciones de las asesorías salen del catálogo de AccioGest
 
 ## 3. Planes Autogestiona
 
-Cada plan es un formulario de pago de AccioGest:
+> **Sustituido por el handoff del 19-11-2026** (cuota mensual, diálogo propio y
+> `create-checkout-session`): ver «Planes mensuales (handoff 19-11)». Lo que sigue es la forma
+> anterior, que deja de funcionar el día que AccioGest pasa los planes a mensuales.
+
+Cada plan era un formulario de pago de AccioGest:
 
 ```
 https://api.acciogest.com/form-builder/public/{FORM_ID_PLAN}/page
@@ -88,7 +95,8 @@ Tras el pago se vuelve a la URL de redirección configurada en cada formulario d
 POST https://api.acciogest.com/form-builder/public/{FORM_ID}/submit
 Content-Type: application/json
 
-{ "response_data": { "<Etiqueta del campo>": "<valor>", ... } }
+{ "response_data": { "<Etiqueta del campo>": "<valor>", ... },
+  "utm_source": "…", "utm_medium": "…", "utm_campaign": "…" }
 ```
 
 - Las claves de `response_data` son **exactamente** las etiquetas de los campos del
@@ -98,19 +106,22 @@ Content-Type: application/json
   adicionales.
 - Solicitud de servicio: el servicio o plan elegido va con la etiqueta `Servicio`.
 - UTM: se leen de la URL de llegada (en cualquier página), se guardan en `sessionStorage`
-  durante la visita y se envían como `utm_source`, `utm_medium` y `utm_campaign`.
+  durante la visita y se envían como `utm_source`, `utm_medium` y `utm_campaign` **en la raíz
+  del cuerpo** (no dentro de `response_data`; handoff 19-11). Solo las que existen.
+- `Teléfono`: se limpia con `cleanPhone()` (solo `+`, dígitos, espacios, guiones y paréntesis).
 - Los campos opcionales vacíos (p. ej. `Teléfono`, `Mensaje` en servicio) no se envían.
-- Consentimiento: `Consentimiento RGPD` = `sí` y `Versión política` = versión de la política
-  de privacidad (p. ej. `2026-10`).
+- Consentimiento: `Consentimiento RGPD` = **texto exacto de la casilla** (`src/data/consent.ts`,
+  handoff 19-11 §2). Ya no se envía `Versión política`.
 - Valores sí/no en minúscula: `sí` / `no`.
 
 Etiquetas que usa la web (editables en `src/config/acciogest.ts` → `FIELD_LABELS`):
 
 | Formulario | Etiquetas |
 |---|---|
-| servicio | Nombre, Email, Teléfono, Servicio, Mensaje, Consentimiento RGPD, Versión política, utm_source, utm_medium, utm_campaign |
-| historia | Nombre, Email, Teléfono, País, Tema, Historia, Compartir públicamente, Anonimato, Cómo contactarte, Instagram, Consentimiento RGPD, Versión política, utm_source, utm_medium, utm_campaign |
-| contacto | Nombre, Email, Teléfono, Mensaje, Consentimiento RGPD, Versión política, utm_source, utm_medium, utm_campaign |
+| servicio | Nombre, Email, Teléfono, Servicio, Mensaje, Consentimiento RGPD |
+| historia | Nombre, Email, Teléfono, País, Tema, Historia, Compartir públicamente, Anonimato, Cómo contactarte, Instagram, Consentimiento RGPD |
+| contacto | Nombre, Email, Teléfono, Mensaje, Consentimiento RGPD |
+| plan (diálogo de contratación) | Nombre, Email, Teléfono, Consentimiento RGPD, Desistimiento |
 
 Valores: `Servicio` = `lead_value` de `servicios.json` (p. ej. `Asesoría migratoria · 1 hora`,
 `Programa Autogestiona · Plan Estándar`, `Extranjería · Arraigos` y el resto de servicios de
@@ -238,12 +249,16 @@ se escribe en el repositorio.
 - `&service={acciogest_id}` en la URL del script abre el widget con ese servicio elegido. El
   «Reservar» de cada tarjeta lleva sus servicios por modalidad (`data-booking-services`); se
   usa el online salvo que el botón diga otra cosa (`data-booking-modality`). Si el widget ya
-  estaba cargado, se recarga con el servicio nuevo. Sin `acciogest_id`, se abre sin servicio.
+  estaba cargado, se recarga con el servicio nuevo. **Desde el handoff 19-11 nunca se abre sin
+  servicio** (la API rechaza la reserva): una tarjeta sin `acciogest_id` abre el servicio por
+  defecto (primera asesoría reservable enlazada, online primero) y, si no hay ninguna enlazada,
+  no se carga el widget (panel «Solicitar cita»).
 - El iframe envía a `window.parent`:
   - `{ type: 'acciogest:booking:height', height }` → alto del contenedor y del iframe (entre
     760 y 6000 px; los 760 px siguen como `min-height` en CSS, por si no llega el mensaje);
   - `{ type: 'acciogest:booking:done', citaId, serviceId }` → `/gracias/?tipo=reserva`
-    (con `&cita=` si `citaId` es un id simple; no se muestra).
+    (con `&cita=` solo si `citaId` es un entero positivo, como número o como texto de dígitos;
+    no se muestra).
 - Solo se aceptan mensajes cuyo `event.origin` esté en `bookingMessageOrigins()`
   (`src/config/acciogest.ts`: el origen de `ACCIOGEST_API` más los de
   `PUBLIC_ACCIOGEST_WIDGET_ORIGINS`, si el iframe se sirve desde otro dominio) **y** que vengan
@@ -283,3 +298,119 @@ WhatsApp. Ningún parámetro se escribe en la página (solo se eligen bloques ya
   importe en el formulario de cada plan (y si es con IVA); origen desde el que se sirve el iframe
   del widget; si el script del widget admite cargarse otra vez con otro `service`; si online y
   presencial comparten nombre y duración; aviso de cuándo pasa a pruebas.
+
+## Planes mensuales (handoff 19-11)
+
+Fuente: `docs/handoff-acciogest-2026-11-19.md` (19/11/2026). `WEB-INTEGRACION.md` (12-11), al
+que remite el handoff para el detalle, **no está en este repositorio**: donde el handoff es
+ambiguo se ha elegido la lectura más prudente, aislada en un único sitio comentado del código,
+y figura abajo como pregunta abierta.
+
+**No publicar en producción** los planes mensuales (diálogo y textos legales) hasta que AccioGest
+lo diga: ese día pasa los planes a mensuales y la contratación anterior deja de funcionar. Los
+textos legales nuevos pasan antes por la revisión legal de AccioGest (muro-legal).
+
+### Variables de Netlify
+
+```
+PUBLIC_ACCIOGEST_FORM_SERVICIO      PUBLIC_ACCIOGEST_PLAN_BASICO       PUBLIC_ACCIOGEST_BOOKING_PLUGIN_ID
+PUBLIC_ACCIOGEST_FORM_HISTORIA      PUBLIC_ACCIOGEST_PLAN_ESTANDAR     PUBLIC_STRIPE_PORTAL_URL
+PUBLIC_ACCIOGEST_FORM_CONTACTO      PUBLIC_ACCIOGEST_PLAN_PREMIUM
+```
+
+- Todos los IDs son números enteros. El del plugin es su id, no el token.
+- `PUBLIC_STRIPE_PORTAL_URL`: portal de cliente de Stripe de Denisse
+  (`https://billing.stripe.com/p/login/…`). Si no empieza así, no se muestra el enlace
+  (`stripePortalUrl()` en `src/config/acciogest.ts`). Aparece en las condiciones (apartado 7) y
+  en `/gracias/?tipo=plan`.
+- Se leen **al compilar**: tras definirlas en Netlify (Site configuration → Environment
+  variables), **Deploys → Trigger deploy → «Clear cache and deploy site»**.
+
+### Diálogo de contratación
+
+`src/components/services/PlanCheckoutDialog.astro` + `src/scripts/plan-checkout.ts`; se abre
+con `data-plan-checkout="basico|estandar|premium"` (sin JavaScript, el botón es un enlace a
+WhatsApp). Campos: `Nombre`*, `Email`*, `Teléfono`*, `Consentimiento RGPD`* («He leído la
+política de privacidad») y `Desistimiento`* (texto por plan con su nombre y cuota del catálogo,
+`planDesistimientoText()` en `src/data/consent.ts`). Dos casillas separadas, sin marcar al abrir
+(se desmarcan cada vez), las dos obligatorias; errores en español con `aria-invalid` y
+`aria-describedby`. El valor de cada casilla es su texto plano exacto; en la web «política de
+privacidad» enlaza a `/politica-privacidad/` y «condiciones de contratación» a
+`/condiciones-contratacion/`.
+
+```
+POST {API}/form-builder/public/{PLAN_ID}/create-checkout-session
+{ "response_data": { "Nombre": "…", "Email": "…", "Teléfono": "…",
+                     "Consentimiento RGPD": "He leído la política de privacidad",
+                     "Desistimiento": "Contrato el Plan Básico: cuota de 242 € al mes (IVA incluido), …" },
+  "utm_source": "…", "utm_medium": "…", "utm_campaign": "…" }
+```
+
+| Respuesta | Qué hace la web |
+|---|---|
+| 200 `{ url }` | Va a `url` solo si es https en `checkout.stripe.com` u otro subdominio de `stripe.com` (`isStripeCheckoutUrl()`); si no, error genérico + WhatsApp |
+| 400 `{ error, missing_fields }` | Marca los campos; si falta `Desistimiento`, explica que hay que marcar «Contrato el Plan …» (inicio inmediato y condiciones) |
+| 403 / 404 | «La contratación de este plan no está disponible» + WhatsApp |
+| 429 | Botón bloqueado **60 s** con cuenta atrás (más si `Retry-After` pide más) |
+| Red / > 15 s | Mensaje de conexión («no se ha cobrado nada»), se conservan los datos, WhatsApp |
+| Otro | Error genérico + WhatsApp |
+
+Campo trampa `website` (si viene relleno no se envía nada), guardia de doble envío (enviando,
+bloqueado o ya saliendo hacia Stripe) y, al volver con «Atrás» desde Stripe, el botón se
+reactiva. Vuelta de Stripe: `/gracias/?tipo=plan&plan=…&response_id=…&pago=ok&session_id=…`
+(texto de cuota mensual y, si existe, enlace al portal).
+
+**Modo simulado** (ID del plan de ejemplo): aviso visible, no se envía nada y se va a
+`/gracias/?tipo=plan&plan=…&pago=ok&response_id=mock`. Errores de prueba: `?acciogest_mock=400`
+(falta `Desistimiento`), `400-rgpd`, `400-tel`, `403`, `404`, `429`, `500`, `network`,
+`timeout`, `bad-url`.
+
+### Importe de los planes
+
+`extractPlanAmount()` (`src/integrations/acciogest-catalog.mjs`) lee al compilar
+`GET {API}/form-builder/public/{PLAN_ID}` y toma el importe de la **raíz** del JSON (`amount`,
+`precio`, `importe`, `price`…, número o texto numérico); solo si la raíz no trae importe, usa el
+criterio anterior (campo de pago). Se muestra como «242 €/mes» en `/autogestion-dg/`, las
+condiciones, `/gracias/` y el JSON-LD (`Offer` con `UnitPriceSpecification`, `unitCode: MON`,
+`valueAddedTaxIncluded`). La visita guiada de `/servicios/` no muestra los planes.
+
+### Textos legales
+
+Condiciones (apartados 3, 4, 6 y 7) y política de privacidad (finalidad y conservación de la
+cuota mensual, Zoom y correo del sistema de Google, IP/navegador/página de origen, frases de la
+casilla y de las UTM, apartado 10), con fecha 19 de noviembre de 2026 y versión `2026-11`. Lo
+pendiente va en comentarios `PENDIENTE` del código (no visibles).
+
+### Preguntas abiertas
+
+1. **Nombre de la clave del importe** en la raíz de `GET /form-builder/public/{PLAN_ID}`, si es
+   con IVA y si va en euros o céntimos (`extractPlanAmount()`).
+2. **Forma exacta de la respuesta 200** de `create-checkout-session` (¿`url` en la raíz?, ¿otros
+   campos?) y si Stripe puede devolver un dominio propio de Checkout (hoy solo se acepta
+   `checkout.stripe.com`; `CHECKOUT_HOSTS` en `plan-checkout.ts`).
+3. **Tabla de errores del checkout** (WEB-INTEGRACION.md §1, no disponible): se ha aplicado la de
+   los leads; ¿hay otros códigos (409, 422…)? ¿`Retry-After` expuesto por CORS?
+4. **UTM «cuando abres el formulario»** (frase de la política de privacidad): la web solo los
+   envía al enviar un formulario o al contratar (no al abrirlo, y la URL del widget de reservas
+   no lleva `utm_*`); ¿se espera que la web los envíe al abrir un formulario o que los pase al
+   widget, o los registra AccioGest por su cuenta? Para muro-legal: el apartado 5 de la política
+   dice «La web solo se comunica con AccioGest cuando envías un formulario, cuando contratas un
+   plan o cuando se carga el sistema de reservas», que no incluye «al abrir»; las dos frases
+   llevan un comentario PENDIENTE (no visible). Según la respuesta, añadir «cuando abres un
+   formulario» al apartado 5 o pedir que se cambie la frase del handoff (que no se toca).
+4b. **«Página de origen»** (política de privacidad): el cuerpo de las peticiones no lleva la
+   página; AccioGest solo recibe la cabecera `Referer`, y con `Referrer-Policy:
+   strict-origin-when-cross-origin` (netlify.toml) es solo el dominio, sin la ruta. ¿La leen del
+   `Referer` (entonces se cambia la política de esa petición para enviar la ruta) o esperan un
+   campo en el cuerpo (¿con qué nombre?)? No se ha inventado ningún campo.
+5. **Plan con el precio oculto** (`mostrar_precio: false`): sin importe no hay texto de
+   «Desistimiento»; hoy su «Contratar» abre «Solicitar información». Confirmar.
+6. **Reservas**: servicio por defecto cuando una tarjeta no tiene `acciogest_id` (hoy, la primera
+   asesoría reservable enlazada); ¿lo prefieren así o que esa tarjeta no ofrezca «Reservar»?
+7. **Denisse**: cuándo surte efecto la baja («al terminar el mes que ya has pagado») y que
+   coincida con el portal de Stripe; activar el portal de cliente y los recibos por correo
+   (la frase «Recibirás el recibo de cada pago…» solo es cierta con ellos).
+8. **Abogado**: qué es «servicio completamente prestado» en una cuota mensual y cómo se calcula
+   la parte proporcional (no se ha inventado ninguna definición).
+9. Política de privacidad: entidades de Zoom y de Google (correo), su condición y transferencias
+   internacionales.
