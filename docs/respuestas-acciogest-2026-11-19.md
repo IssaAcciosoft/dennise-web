@@ -1,3 +1,5 @@
+> **Archivado.** Lo de los planes mensuales (cuota mensual, `create-checkout-session`, `PUBLIC_STRIPE_PORTAL_URL`, baja) queda sustituido por la respuesta de AccioGest del 23-11-2026 (pago único): `docs/respuestas-acciogest-2026-11-23-pago-unico.md` y `docs/integracion-acciogest.md`.
+
 Hola,
 
 Gracias. Os contesto por puntos (comprobado en el código de la API que vamos a subir).

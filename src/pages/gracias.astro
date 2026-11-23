@@ -3,29 +3,24 @@
  * /gracias/ — página de agradecimiento tras contratar un plan o reservar una asesoría en
  * AccioGest. No se indexa, no está en el menú ni en el sitemap (astro.config.mjs → NOINDEX).
  *
- *   /gracias/?tipo=plan&plan=basico|estandar|premium   (+ &response_id=…&pago=ok&session_id=… al
- *                                                       volver de Stripe; handoff 19-11-2026 §3)
+ *   /gracias/?tipo=plan&plan=basico|estandar|premium   (vuelta desde la página de pago del plan)
  *   /gracias/?tipo=reserva                              (+ &cita=… desde el widget, BookingSlot)
  *   /gracias/                       (genérica)
- *   …&pago=<cualquier cosa que no sea «ok»> → «El pago no se ha completado», con «Volver a
- *   intentarlo» (/autogestion-dg/ o, con tipo=reserva, /servicios/#reservar) y WhatsApp.
  *
- * Planes de cuota mensual (handoff de AccioGest del 19-11-2026): tras pagar en Stripe se vuelve
- * a /gracias/?tipo=plan&plan=…&response_id=…&pago=ok&session_id=…; aquí se explica la cuota
- * mensual (importe del catálogo) y, si PUBLIC_STRIPE_PORTAL_URL es válido, se enlaza el portal
- * de cliente de Stripe para darse de baja. Tras una reserva, el widget avisa con postMessage y
- * la web viene aquí con ?tipo=reserva. response_id, session_id y cita no se muestran ni se usan
- * (nunca se escribe texto de la URL en la página: solo se eligen bloques ya escritos y nombres
- * y cuotas conocidos).
+ * Planes de Autogestión DG, PAGO ÚNICO (respuesta de AccioGest del 23-11-2026 §6): la página de
+ * pago de cada plan solo redirige aquí cuando el pago se ha completado, con
+ * ?tipo=plan&plan=<clave> y sin response_id ni pago=ok, así que aquí no se comprueba ningún
+ * parámetro de pago. Tras una reserva, el widget avisa con postMessage y la web viene aquí con
+ * ?tipo=reserva. cita no se muestra ni se usa (nunca se escribe texto de la URL en la página:
+ * solo se eligen bloques ya escritos y nombres e importes conocidos).
  * PENDIENTE (cliente): el proceso tras la compra no está confirmado; aquí solo figura lo que
  * incluye el plan contratado (servicios.json → plans[].includes; docs/cambios-2026-10.md §5),
  * sin pasos ni plazos. Sin ?plan= conocido, la lista no se muestra. Cuando la cliente o AccioGest confirmen el proceso, se podrá añadir una lista numerada.
  */
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import Icon from '~/components/ui/Icon.astro';
-import { autogestion, planIncludes, planFeeLabel, CATALOG } from '~/lib/services';
-import { STRIPE_PORTAL_URL } from '~/config/acciogest';
-import { WA_TEXT, waLink, PHONE, EMAIL } from '~/data/site';
+import { autogestion, planIncludes, formatAmount, CATALOG } from '~/lib/services';
+import { WA_TEXT, waLink } from '~/data/site';
 import { url } from '~/lib/url';
 import { safeJson } from '~/lib/json';
 
@@ -34,12 +29,13 @@ import { safeJson } from '~/lib/json';
 const planNames = Object.fromEntries(autogestion.plans.flatMap((p) => [[p.form_key, p.name], [p.id, p.name]]));
 // Clave (form_key o id) → form_key: qué lista de «Lo que incluye tu plan» se muestra.
 const planKeys = Object.fromEntries(autogestion.plans.flatMap((p) => [[p.form_key, p.form_key], [p.id, p.form_key]]));
-// Clave (form_key o id) → cuota («242 €/mes»); sin precio visible, no hay cuota que mostrar.
+// Clave (form_key o id) → importe («242 €»); sin precio visible, no hay importe que mostrar.
+const fee = (amount: number) => `${formatAmount(amount)} €`;
 const planFees = Object.fromEntries(
-  autogestion.plans.flatMap((p) => (p.amount === null ? [] : [[p.form_key, planFeeLabel(p.amount)], [p.id, planFeeLabel(p.amount)]])),
+  autogestion.plans.flatMap((p) => (p.amount === null ? [] : [[p.form_key, fee(p.amount)], [p.id, fee(p.amount)]])),
 );
-// pago presente y distinto de «ok» → variante «pago no completado» (gana a tipo=…).
-const variantScript = `(function(){try{var q=new URLSearchParams(location.search),t=q.get('tipo'),p=q.get('pago'),v=p!==null&&p!=='ok'?'pago-ko':t==='plan'||t==='reserva'?t:'';if(v==='pago-ko'){document.querySelectorAll('[data-thanks-icon]').forEach(function(el){el.hidden=el.getAttribute('data-thanks-icon')!=='ko'});if(t==='reserva'){document.querySelectorAll('[data-retry]').forEach(function(el){el.setAttribute('href',el.getAttribute('data-retry'))})}}if(v){document.querySelectorAll('[data-thanks]').forEach(function(el){el.hidden=el.getAttribute('data-thanks')!==v})}var m=${safeJson(planNames)},k=q.get('plan')||'',n=Object.prototype.hasOwnProperty.call(m,k)?m[k]:'';if(typeof n==='string'&&n){document.querySelectorAll('[data-plan-name]').forEach(function(el){el.textContent=n})}var pk=${safeJson(planKeys)},f=Object.prototype.hasOwnProperty.call(pk,k)?pk[k]:'';if(typeof f==='string'&&f){document.querySelectorAll('[data-plan-includes]').forEach(function(el){el.hidden=el.getAttribute('data-plan-includes')!==f})}var pf=${safeJson(planFees)},c=Object.prototype.hasOwnProperty.call(pf,k)?pf[k]:'';if(typeof c==='string'&&c){document.querySelectorAll('[data-plan-fee]').forEach(function(el){el.textContent=c});document.querySelectorAll('[data-plan-fee-line]').forEach(function(el){el.hidden=false})}}catch(e){}})();`;
+// Solo se mira tipo y plan: AccioGest solo vuelve aquí con el pago completado (no hay ?pago=).
+const variantScript = `(function(){try{var q=new URLSearchParams(location.search),t=q.get('tipo'),v=t==='plan'||t==='reserva'?t:'';if(v){document.querySelectorAll('[data-thanks]').forEach(function(el){el.hidden=el.getAttribute('data-thanks')!==v})}var m=${safeJson(planNames)},k=q.get('plan')||'',n=Object.prototype.hasOwnProperty.call(m,k)?m[k]:'';if(typeof n==='string'&&n){document.querySelectorAll('[data-plan-name]').forEach(function(el){el.textContent=n})}var pk=${safeJson(planKeys)},f=Object.prototype.hasOwnProperty.call(pk,k)?pk[k]:'';if(typeof f==='string'&&f){document.querySelectorAll('[data-plan-includes]').forEach(function(el){el.hidden=el.getAttribute('data-plan-includes')!==f})}var pf=${safeJson(planFees)},c=Object.prototype.hasOwnProperty.call(pf,k)?pf[k]:'';if(typeof c==='string'&&c){document.querySelectorAll('[data-plan-fee]').forEach(function(el){el.textContent=c});document.querySelectorAll('[data-plan-fee-line]').forEach(function(el){el.hidden=false})}}catch(e){}})();`;
 ---
 
 <BaseLayout
@@ -49,8 +45,7 @@ const variantScript = `(function(){try{var q=new URLSearchParams(location.search
 >
   <section class="thanks" data-wa-hide>
     <div class="container container--narrow thanks-inner">
-      <span class="thanks-icon" aria-hidden="true" data-thanks-icon="ok"><Icon name="check" /></span>
-      <span class="thanks-icon thanks-icon--ko" aria-hidden="true" data-thanks-icon="ko" hidden><Icon name="card" /></span>
+      <span class="thanks-icon" aria-hidden="true"><Icon name="check" /></span>
 
       <div class="thanks-block" data-thanks="default">
         <h1 class="page-title">Gracias.</h1>
@@ -60,11 +55,9 @@ const variantScript = `(function(){try{var q=new URLSearchParams(location.search
       <div class="thanks-block" data-thanks="plan" hidden>
         <p class="eyebrow eyebrow--center">{autogestion.name}</p>
         <h1 class="page-title">Gracias por contratar el <span data-plan-name>plan</span>.</h1>
-        <p class="lead thanks-fee" data-plan-fee-line hidden>Cuota: <strong data-plan-fee></strong> ({CATALOG.tax_label}).</p>
-        <p class="lead">Tu plan es de cuota mensual: se cobra con tarjeta, a través de Stripe, el día de la contratación y el mismo día de cada mes siguiente hasta que te des de baja.</p>
-        <p class="thanks-portal">
-          Puedes darte de baja en cualquier momento{STRIPE_PORTAL_URL ? <> desde tu <a href={STRIPE_PORTAL_URL} target="_blank" rel="noopener">portal de cliente de Stripe</a> o</> : ''} escribiéndonos por WhatsApp al <a href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">{PHONE.display}</a> o a <a href={EMAIL.href}>{EMAIL.address}</a>. La baja surte efecto al terminar el mes ya pagado: no se cobra la cuota siguiente y conservas el servicio hasta esa fecha. Más información en las <a href={url('/condiciones-contratacion/')}>condiciones de contratación</a>.
-        </p>
+        <p class="lead">Tu pago se ha completado.</p>
+        <p class="lead thanks-fee" data-plan-fee-line hidden>Pago único: <strong data-plan-fee></strong> ({CATALOG.tax_label}).</p>
+        <p class="thanks-note">Más información en las <a href={url('/condiciones-contratacion/')}>condiciones de contratación</a>.</p>
         {
           autogestion.plans.map((plan) => (
             <div class="thanks-steps" data-plan-includes={plan.form_key} hidden>
@@ -86,14 +79,6 @@ const variantScript = `(function(){try{var q=new URLSearchParams(location.search
         <p class="eyebrow eyebrow--center">Asesorías</p>
         <h1 class="page-title">Gracias por reservar tu asesoría.</h1>
         <p class="lead">Tu reserva se ha completado.</p>
-      </div>
-
-      <div class="thanks-block" data-thanks="pago-ko" hidden>
-        <h1 class="page-title">El pago no se ha completado.</h1>
-        <p class="lead">Puedes volver a intentarlo o escribirnos por WhatsApp y te ayudamos.</p>
-        <a class="btn btn--primary" href={url('/autogestion-dg/#planes')} data-retry={url('/servicios/#reservar')}>
-          <span>Volver a intentarlo</span>
-        </a>
       </div>
 
       <p class="thanks-help">¿Tienes alguna duda?</p>
@@ -135,8 +120,6 @@ const variantScript = `(function(){try{var q=new URLSearchParams(location.search
     box-shadow: 0 14px 30px -14px rgba(110, 29, 122, .7);
   }
   .thanks-icon :global(.icon) { width: 2.2rem; height: 2.2rem; }
-  .thanks-icon[hidden] { display: none; }
-  .thanks-icon--ko { background: var(--c-lavender); color: var(--c-plum); box-shadow: none; }
   .thanks-block:not([hidden]) { display: grid; justify-items: center; gap: 1.25rem; }
   .thanks-block .page-title { max-width: 14em; }
   .thanks-block .lead { max-width: 34rem; }
@@ -153,7 +136,7 @@ const variantScript = `(function(){try{var q=new URLSearchParams(location.search
   .thanks-list { gap: .85rem; }
   .thanks-help { margin-top: 2rem; color: var(--c-ink-soft); }
   .thanks-fee strong { color: var(--c-plum); font-weight: 600; }
-  .thanks-portal { max-width: 34rem; color: var(--c-ink-soft); text-wrap: pretty; }
-  .thanks-portal a { color: var(--c-plum); font-weight: 600; }
+  .thanks-note { max-width: 34rem; color: var(--c-ink-soft); text-wrap: pretty; }
+  .thanks-note a { color: var(--c-plum); font-weight: 600; }
   .thanks-actions { justify-content: center; margin-top: 1.25rem; }
 </style>

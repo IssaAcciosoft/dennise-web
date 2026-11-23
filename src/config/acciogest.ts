@@ -5,8 +5,7 @@
  *  ÚNICO sitio donde se ponen los IDs. Mientras un ID tenga su valor de ejemplo
  *  (FORM_ID_… / PLUGIN_ID), esa pieza funciona en MODO SIMULADO:
  *    - formularios: se simula la respuesta de la API (no se envía nada) y se avisa;
- *    - planes: el diálogo de contratación simula create-checkout-session (no se cobra nada) y
- *      lleva a /gracias/?tipo=plan&…&pago=ok&response_id=mock;
+ *    - planes: «Contratar» abre el formulario de solicitud (o WhatsApp) en lugar del pago;
  *    - reservas: se muestra un panel con «Solicitar cita» y WhatsApp.
  *  Al poner los IDs reales, pasa a producción sin tocar nada más.
  *
@@ -19,8 +18,6 @@
  *         PUBLIC_ACCIOGEST_FORM_CONTACTO
  *         PUBLIC_ACCIOGEST_PLAN_BASICO          PUBLIC_ACCIOGEST_PLAN_ESTANDAR
  *         PUBLIC_ACCIOGEST_PLAN_PREMIUM         PUBLIC_ACCIOGEST_BOOKING_PLUGIN_ID
- *         PUBLIC_STRIPE_PORTAL_URL              (portal de cliente de Stripe de Denisse:
- *                                                https://billing.stripe.com/p/login/…)
  *         PUBLIC_ACCIOGEST_WIDGET_ORIGINS       (no hace falta: el iframe se sirve desde la API)
  *  Todos los IDs son números enteros (el del plugin es su id, no el token). Se leen AL COMPILAR:
  *  tras cambiarlos en Netlify, Deploys → Trigger deploy → «Clear cache and deploy site».
@@ -43,10 +40,9 @@ export const FORMS = {
 } as const;
 
 /**
- * Planes de Autogestión DG (/autogestion-dg/), cuota mensual (handoff 19-11-2026 §3): id del
- * formulario de cada plan en AccioGest. El diálogo de contratación (PlanCheckoutDialog.astro +
- * src/scripts/plan-checkout.ts) hace POST {API}/form-builder/public/{id}/create-checkout-session
- * y lleva a la página de pago de Stripe que devuelve AccioGest.
+ * Planes de Autogestión DG (/autogestion-dg/): pago único por trámite (respuesta de AccioGest del
+ * 23-11-2026). Cada id es el formulario del plan en AccioGest; «Contratar» abre su página pública
+ * {API}/form-builder/public/{id}/page (casillas, importe y pago con tarjeta) en la misma pestaña.
  */
 export const PLANES = {
   basico: pick(import.meta.env.PUBLIC_ACCIOGEST_PLAN_BASICO, 'FORM_ID_BASICO'),
@@ -104,26 +100,14 @@ export const FIELD_LABELS = {
 } as const satisfies Record<FormKey, Record<string, string>>;
 
 /**
- * Diálogo de contratación de un plan: etiquetas EXACTAS de `response_data` (handoff §2).
- * Clave = name del campo en el HTML · valor = etiqueta en AccioGest.
- */
-export const PLAN_FIELD_LABELS = {
-  nombre: 'Nombre',
-  email: 'Email',
-  telefono: 'Teléfono',
-  rgpd: 'Consentimiento RGPD',
-  desistimiento: 'Desistimiento',
-} as const;
-
-/**
  * Versión de la política de privacidad. Desde el handoff del 19-11-2026 YA NO se envía con los
  * formularios (se guarda el texto de la casilla y la fecha): solo la muestra la página
  * /politica-privacidad/. Cambiarla aquí al publicar una política nueva.
  */
 export const POLICY_VERSION = '2026-11';
 
-/** UTM que se envían con cada lead y cada contratación, en la RAÍZ del cuerpo (de la URL de
- *  llegada; se guardan para toda la visita). */
+/** UTM que se envían con cada lead, en la RAÍZ del cuerpo (de la URL de llegada; se guardan
+ *  para toda la visita). */
 export const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign'] as const;
 /** Clave en sessionStorage (la usan BaseLayout y src/scripts/acciogest.ts). */
 export const UTM_STORAGE_KEY = 'dg:utm';
@@ -139,39 +123,12 @@ export function isConfigured(id: string | null | undefined): id is string {
   return /^\d+$/.test(value) && !PLACEHOLDER.test(value);
 }
 
-/** POST que crea la sesión de pago de Stripe de un plan (null = ID de ejemplo). */
-export const checkoutSessionUrl = (key: PlanKey): string | null =>
-  isConfigured(PLANES[key])
-    ? `${ACCIOGEST_API}/form-builder/public/${encodeURIComponent(PLANES[key])}/create-checkout-session`
-    : null;
-
 /**
- * Modo simulado de la contratación: solo mientras NINGÚN plan tiene ID real (WEB-INTEGRACION
- * 12-11 §0). Con una configuración parcial, un plan sin ID no simula una compra: su botón se
- * queda en WhatsApp y no abre el diálogo (§1, `checkoutOn`).
+ * Página pública de pago de un plan en AccioGest (se abre en la MISMA pestaña: al pagar, AccioGest
+ * vuelve a /gracias/?tipo=plan&plan=<clave>). null = ID de ejemplo → el botón no lleva al pago.
  */
-export const PLAN_CHECKOUT_MOCK: boolean = (Object.keys(PLANES) as PlanKey[]).every((k) => !isConfigured(PLANES[k]));
-
-/** ¿Abre el diálogo de contratación el botón de este plan? (ID real, o todo en modo simulado). */
-export const planCheckoutEnabled = (key: PlanKey): boolean => checkoutSessionUrl(key) !== null || PLAN_CHECKOUT_MOCK;
-
-/**
- * Portal de cliente de Stripe de Denisse (baja de los planes, recibos, tarjeta). Solo se acepta
- * un enlace que empiece por https://billing.stripe.com/p/login/ (handoff §4); cualquier otro
- * valor (o vacío) → null y no se muestra ningún enlace.
- */
-const STRIPE_PORTAL_PREFIX = 'https://billing.stripe.com/p/login/';
-export function stripePortalUrl(value: string | undefined = import.meta.env.PUBLIC_STRIPE_PORTAL_URL): string | null {
-  const v = String(value ?? '').trim();
-  if (!v.startsWith(STRIPE_PORTAL_PREFIX) || v.length <= STRIPE_PORTAL_PREFIX.length || /[\s"'<>]/.test(v)) return null;
-  try {
-    const u = new URL(v);
-    return u.protocol === 'https:' && u.hostname === 'billing.stripe.com' ? u.href : null;
-  } catch {
-    return null;
-  }
-}
-export const STRIPE_PORTAL_URL: string | null = stripePortalUrl();
+export const planPageUrl = (key: PlanKey): string | null =>
+  isConfigured(PLANES[key]) ? `${ACCIOGEST_API}/form-builder/public/${encodeURIComponent(PLANES[key])}/page` : null;
 
 /**
  * Script del widget de reservas (WEB-INTEGRACION 12-11 §4):

@@ -197,12 +197,13 @@ export function linkedServiceIds(json, mock) {
 
 /**
  * ============================================================================
- *  Cuota mensual de un plan desde GET /form-builder/public/{PLAN_FORM_ID}
+ *  Importe (pago único) de un plan desde GET /form-builder/public/{PLAN_FORM_ID}
  * ============================================================================
- *  WEB-INTEGRACION 12-11 §3 y handoff 19-11 §3: el importe está en la RAÍZ del JSON del
- *  formulario, no en un campo:
+ *  WEB-INTEGRACION 12-11 §3 y respuestas 19-11 §2: el importe está en la RAÍZ del JSON del
+ *  formulario, no en un campo. Desde la respuesta del 23-11-2026 los planes son de PAGO ÚNICO
+ *  (payment_interval = null):
  *    { "payment_enabled": true, "payment_amount": 315, "payment_currency": "EUR",
- *      "payment_interval": "month", "payment_concept": "…", "payment_button_text": "…", "fields": […] }
+ *      "payment_interval": null, "payment_concept": "…", "payment_button_text": "…", "fields": […] }
  *  `payment_amount` es un número en euros, tal cual se cobra (sin céntimos), y solo se lee si
  *  `payment_enabled === true`. Respaldo (la spec permite dejarlo): el campo de pago de fields[],
  *  la forma anterior de la API.
@@ -244,22 +245,23 @@ export function extractPlanAmount(json) {
 }
 
 /**
- * Aviso de compilación si el plan aún no es mensual en AccioGest (WEB-INTEGRACION 12-11 §3):
- * `payment_interval` es "month" en los mensuales y null en los de pago único.
+ * Aviso de compilación si el plan tiene cobro recurrente en AccioGest. Los planes de Autogestión
+ * DG son de PAGO ÚNICO por trámite (respuesta del 23-11-2026 §1): `payment_interval` debe ser
+ * null (o no venir). Cualquier otro valor (p. ej. "month") → aviso.
  * @param {unknown} json respuesta de GET /form-builder/public/{id}
  * @param {string} key form_key del plan
  * @returns {string | null}
  */
 export function planIntervalWarning(json, key) {
   const interval = isObj(json) ? /** @type {Record<string, unknown>} */ (json).payment_interval : undefined;
-  return interval === 'month' ? null : `⚠ El plan «${key}» no es mensual en AccioGest: falta aplicar planes-mensuales-619.sql`;
+  if (interval === null || interval === undefined) return null;
+  return `⚠ El plan «${key}» tiene cobro recurrente en AccioGest (payment_interval=${JSON.stringify(interval)}); debe ser pago único (payment_interval = null)`;
 }
 
 /**
  * Control de cordura del importe de un plan leído de AccioGest frente al de servicios.json
- * (`reference`). Ese importe va a la cuota visible y al texto legal «Desistimiento»
- * («cuota de N € al mes»). `payment_amount` viene en euros (WEB-INTEGRACION 12-11 §3); esta
- * comprobación queda como salvaguarda por si llegara en céntimos (convención de Stripe).
+ * (`reference`). Ese importe es el precio visible del plan (la página de pago de AccioGest
+ * muestra el suyo). `payment_amount` viene en euros (WEB-INTEGRACION 12-11 §3); esta comprobación queda como salvaguarda por si llegara en céntimos (convención de Stripe).
  *  - ≈ 100 × reference (entre 50× y 200×) → error: se descarta (última copia buena o
  *    servicios.json), porque casi seguro son céntimos.
  *  - Diferencia de más del 25 % → aviso, pero se usa (un cambio de precio en AccioGest es posible).
@@ -274,7 +276,7 @@ export function checkPlanAmount(amount, reference) {
     return { error: `importe ${amount} ≈ ${Math.round(ratio)} × el de servicios.json (${reference} €): parece estar en céntimos` };
   }
   if (Math.abs(amount - reference) / reference > 0.25) {
-    return { warning: `importe ${amount} € muy distinto del de servicios.json (${reference} €); revisar antes de publicar (va en el texto legal «Desistimiento»)` };
+    return { warning: `importe ${amount} € muy distinto del de servicios.json (${reference} €); revisar antes de publicar (es el precio que se ve en la web)` };
   }
   return {};
 }

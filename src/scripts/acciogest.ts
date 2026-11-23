@@ -169,7 +169,7 @@ function labelToName(formKey: FormKey, label: string): string | null {
   return hit ? hit[0] : null;
 }
 
-export function parseRetryAfter(header: string | null, body: Record<string, unknown>): number {
+function parseRetryAfter(header: string | null, body: Record<string, unknown>): number {
   let seconds = NaN;
   if (header) {
     seconds = /^\d+$/.test(header.trim()) ? Number(header) : (Date.parse(header) - Date.now()) / 1000;

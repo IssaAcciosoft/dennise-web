@@ -7,7 +7,7 @@
  */
 import type { FormKey } from '~/config/acciogest';
 
-export { CONSENT_TEXT, PLAN_PRIVACY_TEXT, planDesistimientoText } from './consent';
+export { CONSENT_TEXT } from './consent';
 
 /** Nombre visible de cada formulario (política de privacidad). */
 export const FORM_NAMES: Record<FormKey, string> = {

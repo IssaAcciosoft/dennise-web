@@ -1,8 +1,10 @@
 # Integración web ↔ AccioGest
 
-Fuente: respuestas del equipo de AccioGest (02/10/2026; fase A, 27/10/2026; planes mensuales,
-handoff del 19/11/2026 en `docs/handoff-acciogest-2026-11-19.md`, que **prevalece** sobre lo
-anterior donde no coincidan: ver «Planes mensuales (handoff 19-11)» al final). Este
+Fuente: respuestas del equipo de AccioGest (02/10/2026; fase A, 27/10/2026; handoff del
+19/11/2026 en `docs/handoff-acciogest-2026-11-19.md` y respuestas del 19/11; y la **decisión final
+del 23/11/2026**, `docs/respuestas-acciogest-2026-11-23-pago-unico.md`: los planes son de **pago
+único** por trámite, que **prevalece** sobre todo lo anterior: ver «Planes: pago único (respuesta
+23-11)» al final; lo de los planes mensuales del handoff 19-11 queda **sustituido**). Este
 documento es la especificación que sigue el código (`src/config/acciogest.ts`,
 `src/scripts/acciogest.ts`, `src/scripts/lead-form.ts`, `src/data/servicios.json`,
 `src/integrations/acciogest-catalog.mjs`, `src/lib/services.ts`). Resumen de uso: README →
@@ -14,7 +16,7 @@ documento es la especificación que sigue el código (`src/config/acciogest.ts`,
 |---|---|---|
 | Reservas de asesorías (con pago previo) | Widget de AccioGest embebido (iframe): servicio, día y hora, modalidad, datos, RGPD y pago con Stripe | Falta `BOOKING_PLUGIN_ID` |
 | Catálogo de servicios | `src/data/servicios.json` + catálogo público de AccioGest al compilar, mezclado por `acciogest_id` (fase A) | Hecho; en desarrollo en AccioGest |
-| Planes Autogestión DG (242 / 315 / 425 €/mes, cuota mensual) | Diálogo propio (`PlanCheckoutDialog.astro` + `plan-checkout.ts`) → `create-checkout-session` → Stripe; el importe, de la raíz del JSON del formulario (handoff 19-11) | Faltan los 3 IDs; no publicar hasta que AccioGest lo diga |
+| Planes Autogestión DG (242 / 315 / 425 €, IVA incluido, pago único por trámite) | Enlace a la página de pago del plan en AccioGest (`/form-builder/public/{id}/page`, misma pestaña), que lleva las casillas, el importe y el pago con Stripe; el importe que muestra la web, de la raíz del JSON del formulario (respuesta 23-11) | Faltan los 3 IDs |
 | Leads: solicitud de servicio, "Cuéntame tu historia", contacto | HTML propio + `fetch` POST al form-builder público | Faltan los 3 `FORM_ID` |
 | Captcha | No existe en AccioGest; no se usa. Se usa un campo honeypot | — |
 
@@ -28,7 +30,6 @@ export const FORMS = { servicio: 'FORM_ID_SERVICIO', historia: 'FORM_ID_HISTORIA
 export const PLANES = { basico: 'FORM_ID_BASICO', estandar: 'FORM_ID_ESTANDAR', premium: 'FORM_ID_PREMIUM' };
 export const BOOKING_PLUGIN_ID = 'PLUGIN_ID';
 export const POLICY_VERSION = '2026-11'; // solo se muestra en /politica-privacidad/; ya no se envía
-// + PUBLIC_STRIPE_PORTAL_URL → STRIPE_PORTAL_URL (null si no empieza por https://billing.stripe.com/p/login/)
 ```
 
 Cada ID se puede dar también con una variable de entorno al compilar (tiene prioridad):
@@ -39,7 +40,7 @@ Cada ID se puede dar también con una variable de entorno al compilar (tiene pri
 
 Mientras un ID siga con su valor de ejemplo (`FORM_ID_…` / `PLUGIN_ID`), la web funciona en
 **modo simulado** para esa pieza (ver más abajo). Al poner los IDs reales, pasa a producción
-sin tocar nada más (`isConfigured(id)`: no vacío y no es un valor de ejemplo).
+sin tocar nada más (`isConfigured(id)`: un número entero, no un valor de ejemplo).
 
 ## 1. Reservas (widget)
 
@@ -73,21 +74,24 @@ precios, nombres y duraciones de las asesorías salen del catálogo de AccioGest
 
 ## 3. Planes Autogestiona
 
-> **Sustituido por el handoff del 19-11-2026** (cuota mensual, diálogo propio y
-> `create-checkout-session`): ver «Planes mensuales (handoff 19-11)». Lo que sigue es la forma
-> anterior, que deja de funcionar el día que AccioGest pasa los planes a mensuales.
+> **Vigente otra vez desde la respuesta de AccioGest del 23-11-2026** (pago único por trámite):
+> el diálogo propio y `create-checkout-session` de los planes mensuales (handoff 19-11) se han
+> quitado. Detalle: «Planes: pago único (respuesta 23-11)».
 
-Cada plan era un formulario de pago de AccioGest:
+Cada plan es un formulario de pago de AccioGest (`planPageUrl()` en `src/config/acciogest.ts`):
 
 ```
 https://api.acciogest.com/form-builder/public/{FORM_ID_PLAN}/page
 ```
 
-Esa página ya cobra con Stripe y crea el lead. Se abre en una pestaña nueva. Sin ID del plan,
-«Contratar Plan X» abre el formulario `servicio` con el plan preseleccionado. Junto a los
-planes: «Al contratar aceptas las condiciones de contratación» (`/condiciones-contratacion/`).
+Esa página lleva las casillas de AccioGest (incluida «Desistimiento»), el importe y el pago con
+tarjeta (Stripe), y crea el lead. Se abre en la **misma pestaña** (decisión de la web: así la vuelta
+tras pagar sigue en la misma pestaña). Sin ID real del plan, o con el precio oculto
+(`mostrar_precio: false`), «Contratar Plan X» abre el formulario `servicio` con el plan
+preseleccionado (sin JavaScript, WhatsApp). Junto a los planes: «Pago único y seguro con
+tarjeta. Al contratar aceptas las condiciones de contratación» (`/condiciones-contratacion/`).
 Tras el pago se vuelve a la URL de redirección configurada en cada formulario de plan
-(`/gracias/?tipo=plan&plan=basico|estandar|premium`, ver «Fase A»).
+(`/gracias/?tipo=plan&plan=basico|estandar|premium`, ver «Fase A» → A4).
 
 ## 4. Leads
 
@@ -125,7 +129,6 @@ Etiquetas que usa la web (editables en `src/config/acciogest.ts` → `FIELD_LABE
 | servicio | Nombre, Email, Teléfono, Servicio, Mensaje, Consentimiento RGPD |
 | historia | Nombre, Email, Teléfono, País, Tema, Historia, Compartir públicamente, Anonimato, Cómo contactarte, Instagram, Consentimiento RGPD |
 | contacto | Nombre, Email, Teléfono, Mensaje, Consentimiento RGPD |
-| plan (diálogo de contratación) | Nombre, Email, Teléfono, Consentimiento RGPD, Desistimiento |
 
 Valores: `Servicio` = `lead_value` de `servicios.json` (p. ej. `Asesoría migratoria · 1 hora`,
 `Programa Autogestiona · Plan Estándar`, `Extranjería · Arraigos` y el resto de servicios de
@@ -293,10 +296,11 @@ se escribe en el repositorio.
 | Plan Estándar | `https://DOMINIO/gracias/?tipo=plan&plan=estandar` |
 | Plan Premium | `https://DOMINIO/gracias/?tipo=plan&plan=premium` |
 
-AccioGest añade `&response_id=…&pago=ok`. En `/gracias/`: `pago=ok` (o sin `pago`) → «Gracias
-por contratar el plan…»; `pago` con cualquier otro valor → «El pago no se ha completado», con
-«Volver a intentarlo» (`/autogestion-dg/`; con `tipo=reserva`, `/servicios/#reservar`) y
-WhatsApp. Ningún parámetro se escribe en la página (solo se eligen bloques ya escritos).
+`DOMINIO` = `dggestoresyabogados.com`. Desde la respuesta del 23-11-2026 (§6) la vuelta es
+exactamente esa, **sin** `response_id` ni `pago=ok`, y la página de pago **solo redirige cuando el
+pago se ha completado**: `/gracias/` no comprueba ningún parámetro de pago y muestra «Gracias por
+contratar el plan…» con el nombre, el importe (pago único) y lo que incluye. Ningún parámetro se
+escribe en la página (solo se eligen bloques ya escritos y nombres e importes conocidos).
 
 ### A5. Pruebas sin AccioGest
 
@@ -315,95 +319,57 @@ WhatsApp. Ningún parámetro se escribe en la página (solo se eligen bloques ya
 
 ### Pendiente (fuera de la fase A)
 
-- Cliente: modelo de cobro de los planes (pago único / mensual / N plazos), IVA de las
-  asesorías y correos de las cuentas.
+- ~~Cliente: modelo de cobro de los planes~~ → pago único por trámite (AccioGest, 23-11).
+- Cliente: IVA de las asesorías y correos de las cuentas.
 - AccioGest: los IDs reales (formularios, planes, plugin) y los 6 `plugin_citas_services.id` de
   las asesorías para `servicios.json`; aviso de cuándo pasa a producción.
 - Resuelto por WEB-INTEGRACION 12-11: importe de los planes (`payment_amount` en la raíz, §3),
   origen del iframe (`https://api.acciogest.com`, §4), cambio de servicio (`setService`, §4) y
   nombre y duración de online / presencial (sin catálogo salen de `servicios.json`, §4).
 
-## Planes mensuales (handoff 19-11)
+## Planes: pago único (respuesta 23-11)
 
-Fuentes: `docs/handoff-acciogest-2026-11-19.md` (HANDOFF, 19/11/2026) y
-`docs/web-integracion-acciogest-2026-11-12.md` (WEB-INTEGRACION, 12/11/2026, la guía por fichero
-a la que remite el handoff). Si chocan, manda el HANDOFF (es posterior): su §6.2 de
-WEB-INTEGRACION está desfasada (la clave es `Desistimiento`, con el texto por plan del HANDOFF §2).
+Fuente: `docs/respuestas-acciogest-2026-11-23-pago-unico.md` (decisión final de AccioGest,
+23/11/2026). **Prevalece** sobre el handoff 19-11 y WEB-INTEGRACION 12-11 en todo lo de los planes:
 
-**No publicar en producción** los planes mensuales (diálogo y textos legales) hasta que AccioGest
-lo diga: ese día pasa los planes a mensuales y la contratación anterior deja de funcionar. Los
-textos legales nuevos pasan antes por la revisión legal de AccioGest (muro-legal).
+1. No se aplica `planes-mensuales-619.sql`: los planes se quedan con `payment_interval = null`.
+2. **Sin portal de cliente de Stripe** (no hay `PUBLIC_STRIPE_PORTAL_URL`).
+3. «Contratar» abre `https://api.acciogest.com/form-builder/public/<id del plan>/page` (la web
+   eligió la **misma pestaña**). Esa página lleva las casillas, el importe y el pago con tarjeta.
+   Sin diálogo propio ni `create-checkout-session`.
+4. El texto de «Desistimiento» («Contrato el {Plan}: pago único de {importe} € (IVA incluido). Pido
+   que el servicio empiece ya…») lo pone AccioGest en su página de cada plan. **En la web no hay
+   casilla** para los planes.
+5. Condiciones: sin nada de la cuota mensual; el texto de pago único del 10/11 con el art. 108.4.
+   Pasa por muro-legal con el resto.
+6. Vuelta tras pagar: `/gracias/?tipo=plan&plan=<basico|estandar|premium>`, sin `response_id` ni
+   `pago=ok`; solo se redirige con el pago completado, así que `/gracias/` no comprueba nada.
 
-### Variables de Netlify
+Lo demás sigue igual: formularios de leads, reservas con un id por servicio, privacidad con Zoom y
+Google, dominio `dggestoresyabogados.com` y los IDs.
+
+### Variables de Netlify (7)
 
 ```
 PUBLIC_ACCIOGEST_FORM_SERVICIO      PUBLIC_ACCIOGEST_PLAN_BASICO       PUBLIC_ACCIOGEST_BOOKING_PLUGIN_ID
-PUBLIC_ACCIOGEST_FORM_HISTORIA      PUBLIC_ACCIOGEST_PLAN_ESTANDAR     PUBLIC_STRIPE_PORTAL_URL
+PUBLIC_ACCIOGEST_FORM_HISTORIA      PUBLIC_ACCIOGEST_PLAN_ESTANDAR
 PUBLIC_ACCIOGEST_FORM_CONTACTO      PUBLIC_ACCIOGEST_PLAN_PREMIUM
 ```
 
 - Todos los IDs son números enteros. El del plugin es su id, no el token.
-- `PUBLIC_STRIPE_PORTAL_URL`: portal de cliente de Stripe de Denisse
-  (`https://billing.stripe.com/p/login/…`). Si no empieza así, no se muestra el enlace
-  (`stripePortalUrl()` en `src/config/acciogest.ts`). Aparece en las condiciones (apartado 7),
-  en `/gracias/?tipo=plan` y en el diálogo de contratación («Cómo darte de baja»).
 - Se leen **al compilar**: tras definirlas en Netlify (Site configuration → Environment
   variables), **Deploys → Trigger deploy → «Clear cache and deploy site»**.
 
-### Diálogo de contratación
+### Contratación en la web
 
-`src/components/services/PlanCheckoutDialog.astro` + `src/scripts/plan-checkout.ts`; se abre
-con `data-plan-checkout="basico|estandar|premium"` (sin JavaScript, el botón es un enlace a
-WhatsApp). Solo lleva `data-plan-checkout` un plan con ID real (`planCheckoutEnabled()`), o todos
-mientras **ningún** ID es real (modo simulado); un plan sin ID con otros ya configurados se queda
-en WhatsApp (nunca una compra simulada en producción). Antes del botón «Pagar y contratar», en la
-misma pantalla: «Plan Estándar · 315 € al mes (IVA incluido)», «Se cobra cada mes con tu tarjeta
-hasta que te des de baja. Primer cobro: hoy.» y «Cómo darte de baja: …» (portal de Stripe solo
-si `PUBLIC_STRIPE_PORTAL_URL` es válido, WhatsApp o email; cuándo surte efecto queda pendiente de
-Denisse) con enlace a `/condiciones-contratacion/`. Campos: `Nombre`*, `Email`*, `Teléfono`*, `Consentimiento RGPD`* («He leído la
-política de privacidad») y `Desistimiento`* (texto por plan con su nombre y cuota del catálogo,
-`planDesistimientoText()` en `src/data/consent.ts`). Dos casillas separadas, sin marcar al abrir
-(se desmarcan cada vez), las dos obligatorias; errores en español con `aria-invalid` y
-`aria-describedby`. El valor de cada casilla es su texto plano exacto; en la web «política de
-privacidad» enlaza a `/politica-privacidad/` y «condiciones de contratación» a
-`/condiciones-contratacion/`.
-
-```
-POST {API}/form-builder/public/{PLAN_ID}/create-checkout-session
-{ "response_data": { "Nombre": "…", "Email": "…", "Teléfono": "…",
-                     "Consentimiento RGPD": "He leído la política de privacidad",
-                     "Desistimiento": "Contrato el Plan Básico: cuota de 242 € al mes (IVA incluido), …" },
-  "utm_source": "…", "utm_medium": "…", "utm_campaign": "…" }
-```
-
-La petición lleva `referrerPolicy: 'no-referrer-when-downgrade'`: AccioGest arma la dirección de
-cancelación de Stripe con la cabecera `Referer`, que con la política del sitio
-(`strict-origin-when-cross-origin`, `netlify.toml`) llegaría sin ruta; así «Atrás» en Stripe
-vuelve a `/autogestion-dg/` y no a la portada. La cabecera del sitio no cambia.
-
-Tabla de WEB-INTEGRACION 12-11 §1:
-
-| Respuesta | Qué hace la web |
-|---|---|
-| 200 `{ url, sessionId, response_id }` | Va a `url` solo si es https en `checkout.stripe.com` (`isStripeCheckoutUrl()`); no guarda nada. Si no, «No se ha podido preparar el pago. Inténtalo de nuevo.» |
-| 400 `{ error, missing_fields }` | Marca los campos; si falta `Desistimiento`, explica que hay que marcar «Contrato el Plan …» (inicio inmediato y condiciones) |
-| 400 «El campo "Email" debe ser un email válido» / «…"Teléfono" debe ser un número de teléfono válido» / «Hace falta un email válido para la suscripción» | Marca el email o el teléfono con ese mensaje (aunque la web lo diera por bueno) y lo muestra |
-| 400 de configuración (sin cobro mensual, Stripe sin configurar, sin dirección de vuelta, URL de redirección no válida, `USAR_CHECKOUT_SUSCRIPCION`) | «Este plan no se puede contratar online ahora mismo» + WhatsApp (no se enseña el texto interno) |
-| 403 / 404 | «Este plan no está disponible ahora mismo» + WhatsApp (404 también si el id no es entero) |
-| 429 | Botón bloqueado **60 s** con cuenta atrás (`Retry-After` no se puede leer desde la web; límite: 120 envíos cada 10 min por conexión, compartido con los leads) |
-| 502 / 500 | El mensaje del servidor (o «No se ha podido preparar el pago. Inténtalo de nuevo.») y se puede reintentar en el acto |
-| Red / > 15 s | Mensaje de conexión («no se ha cobrado nada»), se conservan los datos, WhatsApp |
-
-Campo trampa `website` (si viene relleno no se envía nada), guardia de doble envío (enviando,
-bloqueado o ya saliendo hacia Stripe) y, al volver con «Atrás» desde Stripe, el botón se
-reactiva. Vuelta de Stripe: `/gracias/?tipo=plan&plan=…&response_id=…&pago=ok&session_id=…`
-(texto de cuota mensual y, si existe, enlace al portal).
-
-**Modo simulado** (solo mientras **ningún** plan tiene ID real): aviso visible, no se envía nada y
-se va a `/gracias/?tipo=plan&plan=…&pago=ok&response_id=mock`. Errores de prueba:
-`?acciogest_mock=400` (falta `Desistimiento`), `400-rgpd`, `400-tel`, `400-email`,
-`400-tel-invalido`, `400-email-sub`, `400-config`, `403`, `404`, `429`, `500`, `502`, `network`,
-`timeout`, `bad-url`.
+- Plan con ID real y precio visible → `<a href="{API}/form-builder/public/{PLAN_ID}/page">`
+  (`planPageUrl()`), sin `target="_blank"` (misma pestaña, sin aviso de «pestaña nueva»).
+- Plan sin ID real (valor de ejemplo, o modo simulado) o con el precio oculto → «Solicitar
+  información» con el plan preseleccionado (`data-service-request`); sin JavaScript, WhatsApp.
+- La web no envía nada a AccioGest al contratar un plan (es la página de AccioGest la que recoge
+  los datos y cobra).
+- Precio en las tarjetas: «242 €» + «IVA incluido · pago único»; en condiciones, `/gracias/` y
+  JSON-LD, «242 €» (`Offer` con `price`, sin `UnitPriceSpecification`).
 
 ### Importe de los planes
 
@@ -411,43 +377,68 @@ se va a `/gracias/?tipo=plan&plan=…&pago=ok&response_id=mock`. Errores de prue
 `GET {API}/form-builder/public/{PLAN_ID}` y toma `payment_amount` de la **raíz** del JSON
 (WEB-INTEGRACION 12-11 §3): un número en euros, tal cual se cobra, sin céntimos, y solo si
 `payment_enabled === true`. La raíz trae también `payment_currency` (`EUR`), `payment_interval`
-(`"month"` en los mensuales, `null` en los de pago único), `payment_concept` y
-`payment_button_text`. Solo si la raíz no trae importe, se usa el campo de pago de `fields[]`
-(respaldo). Si `payment_interval !== "month"`, la compilación avisa (`⚠ El plan «…» no es mensual
-en AccioGest: falta aplicar planes-mensuales-619.sql`). Prioridad: `payment_amount` >
-`fields[]` > catálogo > `servicios.json`. 242 / 315 / 425 son lo que Stripe cobra cada mes y la
-web los muestra «IVA incluido» (si Denisse confirma que no lo incluyen, se cambia en AccioGest y
-se quita de `tax_label` en `servicios.json`, `AutogestionPlans.astro` y las condiciones). Se
-muestra como «242 € al mes» en `/autogestion-dg/`, «242 €/mes» en las condiciones, `/gracias/` y
-el JSON-LD (`Offer` con `UnitPriceSpecification`, `unitCode: MON`,
-`valueAddedTaxIncluded`). La visita guiada de `/servicios/` no muestra los planes.
+(`null` en los de pago único), `payment_concept` y `payment_button_text`. Solo si la raíz no trae
+importe, se usa el campo de pago de `fields[]` (respaldo). Si `payment_interval` **no es `null`**
+(p. ej. `"month"`), la compilación avisa (`⚠ El plan «…» tiene cobro recurrente en AccioGest
+(payment_interval="month"); debe ser pago único …`, `planIntervalWarning()`). Prioridad:
+`payment_amount` > `fields[]` > catálogo > `servicios.json`. 242 / 315 / 425 € se muestran «IVA
+incluido» (si Denisse confirma que no lo incluyen, se cambia en AccioGest y se quita de
+`tax_label` en `servicios.json`, `AutogestionPlans.astro` y las condiciones). Fixture de prueba:
+`scripts/acciogest-mock/plan-form.json` (con `payment_interval: null`).
 
 ### Textos legales
 
-Condiciones (apartados 3, 4, 6 y 7) y política de privacidad (finalidad y conservación de la
-cuota mensual, Zoom y correo del sistema de Google, IP/navegador/página de origen, frases de la
-casilla y de las UTM, apartado 10), con fecha 19 de noviembre de 2026 y versión `2026-11`. Lo
-pendiente va en comentarios `PENDIENTE` del código (no visibles).
+- Condiciones: texto del 10/11 aprobado por la titular, con la corrección art. 108.3 → 108.4 y
+  «pago único» en el apartado 4. Sin cuota mensual, baja ni portal. La línea «Confirmación de la
+  contratación» sigue vacía con su `PENDIENTE`, como el 10/11 (ver pregunta abierta 2). Pasa por
+  muro-legal antes de publicar.
+- Política de privacidad: sin la finalidad ni la conservación de la cuota mensual; Stripe, para el
+  pago único de reservas y planes. Se mantienen la frase de las UTM de AccioGest (19-11), Zoom y
+  Google (pendientes de muro-legal). Lo pendiente va en comentarios `PENDIENTE` del código (no
+  visibles).
 
-### Preguntas abiertas
+### Preguntas abiertas (23-11)
 
-Resueltas (WEB-INTEGRACION 12-11):
+1. **UTM y página de origen al contratar un plan** (AccioGest, muro-legal). Con la página de pago
+   alojada, la web no envía nada a AccioGest al contratar un plan, pero la frase de las UTM de la
+   política (apartado 2) y la del apartado 5 dicen «… o contratas un plan» (texto de AccioGest del
+   19-11, que no se cambia sin ellos). Preguntar: ¿la página `/page` del plan registra el origen de
+   la visita (`Referer`, aviso de visita)? ¿Hay que añadir `utm_source` / `utm_medium` /
+   `utm_campaign` a la URL de `/page` para que se guarden? Según la respuesta, añadir las UTM al
+   enlace o ajustar las dos frases con muro-legal. Marcado con `PENDIENTE (AccioGest, muro-legal)`
+   en `src/pages/politica-privacidad.astro`.
+2. **Confirmación de la contratación** (AccioGest, muro-legal). El apartado 4 de las condiciones
+   sigue con el `PENDIENTE` del 10/11. Preguntar si AccioGest (o Stripe, si se activan los recibos
+   por correo) envía un email de confirmación al comprar un plan o reservar, y con qué contenido.
+   Redacción propuesta, si se confirma: «recibirás el recibo del pago de Stripe en el correo que
+   indiques al contratar. En el caso de las asesorías, recibirás además un correo de confirmación
+   de la cita.» No se publica hasta tener la respuesta.
+3. **AccioGest**: los IDs (3 formularios, 3 planes, plugin), los 6 `plugin_citas_services.id`, la
+   API en producción, `montaje-619.sql`, el horario, el webhook, la revisión legal (muro-legal) y
+   el aviso para publicar.
+4. **Prueba en una vista previa**: las vueltas de los planes van a
+   `https://dggestoresyabogados.com/gracias/…` (configuradas en AccioGest), no a la vista previa.
 
-- ~~1. Clave del importe~~ → `payment_amount` en la raíz de `GET /form-builder/public/{PLAN_ID}`,
-  en euros (sin céntimos), solo con `payment_enabled === true`; `payment_interval` = `"month"` en
-  los mensuales. 242 / 315 / 425 es lo que cobra Stripe y la web lo muestra «IVA incluido»
-  (WEB-INTEGRACION 12-11 §3; HANDOFF §3).
-- ~~2. Respuesta 200 / dominio de Checkout~~ → `{ "url": "https://checkout.stripe.com/c/pay/cs_…",
-  "sessionId": "cs_…", "response_id": 123 }`, `url` en la raíz; la web hace
-  `location.assign(url)` y no guarda nada. El código de referencia solo acepta
-  `checkout.stripe.com`: `CHECKOUT_HOSTS` se queda así (WEB-INTEGRACION 12-11 §1).
-- ~~3. Tabla de errores del checkout~~ → la de «Diálogo de contratación» arriba: 400 de datos
-  frente a 400 de configuración, 403/404 no disponible, 429 con 60 s fijos (`Retry-After` no se
-  puede leer desde la web; 120 envíos cada 10 min por conexión), 502/500 con el mensaje del
-  servidor y reintento. No hay otros códigos (409, 422…) (WEB-INTEGRACION 12-11 §1).
-- ~~4b. «Página de origen», en parte~~ → en la contratación AccioGest lee la cabecera `Referer`
-  (no un campo del cuerpo) para la dirección de cancelación de Stripe; la petición lleva
-  `referrerPolicy: 'no-referrer-when-downgrade'` (WEB-INTEGRACION 12-11 §1 e Incoherencias #2).
+## Planes mensuales (handoff 19-11) — SUSTITUIDO
+
+> **Sustituido por la respuesta de AccioGest del 23-11-2026** (pago único): ver «Planes: pago
+> único (respuesta 23-11)». Se deja solo como registro; las especificaciones archivadas son
+> `docs/handoff-acciogest-2026-11-19.md` y `docs/web-integracion-acciogest-2026-11-12.md`.
+
+Lo que se quitó de la web: el diálogo de contratación (`PlanCheckoutDialog.astro`,
+`src/scripts/plan-checkout.ts`), la llamada `POST …/create-checkout-session` y su configuración
+(`checkoutSessionUrl`, `PLAN_CHECKOUT_MOCK`, `planCheckoutEnabled`, `PLAN_FIELD_LABELS`, la lista
+de dominios de Stripe Checkout), las casillas de los planes de `src/data/consent.ts` (texto «Contrato
+el … cuota … al mes …» y «He leído la política de privacidad»), `PUBLIC_STRIPE_PORTAL_URL`, los
+textos de cuota mensual, baja y portal (tarjetas, `/gracias/`, condiciones, privacidad, JSON-LD
+con `UnitPriceSpecification`) y la comprobación de `pago` en `/gracias/`. Se mantienen todos los
+cambios de los leads, las reservas, el dominio y la privacidad que trajeron el handoff y las
+respuestas del 19-11.
+
+### Resueltas antes (WEB-INTEGRACION 12-11 y respuestas 19-11), que siguen valiendo
+
+- Importe: `payment_amount` en la raíz de `GET /form-builder/public/{PLAN_ID}`, en euros (sin
+  céntimos), solo con `payment_enabled === true` (WEB-INTEGRACION 12-11 §3).
 - ~~Etiquetas de los leads~~ → confirmadas: coinciden con `FIELD_LABELS` (WEB-INTEGRACION 12-11 §2).
 - ~~Origen del iframe y recarga del widget~~ → `https://api.acciogest.com` (sin
   `PUBLIC_ACCIOGEST_WIDGET_ORIGINS`); `window.AccioGestBooking.setService(id)` para cambiar de
@@ -455,45 +446,22 @@ Resueltas (WEB-INTEGRACION 12-11):
 - ~~Qué es `service` / `/catalogo`~~ → `plugin_citas_services.id` (entero, como texto en
   `acciogest_id`); los planes quedan con `acciogest_id: null`; `/catalogo` no existe (404 previsto,
   se usa `servicios.json`) (WEB-INTEGRACION 12-11 §4).
-
-Resueltas (respuestas de AccioGest 19-11, `docs/respuestas-acciogest-2026-11-19.md`):
-
-- ~~UTM «cuando abres el formulario»~~ → la frase del handoff no vale para esta web («cuando
-  abres» era su página alojada). Sustituida por la de AccioGest: «… se envía a AccioGest, junto
-  con la página de origen, solo cuando envías un formulario o contratas un plan, sin cookies y sin
-  identificarte». No se envía nada al abrir ni se pasan UTM al widget.
+- ~~UTM «cuando abres el formulario»~~ → sustituida por la frase de AccioGest: «… se envía a
+  AccioGest, junto con la página de origen, solo cuando envías un formulario o contratas un plan,
+  sin cookies y sin identificarte». No se envía nada al abrir ni se pasan UTM al widget (ver la
+  pregunta abierta 1 de arriba sobre los planes).
 - ~~«Página de origen» en los leads~~ → del `Referer`: `referrerPolicy: 'no-referrer-when-downgrade'`
-  también en el `fetch` de `/submit`, sin cambiar la política de toda la web.
+  en el `fetch` de `/submit`, sin cambiar la política de toda la web.
 - ~~`utm_content` / `utm_term`~~ → opcionales; se queda con las tres.
-- ~~Plan con el precio oculto~~ → correcto que abra «Solicitar información».
+- ~~Plan con el precio oculto~~ → abre «Solicitar información».
 - ~~Tarjeta sin id~~ → con el widget activo, esa tarjeta no ofrece «Reservar» con otro servicio:
   «Reservar por WhatsApp». Online y presencial son servicios distintos, cada uno con su id: si la
   tarjeta tiene los dos, un botón por modalidad (`Consultations.astro`).
-- ~~Valor de las casillas~~ → clave = etiqueta exacta, valor = texto de la casilla sin el markdown
-  de los enlaces (ya era así: `src/data/consent.ts`).
+- ~~Valor de las casillas de los leads~~ → clave = etiqueta exacta, valor = texto de la casilla
+  sin el markdown de los enlaces (`src/data/consent.ts`).
 - ~~Zoom y Google~~ → propuesta de AccioGest puesta en la política (apartados 5 y 6), pendiente de
-  muro-legal: Zoom Communications, Inc. (EE. UU.), encargado de Denisse; Google Ireland Limited
-  (posible acceso de Google LLC), subencargado de AccioGest; Marco de Privacidad UE-EE. UU. y
-  cláusulas tipo.
-- **Dominio definitivo**: `https://dggestoresyabogados.com` (comprado por AccioGest). Las vueltas de
-  los planes y los enlaces de las casillas en AccioGest ya lo usan. `astro.config.mjs` lo usa en
+  muro-legal.
+- ~~Denisse~~ → con Denisse solo habla AccioGest (Stripe, recibos por correo). Horario: lunes a
+  viernes de 9 a 18.
+- **Dominio definitivo**: `https://dggestoresyabogados.com`. `astro.config.mjs` lo usa en
   producción; hay que conectarlo en Netlify como dominio principal con HTTPS.
-
-Siguen abiertas:
-
-1. **AccioGest (la semana que viene)**: los IDs (3 formularios, 3 planes, plugin), el enlace del
-   portal de Stripe (`PUBLIC_STRIPE_PORTAL_URL`), los 6
-   `plugin_citas_services.id`, la API en producción, `montaje-619.sql`, el horario, el webhook,
-   la revisión legal (muro-legal) y el aviso para publicar (activan los planes mensuales justo
-   antes).
-2. ~~**Denisse**~~ → resuelto (AccioGest 19-11): con Denisse solo habla AccioGest. Stripe
-   (claves, portal de cliente con cancelación al final del periodo, recibos por correo) lo
-   configuran con ella; el enlace del portal llega con los IDs. Horario: lunes a viernes de 9 a
-   18 (lo cambia AccioGest si hace falta; no afecta a la web). Zoom y Google se quedan como en la
-   propuesta. Si algún día quiere cobrar entero algún trámite, ese trámite necesita precio aparte.
-3. ~~**Abogado**~~ → resuelto (19-11): art. 108.4; si desiste dentro de los 14 días paga solo la
-   parte de la cuota por los días transcurridos y se le devuelve el resto; la baja surte efecto al
-   terminar el mes pagado. La casilla «Desistimiento» no cambia.
-4. **Prueba en una vista previa**: las vueltas de Stripe de los planes van a
-   `https://dggestoresyabogados.com/gracias/…` (configuradas en AccioGest), no a la vista previa;
-   la cancelación sí vuelve a la página de origen (`Referer`).

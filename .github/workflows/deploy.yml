@@ -5,7 +5,6 @@
 #   BASE_PATH  solo si se sirve en un subdirectorio, p. ej. /dennise-web (sin dominio propio)
 #   PUBLIC_ACCIOGEST_*  IDs de AccioGest (opcionales; si no se definen se usan los de
 #              src/config/acciogest.ts). Ver README → «AccioGest».
-#   PUBLIC_STRIPE_PORTAL_URL  portal de cliente de Stripe (https://billing.stripe.com/p/login/…).
 name: Deploy to GitHub Pages
 
 on:
@@ -50,7 +49,6 @@ jobs:
           PUBLIC_ACCIOGEST_PLAN_ESTANDAR: ${{ vars.PUBLIC_ACCIOGEST_PLAN_ESTANDAR }}
           PUBLIC_ACCIOGEST_PLAN_PREMIUM: ${{ vars.PUBLIC_ACCIOGEST_PLAN_PREMIUM }}
           PUBLIC_ACCIOGEST_BOOKING_PLUGIN_ID: ${{ vars.PUBLIC_ACCIOGEST_BOOKING_PLUGIN_ID }}
-          PUBLIC_STRIPE_PORTAL_URL: ${{ vars.PUBLIC_STRIPE_PORTAL_URL }}
 
   deploy:
     needs: build

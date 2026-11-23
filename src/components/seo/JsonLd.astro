@@ -37,25 +37,10 @@ const consultationOffers = consultations.flatMap((c) =>
   })),
 );
 // Plan con el precio oculto en AccioGest (amount null): Offer sin price.
-// Planes de cuota MENSUAL (handoff 19-11-2026): precio por mes (UnitPriceSpecification, MON).
 const planOffers = autogestion.plans.map((p) => ({
   '@type': 'Offer',
   name: `${autogestion.name} · ${p.name}`,
-  ...(p.amount !== null
-    ? {
-        price: String(p.amount),
-        priceCurrency: currency,
-        priceSpecification: {
-          '@type': 'UnitPriceSpecification',
-          price: String(p.amount),
-          priceCurrency: currency,
-          unitCode: 'MON',
-          unitText: 'mes',
-          referenceQuantity: { '@type': 'QuantitativeValue', value: 1, unitCode: 'MON' },
-          valueAddedTaxIncluded: CATALOG.tax_included,
-        },
-      }
-    : {}),
+  ...(p.amount !== null ? { price: String(p.amount), priceCurrency: currency } : {}),
   url: absoluteUrl('/autogestion-dg/', site),
 }));
 // Servicios sin precio publicado (se solicitan por el formulario): Offer → Service, sin price.

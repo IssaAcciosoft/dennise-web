@@ -1,5 +1,7 @@
 # Cómo conectar la web de Denisse a AccioGest (cambios en la web)
 
+> **Archivado.** Lo de los planes mensuales (cuota mensual, diálogo propio, `create-checkout-session`, portal de Stripe, baja) queda sustituido por la respuesta de AccioGest del 23-11-2026 (pago único): `docs/respuestas-acciogest-2026-11-23-pago-unico.md` y `docs/integracion-acciogest.md`.
+
 Para: quien mantiene `IssaAcciosoft/dennise-web` (rama `claude/exciting-hypatia-hfwwmq`, último commit revisado `3d494b4`, 10-11).
 Fecha: 12-11-2026. Escrito contra la rama de la API `feat/denisse-planes-mensuales` (aún no en producción) y el montaje `planes-2026-10-27/sql/montaje-619.sql` (aún no aplicado).
 

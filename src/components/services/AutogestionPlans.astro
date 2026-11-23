@@ -2,19 +2,18 @@
 /**
  * Autogestión DG (/autogestion-dg/): trámites disponibles, planes con lo que incluye y lo que no
  * incluye cada uno (docs/cambios-2026-10.md §5, desde servicios.json) y aviso de condiciones.
- * Ningún plan destacado (§5). Planes de CUOTA MENSUAL (handoff de AccioGest del 19-11-2026 §3):
- * - «Contratar Plan X» abre el diálogo de contratación propio (PlanCheckoutDialog.astro +
- *   src/scripts/plan-checkout.ts, data-plan-checkout), que crea la sesión de pago de Stripe en
- *   AccioGest. Solo si el plan tiene ID real (planCheckoutEnabled); mientras TODOS los IDs son de
- *   ejemplo, el diálogo funciona en modo simulado. Un plan sin ID con otros ya configurados se
- *   queda con el enlace a WhatsApp (WEB-INTEGRACION 12-11 §1, `checkoutOn`).
- * - Sin JavaScript, el botón es un enlace a WhatsApp.
- * - Plan con el precio oculto en AccioGest (amount null): no hay texto de «Desistimiento» que
- *   aceptar, así que abre «Solicitar información» con el plan preseleccionado (data-service-request).
+ * Ningún plan destacado (§5). PAGO ÚNICO por trámite (respuesta de AccioGest del 23-11-2026):
+ * - «Contratar Plan X» con el ID del plan configurado (PLANES en src/config/acciogest.ts) →
+ *   página de pago de AccioGest {API}/form-builder/public/{FORM_ID}/page en la MISMA pestaña
+ *   (casillas, «Desistimiento», importe y pago con tarjeta); al pagar, AccioGest vuelve a
+ *   /gracias/?tipo=plan&plan=<clave>.
+ * - Sin ID (valor de ejemplo) o con el precio oculto en AccioGest (amount null) → abre el
+ *   diálogo «Solicitar información» con el plan preseleccionado (data-service-request);
+ *   sin JavaScript, WhatsApp.
  */
-import { autogestion as program, planIncludes, planFeeLabel, formatAmount, CATALOG } from '~/lib/services';
+import { autogestion as program, planIncludes, formatAmount, CATALOG } from '~/lib/services';
 import { WA_TEXT, waLink } from '~/data/site';
-import { planCheckoutEnabled, PLANES, type PlanKey } from '~/config/acciogest';
+import { planPageUrl, type PlanKey } from '~/config/acciogest';
 import { url } from '~/lib/url';
 import Icon from '../ui/Icon.astro';
 
@@ -24,8 +23,7 @@ const procedures = program.procedures_title.replace(/\s+en:?$/, '');
 const planMessage = (name: string, amount: number | null) =>
   amount === null
     ? `Hola Denisse, me interesa el ${name} de ${program.name}. Mi trámite es: `
-    : `Hola Denisse, me interesa el ${name} (${planFeeLabel(amount)}, ${CATALOG.tax_label}) de ${program.name}. Mi trámite es: `;
-const checkoutOn = (key: string) => key in PLANES && planCheckoutEnabled(key as PlanKey);
+    : `Hola Denisse, me interesa el ${name} (${formatAmount(amount)} €, ${CATALOG.tax_label}) de ${program.name}. Mi trámite es: `;
 ---
 
 <section class="section section--white ag-procedures" id="tramites" aria-labelledby="tramites-title">
@@ -56,6 +54,8 @@ const checkoutOn = (key: string) => key in PLANES && planCheckoutEnabled(key as 
       {
         program.plans.map((plan) => {
           const included = new Set(planIncludes(plan));
+          // Precio oculto (amount null): «Solicitar información», aunque el plan tenga ID.
+          const payUrl = plan.amount !== null ? planPageUrl(plan.form_key as PlanKey) : null;
           const listId = `plan-${plan.id}-incluye`;
           return (
             <li class="plan-card" data-plan-key={plan.form_key} data-reveal data-spotlight>
@@ -64,9 +64,9 @@ const checkoutOn = (key: string) => key in PLANES && planCheckoutEnabled(key as 
                 <>
                   <p class="plan-price">
                     <span class="price">{formatAmount(plan.amount)}</span>
-                    <span class="currency">€ al mes</span>
+                    <span class="currency">€</span>
                   </p>
-                  <p class="plan-vat">{CATALOG.tax_label} · cuota mensual, cancelas cuando quieras</p>
+                  <p class="plan-vat">{CATALOG.tax_label} · pago único</p>
                 </>
               ) : (
                 <p class="plan-vat">Precio al contratar</p>
@@ -92,17 +92,10 @@ const checkoutOn = (key: string) => key in PLANES && planCheckoutEnabled(key as 
                   ),
                 )}
               </ul>
-              {plan.amount !== null ? (
-                <a
-                  class="btn btn--block btn--outline"
-                  href={waLink(planMessage(plan.name, plan.amount))}
-                  target="_blank"
-                  rel="noopener"
-                  data-plan-cta={plan.form_key}
-                  data-lead-value={plan.lead_value}
-                  data-plan-checkout={checkoutOn(plan.form_key) ? plan.form_key : undefined}
-                >
+              {payUrl ? (
+                <a class="btn btn--block btn--outline" href={payUrl} data-plan-cta={plan.form_key} data-lead-value={plan.lead_value}>
                   <span>Contratar {plan.name}</span>
+                  <span class="visually-hidden"> (pago seguro en AccioGest)</span>
                 </a>
               ) : (
                 <a
@@ -125,7 +118,7 @@ const checkoutOn = (key: string) => key in PLANES && planCheckoutEnabled(key as 
 
     <div class="plan-foot" data-reveal>
       <p class="plan-terms">
-        Pago seguro con tarjeta, cuota mensual. Al contratar aceptas las{' '}
+        Pago único y seguro con tarjeta. Al contratar aceptas las{' '}
         <a href={url('/condiciones-contratacion/')}>condiciones de contratación</a>.
       </p>
       <a class="btn btn--link" href={waLink(WA_TEXT.autogestionDudas)} target="_blank" rel="noopener">

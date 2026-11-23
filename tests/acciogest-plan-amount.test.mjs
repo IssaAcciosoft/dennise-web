@@ -1,4 +1,4 @@
-// Importe de los planes (cuota mensual) desde la raíz del JSON del formulario
+// Importe de los planes (pago único) desde la raíz del JSON del formulario
 // (WEB-INTEGRACION 12-11 §3: payment_amount en euros, solo con payment_enabled = true): npm test
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -51,11 +51,15 @@ test('sin importe válido → undefined', () => {
   assert.equal(extractPlanAmount([{ payment_enabled: true, payment_amount: 1 }]), undefined);
 });
 
-test('aviso si el plan no es mensual (payment_interval !== "month")', () => {
-  assert.equal(planIntervalWarning({ payment_interval: 'month' }, 'basico'), null);
-  assert.match(planIntervalWarning({ payment_interval: null }, 'basico') ?? '', /«basico» no es mensual.*planes-mensuales-619\.sql/);
-  assert.ok(planIntervalWarning({}, 'premium'));
-  assert.ok(planIntervalWarning(null, 'premium'));
+test('aviso si el plan tiene cobro recurrente (payment_interval no es null)', () => {
+  assert.equal(planIntervalWarning({ payment_interval: null }, 'basico'), null);
+  assert.equal(planIntervalWarning({}, 'premium'), null);
+  assert.equal(planIntervalWarning(null, 'premium'), null);
+  assert.match(
+    planIntervalWarning({ payment_interval: 'month' }, 'basico') ?? '',
+    /«basico» tiene cobro recurrente en AccioGest \(payment_interval="month"\); debe ser pago único/,
+  );
+  assert.ok(planIntervalWarning({ payment_interval: 'year' }, 'estandar'));
 });
 
 test('el fixture de los tres planes tiene la forma real', () => {

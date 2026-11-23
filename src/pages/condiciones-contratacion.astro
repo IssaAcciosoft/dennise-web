@@ -1,25 +1,19 @@
 ---
 /**
  * Condiciones de contratación (asesorías y Autogestión DG). Aprobadas por la titular el 10/11/2026.
- * Cambios del handoff de AccioGest del 19-11-2026 (planes de cuota mensual, §1) y cambios finales
- * del 19-11 (art. 108.4, desistimiento de la cuota por días, baja al final del mes pagado):
- * pasan por la revisión legal (muro-legal, en AccioGest) y se publican el mismo día que los planes.
+ * Respuesta de AccioGest del 23-11-2026: los planes son de PAGO ÚNICO por trámite (sin cuota
+ * mensual, sin portal de Stripe). Base: el texto del 10/11, con la corrección art. 108.3 →
+ * art. 108.4 y «pago único» en el apartado 4 (la página de pago del plan se abre en la misma
+ * pestaña). La confirmación de la contratación sigue PENDIENTE, como en el texto del 10/11.
+ * Pasa por la revisión legal (muro-legal, en AccioGest) con el resto de los textos antes de
+ * publicarse.
  * Precios y servicios desde src/data/servicios.json (siempre coinciden con la web).
  */
 import LegalLayout from '~/layouts/LegalLayout.astro';
 import { PHONE, TEL_LINK, WA_TEXT, waLink, EMAIL, OFFICE } from '~/data/site';
 import { LEGAL_ID } from '~/data/legal';
-import { feeAmount } from '~/data/consent';
-import { STRIPE_PORTAL_URL } from '~/config/acciogest';
-import { consultations, autogestion, planIncludes, formatAmount, planFeeLabel } from '~/lib/services';
+import { consultations, autogestion, planIncludes, formatAmount } from '~/lib/services';
 import { url } from '~/lib/url';
-
-// «242, 315 o 425 € al mes, IVA incluido» (apartado 4, texto del handoff), desde el catálogo.
-// Si AccioGest oculta el precio de algún plan, no se enumeran importes.
-const planAmounts = autogestion.plans.map((p) => p.amount);
-const feeList = planAmounts.every((a): a is number => a !== null)
-  ? `${planAmounts.map(feeAmount).join(', ').replace(/, ([^,]*)$/, ' o $1')} € al mes, IVA incluido`
-  : null;
 ---
 
 <LegalLayout
@@ -28,7 +22,7 @@ const feeList = planAmounts.every((a): a is number => a !== null)
   description="Condiciones de contratación de las asesorías y de Autogestión DG de DG Gestores y Abogados (Denisse González): precios, pago, prestación del servicio y derecho de desistimiento."
 >
   <Fragment slot="intro">
-    <p class="legal-updated">Última actualización: 19 de noviembre de 2026</p>
+    <p class="legal-updated">Última actualización: 23 de noviembre de 2026</p>
   </Fragment>
 
   <h2>1. Prestadora del servicio</h2>
@@ -59,17 +53,17 @@ const feeList = planAmounts.every((a): a is number => a !== null)
   </ul>
   <h3>{autogestion.name}</h3>
   <ul>
-    {autogestion.plans.map((p) => <li>{p.name}: {p.amount !== null ? planFeeLabel(p.amount) : 'el precio se indica al contratar'}. Incluye: {planIncludes(p).map((i) => i.charAt(0).toLowerCase() + i.slice(1)).join('; ')}.</li>)}
+    {autogestion.plans.map((p) => <li>{p.name}: {p.amount !== null ? `${formatAmount(p.amount)} €` : 'el precio se indica en su página de pago'}. Incluye: {planIncludes(p).map((i) => i.charAt(0).toLowerCase() + i.slice(1)).join('; ')}.</li>)}
   </ul>
   <p>Los precios se indican en euros. Todos los precios publicados (asesorías y planes de {autogestion.name}) incluyen el IVA correspondiente (21&nbsp;%).</p>
 
   <h2>4. Contratación y pago</h2>
   <ul>
     <li><strong>Asesorías:</strong> se reservan en el sistema de reservas de la web, eligiendo el servicio, el día y la hora y la modalidad (online o presencial), o bien por WhatsApp al <a href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">{PHONE.display}</a>, acordando el día, la hora y la modalidad.</li>
-    <li><strong>{autogestion.name}:</strong> cada plan se contrata en la propia web, con una cuota mensual que se cobra con tarjeta, a través de Stripe, el día de la contratación y el mismo día de cada mes siguiente hasta que te des de baja. {feeList ? `El importe de la cuota es el indicado en el apartado 3 (${feeList}).` : 'El importe de la cuota es el indicado en el apartado 3.'}</li>
+    <li><strong>{autogestion.name}:</strong> cada plan se contrata en su página de pago, con un <strong>pago único</strong> por trámite del importe indicado en el apartado 3.</li>
     <li>Las asesorías online se pagan <strong>antes de la cita</strong>. Las asesorías presenciales acordadas por WhatsApp se pagan en el despacho.</li>
-    <li>El pago se realiza <strong>por adelantado</strong>, con tarjeta, a través de la plataforma de pago <strong>Stripe</strong> integrada en el sistema de reservas y en el proceso de contratación de los planes. Esta web no recibe ni guarda los datos de tu tarjeta.</li>
-    <li>Confirmación de la contratación: Recibirás el recibo de cada pago de Stripe en el correo que indiques al contratar. En el caso de las asesorías, recibirás además un correo de confirmación de la cita. {/* Recibos por correo de Stripe: los activa AccioGest con Denisse (19-11), junto con el portal de cliente (cancelar «al final del periodo»). */}</li>
+    <li>El pago se realiza <strong>por adelantado</strong>, con tarjeta, a través de la plataforma de pago <strong>Stripe</strong> integrada en el sistema de reservas y en las páginas de pago de AccioGest. Esta web no recibe ni guarda los datos de tu tarjeta.</li>
+    <li>Confirmación de la contratación: {/* PENDIENTE: confirmar con AccioGest si se envía un email de confirmación y con qué contenido */}</li>
   </ul>
 
   <h2>5. Prestación del servicio</h2>
@@ -83,16 +77,14 @@ const feeList = planAmounts.every((a): a is number => a !== null)
   <p>Si contratas como persona consumidora, tienes derecho a desistir del contrato en un plazo de <strong>14 días naturales</strong> desde su celebración, sin necesidad de justificación, conforme a los artículos 102 y siguientes del Texto Refundido de la Ley General para la Defensa de los Consumidores y Usuarios (Real Decreto Legislativo 1/2007).</p>
   <ul>
     <li><strong>Inicio del servicio dentro del plazo:</strong> si solicitas expresamente que el servicio comience durante esos 14 días (por ejemplo, al reservar una asesoría para una fecha dentro de ese plazo o al empezar {autogestion.name}), y después desistes, deberás abonar la parte proporcional del servicio ya prestado (art. 108.4).</li>
-    <li><strong>Planes de cuota mensual:</strong> el plazo de 14 días se cuenta desde la primera cuota. Si desistes dentro de ese plazo, tras haber pedido que el servicio empiece de inmediato, pagarás solo la parte de esa cuota que corresponde a los días ya transcurridos y se te devolverá el resto. Las cuotas siguientes se pagan por el servicio del mes que comienza, y solo puedes dejar de pagarlas dándote de baja como se explica en el apartado 7.</li>
     <li><strong>Servicio completamente prestado:</strong> no podrás desistir una vez que el servicio se haya prestado por completo, si su ejecución comenzó con tu consentimiento expreso previo y con tu reconocimiento de que, en ese caso, pierdes el derecho de desistimiento (art. 103.a).</li>
     <li><strong>Cómo desistir:</strong> comunícalo de forma inequívoca a <a href={EMAIL.href}>{EMAIL.address}</a> o por WhatsApp al <a href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">{PHONE.display}</a>. Puedes usar este modelo (no es obligatorio): «Por la presente le comunico que desisto de mi contrato de prestación del siguiente servicio: […], contratado el […]. Nombre: […]. Domicilio: […]. Fecha: […]».</li>
     <li><strong>Devolución:</strong> se reembolsarán los importes que correspondan en un plazo máximo de 14 días naturales desde la comunicación, por el mismo medio de pago utilizado.</li>
   </ul>
+  {/* La solicitud expresa de inicio y el reconocimiento de la pérdida del derecho los recoge la casilla «Desistimiento» de la página de pago de cada plan en AccioGest (respuesta del 23-11-2026 §4). PENDIENTE (AccioGest): confirmar cómo lo recoge el widget de reservas. */}
 
   <h2>7. Cancelación y cambio de cita</h2>
   <p>Una vez realizado el pago, las asesorías no se cancelan ni se reembolsan, sin perjuicio del derecho de desistimiento de las personas consumidoras en los términos del apartado 6.</p>
-  <p><strong>Baja de los planes mensuales.</strong> Puedes darte de baja en cualquier momento, sin penalización y sin necesidad de justificarlo, desde tu {STRIPE_PORTAL_URL ? <a href={STRIPE_PORTAL_URL} target="_blank" rel="noopener">portal de cliente de Stripe</a> : 'portal de cliente de Stripe'}, o escribiéndonos por WhatsApp al <a href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">{PHONE.display}</a> o a <a href={EMAIL.href}>{EMAIL.address}</a>. La baja surte efecto al terminar el mes que ya has pagado: no se cobrará la cuota siguiente y conservas el servicio hasta esa fecha. No se reembolsan cuotas ya pagadas por meses ya iniciados, sin perjuicio del derecho de desistimiento del apartado 6.</p>
-  {/* El enlace del portal solo aparece si PUBLIC_STRIPE_PORTAL_URL es válido (src/config/acciogest.ts). La baja al final del periodo debe coincidir con el ajuste del portal de cliente de Stripe (cancelar «al final del periodo»). */}
   <p>Puedes solicitar un <strong>cambio de fecha</strong> para reagendar tu cita, sujeto a disponibilidad, por WhatsApp al <a href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">{PHONE.display}</a> o en <a href={EMAIL.href}>{EMAIL.address}</a>. El día anterior a la cita te enviamos un mensaje de confirmación. Si no te presentas a la cita sin haber pedido el cambio, la sesión se da por realizada y no se reembolsa.</p>
 
   <h2>8. Facturación</h2>

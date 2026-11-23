@@ -1,5 +1,7 @@
 # Handoff para el agente de la web de Denisse (19-11-2026)
 
+> **Archivado.** Lo de los planes mensuales (cuota mensual, diálogo propio, `create-checkout-session`, portal de Stripe, baja) queda sustituido por la respuesta de AccioGest del 23-11-2026 (pago único): `docs/respuestas-acciogest-2026-11-23-pago-unico.md` y `docs/integracion-acciogest.md`.
+
 Repo `IssaAcciosoft/dennise-web`, rama `claude/exciting-hypatia-hfwwmq` (último commit `3d494b4`, 10-11). Web en https://denisseg.netlify.app (Astro, Netlify).
 
 Lo de AccioGest (API, formularios, plugin de citas, Stripe y webhook) ya está hecho y probado. Todavía no está en producción: lo sube el equipo de AccioGest. Tú solo tocas la web.
