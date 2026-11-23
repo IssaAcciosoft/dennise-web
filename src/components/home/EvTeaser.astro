@@ -16,7 +16,7 @@ import Icon from '../ui/Icon.astro';
 import educationPeace from '~/assets/img/education-peace.jpg';
 import yhri from '~/assets/img/yhri-asamblea.jpg';
 // Logo principal de Empoderando Voces (docs/cambios-2026-10.md §1): sobre su fondo blanco original.
-import evLogo from '~/assets/img/ev/logo-ev-principal.png';
+import evLogo from '~/assets/img/ev/logo-ev-2026-oscuro.png';
 ---
 
 <script is:inline set:html={vtScript} />
@@ -48,7 +48,7 @@ import evLogo from '~/assets/img/ev/logo-ev-principal.png';
           <Photo src={yhri} alt="" widths={[360, 540]} sizes="(min-width: 900px) 17vw, 38vw" position="60% 35%" />
         </figure>
         <span class="ev-teaser-logo">
-          <Photo src={evLogo} alt="" widths={[160, 240, 320]} sizes="(min-width: 900px) 184px, 140px" />
+          <Photo src={evLogo} alt="" widths={[300, 460, 600]} sizes="(min-width: 900px) 260px, 200px" />
         </span>
       </div>
     </article>
@@ -171,17 +171,17 @@ import evLogo from '~/assets/img/ev/logo-ev-principal.png';
     border-radius: 4px;
   }
   .ev-teaser-photo--2 { margin-top: 3rem; }
-  /* Logo de Empoderando Voces: sello claro que se apoya sobre la esquina de las fotos */
+  /* Logo de Empoderando Voces 2026 (versión de fondo negro), apoyado sobre las fotos */
   .ev-teaser-logo {
     position: absolute;
     left: 50%;
-    bottom: -1.25rem;
+    bottom: -1.5rem;
     z-index: 1;
-    width: clamp(124px, 38%, 184px);
-    padding: .35rem;
+    width: clamp(180px, 62%, 260px);
+    overflow: hidden;
     translate: -50% 0;
-    background: #fff;
-    border-radius: 18px;
+    background: #000;
+    border-radius: 16px;
     box-shadow: 0 0 0 1px rgba(221, 181, 108, .55), 0 24px 48px -20px rgba(0, 0, 0, .8);
   }
   .ev-teaser-logo :global(img) { display: block; width: 100%; height: auto; }
