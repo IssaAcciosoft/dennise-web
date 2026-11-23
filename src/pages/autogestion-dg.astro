@@ -17,7 +17,6 @@ import { getImage } from 'astro:assets';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import Icon from '~/components/ui/Icon.astro';
 import AutogestionPlans from '~/components/services/AutogestionPlans.astro';
-import AutogestionCompare from '~/components/services/AutogestionCompare.astro';
 import ServiceRequestDialog from '~/components/services/ServiceRequestDialog.astro';
 import { autogestion, formatAmount, CATALOG } from '~/lib/services';
 import { WA_TEXT, waLink } from '~/data/site';
@@ -116,7 +115,6 @@ const prices = autogestion.plans.flatMap((p) => (p.amount === null ? [] : [`${fo
     </div>
   </section>
 
-  <AutogestionCompare />
   <AutogestionPlans />
 
   <ServiceRequestDialog
