@@ -7,7 +7,7 @@ import logoDark from '~/assets/logo/dg-logo-dark.svg?url';
 import SocialLinks from '../ui/SocialLinks.astro';
 import Photo from '../ui/Photo.astro';
 // Logo principal de Empoderando Voces en la franja del pie (la cliente pidió quitar el de las siluetas).
-import evLogo from '~/assets/img/ev/logo-ev-principal.png';
+import evLogo from '~/assets/img/ev/logo-ev-2026-claro.png';
 
 interface Props {
   /** Páginas cortas (404, /gracias/): el logo del pie se ve al cargar y puede ser el LCP. */
@@ -42,7 +42,7 @@ const onEv = current === '/empoderando-voces/';
         !onEv && (
           <a class="footer-ev" href={url('/empoderando-voces/')}>
             <span class="footer-ev-logo">
-              <Photo src={evLogo} alt="" widths={[120, 180]} sizes="60px" />
+              <Photo src={evLogo} alt="" widths={[220, 330]} sizes="110px" />
             </span>
             <span class="footer-ev-text">
               <span class="footer-ev-name">Empoderando Voces</span>
@@ -114,7 +114,7 @@ const onEv = current === '/empoderando-voces/';
     font-size: 1.35rem;
     color: var(--c-plum);
   }
-  /* Franja de Empoderando Voces (logo principal sobre su fondo blanco) */
+  /* Franja de Empoderando Voces (logo 2026, versión de fondo blanco) */
   .footer-ev {
     display: inline-flex;
     align-items: center;
@@ -129,7 +129,7 @@ const onEv = current === '/empoderando-voces/';
   .site-footer a.footer-ev { text-decoration: none; }
   .site-footer a.footer-ev:active { transform: scale(.99); }
   .footer-ev-name { transition: color var(--dur-fast) var(--ease-hover); }
-  .footer-ev-logo { width: 60px; flex: none; }
+  .footer-ev-logo { width: 110px; flex: none; }
   .footer-ev-logo :global(img) { display: block; width: 100%; height: auto; }
   .footer-ev-text { display: grid; gap: .1rem; line-height: 1.3; }
   .footer-ev-name { color: var(--c-ink); font-family: var(--ff-serif); font-size: 1.15rem; font-weight: 600; }

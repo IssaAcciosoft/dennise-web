@@ -38,7 +38,7 @@ import summitAtril from '~/assets/img/summit-atril.jpg';
 import kit from '~/assets/img/kit-delegada.jpg';
 import onuBlanco from '~/assets/img/onu-blanco.jpg';
 // Logo principal de Empoderando Voces (docs/cambios-2026-10.md §1), en la firma de la página.
-import evLogo from '~/assets/img/ev/logo-ev-principal.png';
+import evLogo from '~/assets/img/ev/logo-ev-2026-oscuro.png';
 
 const storyLink = waLink(WA_TEXT.historia);
 
@@ -310,7 +310,7 @@ const memories = [
     <div class="container">
       <div class="ev-signoff">
         <figure class="ev-logo" data-reveal>
-          <Photo src={evLogo} alt="Logotipo de Empoderando Voces: «Empoderando Voces · Afirmando la Dignidad»" widths={[240, 360, 480]} sizes="(min-width: 600px) 220px, 180px" />
+          <Photo src={evLogo} alt="Logotipo de Empoderando Voces 2026: «Empoderando Voces 2026 · Afirmando la Dignidad»" widths={[300, 460, 640, 760]} sizes="(min-width: 600px) 380px, 280px" />
         </figure>
         <p class="ev-motto" data-reveal>{SITE.motto}</p>
         <p class="ev-sign" data-reveal><span class="ev-sign-name">Empoderando Voces</span> — Historias reales. Personas reales. Voces que merecen un espacio.</p>
@@ -943,18 +943,17 @@ const memories = [
     flex-basis: 100%;
     margin: 0 0 .5rem;
   }
-  .ev-logo :global(picture) { display: block; width: 180px; }
+  .ev-logo :global(picture) { display: block; width: min(280px, 100%); }
   .ev-logo :global(img) {
     display: block;
     width: 100%;
     height: auto;
-    padding: .3rem;
-    background: #fff;
-    border-radius: 22px;
+    background: #000;
+    border-radius: 20px;
     box-shadow: 0 0 0 1px rgba(221, 181, 108, .5), 0 30px 60px -28px rgba(0, 0, 0, .8);
   }
   @media (min-width: 600px) {
-    .ev-logo :global(picture) { width: 220px; }
+    .ev-logo :global(picture) { width: 380px; }
   }
   .ev-motto {
     font-family: var(--ff-serif);

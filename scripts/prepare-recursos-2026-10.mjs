@@ -38,9 +38,7 @@ const JOBS = [
   // Principal: el PNG suelto llega con la «O» final de «EMPODERANDO» cortada en el borde; se toma
   // la mitad izquierda de la hoja conjunta (palabra completa), se recorta al dibujo y se añade
   // un margen blanco del 4 %.
-  { src: 'logos-empoderando-voces.webp', out: 'ev/logo-ev-principal.png', crop: [20, 10, 920, 875], trim: true, pad: 0.04 },
   // Secundario: letras pegadas al borde: margen blanco del 5 % alrededor.
-  { src: 'logo-ev-secundario.png', out: 'ev/logo-ev-secundario.png', pad: 0.05 },
 ];
 
 for (const job of JOBS) {

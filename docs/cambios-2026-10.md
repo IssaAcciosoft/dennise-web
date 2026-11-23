@@ -161,3 +161,11 @@ Lo que lleva guion es lo que incluye cada plan:
 ## Actualización 09/11/2026
 
 Nuevos precios de Autogestión DG (IVA incluido): Básico 242 €, Estándar 315 €, Premium 425 €. Sustituyen a 121 / 200 / 300 €.
+
+## Actualización 23/11/2026
+
+Logo nuevo de Empoderando Voces («Empoderando Voces 2026 · Afirmando la Dignidad»), sustituye a
+los anteriores (`logo-ev-principal.png` y `logo-ev-secundario.png`, retirados):
+`src/assets/img/ev/logo-ev-2026-oscuro.png` (fondo negro) en la tarjeta de Inicio y en
+`/empoderando-voces/`; `logo-ev-2026-claro.png` (fondo blanco) en el pie. Originales en
+`_originales/recursos-2026-11/`.
