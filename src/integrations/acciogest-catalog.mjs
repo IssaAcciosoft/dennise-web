@@ -89,6 +89,7 @@ export function cleanText(v, max) {
   const t = v
     .replace(/[\u0000-\u001F\u007F-\u009F\u2028\u2029]+/g, ' ')
     .replace(/<[a-z!?/][^>]*>/gi, ' ')
+    .replace(/<[a-z!?/][^>]*$/i, ' ')
     .replace(/\s+/g, ' ')
     .trim();
   if (!t) return null;
