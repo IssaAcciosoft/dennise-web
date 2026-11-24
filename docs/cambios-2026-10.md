@@ -169,3 +169,12 @@ los anteriores (`logo-ev-principal.png` y `logo-ev-secundario.png`, retirados):
 `src/assets/img/ev/logo-ev-2026-oscuro.png` (fondo negro) en la tarjeta de Inicio y en
 `/empoderando-voces/`; `logo-ev-2026-claro.png` (fondo blanco) en el pie. Originales en
 `_originales/recursos-2026-11/`.
+
+## Actualización 24/11/2026
+
+- Logo de DG: la cabecera y el pie muestran «Gestores y Abogados» (en lugar de «Denisse
+  González»), como el logo nuevo de la cliente: monograma DG con balanza + «Gestores y» en morado
+  y «Abogados» en gris. El SVG antiguo con «Denisse Gonzalez» (`dg-logo.svg`) ya no se usa en la web.
+- Partner nuevo: **Madrazo & Rosales Abogados** (madrazorosales.com): «Despacho de abogados
+  especializado en litigio y consultoría en materia penal, civil, mercantil y amparo.» Logo del
+  vectorial (`_originales/recursos-2026-11/`), fondo transparente.
