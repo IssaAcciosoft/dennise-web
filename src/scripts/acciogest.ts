@@ -12,9 +12,9 @@
  *   handoff 19-11-2026 §2). Ya no se envía «Versión política».
  * - «Teléfono» limpio con cleanPhone(): «+» solo al principio, dígitos, espacios, guiones y
  *   paréntesis (los puntos pasan a espacios).
- * - UTM (utm_source / utm_medium / utm_campaign) de la URL de llegada, guardadas en
- *   sessionStorage para toda la visita (las captura también BaseLayout en cada página). Van en
- *   la RAÍZ del cuerpo, no dentro de response_data (handoff §3).
+ * - UTM (utm_source / utm_medium / utm_campaign): solo si la dirección de la página desde la que
+ *   se envía el formulario las trae; no se guardan en el navegador (revisión legal 24-11-2026).
+ *   Van en la RAÍZ del cuerpo, no dentro de response_data (handoff §3).
  * - MODO SIMULADO si el ID es de ejemplo: misma forma de respuesta tras ~700 ms; errores
  *   forzados con ?acciogest_mock=400 | 400-tel | 400-email | 429 | 429-5 | 403 | 404 | 500 | network | timeout.
  * - DEPURACIÓN con IDs reales: ?acciogest_debug=1 compara las etiquetas con
@@ -25,7 +25,6 @@ import {
   FIELD_LABELS,
   FORMS,
   UTM_KEYS,
-  UTM_STORAGE_KEY,
   WHATSAPP_NUMBER,
   isConfigured,
   type FormKey,
@@ -58,39 +57,15 @@ const DEFAULT_RETRY_S = 60;
  * UTM
  * ----------------------------------------------------------------------- */
 
-/** Lee las UTM de la URL; si hay alguna, sustituye las guardadas. Devuelve las vigentes. */
+/** UTM de la dirección de la página actual (sin guardar nada en el navegador). */
 export function captureUtms(search: string = location.search): Record<string, string> {
   const params = new URLSearchParams(search);
-  const fresh: Record<string, string> = {};
+  const out: Record<string, string> = {};
   for (const key of UTM_KEYS) {
     const value = params.get(key)?.trim();
-    if (value) fresh[key] = value.slice(0, 200);
+    if (value) out[key] = value.slice(0, 200);
   }
-  if (Object.keys(fresh).length) {
-    try {
-      sessionStorage.setItem(UTM_STORAGE_KEY, JSON.stringify(fresh));
-    } catch {
-      /* almacenamiento bloqueado (modo privado, cookies desactivadas…) */
-    }
-    return fresh;
-  }
-  return readStoredUtms();
-}
-
-function readStoredUtms(): Record<string, string> {
-  try {
-    const raw = sessionStorage.getItem(UTM_STORAGE_KEY);
-    const parsed: unknown = raw ? JSON.parse(raw) : null;
-    if (!parsed || typeof parsed !== 'object') return {};
-    const out: Record<string, string> = {};
-    for (const key of UTM_KEYS) {
-      const value = (parsed as Record<string, unknown>)[key];
-      if (typeof value === 'string' && value) out[key] = value.slice(0, 200);
-    }
-    return out;
-  } catch {
-    return {};
-  }
+  return out;
 }
 
 /* --------------------------------------------------------------------------
@@ -150,7 +125,7 @@ export function buildResponseData(formKey: FormKey, values: LeadValues): Record<
   return data;
 }
 
-/** UTM vigentes de la visita, para la RAÍZ del cuerpo (solo las que existen). */
+/** UTM de la página actual, para la RAÍZ del cuerpo (solo las que existen). */
 export function utmBody(): Partial<Record<(typeof UTM_KEYS)[number], string>> {
   const utms = captureUtms();
   const out: Partial<Record<(typeof UTM_KEYS)[number], string>> = {};

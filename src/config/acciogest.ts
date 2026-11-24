@@ -106,11 +106,10 @@ export const FIELD_LABELS = {
  */
 export const POLICY_VERSION = '2026-11';
 
-/** UTM que se envían con cada lead, en la RAÍZ del cuerpo (de la URL de llegada; se guardan
- *  para toda la visita). */
+/** UTM que se envían con cada lead, en la RAÍZ del cuerpo. Solo las de la dirección de la página
+ *  desde la que se envía el formulario: la web no guarda nada en el navegador (revisión legal de
+ *  AccioGest, 24-11-2026). */
 export const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign'] as const;
-/** Clave en sessionStorage (la usan BaseLayout y src/scripts/acciogest.ts). */
-export const UTM_STORAGE_KEY = 'dg:utm';
 
 /** Número para la alternativa por WhatsApp (sin «+»), desde src/data/site.ts. */
 export const WHATSAPP_NUMBER: string = PHONE.wa;

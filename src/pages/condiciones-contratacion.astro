@@ -4,9 +4,10 @@
  * Respuesta de AccioGest del 23-11-2026: los planes son de PAGO ÚNICO por trámite (sin cuota
  * mensual, sin portal de Stripe). Base: el texto del 10/11, con la corrección art. 108.3 →
  * art. 108.4 y «pago único» en el apartado 4 (la página de pago del plan se abre en la misma
- * pestaña). La confirmación de la contratación sigue PENDIENTE, como en el texto del 10/11.
- * Pasa por la revisión legal (muro-legal, en AccioGest) con el resto de los textos antes de
- * publicarse.
+ * pestaña). Revisión legal (muro-legal) del 24-11-2026 aplicada tal cual: texto de la
+ * «Confirmación de la contratación» (docs/revision-legal-acciogest-2026-11-24.txt). El PDF que
+ * AccioGest adjunta al correo de confirmación se genera desde esta página: `npm run pdf:condiciones`
+ * (public/docs/condiciones-contratacion.pdf).
  * Precios y servicios desde src/data/servicios.json (siempre coinciden con la web).
  */
 import LegalLayout from '~/layouts/LegalLayout.astro';
@@ -22,7 +23,8 @@ import { url } from '~/lib/url';
   description="Condiciones de contratación de las asesorías y de Autogestión DG de DG Gestores y Abogados (Denisse González): precios, pago, prestación del servicio y derecho de desistimiento."
 >
   <Fragment slot="intro">
-    <p class="legal-updated">Última actualización: 23 de noviembre de 2026</p>
+    <p class="legal-updated">Última actualización: 24 de noviembre de 2026</p>
+    <p class="legal-pdf"><a href={url('/docs/condiciones-contratacion.pdf')} download>Descargar estas condiciones en PDF</a></p>
   </Fragment>
 
   <h2>1. Prestadora del servicio</h2>
@@ -63,7 +65,7 @@ import { url } from '~/lib/url';
     <li><strong>{autogestion.name}:</strong> cada plan se contrata en su página de pago, con un <strong>pago único</strong> por trámite del importe indicado en el apartado 3.</li>
     <li>Las asesorías online se pagan <strong>antes de la cita</strong>. Las asesorías presenciales acordadas por WhatsApp se pagan en el despacho.</li>
     <li>El pago se realiza <strong>por adelantado</strong>, con tarjeta, a través de la plataforma de pago <strong>Stripe</strong> integrada en el sistema de reservas y en las páginas de pago de AccioGest. Esta web no recibe ni guarda los datos de tu tarjeta.</li>
-    <li>Confirmación de la contratación: {/* PENDIENTE: confirmar con AccioGest si se envía un email de confirmación y con qué contenido */}</li>
+    <li>Confirmación de la contratación: al terminar el pago verás la confirmación en pantalla. En un plazo máximo de 24 horas, y siempre antes de empezar el trámite, te enviaremos por correo electrónico la confirmación de lo contratado, con estas condiciones adjuntas, el plan y el precio y la solicitud de inicio inmediato que has aceptado al contratar.</li>
   </ul>
 
   <h2>5. Prestación del servicio</h2>
@@ -81,7 +83,7 @@ import { url } from '~/lib/url';
     <li><strong>Cómo desistir:</strong> comunícalo de forma inequívoca a <a href={EMAIL.href}>{EMAIL.address}</a> o por WhatsApp al <a href={waLink(WA_TEXT.general)} target="_blank" rel="noopener">{PHONE.display}</a>. Puedes usar este modelo (no es obligatorio): «Por la presente le comunico que desisto de mi contrato de prestación del siguiente servicio: […], contratado el […]. Nombre: […]. Domicilio: […]. Fecha: […]».</li>
     <li><strong>Devolución:</strong> se reembolsarán los importes que correspondan en un plazo máximo de 14 días naturales desde la comunicación, por el mismo medio de pago utilizado.</li>
   </ul>
-  {/* La solicitud expresa de inicio y el reconocimiento de la pérdida del derecho los recoge la casilla «Desistimiento» de la página de pago de cada plan en AccioGest (respuesta del 23-11-2026 §4). PENDIENTE (AccioGest): confirmar cómo lo recoge el widget de reservas. */}
+  {/* La solicitud expresa de inicio y el reconocimiento de la pérdida del derecho los recoge la casilla «Desistimiento» de la página de pago de cada plan en AccioGest (respuesta del 23-11-2026 §4). */}
 
   <h2>7. Cancelación y cambio de cita</h2>
   <p>Una vez realizado el pago, las asesorías no se cancelan ni se reembolsan, sin perjuicio del derecho de desistimiento de las personas consumidoras en los términos del apartado 6.</p>

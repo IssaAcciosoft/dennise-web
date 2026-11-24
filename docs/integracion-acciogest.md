@@ -479,3 +479,33 @@ definen). No se ponen todavía como variables de Netlify a nivel de sitio: la pr
 Comprobado contra la API el 24-11: etiquetas, opciones, textos de consentimiento, importes
 (242/315/425, `payment_interval` null), widget con `service` y `setService`, página de pago de
 cada plan. Stripe en modo prueba. No se publica en el dominio hasta que avise AccioGest.
+
+
+## Revisión legal de AccioGest (24-11-2026)
+
+Aplicada tal cual (`docs/revision-legal-acciogest-2026-11-24.txt`):
+
+- **UTM:** la web ya no guarda nada en el navegador (fuera el script de BaseLayout y
+  `sessionStorage`). `captureUtms()` lee solo los `utm_*` de la dirección de la página desde la
+  que se envía el formulario; si no hay, no se envía nada. No se añaden UTM al enlace de
+  «Contratar».
+- **Privacidad:** tramitación de Autogestión DG (apartado 2), UTM y datos del envío, interés
+  legítimo, plazos con «trámites», ACCIOSOFT, S.L. (AccioGest), alojamiento web con
+  `{PROVEEDOR, PAÍS}` (`HOSTING` en `src/data/legal.ts`), «cuando abres la página de contratación
+  de un plan», apartado 9 sin `sessionStorage`. Apartado 6: «y, en su caso, del proveedor de
+  alojamiento web» se ha integrado en la enumeración de la última frase («…de Zoom Communications,
+  Inc., en su caso, de Google LLC y, en su caso, del proveedor de alojamiento web se amparan…»),
+  porque añadido literalmente al final de la frase no tenía sentido.
+- **Condiciones:** texto de «Confirmación de la contratación» (apartado 4).
+- **PDF de las condiciones** (lo adjunta AccioGest al correo de confirmación):
+  `npm run build && npm run pdf:condiciones && npm run build` →
+  `public/docs/condiciones-contratacion.pdf`, publicado en `/docs/condiciones-contratacion.pdf`
+  (enlace «Descargar estas condiciones en PDF» en la página). La página también es imprimible
+  (sin cabecera, pie ni botones). Regenerarlo cada vez que cambie el texto.
+- **Antes de publicar:** `npm run check:publish` falla mientras quede `{PROVEEDOR, PAÍS}` o el PDF
+  sea más antiguo que la página.
+- **Alojamiento:** la web no irá en Netlify. En el nuevo alojamiento hay que reproducir lo que hoy
+  hace `netlify.toml`: cabeceras (`Referrer-Policy: strict-origin-when-cross-origin`, cachés de
+  `/_astro/*`), la redirección 301 de `/dubai/` a `/apertura-de-empresas/` y el comando de
+  compilación (`npm run build`, carpeta `dist/`). `astro.config.mjs` usa
+  `https://dggestoresyabogados.com` fuera de las vistas previas de Netlify.
