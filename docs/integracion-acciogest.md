@@ -465,3 +465,17 @@ respuestas del 19-11.
   viernes de 9 a 18.
 - **Dominio definitivo**: `https://dggestoresyabogados.com`. `astro.config.mjs` lo usa en
   producción; hay que conectarlo en Netlify como dominio principal con HTTPS.
+
+
+## IDs de producción (AccioGest, 24-11-2026)
+
+Formularios 46 (servicio), 47 (historia), 48 (contacto); planes 49 (Básico), 50 (Estándar), 51
+(Premium); plugin de reservas 24. Servicios del widget: 133/134 asesoría 1 h online/presencial,
+135/136 asesoría 30 min online/presencial, 137/138 orientación académica online/presencial
+(`servicios.json`). En la rama `planes-mensuales` van como valores por defecto en
+`src/config/acciogest.ts` (las variables `PUBLIC_ACCIOGEST_*` de Netlify los sustituyen si se
+definen). No se ponen todavía como variables de Netlify a nivel de sitio: la producción actual
+(rama `claude/exciting-hypatia-hfwwmq`) pasaría a enviar datos reales con el código antiguo.
+Comprobado contra la API el 24-11: etiquetas, opciones, textos de consentimiento, importes
+(242/315/425, `payment_interval` null), widget con `service` y `setService`, página de pago de
+cada plan. Stripe en modo prueba. No se publica en el dominio hasta que avise AccioGest.

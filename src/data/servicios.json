@@ -87,13 +87,13 @@
           "modality": "online",
           "label": "Online",
           "amount": 60,
-          "acciogest_id": null
+          "acciogest_id": "133"
         },
         {
           "modality": "presencial",
           "label": "Presencial",
           "amount": 80,
-          "acciogest_id": null
+          "acciogest_id": "134"
         }
       ],
       "bookable": true,
@@ -110,13 +110,13 @@
           "modality": "online",
           "label": "Online",
           "amount": 30,
-          "acciogest_id": null
+          "acciogest_id": "135"
         },
         {
           "modality": "presencial",
           "label": "Presencial",
           "amount": 50,
-          "acciogest_id": null
+          "acciogest_id": "136"
         }
       ],
       "bookable": true,
@@ -133,13 +133,13 @@
           "modality": "online",
           "label": "Online",
           "amount": 45,
-          "acciogest_id": null
+          "acciogest_id": "137"
         },
         {
           "modality": "presencial",
           "label": "Presencial",
           "amount": 65,
-          "acciogest_id": null
+          "acciogest_id": "138"
         }
       ],
       "bookable": true,

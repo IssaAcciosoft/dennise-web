@@ -34,9 +34,9 @@ export const ACCIOGEST_API = pick(import.meta.env.PUBLIC_ACCIOGEST_API, 'https:/
 
 /** Formularios de leads (form-builder público de AccioGest). */
 export const FORMS = {
-  servicio: pick(import.meta.env.PUBLIC_ACCIOGEST_FORM_SERVICIO, 'FORM_ID_SERVICIO'),
-  historia: pick(import.meta.env.PUBLIC_ACCIOGEST_FORM_HISTORIA, 'FORM_ID_HISTORIA'),
-  contacto: pick(import.meta.env.PUBLIC_ACCIOGEST_FORM_CONTACTO, 'FORM_ID_CONTACTO'),
+  servicio: pick(import.meta.env.PUBLIC_ACCIOGEST_FORM_SERVICIO, '46'),
+  historia: pick(import.meta.env.PUBLIC_ACCIOGEST_FORM_HISTORIA, '47'),
+  contacto: pick(import.meta.env.PUBLIC_ACCIOGEST_FORM_CONTACTO, '48'),
 } as const;
 
 /**
@@ -45,13 +45,13 @@ export const FORMS = {
  * {API}/form-builder/public/{id}/page (casillas, importe y pago con tarjeta) en la misma pestaña.
  */
 export const PLANES = {
-  basico: pick(import.meta.env.PUBLIC_ACCIOGEST_PLAN_BASICO, 'FORM_ID_BASICO'),
-  estandar: pick(import.meta.env.PUBLIC_ACCIOGEST_PLAN_ESTANDAR, 'FORM_ID_ESTANDAR'),
-  premium: pick(import.meta.env.PUBLIC_ACCIOGEST_PLAN_PREMIUM, 'FORM_ID_PREMIUM'),
+  basico: pick(import.meta.env.PUBLIC_ACCIOGEST_PLAN_BASICO, '49'),
+  estandar: pick(import.meta.env.PUBLIC_ACCIOGEST_PLAN_ESTANDAR, '50'),
+  premium: pick(import.meta.env.PUBLIC_ACCIOGEST_PLAN_PREMIUM, '51'),
 } as const;
 
 /** Widget de reservas (iframe con servicio, día y hora, modalidad, datos, RGPD y pago). */
-export const BOOKING_PLUGIN_ID = pick(import.meta.env.PUBLIC_ACCIOGEST_BOOKING_PLUGIN_ID, 'PLUGIN_ID');
+export const BOOKING_PLUGIN_ID = pick(import.meta.env.PUBLIC_ACCIOGEST_BOOKING_PLUGIN_ID, '24');
 
 export type FormKey = keyof typeof FORMS;
 export type PlanKey = keyof typeof PLANES;
