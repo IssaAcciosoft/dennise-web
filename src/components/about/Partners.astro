@@ -7,6 +7,8 @@
  * Logos sobre tarjetas claras, todos en una caja del mismo alto (object-fit: contain, sin
  * deformar). El de Poplavsky tiene fondo negro: va sobre su propia placa negra dentro de la
  * tarjeta. Ariel Noriega es una persona: ficha con retrato circular, como el equipo.
+ * Madrazo & Rosales (24/11/2026): logo recortado del vectorial _originales/recursos-2026-11/
+ *   madrazo-rosales-logo-vectorial.pdf, con fondo transparente; texto de su web (madrazorosales.com).
  * Imágenes: scripts/prepare-recursos-2026-10.mjs (De la Flor, Espiga, «Bienvenido / Welcome!»,
  * Ariel Noriega) y scripts/prepare-web-anterior-images.mjs (Poplavsky).
  */
@@ -18,6 +20,7 @@ import Icon from '../ui/Icon.astro';
 import Photo from '../ui/Photo.astro';
 import deLaFlor from '~/assets/img/partners/de-la-flor-abogados.png';
 import espiga from '~/assets/img/partners/espiga-exports.png';
+import madrazoRosales from '~/assets/img/partners/madrazo-rosales.png';
 import bienvenido from '~/assets/img/partners/bienvenido-welcome.png';
 import poplavsky from '~/assets/img/poplavsky-logo.jpg';
 import ariel from '~/assets/img/partners/ariel-noriega.jpg';
@@ -42,6 +45,13 @@ const partners: Partner[] = [
     alt: 'Logotipo de De la Flor Abogados',
     maxW: '10.5rem',
     text: 'Despacho con una larga trayectoria profesional en asesoría jurídica, fiscal, contable, financiera y laboral a empresas.',
+  },
+  {
+    name: 'Madrazo & Rosales Abogados',
+    logo: madrazoRosales,
+    alt: 'Logotipo de Madrazo & Rosales Abogados',
+    maxW: '12rem',
+    text: 'Despacho de abogados especializado en litigio y consultoría en materia penal, civil, mercantil y amparo.',
   },
   {
     name: 'Espiga Exports',
@@ -234,7 +244,7 @@ const partners: Partner[] = [
     .partner-card--person { grid-column: 1 / -1; }
   }
   @media (min-width: 1100px) {
-    .partners-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .partners-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   }
 
   /* Ariel Noriega + su proyecto «Bienvenido / Welcome!» en la misma ficha. */

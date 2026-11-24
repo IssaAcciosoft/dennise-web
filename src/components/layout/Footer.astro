@@ -1,19 +1,16 @@
 ---
 import { NAV, FOOTER_EXTRA, LEGAL_NAV, SITE, PHONE, TEL_LINK, WA_TEXT, waLink, EMAIL, OFFICE } from '~/data/site';
 import { url, normalizePath } from '~/lib/url';
-import logo from '~/assets/logo/dg-logo.svg?url';
-// Variante clara del logo (mismos trazos, colores de la cabecera oscura) para el pie oscuro de EV.
-import logoDark from '~/assets/logo/dg-logo-dark.svg?url';
+import LogoMark from './LogoMark.astro';
 import SocialLinks from '../ui/SocialLinks.astro';
 import Photo from '../ui/Photo.astro';
 // Logo principal de Empoderando Voces en la franja del pie (la cliente pidió quitar el de las siluetas).
 import evLogo from '~/assets/img/ev/logo-ev-2026-claro.png';
 
 interface Props {
-  /** Páginas cortas (404, /gracias/): el logo del pie se ve al cargar y puede ser el LCP. */
+  /** Ya no se usa: el logo del pie va en línea (sin imagen que cargar). Se mantiene por compatibilidad. */
   logoEager?: boolean;
 }
-const { logoEager = false } = Astro.props;
 const year = new Date().getFullYear();
 const current = normalizePath(Astro.url.pathname);
 const here = (path: string) => (current === path ? 'page' : undefined);
@@ -26,16 +23,11 @@ const onEv = current === '/empoderando-voces/';
 <footer class="site-footer" data-wa-hide data-tone={onEv ? 'dark' : undefined}>
   <div class="container footer-grid">
     <div class="footer-brand">
-      <a class="footer-logo" href={url('/')}>
-        <img
-          src={onEv ? logoDark : logo}
-          width="656"
-          height="494"
-          alt="Denisse González — volver al inicio"
-          loading={logoEager ? 'eager' : 'lazy'}
-          fetchpriority={logoEager ? 'high' : undefined}
-          decoding="async"
-        />
+      {/* Logo de DG con «Gestores y Abogados» (logo de la cliente, 24/11/2026): monograma en línea
+          + logotipo en texto. En el pie oscuro de /empoderando-voces/, colores claros. */}
+      <a class="footer-logo" href={url('/')} aria-label={`${SITE.firm} — volver al inicio`}>
+        <LogoMark class="footer-logo-mark" idPrefix="ftr" />
+        <span class="footer-logo-text" aria-hidden="true"><span class="footer-logo-a">Gestores y</span> <span class="footer-logo-b">Abogados</span></span>
       </a>
       {!onEv && <p class="footer-motto">{SITE.motto}</p>}
       {
@@ -105,8 +97,29 @@ const onEv = current === '/empoderando-voces/';
     gap: 2.5rem;
     padding-bottom: 3rem;
   }
-  .footer-logo { display: inline-block; }
-  .footer-logo img { width: 180px; }
+  .footer-logo {
+    --logo-a: #7A1F86;
+    --logo-b: #8A8A8F;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .2rem;
+    text-decoration: none;
+  }
+  .site-footer[data-tone="dark"] .footer-logo { --logo-a: #E7D3EC; --logo-b: #A992AF; }
+  .footer-logo :global(.footer-logo-mark) { width: 150px; height: auto; }
+  .footer-logo :global(.footer-logo-mark) :global([fill="#7A1F86"]) { fill: var(--logo-a); }
+  .footer-logo :global(.footer-logo-mark) :global([stroke="#7A1F86"]) { stroke: var(--logo-a); }
+  .footer-logo :global(.footer-logo-mark) :global([fill="#9B9B9F"]) { fill: var(--logo-b); }
+  .footer-logo-text {
+    font-family: var(--ff-serif);
+    font-size: 1.45rem;
+    font-weight: 700;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+  .footer-logo-a { color: var(--logo-a); }
+  .footer-logo-b { color: var(--logo-b); }
   .footer-motto {
     margin-top: 1.25rem;
     font-family: var(--ff-serif);
