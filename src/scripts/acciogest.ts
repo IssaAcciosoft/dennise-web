@@ -15,8 +15,9 @@
  * - UTM (utm_source / utm_medium / utm_campaign): solo si la dirección de la página desde la que
  *   se envía el formulario las trae; no se guardan en el navegador (revisión legal 24-11-2026).
  *   Van en la RAÍZ del cuerpo, no dentro de response_data (handoff §3).
- * - MODO SIMULADO si el ID es de ejemplo: misma forma de respuesta tras ~700 ms; errores
- *   forzados con ?acciogest_mock=400 | 400-tel | 400-email | 429 | 429-5 | 403 | 404 | 500 | network | timeout.
+ * - MODO SIMULADO solo si el ID es de ejemplo (FORM_ID_…; nunca con los IDs reales): misma forma de respuesta tras ~700 ms; errores
+ *   forzados con ?acciogest_mock=400 | 400-tel | 400-email | 429 | 429-5 | 403 | 404 | 500 | network | timeout
+ *   (con IDs reales ?acciogest_mock no hace nada: se envía siempre a la API).
  * - DEPURACIÓN con IDs reales: ?acciogest_debug=1 compara las etiquetas con
  *   GET {API}/form-builder/public/{FORM_ID} y avisa en la consola de las diferencias.
  */
@@ -309,7 +310,7 @@ export async function submitLead(
   try {
     const response = await fetch(`${ACCIOGEST_API}/form-builder/public/${encodeURIComponent(FORMS[formKey])}/submit`, {
       // AccioGest saca la página de origen del Referer (respuestas 19-11): ruta completa solo en
-      // las llamadas a AccioGest, sin cambiar la política de toda la web (netlify.toml).
+      // las llamadas a AccioGest, sin cambiar la política de toda la web.
       referrerPolicy: 'no-referrer-when-downgrade',
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },

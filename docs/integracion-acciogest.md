@@ -10,14 +10,45 @@ documento es la especificación que sigue el código (`src/config/acciogest.ts`,
 `src/integrations/acciogest-catalog.mjs`, `src/lib/services.ts`). Resumen de uso: README →
 «AccioGest».
 
+## Estado 27-11-2026: AccioGest en real
+
+Desde el **27-11-2026** AccioGest funciona **en real** para la empresa 619 y **los pagos son
+reales** (Stripe en vivo, a la cuenta de Denisse). Lo que sigue en este documento sobre modo
+simulado, claves o tarjetas de prueba de Stripe y «faltan los IDs» es **historia**: no vale para
+producción.
+
+- **IDs** (valores por defecto en `src/config/acciogest.ts`; las variables `PUBLIC_ACCIOGEST_*`
+  los sustituyen si se definen): formularios de leads 46 (servicio), 47 (historia), 48
+  (contacto) → `POST /form-builder/public/<id>/submit`; planes de pago único, IVA incluido: 49
+  Básico (242 €), 50 Estándar (315 €), 51 Premium (425 €); plugin de reservas 24 con los
+  servicios 133-138 (`acciogest_id` de `servicios.json`), todos con pago previo.
+- **Planes:** «Contratar» = `https://api.acciogest.com/form-builder/public/<49|50|51>/page` en la
+  misma pestaña. Tras pagar, AccioGest vuelve a
+  `/gracias/?tipo=plan&plan=<basico|estandar|premium>&response_id=…&pago=ok` (solo redirige con el
+  pago completado). `/gracias/` muestra el éxito con o sin esos parámetros (nunca «pago no
+  completado»): nombre del plan, «Pago único: N € (IVA incluido)», «Recibirás por correo el
+  justificante del pago.», lo que incluye y el enlace a las condiciones.
+- **Reservas:** el widget se carga con `?service=<id>` y cambia con `setService`.
+- **Stripe:** recibos por correo activados en la cuenta de Denisse; AccioGest pasa el email del
+  cliente a Stripe (27-11 o 30-11).
+- **Qué cambió en la web:** los IDs reales son los valores por defecto, así que el modo simulado
+  (y su aviso «Modo de prueba») no se activa nunca con ellos; `?acciogest_mock` no hace nada con
+  IDs reales y `?acciogest_debug=1` solo escribe en la consola. Se quitaron los comentarios
+  pendientes de AccioGest ya resueltos. El marcador del alojamiento pasa a ser `{ALOJAMIENTO}`
+  (el alojamiento no es Netlify y aún no está decidido): `npm run check:publish` falla mientras
+  siga.
+- **Pruebas en real:** no enviar formularios, reservas ni pagos de prueba contra
+  `api.acciogest.com` (la tarjeta 4242 se rechaza). En pruebas automáticas, interceptar los POST a
+  AccioGest y responder con un 201 falso.
+
 ## Resumen
 
 | Pieza | Cómo se integra | Estado |
 |---|---|---|
-| Reservas de asesorías (con pago previo) | Widget de AccioGest embebido (iframe): servicio, día y hora, modalidad, datos, RGPD y pago con Stripe | Falta `BOOKING_PLUGIN_ID` |
-| Catálogo de servicios | `src/data/servicios.json` + catálogo público de AccioGest al compilar, mezclado por `acciogest_id` (fase A) | Hecho; en desarrollo en AccioGest |
-| Planes Autogestión DG (242 / 315 / 425 €, IVA incluido, pago único por trámite) | Enlace a la página de pago del plan en AccioGest (`/form-builder/public/{id}/page`, misma pestaña), que lleva las casillas, el importe y el pago con Stripe; el importe que muestra la web, de la raíz del JSON del formulario (respuesta 23-11) | Faltan los 3 IDs |
-| Leads: solicitud de servicio, "Cuéntame tu historia", contacto | HTML propio + `fetch` POST al form-builder público | Faltan los 3 `FORM_ID` |
+| Reservas de asesorías (con pago previo) | Widget de AccioGest embebido (iframe): servicio, día y hora, modalidad, datos, RGPD y pago con Stripe | En real (plugin 24, servicios 133-138) |
+| Catálogo de servicios | `src/data/servicios.json` + catálogo público de AccioGest al compilar, mezclado por `acciogest_id` (fase A) | Hecho (la ruta `/catalogo` no existe: datos de `servicios.json`) |
+| Planes Autogestión DG (242 / 315 / 425 €, IVA incluido, pago único por trámite) | Enlace a la página de pago del plan en AccioGest (`/form-builder/public/{id}/page`, misma pestaña), que lleva las casillas, el importe y el pago con Stripe; el importe que muestra la web, de la raíz del JSON del formulario (respuesta 23-11) | En real (49 / 50 / 51) |
+| Leads: solicitud de servicio, "Cuéntame tu historia", contacto | HTML propio + `fetch` POST al form-builder público | En real (46 / 47 / 48) |
 | Captcha | No existe en AccioGest; no se usa. Se usa un campo honeypot | — |
 
 No hace falta backend, proxy ni claves secretas: CORS está abierto para estas rutas.
@@ -26,9 +57,9 @@ No hace falta backend, proxy ni claves secretas: CORS está abierto para estas r
 
 ```ts
 export const ACCIOGEST_API = 'https://api.acciogest.com';
-export const FORMS = { servicio: 'FORM_ID_SERVICIO', historia: 'FORM_ID_HISTORIA', contacto: 'FORM_ID_CONTACTO' };
-export const PLANES = { basico: 'FORM_ID_BASICO', estandar: 'FORM_ID_ESTANDAR', premium: 'FORM_ID_PREMIUM' };
-export const BOOKING_PLUGIN_ID = 'PLUGIN_ID';
+export const FORMS = { servicio: '46', historia: '47', contacto: '48' };
+export const PLANES = { basico: '49', estandar: '50', premium: '51' };
+export const BOOKING_PLUGIN_ID = '24';
 export const POLICY_VERSION = '2026-11'; // solo se muestra en /politica-privacidad/; ya no se envía
 ```
 
@@ -38,9 +69,9 @@ Cada ID se puede dar también con una variable de entorno al compilar (tiene pri
 `PUBLIC_ACCIOGEST_PLAN_PREMIUM`, `PUBLIC_ACCIOGEST_BOOKING_PLUGIN_ID` (y
 `PUBLIC_ACCIOGEST_API`). El workflow de GitHub Pages las lee de las variables del repositorio.
 
-Mientras un ID siga con su valor de ejemplo (`FORM_ID_…` / `PLUGIN_ID`), la web funciona en
-**modo simulado** para esa pieza (ver más abajo). Al poner los IDs reales, pasa a producción
-sin tocar nada más (`isConfigured(id)`: un número entero, no un valor de ejemplo).
+Los valores por defecto son los IDs de producción (27-11-2026). Solo si un ID se sustituye por un
+valor de ejemplo (`FORM_ID_…` / `PLUGIN_ID`), esa pieza funciona en **modo simulado** (desarrollo
+local; ver más abajo). Con los IDs reales funciona en producción (`isConfigured(id)`: un número entero, no un valor de ejemplo).
 
 ## 1. Reservas (widget)
 
@@ -154,16 +185,16 @@ desactivado mientras se envía, y se muestra el `message` de la respuesta.
 
 ## 5. Pruebas
 
-- **Modo simulado** (IDs de ejemplo): `src/scripts/acciogest.ts` responde con la misma forma
+- **Modo simulado** (solo con IDs de ejemplo, nunca con los reales): `src/scripts/acciogest.ts` responde con la misma forma
   que la API (201 / 400) tras ~700 ms y lo indica en la consola (`console.info`). El formulario
   muestra un aviso visible de «Modo de prueba» (para que nadie crea haber enviado algo si la
   web se publicara sin IDs). Para forzar errores en pruebas manuales:
   `?acciogest_mock=400`, `400-email`, `429` (o `429-5`), `403`, `404`, `500`, `network`,
-  `timeout`.
+  `timeout` (con IDs reales, `?acciogest_mock` no hace nada).
 - **Comprobación de etiquetas**: con IDs reales, abrir la web con `?acciogest_debug=1`; la
   consola compara las etiquetas de la web con `GET /form-builder/public/{FORM_ID}` y avisa de
-  las que no coinciden o falten como obligatorias.
-- Antes de publicar, AccioGest probará el pago con tarjetas de prueba de Stripe.
+  las que no coinciden o falten como obligatorias (solo consola; no envía nada).
+- Pagos en real desde el 27-11-2026: no hacer pagos de prueba en producción (ver «Estado 27-11-2026»).
 
 ## Fase A — catálogo, widget y redirecciones
 
@@ -342,8 +373,9 @@ Fuente: `docs/respuestas-acciogest-2026-11-23-pago-unico.md` (decisión final de
    casilla** para los planes.
 5. Condiciones: sin nada de la cuota mensual; el texto de pago único del 10/11 con el art. 108.4.
    Pasa por muro-legal con el resto.
-6. Vuelta tras pagar: `/gracias/?tipo=plan&plan=<basico|estandar|premium>`, sin `response_id` ni
-   `pago=ok`; solo se redirige con el pago completado, así que `/gracias/` no comprueba nada.
+6. Vuelta tras pagar: `/gracias/?tipo=plan&plan=<basico|estandar|premium>` (en real, 27-11, con
+   `&response_id=…&pago=ok`); solo se redirige con el pago completado, así que `/gracias/` no
+   comprueba nada y muestra el éxito con o sin esos parámetros.
 
 Lo demás sigue igual: formularios de leads, reservas con un id por servicio, privacidad con Zoom y
 Google, dominio `dggestoresyabogados.com` y los IDs.
@@ -389,15 +421,17 @@ incluido» (si Denisse confirma que no lo incluyen, se cambia en AccioGest y se 
 ### Textos legales
 
 - Condiciones: texto del 10/11 aprobado por la titular, con la corrección art. 108.3 → 108.4 y
-  «pago único» en el apartado 4. Sin cuota mensual, baja ni portal. La línea «Confirmación de la
-  contratación» sigue vacía con su `PENDIENTE`, como el 10/11 (ver pregunta abierta 2). Pasa por
-  muro-legal antes de publicar.
+  «pago único» en el apartado 4. Sin cuota mensual, baja ni portal. «Confirmación de la
+  contratación»: texto de la revisión legal del 24-11 (ya aplicado).
 - Política de privacidad: sin la finalidad ni la conservación de la cuota mensual; Stripe, para el
   pago único de reservas y planes. Se mantienen la frase de las UTM de AccioGest (19-11), Zoom y
-  Google (pendientes de muro-legal). Lo pendiente va en comentarios `PENDIENTE` del código (no
-  visibles).
+  Google (revisados por muro-legal el 24-11 y ya aplicados).
 
 ### Preguntas abiertas (23-11)
+
+> Actualizado el 27-11-2026: la 1 se resolvió con la revisión legal del 24-11 (no se añaden UTM al
+> enlace de «Contratar»); la 2, con el texto de «Confirmación de la contratación» de esa revisión
+> (apartado 4 de las condiciones, sin `PENDIENTE`); la 3 y la 4, con el paso a real del 27-11.
 
 1. **UTM y página de origen al contratar un plan** (AccioGest, muro-legal). Con la página de pago
    alojada, la web no envía nada a AccioGest al contratar un plan, pero la frase de las UTM de la
@@ -478,7 +512,8 @@ definen). No se ponen todavía como variables de Netlify a nivel de sitio: la pr
 (rama `claude/exciting-hypatia-hfwwmq`) pasaría a enviar datos reales con el código antiguo.
 Comprobado contra la API el 24-11: etiquetas, opciones, textos de consentimiento, importes
 (242/315/425, `payment_interval` null), widget con `service` y `setService`, página de pago de
-cada plan. Stripe en modo prueba. No se publica en el dominio hasta que avise AccioGest.
+cada plan. **Actualizado el 27-11-2026:** AccioGest en real y Stripe en vivo (ver «Estado
+27-11-2026»).
 
 
 ## Revisión legal de AccioGest (24-11-2026)
@@ -491,7 +526,7 @@ Aplicada tal cual (`docs/revision-legal-acciogest-2026-11-24.txt`):
   «Contratar».
 - **Privacidad:** tramitación de Autogestión DG (apartado 2), UTM y datos del envío, interés
   legítimo, plazos con «trámites», ACCIOSOFT, S.L. (AccioGest), alojamiento web con
-  `{PROVEEDOR, PAÍS}` (`HOSTING` en `src/data/legal.ts`), «cuando abres la página de contratación
+  `{ALOJAMIENTO}` (`HOSTING` en `src/data/legal.ts`), «cuando abres la página de contratación
   de un plan», apartado 9 sin `sessionStorage`. Apartado 6: «y, en su caso, del proveedor de
   alojamiento web» se ha integrado en la enumeración de la última frase («…de Zoom Communications,
   Inc., en su caso, de Google LLC y, en su caso, del proveedor de alojamiento web se amparan…»),
@@ -502,7 +537,7 @@ Aplicada tal cual (`docs/revision-legal-acciogest-2026-11-24.txt`):
   `public/docs/condiciones-contratacion.pdf`, publicado en `/docs/condiciones-contratacion.pdf`
   (enlace «Descargar estas condiciones en PDF» en la página). La página también es imprimible
   (sin cabecera, pie ni botones). Regenerarlo cada vez que cambie el texto.
-- **Antes de publicar:** `npm run check:publish` falla mientras quede `{PROVEEDOR, PAÍS}` o el PDF
+- **Antes de publicar:** `npm run check:publish` falla mientras quede `{ALOJAMIENTO}` o el PDF
   sea más antiguo que la página.
 - **Alojamiento:** la web no irá en Netlify. En el nuevo alojamiento hay que reproducir lo que hoy
   hace `netlify.toml`: cabeceras (`Referrer-Policy: strict-origin-when-cross-origin`, cachés de

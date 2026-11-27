@@ -1,6 +1,6 @@
 /**
  * Comprobación antes de publicar: falla si en dist/ queda algún marcador que no puede publicarse
- * (p. ej. el proveedor de alojamiento {PROVEEDOR, PAÍS} de la política de privacidad) o si el PDF
+ * (p. ej. el proveedor de alojamiento {ALOJAMIENTO} de la política de privacidad) o si el PDF
  * de las condiciones no existe o es más antiguo que la página. Uso: npm run build && npm run check:publish
  */
 import { readFile, stat } from 'node:fs/promises';
@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const problems = [];
-const MARKERS = ['{PROVEEDOR, PAÍS}', 'FORM_ID_', 'PLUGIN_ID'];
+const MARKERS = ['{ALOJAMIENTO}', 'FORM_ID_', 'PLUGIN_ID'];
 for (const page of ['politica-privacidad', 'condiciones-contratacion', 'aviso-legal', 'autogestion-dg', 'servicios', 'contacto', 'empoderando-voces']) {
   const html = await readFile(join(root, 'dist', page, 'index.html'), 'utf8').catch(() => '');
   if (!html) problems.push(`falta dist/${page}/index.html (¿npm run build?)`);

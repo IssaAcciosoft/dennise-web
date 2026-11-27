@@ -63,7 +63,7 @@ src/
   layouts/
     BaseLayout.astro        <head> común (SEO, Open Graph, canonical, JSON-LD, fuentes),
                             cabecera, pie y WhatsApp flotante
-    LegalLayout.astro       Páginas legales (borradores: completar los [PENDIENTE] antes de publicar)
+    LegalLayout.astro       Páginas legales (aviso legal, privacidad y condiciones)
   components/
     layout/                 Header (menú móvil con Popover API), Footer, WhatsAppFloat, LogoMark
     seo/                    Fonts (tipografías autoalojadas + fallbacks), JsonLd
@@ -135,6 +135,32 @@ _originales/                Originales sin tocar: NO se publican (no están en s
 Especificación: `docs/integracion-acciogest.md`. Todo se configura en
 **`src/config/acciogest.ts`**; no hace falta backend ni claves secretas.
 
+### Estado 27-11-2026: AccioGest en real
+
+AccioGest funciona **en real** (empresa 619) y **los pagos son reales** (Stripe en vivo). Los IDs
+de producción son los valores por defecto de `src/config/acciogest.ts` (las variables
+`PUBLIC_ACCIOGEST_*` los sustituyen si se definen):
+
+| Pieza | ID |
+|---|---|
+| Formularios de leads: servicio / historia / contacto | 46 / 47 / 48 |
+| Planes (pago único, IVA incluido): Básico 242 € / Estándar 315 € / Premium 425 € | 49 / 50 / 51 |
+| Plugin de reservas (con pago previo) · servicios del widget (`servicios.json` → `acciogest_id`) | 24 · 133-138 |
+
+- «Contratar» abre `https://api.acciogest.com/form-builder/public/<49|50|51>/page` en la misma
+  pestaña; tras pagar vuelve a `/gracias/?tipo=plan&plan=<clave>&response_id=…&pago=ok`, que
+  muestra el éxito (con o sin esos parámetros) y «Recibirás por correo el justificante del pago.»
+  (recibos de Stripe activados en la cuenta de Denisse).
+- Qué cambió: el modo simulado y su aviso «Modo de prueba» ya no se activan con los IDs
+  configurados (solo con valores de ejemplo, en desarrollo); `?acciogest_mock` no hace nada con
+  IDs reales y `?acciogest_debug=1` solo escribe en la consola. Fuera los comentarios pendientes
+  de AccioGest ya resueltos. El alojamiento aún no está decidido (no es Netlify): la política de
+  privacidad muestra `{ALOJAMIENTO}` y `npm run check:publish` falla hasta rellenar `HOSTING` en
+  `src/data/legal.ts`. Las menciones a Netlify de este README son de la configuración anterior.
+- **No** enviar formularios, reservas ni pagos de prueba a `api.acciogest.com` (la tarjeta 4242
+  se rechaza). En pruebas automáticas, interceptar los POST a AccioGest y responder con un 201
+  falso.
+
 | Pieza | Dónde | ID |
 |---|---|---|
 | «Cuéntame tu historia» (diálogo en `/empoderando-voces/`, también `#cuentame`) | `components/ev/StoryDialog.astro` | `FORMS.historia` |
@@ -164,7 +190,8 @@ en Netlify, **Deploys → Trigger deploy → «Clear cache and deploy site»**.
 Son IDs públicos (acaban en el HTML/JS), no secretos. Ejemplo local:
 `PUBLIC_ACCIOGEST_FORM_CONTACTO=123 npm run build`.
 
-**Modo simulado** — mientras un ID tenga su valor de ejemplo (`FORM_ID_…` / `PLUGIN_ID`):
+**Modo simulado** (solo desarrollo; nunca con los IDs reales) — si un ID se sustituye por un
+valor de ejemplo (`FORM_ID_…` / `PLUGIN_ID`):
 - formularios: no se envía nada; la respuesta se simula (~700 ms, misma forma que la API) y el
   formulario muestra un aviso visible de «Modo de prueba» con WhatsApp como alternativa;
 - planes: un plan sin ID real (o con el precio oculto en AccioGest) no lleva al pago:
@@ -172,7 +199,7 @@ Son IDs públicos (acaban en el HTML/JS), no secretos. Ejemplo local:
   WhatsApp);
 - reservas: panel con lo que incluye la reserva, «Solicitar cita» y WhatsApp.
 
-Errores de prueba (solo en modo simulado), añadiendo a la URL: `?acciogest_mock=400`,
+Errores de prueba (solo en modo simulado; con IDs reales no hacen nada), añadiendo a la URL: `?acciogest_mock=400`,
 `400-email`, `429` (o `429-5` para 5 s), `403`, `404`, `500`, `network`, `timeout`.
 
 **Comprobar etiquetas** (con IDs reales): `?acciogest_debug=1` → la consola compara las
@@ -183,8 +210,8 @@ las obligatorias que no se envían y de las obligatorias en AccioGest pero opcio
 `response_data` exactamente iguales a las del formulario en AccioGest. `Consentimiento RGPD`
 lleva como valor el **texto exacto de la casilla** (`src/data/consent.ts`; el que AccioGest
 guarda como prueba del consentimiento; en la web se ve con el enlace, se envía sin él). Ya **no** se envía `Versión política`. `utm_source` /
-`utm_medium` / `utm_campaign` (de la URL de llegada, guardadas en `sessionStorage` durante la
-visita) van en la **raíz** del cuerpo, no dentro de `response_data`. `Teléfono` se limpia con
+`utm_medium` / `utm_campaign` (solo las de la dirección de la página desde la que se envía el
+formulario; no se guarda nada en el navegador) van en la **raíz** del cuerpo, no dentro de `response_data`. `Teléfono` se limpia con
 `cleanPhone()` (`+` solo al principio, dígitos, espacios, guiones y paréntesis; los puntos
 pasan a espacios); se valida el valor limpio (al menos 6 dígitos). Los campos opcionales vacíos
 no se envían.
@@ -195,10 +222,10 @@ atrás con `Retry-After` (60 s si no se puede leer) y botón bloqueado · sin re
 mensaje y se conservan los datos. Campo trampa `website`: si llega relleno se finge éxito.
 
 **Página `/gracias/`** (`?tipo=plan&plan=basico|estandar|premium` o `?tipo=reserva`). La página
-de pago de cada plan vuelve a `/gracias/?tipo=plan&plan=<basico|estandar|premium>` (sin
-`response_id` ni `pago=ok`) **solo cuando el pago se ha completado**, así que `/gracias/` no
-comprueba nada: muestra el nombre del plan, su importe (pago único, IVA incluido) y lo que
-incluye. Tras una reserva, el widget avisa a la web (`acciogest:booking:done`, `citaId` número;
+de pago de cada plan vuelve a `/gracias/?tipo=plan&plan=<basico|estandar|premium>&response_id=…&pago=ok`
+**solo cuando el pago se ha completado**, así que `/gracias/` no comprueba nada (muestra lo mismo
+con o sin `response_id` / `pago`): el nombre del plan, «Pago único: N € (IVA incluido)», «Recibirás
+por correo el justificante del pago.», lo que incluye y el enlace a las condiciones. Tras una reserva, el widget avisa a la web (`acciogest:booking:done`, `citaId` número;
 solo un entero positivo pasa a `&cita=`) y la web lleva a `/gracias/?tipo=reserva&cita=…`.
 
 ### Planes de Autogestión DG: pago único (respuesta 23-11)
@@ -211,8 +238,8 @@ a los planes mensuales del handoff 19-11 (`docs/handoff-acciogest-2026-11-19.md`
   `{API}/form-builder/public/{PLAN_ID}/page` en la **misma pestaña** (`planPageUrl()`). Esa página
   de AccioGest lleva las casillas (incluida «Desistimiento»), el importe y el pago con tarjeta
   (Stripe); la web no envía nada ni muestra casillas para los planes.
-- Al pagar, AccioGest vuelve a `/gracias/?tipo=plan&plan=<clave>` (configurado en cada formulario
-  de plan).
+- Al pagar, AccioGest vuelve a `/gracias/?tipo=plan&plan=<clave>&response_id=…&pago=ok`
+  (configurado en cada formulario de plan).
 - Importe de cada plan: `payment_amount` (euros, con `payment_enabled === true`) de la raíz de
   `GET /form-builder/public/{PLAN_ID}` al compilar (`extractPlanAmount()`; respaldo: el campo de
   pago de `fields[]`); aviso en el log si `payment_interval` no es `null` (cobro recurrente). Se
@@ -222,14 +249,14 @@ a los planes mensuales del handoff 19-11 (`docs/handoff-acciogest-2026-11-19.md`
 
 ### Catálogo de AccioGest (fase A)
 
-Especificación: `docs/integracion-acciogest.md` → «Fase A». **En desarrollo en AccioGest:
-mantener el modo simulado** (IDs de ejemplo) hasta que avisen de que está en pruebas.
+Especificación: `docs/integracion-acciogest.md` → «Fase A». En real desde el 27-11-2026 (la ruta
+`/catalogo` no existe: los datos salen de `servicios.json`).
 
 - **`acciogest_id`** (`src/data/servicios.json`): en cada `consultations[].prices[]`, el
   `plugin_citas_services.id` del servicio en el plugin de citas, como texto (p. ej. `"41"`;
   online y presencial son servicios distintos, cada uno con su id). No es un uuid ni un id de
-  catálogo. `null` = sin enlazar; **sin ninguno enlazado no se carga el widget**. Los da AccioGest
-  tras montar la empresa (hoy no existen). Los planes se quedan con `acciogest_id: null` (su
+  catálogo. `null` = sin enlazar; **sin ninguno enlazado no se carga el widget**. Puestos: 133-138
+  (AccioGest, 24-11). Los planes se quedan con `acciogest_id: null` (su
   importe sale de su formulario).
 - Al compilar con `BOOKING_PLUGIN_ID` configurado se pide
   `{API}/plugin-citas/public/{BOOKING_PLUGIN_ID}/catalogo` (8 s como máximo). **Esa ruta no existe
@@ -524,15 +551,9 @@ De la cliente (ver `docs/contenido.md` §7):
    partners (Poplavsky, De la Flor Abogados, Espiga Exports, Ariel Noriega) para publicar; una
    foto mejor de Stephanie si existe; nombre y descripción de «Bienvenido / Welcome!» (proyecto
    de Everardo Corona, PENDIENTE); originales de los logos de Empoderando Voces sin recortar.
-5. AccioGest: faltan los 3 `FORM_ID` de formularios, los 3 de planes, el `PLUGIN_ID` de
-   reservas y los 6 `acciogest_id` (`plugin_citas_services.id`) de
-   las asesorías, sin los que no hay widget de reservas (README →
-   AccioGest). Hasta entonces, modo simulado con aviso visible. Planes: pago único por trámite
-   (respuesta 23-11, docs/integracion-acciogest.md → «Planes: pago único (respuesta 23-11)»); los
-   textos legales pasan por la revisión legal de AccioGest (muro-legal) antes de publicar. Si «Servicio»
-   es un desplegable en AccioGest, añadir los nuevos valores (extranjería y Dubái).
-   Revisar las páginas legales (`[PENDIENTE]`), en especial las condiciones de contratación
-   (borrador) y el proceso tras la compra de un plan.
+5. ~~AccioGest: IDs, `acciogest_id` y revisión legal~~ → en real desde el 27-11-2026 (README →
+   «Estado 27-11-2026»). Falta: el proveedor de alojamiento (`{ALOJAMIENTO}`, `HOSTING` en
+   `src/data/legal.ts`) y, de la cliente, el proceso tras la compra de un plan.
 6. Logotipo: el original dice «Gonzalez» sin tilde y así se ha reproducido; confirmar.
 7. Confirmar si los precios de las asesorías (60/80 €, 30/50 €, 45/65 €) incluyen IVA. Hoy solo
    se indica «IVA incluido» en los planes.

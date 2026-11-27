@@ -3,19 +3,22 @@
  * /gracias/ — página de agradecimiento tras contratar un plan o reservar una asesoría en
  * AccioGest. No se indexa, no está en el menú ni en el sitemap (astro.config.mjs → NOINDEX).
  *
- *   /gracias/?tipo=plan&plan=basico|estandar|premium   (vuelta desde la página de pago del plan)
+ *   /gracias/?tipo=plan&plan=basico|estandar|premium   (vuelta desde la página de pago del plan,
+ *                                                       con &response_id=…&pago=ok)
  *   /gracias/?tipo=reserva                              (+ &cita=… desde el widget, BookingSlot)
  *   /gracias/                       (genérica)
  *
- * Planes de Autogestión DG, PAGO ÚNICO (respuesta de AccioGest del 23-11-2026 §6): la página de
- * pago de cada plan solo redirige aquí cuando el pago se ha completado, con
- * ?tipo=plan&plan=<clave> y sin response_id ni pago=ok, así que aquí no se comprueba ningún
- * parámetro de pago. Tras una reserva, el widget avisa con postMessage y la web viene aquí con
- * ?tipo=reserva. cita no se muestra ni se usa (nunca se escribe texto de la URL en la página:
- * solo se eligen bloques ya escritos y nombres e importes conocidos).
- * PENDIENTE (cliente): el proceso tras la compra no está confirmado; aquí solo figura lo que
- * incluye el plan contratado (servicios.json → plans[].includes; docs/cambios-2026-10.md §5),
- * sin pasos ni plazos. Sin ?plan= conocido, la lista no se muestra. Cuando la cliente o AccioGest confirmen el proceso, se podrá añadir una lista numerada.
+ * Planes de Autogestión DG, PAGO ÚNICO (AccioGest en real desde el 27-11-2026, pagos en vivo):
+ * la página de pago de cada plan solo redirige aquí cuando el pago se ha completado, con
+ * ?tipo=plan&plan=<clave>&response_id=…&pago=ok. Aquí no se comprueba ningún parámetro de pago:
+ * con o sin response_id / pago=ok se muestra lo mismo (pago completado). Tras una reserva, el
+ * widget avisa con postMessage y la web viene aquí con ?tipo=reserva. cita y response_id no se
+ * muestran ni se usan (nunca se escribe texto de la URL en la página: solo se eligen bloques ya
+ * escritos y nombres e importes conocidos). El justificante del pago lo envía Stripe por correo.
+ * Lo que incluye el plan contratado sale de servicios.json → plans[].includes; sin ?plan=
+ * conocido, la lista no se muestra.
+ * PENDIENTE (cliente): los pasos y plazos tras la compra no están confirmados; cuando la cliente
+ * los confirme, se podrá añadir una lista numerada.
  */
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import Icon from '~/components/ui/Icon.astro';
@@ -34,7 +37,8 @@ const fee = (amount: number) => `${formatAmount(amount)} €`;
 const planFees = Object.fromEntries(
   autogestion.plans.flatMap((p) => (p.amount === null ? [] : [[p.form_key, fee(p.amount)], [p.id, fee(p.amount)]])),
 );
-// Solo se mira tipo y plan: AccioGest solo vuelve aquí con el pago completado (no hay ?pago=).
+// Solo se mira tipo y plan: AccioGest solo vuelve aquí con el pago completado (pago=ok y
+// response_id se ignoran).
 const variantScript = `(function(){try{var q=new URLSearchParams(location.search),t=q.get('tipo'),v=t==='plan'||t==='reserva'?t:'';if(v){document.querySelectorAll('[data-thanks]').forEach(function(el){el.hidden=el.getAttribute('data-thanks')!==v})}var m=${safeJson(planNames)},k=q.get('plan')||'',n=Object.prototype.hasOwnProperty.call(m,k)?m[k]:'';if(typeof n==='string'&&n){document.querySelectorAll('[data-plan-name]').forEach(function(el){el.textContent=n})}var pk=${safeJson(planKeys)},f=Object.prototype.hasOwnProperty.call(pk,k)?pk[k]:'';if(typeof f==='string'&&f){document.querySelectorAll('[data-plan-includes]').forEach(function(el){el.hidden=el.getAttribute('data-plan-includes')!==f})}var pf=${safeJson(planFees)},c=Object.prototype.hasOwnProperty.call(pf,k)?pf[k]:'';if(typeof c==='string'&&c){document.querySelectorAll('[data-plan-fee]').forEach(function(el){el.textContent=c});document.querySelectorAll('[data-plan-fee-line]').forEach(function(el){el.hidden=false})}}catch(e){}})();`;
 ---
 
@@ -57,6 +61,7 @@ const variantScript = `(function(){try{var q=new URLSearchParams(location.search
         <h1 class="page-title">Gracias por contratar el <span data-plan-name>plan</span>.</h1>
         <p class="lead">Tu pago se ha completado.</p>
         <p class="lead thanks-fee" data-plan-fee-line hidden>Pago único: <strong data-plan-fee></strong> ({CATALOG.tax_label}).</p>
+        <p class="thanks-note">Recibirás por correo el justificante del pago.</p>
         <p class="thanks-note">Más información en las <a href={url('/condiciones-contratacion/')}>condiciones de contratación</a>.</p>
         {
           autogestion.plans.map((plan) => (

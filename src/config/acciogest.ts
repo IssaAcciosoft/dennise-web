@@ -2,17 +2,16 @@
  * ============================================================================
  *  Configuración de la integración con AccioGest (docs/integracion-acciogest.md)
  * ============================================================================
- *  ÚNICO sitio donde se ponen los IDs. Mientras un ID tenga su valor de ejemplo
- *  (FORM_ID_… / PLUGIN_ID), esa pieza funciona en MODO SIMULADO:
+ *  ÚNICO sitio donde se ponen los IDs. Desde el 27-11-2026 AccioGest está EN REAL (empresa 619,
+ *  pagos con Stripe en vivo): los valores por defecto de abajo son los IDs de producción.
+ *  Solo si un ID se sustituye por un valor de ejemplo (FORM_ID_… / PLUGIN_ID) o no numérico,
+ *  esa pieza pasa a MODO SIMULADO (desarrollo local; nunca con los IDs reales):
  *    - formularios: se simula la respuesta de la API (no se envía nada) y se avisa;
  *    - planes: «Contratar» abre el formulario de solicitud (o WhatsApp) en lugar del pago;
  *    - reservas: se muestra un panel con «Solicitar cita» y WhatsApp.
- *  Al poner los IDs reales, pasa a producción sin tocar nada más.
  *
- *  Dos formas de poner los IDs:
- *    1. Editar los valores de ejemplo de este archivo, o
- *    2. Variables de entorno al compilar (tienen prioridad), en Netlify → Site configuration →
- *       Environment variables (ver README → AccioGest; el hosting es Netlify):
+ *  Las variables de entorno al compilar tienen prioridad sobre los valores de este archivo
+ *  (en el alojamiento que se elija o en local):
  *         PUBLIC_ACCIOGEST_API                  (por defecto https://api.acciogest.com)
  *         PUBLIC_ACCIOGEST_FORM_SERVICIO        PUBLIC_ACCIOGEST_FORM_HISTORIA
  *         PUBLIC_ACCIOGEST_FORM_CONTACTO
@@ -20,14 +19,14 @@
  *         PUBLIC_ACCIOGEST_PLAN_PREMIUM         PUBLIC_ACCIOGEST_BOOKING_PLUGIN_ID
  *         PUBLIC_ACCIOGEST_WIDGET_ORIGINS       (no hace falta: el iframe se sirve desde la API)
  *  Todos los IDs son números enteros (el del plugin es su id, no el token). Se leen AL COMPILAR:
- *  tras cambiarlos en Netlify, Deploys → Trigger deploy → «Clear cache and deploy site».
+ *  tras cambiarlos hay que recompilar (sin caché).
  *  Son IDs públicos (van en el HTML/JS de la web): no son secretos.
- *  (La URL del build hook de Netlify SÍ es secreta y nunca va aquí: README → AccioGest.)
+ *  (La URL del build hook del alojamiento SÍ es secreta y nunca va aquí: README → AccioGest.)
  * ============================================================================
  */
 import { PHONE } from '~/data/site';
 
-/** Valor de una variable PUBLIC_* (o el de ejemplo si no está definida o está vacía). */
+/** Valor de una variable PUBLIC_* (o el valor por defecto si no está definida o está vacía). */
 const pick = (value: string | undefined, fallback: string): string => (value && value.trim()) || fallback;
 
 export const ACCIOGEST_API = pick(import.meta.env.PUBLIC_ACCIOGEST_API, 'https://api.acciogest.com').replace(/\/+$/, '');

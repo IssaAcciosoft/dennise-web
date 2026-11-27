@@ -28,11 +28,10 @@ export const LEGAL_ID = {
 } as const;
 
 /**
- * Proveedor de alojamiento web (política de privacidad, apartado 5). La web no irá en Netlify
- * (revisión legal de AccioGest, 24-11-2026); AccioGest pasará el nombre y el país. Mientras esté
- * vacío se muestra el marcador {PROVEEDOR, PAÍS} y `npm run check:publish` falla: no se publica
- * con el marcador.
+ * Proveedor de alojamiento web (política de privacidad, apartado 5). El alojamiento aún no está
+ * decidido (revisión legal de AccioGest, 24-11-2026). Mientras `name` esté vacío se muestra el
+ * marcador {ALOJAMIENTO} y `npm run check:publish` falla: no se publica con el marcador.
  */
 export const HOSTING: { name: string; country: string } = { name: '', country: '' };
-export const HOSTING_PLACEHOLDER = '{PROVEEDOR, PAÍS}';
+export const HOSTING_PLACEHOLDER = '{ALOJAMIENTO}';
 export const HOSTING_LABEL = HOSTING.name ? `${HOSTING.name}${HOSTING.country ? ` (${HOSTING.country})` : ''}` : HOSTING_PLACEHOLDER;

@@ -5,8 +5,9 @@
  * Lo controla src/scripts/lead-form.ts (initLeadForm sobre [data-lead]); lo inicializa el
  * componente que lo usa (diálogo o página).
  *
- * Con un ID de ejemplo (modo simulado) muestra un aviso visible: nunca se pierde un mensaje
- * sin que la persona lo sepa.
+ * Solo con un ID de ejemplo (modo simulado, desarrollo) se generan los avisos de «Modo de
+ * prueba»: nunca se pierde un mensaje sin que la persona lo sepa. Con los IDs reales (por
+ * defecto desde el 27-11-2026) esos avisos no están en el HTML.
  */
 import { FORMS, isConfigured, type FormKey } from '~/config/acciogest';
 import { CONSENT_TEXT, LINK_PHRASES, linkParts } from '~/data/consent';
@@ -121,9 +122,13 @@ const [consentBefore, consentLink, consentAfter] = linkParts(CONSENT_TEXT[formKe
     <span class="lead-result-icon" aria-hidden="true"><Icon name="check" /></span>
     <h3 class="lead-result-title" tabindex="-1" data-result-title>{successTitle}</h3>
     <p class="lead-result-text" data-result-text></p>
-    <p class="lead-result-mock" data-result-mock hidden>
-      Modo de prueba: el formulario aún no está conectado a AccioGest, así que {V.notReached}.
-    </p>
+    {
+      mock && (
+        <p class="lead-result-mock" data-result-mock hidden>
+          Modo de prueba: el formulario aún no está conectado a AccioGest, así que {V.notReached}.
+        </p>
+      )
+    }
     <div class="lead-result-actions">
       {inDialog && (
         <button class:list={['btn', btnClass]} type="button" data-dialog-close>Cerrar</button>
