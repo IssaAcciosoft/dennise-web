@@ -12,11 +12,13 @@
  * - 201: muestra el `message` de la API y resetea · 400: marca los campos · 403/404: no
  *   disponible + WhatsApp · 429: cuenta atrás con el botón bloqueado · red/timeout: reintentar.
  */
-import { submitLead, debugLabels, whatsappLink, type LeadResult, type LeadValues } from './acciogest';
+import { submitLead, debugLabels, whatsappLink, cleanPhone, type LeadResult, type LeadValues } from './acciogest';
 import { FIELD_LABELS, type FormKey } from '~/config/acciogest';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const TEL_RE = /^[+()\d\s.\-]{6,25}$/;
+// «+» solo al principio (AccioGest rechaza uno en medio); los puntos se aceptan y cleanPhone()
+// los convierte en espacios antes de enviar.
+const TEL_RE = /^\+?[()\d\s.\-]{6,25}$/;
 const HONEYPOT = 'website';
 
 type Control = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
@@ -123,7 +125,8 @@ export function initLeadForm(rootEl: HTMLElement | null): LeadFormController | n
     if (first.type === 'email' && !EMAIL_RE.test(value)) {
       return msg(first, 'msgEmail', 'Escribe un email válido, por ejemplo nombre@dominio.com.');
     }
-    if (first.type === 'tel' && !TEL_RE.test(value)) {
+    // Se valida también el valor LIMPIO (lo que se envía): al menos 6 dígitos tras cleanPhone().
+    if (first.type === 'tel' && (!TEL_RE.test(value) || cleanPhone(value).replace(/\D/g, '').length < 6)) {
       return msg(first, 'msgTel', 'Escribe un teléfono válido (puedes incluir el prefijo, por ejemplo +34).');
     }
     const min = Number(first.getAttribute('minlength') || 0);

@@ -63,7 +63,7 @@ src/
   layouts/
     BaseLayout.astro        <head> común (SEO, Open Graph, canonical, JSON-LD, fuentes),
                             cabecera, pie y WhatsApp flotante
-    LegalLayout.astro       Páginas legales (borradores: completar los [PENDIENTE] antes de publicar)
+    LegalLayout.astro       Páginas legales (aviso legal, privacidad y condiciones)
   components/
     layout/                 Header (menú móvil con Popover API), Footer, WhatsAppFloat, LogoMark
     seo/                    Fonts (tipografías autoalojadas + fallbacks), JsonLd
@@ -83,7 +83,7 @@ src/
     site.ts                 Teléfono, WhatsApp, email, despacho, redes, navegación ← ÚNICA fuente
     servicios.json          Catálogo: extranjería en España, gestoría, asesorías, Autogestión DG
                             (planes con `includes`), apertura de empresas, Dubái ← precios aquí
-                            (`acciogest_id` en cada precio y plan: ver «AccioGest»)
+                            (`acciogest_id` en cada precio de asesoría; planes: null. Ver «AccioGest»)
     acciogest-catalogo.last.json  Última copia buena del catálogo de AccioGest (la escribe la
                             compilación; no se edita a mano)
     faq.ts                  Preguntas frecuentes (España / Dubái) + FAQPage para JSON-LD
@@ -135,73 +135,137 @@ _originales/                Originales sin tocar: NO se publican (no están en s
 Especificación: `docs/integracion-acciogest.md`. Todo se configura en
 **`src/config/acciogest.ts`**; no hace falta backend ni claves secretas.
 
+### Estado 27-11-2026: AccioGest en real
+
+AccioGest funciona **en real** (empresa 619) y **los pagos son reales** (Stripe en vivo). Los IDs
+de producción son los valores por defecto de `src/config/acciogest.ts` (las variables
+`PUBLIC_ACCIOGEST_*` los sustituyen si se definen):
+
+| Pieza | ID |
+|---|---|
+| Formularios de leads: servicio / historia / contacto | 46 / 47 / 48 |
+| Planes (pago único, IVA incluido): Básico 242 € / Estándar 315 € / Premium 425 € | 49 / 50 / 51 |
+| Plugin de reservas (con pago previo) · servicios del widget (`servicios.json` → `acciogest_id`) | 24 · 133-138 |
+
+- «Contratar» abre `https://api.acciogest.com/form-builder/public/<49|50|51>/page` en la misma
+  pestaña; tras pagar vuelve a `/gracias/?tipo=plan&plan=<clave>&response_id=…&pago=ok`, que
+  muestra el éxito (con o sin esos parámetros) y «Recibirás por correo el justificante del pago.»
+  (recibos de Stripe activados en la cuenta de Denisse).
+- Qué cambió: el modo simulado y su aviso «Modo de prueba» ya no se activan con los IDs
+  configurados (solo con valores de ejemplo, en desarrollo); `?acciogest_mock` no hace nada con
+  IDs reales y `?acciogest_debug=1` solo escribe en la consola. Fuera los comentarios pendientes
+  de AccioGest ya resueltos. El alojamiento aún no está decidido (no es Netlify): la política de
+  privacidad muestra `{ALOJAMIENTO}` y `npm run check:publish` falla hasta rellenar `HOSTING` en
+  `src/data/legal.ts`. Las menciones a Netlify de este README son de la configuración anterior.
+- **No** enviar formularios, reservas ni pagos de prueba a `api.acciogest.com` (la tarjeta 4242
+  se rechaza). En pruebas automáticas, interceptar los POST a AccioGest y responder con un 201
+  falso.
+
 | Pieza | Dónde | ID |
 |---|---|---|
 | «Cuéntame tu historia» (diálogo en `/empoderando-voces/`, también `#cuentame`) | `components/ev/StoryDialog.astro` | `FORMS.historia` |
 | «Solicitar información» (diálogo en `/servicios/`: tarjetas y «Solicitar cita»; en `/apertura-de-empresas/`, con el país preseleccionado; en `/autogestion-dg/`, planes sin ID, con `withPlans`) | `components/services/ServiceRequestDialog.astro` | `FORMS.servicio` |
 | Formulario de contacto (`/contacto/#formulario-contacto`) | `components/contact/ContactForm.astro` | `FORMS.contacto` |
-| «Contratar Plan X» → página de pago de AccioGest en pestaña nueva (`/autogestion-dg/`) | `components/services/AutogestionPlans.astro` | `PLANES.basico/estandar/premium` |
+| «Contratar Plan X» → página de pago del plan en AccioGest (pago único, misma pestaña, `/autogestion-dg/`) | `components/services/AutogestionPlans.astro` | `PLANES.basico/estandar/premium` |
 | Widget de reservas en `/servicios/#reservar` (carga diferida, 760 px reservados) | `components/services/BookingSlot.astro` | `BOOKING_PLUGIN_ID` |
 
-**Poner los IDs** — editando los valores de ejemplo de `src/config/acciogest.ts` o, mejor, con
-variables de entorno al compilar (en GitHub: Settings → Secrets and variables → Actions →
-Variables; el workflow ya las pasa):
+**Poner los IDs** — con variables de entorno al compilar en **Netlify** (el hosting de la web:
+Site configuration → Environment variables; WEB-INTEGRACION 12-11 §5) o editando los valores de
+ejemplo de `src/config/acciogest.ts`. (Si algún día se publica con el workflow de GitHub Pages,
+irían en Settings → Secrets and variables → Actions → Variables, que el workflow ya pasa.) Las 7
+variables (3 formularios, 3 planes y el plugin de reservas):
 
 ```
 PUBLIC_ACCIOGEST_FORM_SERVICIO   PUBLIC_ACCIOGEST_FORM_HISTORIA   PUBLIC_ACCIOGEST_FORM_CONTACTO
 PUBLIC_ACCIOGEST_PLAN_BASICO     PUBLIC_ACCIOGEST_PLAN_ESTANDAR   PUBLIC_ACCIOGEST_PLAN_PREMIUM
-PUBLIC_ACCIOGEST_BOOKING_PLUGIN_ID                                PUBLIC_ACCIOGEST_API (opcional)
+PUBLIC_ACCIOGEST_BOOKING_PLUGIN_ID
 ```
 
-Son IDs públicos (acaban en el HTML/JS), no secretos. Ejemplo local:
-`PUBLIC_ACCIOGEST_FORM_CONTACTO=abc123 npm run build`.
+(`PUBLIC_ACCIOGEST_API` y `PUBLIC_ACCIOGEST_WIDGET_ORIGINS` no hacen falta: la API y el iframe
+de reservas son `https://api.acciogest.com`). Todos los IDs son
+**números enteros**; el del plugin es su **id, no el token**. No hay portal de cliente de Stripe
+(los planes son de pago único: respuesta de AccioGest del 23-11-2026). **Se leen al compilar**: tras definirlas o cambiarlas
+en Netlify, **Deploys → Trigger deploy → «Clear cache and deploy site»**.
 
-**Modo simulado** — mientras un ID tenga su valor de ejemplo (`FORM_ID_…` / `PLUGIN_ID`):
+Son IDs públicos (acaban en el HTML/JS), no secretos. Ejemplo local:
+`PUBLIC_ACCIOGEST_FORM_CONTACTO=123 npm run build`.
+
+**Modo simulado** (solo desarrollo; nunca con los IDs reales) — si un ID se sustituye por un
+valor de ejemplo (`FORM_ID_…` / `PLUGIN_ID`):
 - formularios: no se envía nada; la respuesta se simula (~700 ms, misma forma que la API) y el
   formulario muestra un aviso visible de «Modo de prueba» con WhatsApp como alternativa;
-- planes: «Contratar» abre el diálogo de solicitud con el plan elegido;
+- planes: un plan sin ID real (o con el precio oculto en AccioGest) no lleva al pago:
+  «Contratar» abre «Solicitar información» con el plan preseleccionado (sin JavaScript,
+  WhatsApp);
 - reservas: panel con lo que incluye la reserva, «Solicitar cita» y WhatsApp.
 
-Errores de prueba (solo en modo simulado), añadiendo a la URL: `?acciogest_mock=400`,
+Errores de prueba (solo en modo simulado; con IDs reales no hacen nada), añadiendo a la URL: `?acciogest_mock=400`,
 `400-email`, `429` (o `429-5` para 5 s), `403`, `404`, `500`, `network`, `timeout`.
 
 **Comprobar etiquetas** (con IDs reales): `?acciogest_debug=1` → la consola compara las
 etiquetas de la web con `GET /form-builder/public/{FORM_ID}` y avisa de las que no existen, de
 las obligatorias que no se envían y de las obligatorias en AccioGest pero opcionales en la web.
 
-**Etiquetas** (`FIELD_LABELS` en `src/config/acciogest.ts`): claves de `response_data`
-exactamente iguales a las del formulario en AccioGest. Se envían también
-`Consentimiento RGPD` = `sí`, `Versión política` = `POLICY_VERSION` (`2026-10`, la que muestra
-la política de privacidad) y `utm_source` / `utm_medium` / `utm_campaign` (de la URL de
-llegada, guardadas en `sessionStorage` durante la visita). Los campos opcionales vacíos no se
-envían. Los textos de las casillas de consentimiento están en `src/data/legal.ts`.
+**Etiquetas** (`FIELD_LABELS` en `src/config/acciogest.ts`): claves de
+`response_data` exactamente iguales a las del formulario en AccioGest. `Consentimiento RGPD`
+lleva como valor el **texto exacto de la casilla** (`src/data/consent.ts`; el que AccioGest
+guarda como prueba del consentimiento; en la web se ve con el enlace, se envía sin él). Ya **no** se envía `Versión política`. `utm_source` /
+`utm_medium` / `utm_campaign` (solo las de la dirección de la página desde la que se envía el
+formulario; no se guarda nada en el navegador) van en la **raíz** del cuerpo, no dentro de `response_data`. `Teléfono` se limpia con
+`cleanPhone()` (`+` solo al principio, dígitos, espacios, guiones y paréntesis; los puntos
+pasan a espacios); se valida el valor limpio (al menos 6 dígitos). Los campos opcionales vacíos
+no se envían.
 
 **Respuestas**: 201 → muestra el `message` de AccioGest y resetea · 400 → marca los campos
 (`missing_fields` o «El campo "X"…») · 403/404 → «no disponible» + WhatsApp · 429 → cuenta
 atrás con `Retry-After` (60 s si no se puede leer) y botón bloqueado · sin red o > 15 s →
 mensaje y se conservan los datos. Campo trampa `website`: si llega relleno se finge éxito.
 
-**Página `/gracias/`** (`?tipo=plan&plan=basico|estandar|premium` o `?tipo=reserva`). Cada
-formulario de plan en AccioGest lleva como URL de redirección
-`https://DOMINIO/gracias/?tipo=plan&plan=basico` (y `estandar`, `premium`); AccioGest añade
-`&response_id=…&pago=ok`. Con `pago` distinto de `ok` se muestra «El pago no se ha completado»
-con «Volver a intentarlo» y WhatsApp. Tras una reserva, el widget avisa a la web
-(`acciogest:booking:done`) y la web lleva a `/gracias/?tipo=reserva`.
+**Página `/gracias/`** (`?tipo=plan&plan=basico|estandar|premium` o `?tipo=reserva`). La página
+de pago de cada plan vuelve a `/gracias/?tipo=plan&plan=<basico|estandar|premium>&response_id=…&pago=ok`
+**solo cuando el pago se ha completado**, así que `/gracias/` no comprueba nada (muestra lo mismo
+con o sin `response_id` / `pago`): el nombre del plan, «Pago único: N € (IVA incluido)», «Recibirás
+por correo el justificante del pago.», lo que incluye y el enlace a las condiciones. Tras una reserva, el widget avisa a la web (`acciogest:booking:done`, `citaId` número;
+solo un entero positivo pasa a `&cita=`) y la web lleva a `/gracias/?tipo=reserva&cita=…`.
+
+### Planes de Autogestión DG: pago único (respuesta 23-11)
+
+Decisión final de AccioGest (`docs/respuestas-acciogest-2026-11-23-pago-unico.md`): **pago único
+por trámite**, sin cuota mensual, sin portal de cliente de Stripe y sin diálogo propio. Sustituye
+a los planes mensuales del handoff 19-11 (`docs/handoff-acciogest-2026-11-19.md`, archivado).
+
+- «Contratar Plan X» (plan con ID real y precio visible) → enlace a
+  `{API}/form-builder/public/{PLAN_ID}/page` en la **misma pestaña** (`planPageUrl()`). Esa página
+  de AccioGest lleva las casillas (incluida «Desistimiento»), el importe y el pago con tarjeta
+  (Stripe); la web no envía nada ni muestra casillas para los planes.
+- Al pagar, AccioGest vuelve a `/gracias/?tipo=plan&plan=<clave>&response_id=…&pago=ok`
+  (configurado en cada formulario de plan).
+- Importe de cada plan: `payment_amount` (euros, con `payment_enabled === true`) de la raíz de
+  `GET /form-builder/public/{PLAN_ID}` al compilar (`extractPlanAmount()`; respaldo: el campo de
+  pago de `fields[]`); aviso en el log si `payment_interval` no es `null` (cobro recurrente). Se
+  muestra «242 €» + «IVA incluido · pago único».
+- Reservas: el widget nunca se carga sin `&service=` (por defecto, la primera asesoría
+  reservable enlazada); sin ninguna enlazada, se ve el panel de «Solicitar cita».
 
 ### Catálogo de AccioGest (fase A)
 
-Especificación: `docs/integracion-acciogest.md` → «Fase A». **En desarrollo en AccioGest:
-mantener el modo simulado** (IDs de ejemplo) hasta que avisen de que está en pruebas.
+Especificación: `docs/integracion-acciogest.md` → «Fase A». En real desde el 27-11-2026 (la ruta
+`/catalogo` no existe: los datos salen de `servicios.json`).
 
-- **`acciogest_id`** (`src/data/servicios.json`): id del servicio en AccioGest en cada
-  `consultations[].prices[]` (online y presencial son servicios distintos, cada uno con su id) y
-  en cada plan. `null` = sin enlazar: se usa el precio del JSON. Lo da Denisse/AccioGest; se
-  escribe tal cual (texto o número).
-- Al compilar con `BOOKING_PLUGIN_ID` configurado se descarga
-  `{API}/plugin-citas/public/{BOOKING_PLUGIN_ID}/catalogo` (8 s como máximo) y se mezclan por
-  `acciogest_id` nombre, descripción, duración y precio con IVA (`precio_bruto`);
-  `mostrar_precio: false` oculta ese precio. Los planes con `PLANES.<plan>` configurado toman su
-  importe del campo de pago de su formulario. Los bloques sin precio siguen en el JSON.
+- **`acciogest_id`** (`src/data/servicios.json`): en cada `consultations[].prices[]`, el
+  `plugin_citas_services.id` del servicio en el plugin de citas, como texto (p. ej. `"41"`;
+  online y presencial son servicios distintos, cada uno con su id). No es un uuid ni un id de
+  catálogo. `null` = sin enlazar; **sin ninguno enlazado no se carga el widget**. Puestos: 133-138
+  (AccioGest, 24-11). Los planes se quedan con `acciogest_id: null` (su
+  importe sale de su formulario).
+- Al compilar con `BOOKING_PLUGIN_ID` configurado se pide
+  `{API}/plugin-citas/public/{BOOKING_PLUGIN_ID}/catalogo` (8 s como máximo). **Esa ruta no existe
+  en la API**: el 404 y el aviso «No se ha podido leer el catálogo de AccioGest» en el log son lo
+  previsto, y nombres, duraciones y precios salen de `servicios.json` (sin marcar ningún id como
+  despublicado). Si existiera, se mezclarían por `acciogest_id` nombre, descripción, duración y
+  precio con IVA (`precio_bruto`; `mostrar_precio: false` oculta ese precio). Los planes con
+  `PLANES.<plan>` configurado toman su importe de `payment_amount` en la raíz de su formulario.
+  Los bloques sin precio siguen en el JSON.
 - Si AccioGest no responde, aviso en el log de la compilación y se usa la **última copia buena**
   (`src/data/acciogest-catalogo.last.json`, o la caché de Netlify si es más reciente); si no hay,
   `servicios.json`. Tras compilar en local con los IDs reales, versionar ese archivo.
@@ -210,8 +274,11 @@ mantener el modo simulado** (IDs de ejemplo) hasta que avisen de que está en pr
   prueba). Widget y mensajes del iframe: `npm run mock:acciogest -- --port 4322 --dist dist`
   tras compilar con `PUBLIC_ACCIOGEST_API=http://127.0.0.1:4322` y abrir
   `http://localhost:4322/servicios/#reservar`.
-- Orígenes permitidos para los mensajes del widget: el de `PUBLIC_ACCIOGEST_API` y, si el iframe
-  se sirve desde otro dominio, `PUBLIC_ACCIOGEST_WIDGET_ORIGINS` (separados por comas).
+- Orígenes permitidos para los mensajes del widget: el de `PUBLIC_ACCIOGEST_API`
+  (`https://api.acciogest.com`, desde donde se sirve el iframe; `PUBLIC_ACCIOGEST_WIDGET_ORIGINS`
+  no hace falta). Cambiar de servicio con el widget ya cargado usa
+  `window.AccioGestBooking.setService(id)`, sin recargar; quitar y volver a inyectar el script
+  queda solo como respaldo.
 
 ### Build hook (recompilar cuando cambie un servicio)
 
@@ -438,20 +505,26 @@ evitan saltos al cambiar de fuente; valores calculados con `@capsizecss/unpack`.
 
 ## Publicación
 
-**GitHub Pages** (incluido): `.github/workflows/deploy.yml` compila con `withastro/action` y
-publica en cada push a `main` (o a mano desde Actions → «Run workflow»).
+**Netlify** (el hosting de la web; dominio principal `https://dggestoresyabogados.com`, antes
+`https://denisseg.netlify.app`; `netlify.toml`): comando
+`npm run build`, carpeta `dist/`. Las variables de compilación (`SITE_URL` y las de AccioGest) van
+en **Site configuration → Environment variables**; tras cambiarlas, **Deploys → Trigger deploy →
+Clear cache and deploy site** (se leen al compilar).
+
+**GitHub Pages** (alternativa, incluida): `.github/workflows/deploy.yml` compila con
+`withastro/action` y publica en cada push a `main` (o a mano desde Actions → «Run workflow»).
 
 1. Settings → Pages → Source: **GitHub Actions**.
 2. Settings → Secrets and variables → Actions → **Variables**:
-   - `SITE_URL` = dominio definitivo, p. ej. `https://www.dominio.es` (**obligatorio**: canonical,
-     Open Graph, JSON-LD, sitemap y robots.txt usan URLs absolutas). Sin ella el workflow se
-     detiene con un error («Check SITE_URL») y `astro.config.mjs` no compila en CI (`CI=true`);
-     en local se usa el marcador `https://denissegonzalez.example`. Solo se publica desde `main`.
+   - `SITE_URL` = `https://dggestoresyabogados.com` (o el que corresponda: canonical, Open
+     Graph, JSON-LD, sitemap y robots.txt usan URLs absolutas). El workflow exige la variable
+     («Check SITE_URL»); sin ella, `astro.config.mjs` usa `https://dggestoresyabogados.com`.
+     Solo se publica desde `main`.
    - `BASE_PATH` = solo si la web va en un subdirectorio (`/dennise-web` en
      `usuario.github.io/dennise-web` sin dominio propio).
 
-**Otro alojamiento (Netlify, Vercel, servidor propio):** comando `npm run build`, carpeta
-`dist/`, con las mismas variables de entorno.
+**Otro alojamiento (Vercel, servidor propio):** comando `npm run build`, carpeta `dist/`, con las
+mismas variables de entorno.
 
 **Caché.** Los archivos de `/_astro/` (JS, CSS, tipografías e imágenes) llevan un hash en el
 nombre y se pueden guardar en caché un año (`immutable`). `public/_headers` lo configura en
@@ -478,19 +551,16 @@ De la cliente (ver `docs/contenido.md` §7):
    partners (Poplavsky, De la Flor Abogados, Espiga Exports, Ariel Noriega) para publicar; una
    foto mejor de Stephanie si existe; nombre y descripción de «Bienvenido / Welcome!» (proyecto
    de Everardo Corona, PENDIENTE); originales de los logos de Empoderando Voces sin recortar.
-5. AccioGest: faltan los 3 `FORM_ID` de formularios, los 3 de planes, el `PLUGIN_ID` de
-   reservas y los `acciogest_id` de cada precio y plan (README → AccioGest). Hasta que AccioGest
-   avise de que la fase A está en pruebas, modo simulado con aviso visible. Pendiente de la
-   cliente: modelo de cobro de los planes (único / mensual / plazos) y correos de las cuentas. Si «Servicio»
-   es un desplegable en AccioGest, añadir los nuevos valores (extranjería y Dubái).
-   Revisar las páginas legales (`[PENDIENTE]`), en especial las condiciones de contratación
-   (borrador) y el proceso tras la compra de un plan.
+5. ~~AccioGest: IDs, `acciogest_id` y revisión legal~~ → en real desde el 27-11-2026 (README →
+   «Estado 27-11-2026»). Falta: el proveedor de alojamiento (`{ALOJAMIENTO}`, `HOSTING` en
+   `src/data/legal.ts`) y, de la cliente, el proceso tras la compra de un plan.
 6. Logotipo: el original dice «Gonzalez» sin tilde y así se ha reproducido; confirmar.
 7. Confirmar si los precios de las asesorías (60/80 €, 30/50 €, 45/65 €) incluyen IVA. Hoy solo
    se indica «IVA incluido» en los planes.
 8. Idiomas de atención y zona en la que presta servicio (JSON-LD `knowsLanguage`, `areaServed`).
 9. Validar la transcripción del artículo «8 de marzo — Voces que se unen».
-10. Dominio definitivo (`SITE_URL`).
+10. ~~Dominio definitivo~~: `https://dggestoresyabogados.com` (AccioGest, 19-11). Conectarlo en
+    Netlify como dominio principal con HTTPS.
 11. Redes sociales (`docs/contenido.md` §7, punto 9): enlace de TikTok de su bio de Instagram,
     original del retrato del despacho, sede de C/ Santa Catalina 7 y SANDIN & Asociados.
 

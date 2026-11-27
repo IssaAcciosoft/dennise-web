@@ -14,7 +14,7 @@ export function url(path: string): string {
 /** URL absoluta a partir de una ruta interna, usando `site` de astro.config. */
 export function absoluteUrl(path: string, site: URL | undefined): string {
   if (/^https?:/.test(path)) return path;
-  const origin = site ?? new URL('https://denissegonzalez.example');
+  const origin = site ?? new URL('https://dggestoresyabogados.com');
   return new URL(url(path), origin).href;
 }
 

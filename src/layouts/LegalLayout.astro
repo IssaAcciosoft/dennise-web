@@ -1,5 +1,5 @@
 ---
-/** Páginas legales (borradores con datos [PENDIENTE] que hay que completar antes de publicar). */
+/** Páginas legales (aviso legal, política de privacidad y condiciones de contratación). */
 import BaseLayout from './BaseLayout.astro';
 import { url } from '~/lib/url';
 
@@ -79,4 +79,13 @@ const { title, heading, description } = Astro.props;
     font-weight: 600;
   }
   .legal-back { margin-top: 3rem; }
+  /* Impresión y PDF de las condiciones (npm run pdf:condiciones): solo el texto legal. */
+  @media print {
+    :global(.site-footer), .legal-back, :global(.legal-pdf) { display: none !important; }
+    .legal-hero { padding-block: 0 1rem; background: none; }
+    .legal-body { padding-block: 0; }
+    .legal-content :global(a) { color: inherit; text-decoration: underline; }
+    .legal-content :global(h2) { break-after: avoid; }
+    .legal-content :global(li), .legal-content :global(p) { break-inside: avoid; }
+  }
 </style>

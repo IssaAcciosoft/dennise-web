@@ -12,12 +12,25 @@
  *    la web NO implementa pagos ni disponibilidad.
  *    Fase A (docs/integracion-acciogest.md → «Fase A»):
  *      - «Reservar» en una tarjeta enlazada (data-booking-services) → &service={acciogest_id}
- *        (online por defecto); si el widget ya estaba cargado, se recarga con ese servicio;
- *      - mensajes del iframe (solo de bookingMessageOrigins() y de un iframe del contenedor):
+ *        (= plugin_citas_services.id, online por defecto); si el widget ya estaba cargado, se
+ *        cambia de servicio sin recargar con window.AccioGestBooking.setService(id)
+ *        (WEB-INTEGRACION 12-11 §4); solo si el script no lo expone (versión vieja en caché), se
+ *        quita y se vuelve a inyectar (funciona, pero deja escuchas duplicadas);
+ *      - mensajes del iframe (origen https://api.acciogest.com = bookingMessageOrigins(), y de un
+ *        iframe del contenedor):
  *        'acciogest:booking:height' → alto del contenedor (760 px mínimo por CSS, máx. 6000);
  *        'acciogest:booking:done'   → /gracias/?tipo=reserva (con &cita= si llega citaId).
- *  Sin configurar (PLUGIN_ID de ejemplo): panel con lo que incluye la reserva, «Solicitar cita»
- *  (diálogo de solicitud, ServiceRequestDialog) y WhatsApp. Cero peticiones a terceros.
+ *  Handoff de AccioGest del 19-11-2026 §3: TODA reserva lleva servicio (sin él la API la
+ *  rechaza), así que el widget NUNCA se carga sin `&service=`: por defecto, el primer servicio
+ *  reservable enlazado (primera asesoría con `bookable` y algún `acciogest_id`, online primero);
+ *  una tarjeta sin servicios enlazados abre ese mismo servicio por defecto (el widget deja
+ *  cambiarlo). Si ninguna asesoría está enlazada, no se carga el widget: se ve el panel de abajo.
+ *  `citaId` llega como número (handoff §3): solo se pasa `&cita=` si es un entero positivo (se
+ *  acepta también como texto de dígitos, por si AccioGest lo serializa). La casilla legal de las reservas va dentro del
+ *  widget de AccioGest (la web no pone casilla); se mantiene la línea bajo el widget.
+ *  Sin configurar (PLUGIN_ID de ejemplo) o sin servicios enlazados: panel con lo que incluye la
+ *  reserva, «Solicitar cita» (diálogo de solicitud, ServiceRequestDialog) y WhatsApp. Cero
+ *  peticiones a terceros.
  * ============================================================================
  */
 import { PHONE, TEL_LINK, WA_TEXT, waLink } from '~/data/site';
@@ -26,7 +39,13 @@ import { consultations } from '~/lib/services';
 import { url } from '~/lib/url';
 import Icon, { type IconName } from '../ui/Icon.astro';
 
-const scriptSrc = bookingScriptUrl();
+// Servicio por defecto del widget: primera asesoría reservable con servicios enlazados (online
+// primero). Sin ninguno, el widget no se carga (se muestra el panel sin configurar).
+const defaultService =
+  consultations
+    .filter((c) => c.bookable && c.booking.length)
+    .map((c) => (c.booking.find((b) => b.modality === 'online') ?? c.booking[0]).acciogest_id)[0] ?? null;
+const scriptSrc = defaultService ? bookingScriptUrl() : null;
 
 // «Asesoría migratoria (1 hora o 30 min) o sesión de orientación académica», desde servicios.json
 const byName = new Map<string, string[]>();
@@ -51,6 +70,7 @@ const widgetConfig = JSON.stringify({
   min: BOOKING_MIN_HEIGHT,
   max: BOOKING_MAX_HEIGHT,
   thanks: url('/gracias/?tipo=reserva'),
+  defaultService,
 });
 ---
 
@@ -149,6 +169,14 @@ const widgetConfig = JSON.stringify({
 </section>
 
 <script>
+  import { bookingThanksUrl, setServiceInPlace } from '~/lib/acciogest-helpers.mjs';
+
+  declare global {
+    interface Window {
+      AccioGestBooking?: { setService: (id: string | number | null) => void };
+    }
+  }
+
   // «Reservar» en una tarjeta → el «Solicitar cita» del panel queda con ese servicio elegido.
   const request = document.querySelector<HTMLElement>('[data-booking-request]');
   if (request) {
@@ -162,7 +190,15 @@ const widgetConfig = JSON.stringify({
   // Se da por cargado cuando aparece su iframe (no con un temporizador). Si el script falla, o
   // carga pero no pinta nada (pluginId incorrecto, error interno…), se muestra «Solicitar cita»
   // + WhatsApp en el mismo hueco reservado.
-  type WidgetConfig = { origins: string[]; messages: { height: string; done: string }; min: number; max: number; thanks: string };
+  type WidgetConfig = {
+    origins: string[];
+    messages: { height: string; done: string };
+    min: number;
+    max: number;
+    thanks: string;
+    /** Servicio con el que se abre el widget si no se ha elegido otro (nunca vacío). */
+    defaultService: string | null;
+  };
   const host = document.getElementById('acciogest-booking');
   const baseSrc = host?.dataset.bookingSrc;
   if (host && baseSrc) {
@@ -174,7 +210,8 @@ const widgetConfig = JSON.stringify({
     }
     let io: IntersectionObserver | undefined;
     /** Servicio con el que se abre el widget (acciogest_id) y el que tiene el cargado ahora. */
-    let service = '';
+    const defaultService = typeof config?.defaultService === 'string' ? config.defaultService : '';
+    let service = defaultService;
     let loadedService: string | null = null; // null = aún no inyectado
     let script: HTMLScriptElement | null = null;
     let cleanup: (() => void) | null = null;
@@ -186,9 +223,24 @@ const widgetConfig = JSON.stringify({
     const srcFor = (id: string) => (id ? `${baseSrc}&service=${encodeURIComponent(id)}` : baseSrc);
     const errorBox = document.querySelector<HTMLElement>('[data-booking-error]');
     const inject = () => {
+      // Sin servicio no hay reserva posible (la API la rechaza): nunca se carga el widget sin él.
+      if (!service) {
+        if (errorBox) errorBox.hidden = false;
+        host.dataset.state = 'error';
+        return;
+      }
       if (loadedService === service) return;
-      // Recarga con otro servicio: fuera el iframe y el script anteriores.
-      // TODO (AccioGest): confirmar que su script admite cargarse otra vez en la misma página.
+      // Widget ya cargado: se cambia de servicio sin recargar el script ni la página.
+      if (loadedService !== null && setServiceInPlace(window.AccioGestBooking, service)) {
+        loadedService = service;
+        cancelAnimationFrame(raf);
+        frameHeight = 0;
+        host.style.removeProperty('height');
+        if (errorBox) errorBox.hidden = true;
+        return;
+      }
+      // Respaldo (script viejo sin setService): fuera el iframe y el script anteriores y se
+      // vuelve a inyectar. Funciona, pero deja escuchas duplicadas.
       if (loadedService !== null) {
         cleanup?.();
         script?.remove();
@@ -255,16 +307,17 @@ const widgetConfig = JSON.stringify({
     document.addEventListener('click', (e) => {
       const target = e.target as Element | null;
       // «Reservar» de una tarjeta → abrir el widget con su servicio de AccioGest; una tarjeta sin
-      // servicios enlazados (sin data-booking-services) lo abre SIN servicio, no con el anterior.
+      // servicios enlazados (sin data-booking-services) lo abre con el servicio por defecto (nunca
+      // sin servicio ni con el de la tarjeta anterior).
       const bookCard = target?.closest<HTMLElement>('[data-book-service]');
-      if (bookCard) service = '';
+      if (bookCard) service = defaultService;
       const card = target?.closest<HTMLElement>('[data-booking-services]');
       if (card) {
         try {
           const ids = JSON.parse(card.dataset.bookingServices ?? '{}') as Record<string, unknown>;
           const wanted = card.dataset.bookingModality;
           const id = (wanted && ids[wanted]) || ids.online || Object.values(ids)[0];
-          if (typeof id === 'string' && id) service = id;
+          if ((typeof id === 'string' || typeof id === 'number') && String(id)) service = String(id);
         } catch {
           /* atributo mal formado: se abre sin servicio */
         }
@@ -297,9 +350,8 @@ const widgetConfig = JSON.stringify({
           });
         } else if (msg.type === messages.done && !leaving) {
           leaving = true;
-          const cita = typeof msg.citaId === 'string' || typeof msg.citaId === 'number' ? String(msg.citaId) : '';
-          const safe = /^[A-Za-z0-9_-]{1,64}$/.test(cita) ? `&cita=${encodeURIComponent(cita)}` : '';
-          window.location.assign(`${config.thanks}${safe}`);
+          // citaId: entero positivo (número, o texto de dígitos). Si no, sin &cita=.
+          window.location.assign(bookingThanksUrl(config.thanks, msg.citaId));
         }
       });
     }

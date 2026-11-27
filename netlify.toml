@@ -1,7 +1,8 @@
 # Despliegue en Netlify (sitio estático de Astro).
-# En Netlify → Site configuration → Environment variables, define SITE_URL con el dominio final
-# (p. ej. https://www.dominio.es) para que canonical, Open Graph y sitemap usen URLs absolutas correctas.
-# Si no se define, se usa la URL que asigna Netlify (variables URL / DEPLOY_PRIME_URL).
+# Dominio principal: https://dggestoresyabogados.com (Domain management → dominio principal, con
+# HTTPS). Netlify redirige solo denisseg.netlify.app y www al dominio principal.
+# astro.config.mjs usa ese dominio en producción y DEPLOY_PRIME_URL en las vistas previas;
+# SITE_URL solo hace falta para forzar otro.
 [build]
   command = "npm run build"
   publish = "dist"

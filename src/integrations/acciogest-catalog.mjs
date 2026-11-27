@@ -10,7 +10,7 @@
  *  - Catálogo de reservas: solo si BOOKING_PLUGIN_ID está configurado →
  *      GET {API}/plugin-citas/public/{BOOKING_PLUGIN_ID}/catalogo   (8 s como máximo)
  *  - Precio de cada plan: solo si su PLANES.<plan> está configurado →
- *      GET {API}/form-builder/public/{PLAN_FORM_ID}                  (campo de pago)
+ *      GET {API}/form-builder/public/{PLAN_FORM_ID}                  (importe en la raíz del JSON)
  *
  *  Si una petición va bien, se guarda como «última copia buena» en
  *    src/data/acciogest-catalogo.last.json      (versionado: solo se reescribe si cambia) y
@@ -40,7 +40,7 @@ const PLAN_KEYS = /** @type {const} */ (['basico', 'estandar', 'premium']);
 const PLACEHOLDER = /^(FORM_ID_[A-Z_]*|PLUGIN_ID)$/;
 const isConfigured = (/** @type {string | undefined} */ id) => {
   const v = (id ?? '').trim();
-  return v !== '' && !PLACEHOLDER.test(v);
+  return /^\d+$/.test(v) && !PLACEHOLDER.test(v);
 };
 
 /**
@@ -196,39 +196,112 @@ export function linkedServiceIds(json, mock) {
 }
 
 /**
- * Precio de un plan desde GET /form-builder/public/{PLAN_FORM_ID}.
- * TODO (AccioGest): confirmar el nombre exacto del campo de pago y de su importe, y si es con
- * IVA incluido (la web lo muestra como «IVA incluido»). Mientras tanto se busca, de forma
- * tolerante, un campo cuyo tipo parezca de pago (payment / pago / stripe…) con un importe en
- * amount / precio / price / importe / monto (o en su config / settings / options / payment), y
- * en céntimos si la clave lo dice (amount_cents…). Si hay varios, se usa el primero.
+ * ============================================================================
+ *  Importe (pago único) de un plan desde GET /form-builder/public/{PLAN_FORM_ID}
+ * ============================================================================
+ *  WEB-INTEGRACION 12-11 §3 y respuestas 19-11 §2: el importe está en la RAÍZ del JSON del
+ *  formulario, no en un campo. Desde la respuesta del 23-11-2026 los planes son de PAGO ÚNICO
+ *  (payment_interval = null):
+ *    { "payment_enabled": true, "payment_amount": 315, "payment_currency": "EUR",
+ *      "payment_interval": null, "payment_concept": "…", "payment_button_text": "…", "fields": […] }
+ *  `payment_amount` es un número en euros, tal cual se cobra (sin céntimos), y solo se lee si
+ *  `payment_enabled === true`. Respaldo (la spec permite dejarlo): el campo de pago de fields[],
+ *  la forma anterior de la API.
+ *  Si no hay importe → undefined (se usa la última copia buena o servicios.json, con aviso).
+ * ============================================================================
  * @param {unknown} json
  * @returns {number | undefined}
  */
 export function extractPlanAmount(json) {
   if (!isObj(json)) return undefined;
   const j = /** @type {Record<string, any>} */ (json);
-  const fields = [j.fields, j.data?.fields, j.form?.fields, j.form?.data?.fields].find(Array.isArray) ?? [];
-  const AMOUNT_KEYS = ['precio_bruto', 'amount', 'precio', 'price', 'importe', 'monto', 'amount_cents', 'price_cents', 'importe_centimos'];
-  /** @param {Record<string, unknown>} o */
-  const amountIn = (o) => {
-    for (const key of AMOUNT_KEYS) {
+  // AccioGest: importe en la raíz del JSON (no en fields[]).
+  if (j.payment_enabled === true) {
+    const root = toNumber(j.payment_amount);
+    if (root !== undefined && root > 0) return root;
+  }
+  /** @param {Record<string, unknown>} o @param {string[]} keys */
+  const amountIn = (o, keys) => {
+    for (const key of keys) {
       const n = toNumber(o[key]);
       if (n !== undefined && n > 0) return /cent/i.test(key) ? n / 100 : n;
     }
     return undefined;
   };
+  // Forma anterior (fase A): importe en el campo de pago del formulario.
+  const fields = [j.fields, j.data?.fields, j.form?.fields, j.form?.data?.fields].find(Array.isArray) ?? [];
+  const FIELD_KEYS = ['precio_bruto', 'amount', 'precio', 'price', 'importe', 'monto', 'amount_cents', 'price_cents', 'importe_centimos'];
   for (const f of fields) {
     if (!isObj(f)) continue;
     const type = String(f.type ?? f.field_type ?? f.tipo ?? '');
     if (!/pay|pago|stripe|cobro/i.test(type)) continue;
     for (const where of [f, f.config, f.settings, f.options, f.payment, f.properties]) {
       if (!isObj(where)) continue;
-      const n = amountIn(where);
+      const n = amountIn(where, FIELD_KEYS);
       if (n !== undefined) return n;
     }
   }
   return undefined;
+}
+
+/**
+ * Aviso de compilación si el plan tiene cobro recurrente en AccioGest. Los planes de Autogestión
+ * DG son de PAGO ÚNICO por trámite (respuesta del 23-11-2026 §1): `payment_interval` debe ser
+ * null (o no venir). Cualquier otro valor (p. ej. "month") → aviso.
+ * @param {unknown} json respuesta de GET /form-builder/public/{id}
+ * @param {string} key form_key del plan
+ * @returns {string | null}
+ */
+export function planIntervalWarning(json, key) {
+  const interval = isObj(json) ? /** @type {Record<string, unknown>} */ (json).payment_interval : undefined;
+  if (interval === null || interval === undefined) return null;
+  return `⚠ El plan «${key}» tiene cobro recurrente en AccioGest (payment_interval=${JSON.stringify(interval)}); debe ser pago único (payment_interval = null)`;
+}
+
+/**
+ * Control de cordura del importe de un plan leído de AccioGest frente al de servicios.json
+ * (`reference`). Ese importe es el precio visible del plan (la página de pago de AccioGest
+ * muestra el suyo). `payment_amount` viene en euros (WEB-INTEGRACION 12-11 §3); esta comprobación queda como salvaguarda por si llegara en céntimos (convención de Stripe).
+ *  - ≈ 100 × reference (entre 50× y 200×) → error: se descarta (última copia buena o
+ *    servicios.json), porque casi seguro son céntimos.
+ *  - Diferencia de más del 25 % → aviso, pero se usa (un cambio de precio en AccioGest es posible).
+ * @param {number} amount importe leído de AccioGest
+ * @param {number | null | undefined} reference importe del plan en servicios.json
+ * @returns {{ error?: string, warning?: string }}
+ */
+export function checkPlanAmount(amount, reference) {
+  if (typeof reference !== 'number' || !Number.isFinite(reference) || reference <= 0) return {};
+  const ratio = amount / reference;
+  if (ratio >= 50 && ratio <= 200) {
+    return { error: `importe ${amount} ≈ ${Math.round(ratio)} × el de servicios.json (${reference} €): parece estar en céntimos` };
+  }
+  if (Math.abs(amount - reference) / reference > 0.25) {
+    return { warning: `importe ${amount} € muy distinto del de servicios.json (${reference} €); revisar antes de publicar (es el precio que se ve en la web)` };
+  }
+  return {};
+}
+
+/**
+ * Importe del plan `key` (form_key) en servicios.json, buscando cualquier array `plans`.
+ * @param {any} json servicios.json
+ * @param {string} key
+ * @returns {number | undefined}
+ */
+export function referencePlanAmount(json, key) {
+  /** @type {number | undefined} */
+  let found;
+  /** @param {any} node */
+  const walk = (node) => {
+    if (found !== undefined || node === null || typeof node !== 'object') return;
+    if (Array.isArray(node)) return node.forEach(walk);
+    if (Array.isArray(node.plans)) {
+      const plan = node.plans.find((/** @type {any} */ pl) => isObj(pl) && pl.form_key === key);
+      if (plan && typeof plan.amount === 'number') found = plan.amount;
+    }
+    Object.values(node).forEach(walk);
+  };
+  walk(json);
+  return found;
 }
 
 /** @param {string} url */
@@ -344,8 +417,13 @@ export default function acciogestCatalog(options = {}) {
             const url = `${api}/form-builder/public/${encodeURIComponent(formId)}`;
             try {
               const json = mock === 'fixture' ? JSON.parse(readFileSync(join(MOCK_DIR, 'plan-form.json'), 'utf8'))[key] : await getJson(url);
+              const interval = planIntervalWarning(json, key);
+              if (interval) warn(`${interval} (${url}).`);
               const amount = extractPlanAmount(json);
-              if (amount === undefined) throw new Error('no se encuentra el importe del campo de pago');
+              if (amount === undefined) throw new Error('no se encuentra el importe (payment_amount con payment_enabled = true)');
+              const check = checkPlanAmount(amount, referencePlanAmount(ours, key));
+              if (check.error) throw new Error(check.error);
+              if (check.warning) warn(`⚠ Plan «${key}» (${url}): ${check.warning}.`);
               out.plans[key] = { form_id: formId, amount };
               fresh.plans[key] = { form_id: formId, amount, saved_at: now };
             } catch (e) {

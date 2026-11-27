@@ -1,0 +1,41 @@
+Revisión legal hecha: pasa con estos cambios. Lo que no aparece aquí se queda igual (aviso legal, casillas, condiciones 1-3 y 5-11, texto del widget de reservas).
+
+Decisión: la web deja de guardar los utm (nada en sessionStorage). Si la página donde está el formulario trae utm_* en su dirección, se envían con el formulario; si no, no se envía nada. No hace falta añadir utm al enlace de «Contratar».
+
+POLÍTICA DE PRIVACIDAD
+
+Apartado 2, «Reservas de asesorías y contratación de planes». Añadir al final:
+Tramitación de Autogestión DG: los datos y documentos que aportes para el trámite (identificación, nacionalidad, domicilio, situación familiar y laboral y los documentos que exija el trámite, como antecedentes penales o certificados médicos), que se envían y guardan en la aplicación de AccioGest. Se tratan solo para realizar el trámite. Cuando incluyan datos de salud o relativos a antecedentes penales, se tratan con tu consentimiento al aportarlos.
+
+Apartado 2, «Datos que acompañan a los formularios»:
+- Sustituir el punto de UTM por: Si la página desde la que envías un formulario incluye en su dirección parámetros de campaña (utm), se envían con el formulario para saber por qué canal llegan las consultas.
+- Sustituir «De cada envío se guardan además…» por: De cada envío se guardan además la dirección IP, el navegador y la página de origen, por seguridad y para evitar abusos.
+
+Apartado 3, interés legítimo. Sustituir por:
+Interés legítimo (art. 6.1.f RGPD): conocer el canal por el que llegan las consultas, proteger los formularios frente al spam y mantener la seguridad (dirección IP y datos técnicos del envío).
+
+Apartado 4, tercera línea. Sustituir por:
+Reservas, contrataciones, trámites y facturas: mientras dure la relación profesional y, después, durante los plazos legales (por ejemplo, seis años para la documentación contable según el Código de Comercio y los plazos de prescripción fiscales).
+
+Apartado 5, AccioGest. Sustituir por:
+ACCIOSOFT, S.L. (AccioGest), como encargado del tratamiento: recibe y almacena los formularios de la web (historias, solicitudes y contacto) y la documentación de los trámites, y gestiona el sistema de reservas y las páginas de contratación de los planes.
+
+Apartado 5, alojamiento (sustituye a Netlify; la web no irá en Netlify):
+Alojamiento web: {PROVEEDOR, PAÍS}, que sirve las páginas de la web y trata la dirección IP de las visitas con fines técnicos y de seguridad. No recibe los datos de los formularios, que se envían directamente a AccioGest.
+(El nombre real os lo pasamos; no se publica con el marcador.)
+
+Apartado 5, última frase:
+La web solo se comunica con AccioGest cuando envías un formulario, cuando abres la página de contratación de un plan o cuando se carga el sistema de reservas.
+
+Apartado 6. Añadir al final: «y, en su caso, del proveedor de alojamiento web».
+
+Apartado 9. Quitar la frase del sessionStorage. Queda: «Este sitio web no utiliza cookies propias ni herramientas de analítica.» y el resto igual.
+
+CONDICIONES DE CONTRATACIÓN
+
+Apartado 4, línea vacía «Confirmación de la contratación:». Texto:
+Confirmación de la contratación: al terminar el pago verás la confirmación en pantalla. En un plazo máximo de 24 horas, y siempre antes de empezar el trámite, te enviaremos por correo electrónico la confirmación de lo contratado, con estas condiciones adjuntas, el plan y el precio y la solicitud de inicio inmediato que has aceptado al contratar.
+
+Apartado 6: sin cambios.
+
+Necesitamos además un PDF de las condiciones de contratación (para adjuntarlo al correo de confirmación): generadlo desde la página o dejad la página imprimible.

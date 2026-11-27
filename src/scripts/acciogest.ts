@@ -3,15 +3,21 @@
  * framework: lo usan los formularios (src/scripts/lead-form.ts) y se puede usar desde React.
  *
  *   submitLead('contacto', { nombre, email, telefono, mensaje, consentimiento: true })
- *     → POST {API}/form-builder/public/{FORM_ID}/submit  { "response_data": { "<Etiqueta>": "…" } }
+ *     → POST {API}/form-builder/public/{FORM_ID}/submit
+ *       { "response_data": { "<Etiqueta>": "…" }, "utm_source": "…", "utm_medium": "…", "utm_campaign": "…" }
  *     → resultado normalizado (LeadResult): ok | validation | unavailable | rate_limited | network | server
  *
  * - Claves de response_data = etiquetas EXACTAS (FIELD_LABELS en src/config/acciogest.ts).
- * - sí/no en minúscula; «Consentimiento RGPD» = «sí»; «Versión política» = POLICY_VERSION.
- * - UTM (utm_source / utm_medium / utm_campaign) de la URL de llegada, guardadas en
- *   sessionStorage para toda la visita (las captura también BaseLayout en cada página).
- * - MODO SIMULADO si el ID es de ejemplo: misma forma de respuesta tras ~700 ms; errores
- *   forzados con ?acciogest_mock=400 | 400-tel | 400-email | 429 | 429-5 | 403 | 404 | 500 | network | timeout.
+ * - sí/no en minúscula; «Consentimiento RGPD» = TEXTO EXACTO de la casilla (src/data/consent.ts,
+ *   handoff 19-11-2026 §2). Ya no se envía «Versión política».
+ * - «Teléfono» limpio con cleanPhone(): «+» solo al principio, dígitos, espacios, guiones y
+ *   paréntesis (los puntos pasan a espacios).
+ * - UTM (utm_source / utm_medium / utm_campaign): solo si la dirección de la página desde la que
+ *   se envía el formulario las trae; no se guardan en el navegador (revisión legal 24-11-2026).
+ *   Van en la RAÍZ del cuerpo, no dentro de response_data (handoff §3).
+ * - MODO SIMULADO solo si el ID es de ejemplo (FORM_ID_…; nunca con los IDs reales): misma forma de respuesta tras ~700 ms; errores
+ *   forzados con ?acciogest_mock=400 | 400-tel | 400-email | 429 | 429-5 | 403 | 404 | 500 | network | timeout
+ *   (con IDs reales ?acciogest_mock no hace nada: se envía siempre a la API).
  * - DEPURACIÓN con IDs reales: ?acciogest_debug=1 compara las etiquetas con
  *   GET {API}/form-builder/public/{FORM_ID} y avisa en la consola de las diferencias.
  */
@@ -19,13 +25,12 @@ import {
   ACCIOGEST_API,
   FIELD_LABELS,
   FORMS,
-  POLICY_VERSION,
   UTM_KEYS,
-  UTM_STORAGE_KEY,
   WHATSAPP_NUMBER,
   isConfigured,
   type FormKey,
 } from '~/config/acciogest';
+import { CONSENT_TEXT } from '~/data/consent';
 
 export type FieldValue = string | boolean | null | undefined;
 export type LeadValues = Record<string, FieldValue>;
@@ -53,39 +58,15 @@ const DEFAULT_RETRY_S = 60;
  * UTM
  * ----------------------------------------------------------------------- */
 
-/** Lee las UTM de la URL; si hay alguna, sustituye las guardadas. Devuelve las vigentes. */
+/** UTM de la dirección de la página actual (sin guardar nada en el navegador). */
 export function captureUtms(search: string = location.search): Record<string, string> {
   const params = new URLSearchParams(search);
-  const fresh: Record<string, string> = {};
+  const out: Record<string, string> = {};
   for (const key of UTM_KEYS) {
     const value = params.get(key)?.trim();
-    if (value) fresh[key] = value.slice(0, 200);
+    if (value) out[key] = value.slice(0, 200);
   }
-  if (Object.keys(fresh).length) {
-    try {
-      sessionStorage.setItem(UTM_STORAGE_KEY, JSON.stringify(fresh));
-    } catch {
-      /* almacenamiento bloqueado (modo privado, cookies desactivadas…) */
-    }
-    return fresh;
-  }
-  return readStoredUtms();
-}
-
-function readStoredUtms(): Record<string, string> {
-  try {
-    const raw = sessionStorage.getItem(UTM_STORAGE_KEY);
-    const parsed: unknown = raw ? JSON.parse(raw) : null;
-    if (!parsed || typeof parsed !== 'object') return {};
-    const out: Record<string, string> = {};
-    for (const key of UTM_KEYS) {
-      const value = (parsed as Record<string, unknown>)[key];
-      if (typeof value === 'string' && value) out[key] = value.slice(0, 200);
-    }
-    return out;
-  } catch {
-    return {};
-  }
+  return out;
 }
 
 /* --------------------------------------------------------------------------
@@ -112,28 +93,49 @@ function normaliseValue(value: FieldValue): string {
   return text;
 }
 
-const META_FIELDS = new Set(['consentimiento', 'politica', ...UTM_KEYS]);
+const META_FIELDS = new Set(['consentimiento']);
+
+/**
+ * Teléfono para AccioGest (WEB-INTEGRACION 12-11 §1 y §2; handoff §3): «+» solo al principio y
+ * después solo dígitos, espacios, guiones y paréntesis. Los puntos pasan a espacios
+ * («600.123.456» → «600 123 456»), se quita cualquier «+» que no sea el primer carácter y todo
+ * lo demás (letras, emojis…), y se normalizan los espacios.
+ */
+export function cleanPhone(value: string): string {
+  const t = value.trim().replace(/\./g, ' ').replace(/(?!^)\+/g, '');
+  return t
+    .replace(/[^\d\s()+-]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 
 /**
  * Construye `response_data` con las etiquetas exactas, en el orden de FIELD_LABELS.
- * Los campos opcionales vacíos no se envían.
+ * Los campos opcionales vacíos no se envían. «Consentimiento RGPD» = texto de la casilla.
  */
 export function buildResponseData(formKey: FormKey, values: LeadValues): Record<string, string> {
   const labels = FIELD_LABELS[formKey] as Record<string, string>;
   const data: Record<string, string> = {};
   for (const [name, label] of Object.entries(labels)) {
     if (META_FIELDS.has(name)) continue;
-    const value = normaliseValue(values[name]);
+    let value = normaliseValue(values[name]);
+    if (name === 'telefono') value = cleanPhone(value);
     if (value) data[label] = value;
   }
-  data[labels.consentimiento] = 'sí';
-  data[labels.politica] = POLICY_VERSION;
-  const utms = captureUtms();
-  for (const key of UTM_KEYS) {
-    if (utms[key]) data[labels[key]] = utms[key];
-  }
+  data[labels.consentimiento] = CONSENT_TEXT[formKey];
   return data;
 }
+
+/** UTM de la página actual, para la RAÍZ del cuerpo (solo las que existen). */
+export function utmBody(): Partial<Record<(typeof UTM_KEYS)[number], string>> {
+  const utms = captureUtms();
+  const out: Partial<Record<(typeof UTM_KEYS)[number], string>> = {};
+  for (const key of UTM_KEYS) if (utms[key]) out[key] = utms[key];
+  return out;
+}
+
+/** Cuerpo del POST: { response_data, utm_source?, utm_medium?, utm_campaign? }. */
+export const buildRequestBody = (responseData: Record<string, string>) => ({ response_data: responseData, ...utmBody() });
 
 /** Etiqueta de AccioGest → nombre interno del campo (para marcar errores). */
 function labelToName(formKey: FormKey, label: string): string | null {
@@ -250,7 +252,7 @@ async function mockSubmit(formKey: FormKey, data: Record<string, string>): Promi
         'Errores de prueba: ?acciogest_mock=400 | 400-email | 429 | 404 | network.',
     );
   }
-  console.info('[AccioGest] response_data simulado:', data);
+  console.info('[AccioGest] cuerpo simulado:', buildRequestBody(data));
   await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
 
   const headers = new Map<string, string>();
@@ -307,9 +309,12 @@ export async function submitLead(
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetch(`${ACCIOGEST_API}/form-builder/public/${encodeURIComponent(FORMS[formKey])}/submit`, {
+      // AccioGest saca la página de origen del Referer (respuestas 19-11): ruta completa solo en
+      // las llamadas a AccioGest, sin cambiar la política de toda la web.
+      referrerPolicy: 'no-referrer-when-downgrade',
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ response_data: data }),
+      body: JSON.stringify(buildRequestBody(data)),
       credentials: 'omit',
       signal: controller.signal,
     });

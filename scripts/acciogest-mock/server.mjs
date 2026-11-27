@@ -2,12 +2,18 @@
 /**
  * Servidor de PRUEBA que imita las rutas públicas de AccioGest que usa la web (fase A):
  *
- *   GET /plugin-citas/public/{id}/catalogo   → scripts/acciogest-mock/catalogo.json
+ *   GET /plugin-citas/public/{id}/catalogo   → 404, como la API real (la ruta no existe,
+ *                                               WEB-INTEGRACION 12-11 §4): la compilación avisa y
+ *                                               usa servicios.json. Con --catalogo sirve
+ *                                               scripts/acciogest-mock/catalogo.json.
  *   GET /form-builder/public/{id}             → scripts/acciogest-mock/plan-form.json (por plan)
  *   GET /plugin-citas-embed.js?pluginId=…&service=…
- *                                             → crea en #acciogest-booking un iframe de prueba
+ *                                             → crea en #acciogest-booking un iframe de prueba y
+ *                                               define window.AccioGestBooking.setService(id), que
+ *                                               vuelve a montar el iframe con otro servicio
  *   GET /mock/booking-frame.html              → el iframe: envía a window.parent
- *        { type: 'acciogest:booking:height', height } y { type: 'acciogest:booking:done', citaId, serviceId }
+ *        { type: 'acciogest:booking:height', height } y
+ *        { type: 'acciogest:booking:done', citaId: <número>, serviceId: <número o null> }
  *
  * Opcional: --dist dist sirve también la web compilada (todo en un mismo puerto).
  *
@@ -32,6 +38,7 @@ const arg = (name, fallback) => {
 };
 const PORT = Number(arg('port', process.env.PORT || 4322));
 const DIST = args.includes('--dist') ? resolve(arg('dist', 'dist')) : null;
+const SERVE_CATALOGO = args.includes('--catalogo');
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.avif': 'image/avif', '.webp': 'image/webp', '.woff2': 'font/woff2', '.xml': 'application/xml', '.webmanifest': 'application/manifest+json', '.txt': 'text/plain' };
 
 const embedJs = `(function () {
@@ -39,13 +46,19 @@ const embedJs = `(function () {
   var src = new URL(me.src);
   var host = document.getElementById('acciogest-booking');
   if (!host) return;
-  var f = document.createElement('iframe');
-  f.title = 'Reserva (PRUEBA)';
-  f.src = src.origin + '/mock/booking-frame.html?pluginId=' + encodeURIComponent(src.searchParams.get('pluginId') || '') +
-    '&service=' + encodeURIComponent(src.searchParams.get('service') || '');
-  f.style.width = '100%';
-  f.style.border = '0';
-  host.appendChild(f);
+  var pluginId = src.searchParams.get('pluginId') || '';
+  function mount(service) {
+    var f = document.createElement('iframe');
+    f.title = 'Reserva (PRUEBA)';
+    f.src = src.origin + '/mock/booking-frame.html?pluginId=' + encodeURIComponent(pluginId) +
+      '&service=' + encodeURIComponent(service == null ? '' : String(service));
+    f.style.width = '100%';
+    f.style.border = '0';
+    host.replaceChildren(f);
+  }
+  mount(src.searchParams.get('service'));
+  // Como el script real: cambia de servicio sin volver a cargar el script (null o '' = ninguno).
+  window.AccioGestBooking = { setService: function (id) { mount(id === '' ? null : id); } };
 })();`;
 
 const frameHtml = `<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
@@ -64,7 +77,11 @@ const frameHtml = `<!doctype html><html lang="es"><meta charset="utf-8"><meta na
   function send() { parent.postMessage({ type: 'acciogest:booking:height', height: document.documentElement.scrollHeight }, '*'); }
   document.getElementById('grow').onclick = function () { extra += 400; pad.style.height = extra + 'px'; send(); };
   document.getElementById('shrink').onclick = function () { extra = Math.max(0, extra - 400); pad.style.height = extra + 'px'; send(); };
-  document.getElementById('done').onclick = function () { parent.postMessage({ type: 'acciogest:booking:done', citaId: 'MOCK-' + Date.now(), serviceId: svc || null }, '*'); };
+  // Como la API real: citaId y serviceId son números (serviceId null si no hay servicio entero).
+  document.getElementById('done').onclick = function () {
+    var sid = /^\\d+$/.test(svc) ? Number(svc) : null;
+    parent.postMessage({ type: 'acciogest:booking:done', citaId: Math.floor(Date.now() / 1000) % 100000, serviceId: sid }, '*');
+  };
   addEventListener('load', send);
 </script></html>`;
 
@@ -84,7 +101,10 @@ const server = createServer(async (req, res) => {
   };
   try {
     let m;
-    if ((m = u.pathname.match(/^\/plugin-citas\/public\/([^/]+)\/catalogo\/?$/))) return send(200, 'application/json', JSON.stringify(await json('catalogo.json')));
+    if ((m = u.pathname.match(/^\/plugin-citas\/public\/([^/]+)\/catalogo\/?$/))) {
+      if (!SERVE_CATALOGO) return send(404, 'application/json', JSON.stringify({ error: 'Not found' }));
+      return send(200, 'application/json', JSON.stringify(await json('catalogo.json')));
+    }
     if ((m = u.pathname.match(/^\/form-builder\/public\/([^/]+)\/?$/))) {
       const forms = await json('plan-form.json');
       const key = ['basico', 'estandar', 'premium'].find((k) => decodeURIComponent(m[1]).toLowerCase().includes(k)) ?? 'basico';

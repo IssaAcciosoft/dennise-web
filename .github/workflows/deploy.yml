@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Sin dominio definitivo no se publica: canonical, Open Graph, JSON-LD, sitemap y robots.txt
-      # apuntarían al marcador https://denissegonzalez.example.
+      # apuntarían al dominio de producción de Netlify (https://dggestoresyabogados.com).
       - name: Check SITE_URL
         if: ${{ vars.SITE_URL == '' }}
         run: |

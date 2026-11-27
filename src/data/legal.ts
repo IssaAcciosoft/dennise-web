@@ -1,20 +1,13 @@
 /**
- * Textos legales compartidos entre los formularios y la política de privacidad.
- * El texto de cada casilla de consentimiento DEBE coincidir con las finalidades descritas en
- * /politica-privacidad/ (§3), que los muestra desde aquí. Versión: POLICY_VERSION
- * (src/config/acciogest.ts), que se envía con cada formulario como «Versión política».
+ * Textos legales compartidos entre los formularios y las páginas legales.
+ * Los textos EXACTOS de las casillas de consentimiento están en src/data/consent.ts (los que
+ * AccioGest guarda como prueba del consentimiento, handoff 19-11-2026 §2); la política de
+ * privacidad (§2) los cita desde allí. Desde el handoff del 19-11 ya no se envía la versión de
+ * la política: se guarda el texto de la casilla y la fecha del envío.
  */
 import type { FormKey } from '~/config/acciogest';
 
-/** Va detrás de «He leído y acepto la política de privacidad y…». */
-export const CONSENT: Record<FormKey, string> = {
-  historia:
-    'consiento expresamente el tratamiento de los datos de mi historia, incluidos los datos sensibles que decida incluir, para que Denisse González pueda leerla, contactarme y, solo si lo he indicado, compartirla públicamente.',
-  servicio:
-    'consiento el tratamiento de mis datos para que Denisse González atienda mi solicitud de información sobre el servicio elegido y se ponga en contacto conmigo.',
-  contacto:
-    'consiento el tratamiento de mis datos para que Denisse González responda a mi mensaje y se ponga en contacto conmigo.',
-};
+export { CONSENT_TEXT } from './consent';
 
 /** Nombre visible de cada formulario (política de privacidad). */
 export const FORM_NAMES: Record<FormKey, string> = {
@@ -33,3 +26,12 @@ export const LEGAL_ID = {
   nie: 'Z1195681P',
   tradeName: 'DG Gestores y Abogados',
 } as const;
+
+/**
+ * Proveedor de alojamiento web (política de privacidad, apartado 5). El alojamiento aún no está
+ * decidido (revisión legal de AccioGest, 24-11-2026). Mientras `name` esté vacío se muestra el
+ * marcador {ALOJAMIENTO} y `npm run check:publish` falla: no se publica con el marcador.
+ */
+export const HOSTING: { name: string; country: string } = { name: 'Netlify, Inc.', country: 'Estados Unidos' };
+export const HOSTING_PLACEHOLDER = '{ALOJAMIENTO}';
+export const HOSTING_LABEL = HOSTING.name ? `${HOSTING.name}${HOSTING.country ? ` (${HOSTING.country})` : ''}` : HOSTING_PLACEHOLDER;

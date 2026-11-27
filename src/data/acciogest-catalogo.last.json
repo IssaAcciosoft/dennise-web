@@ -2,5 +2,21 @@
   "_comment": "Última respuesta buena de AccioGest (la escribe la compilación: src/integrations/acciogest-catalog.mjs). Se usa si AccioGest no responde. No editar a mano.",
   "plugin_id": null,
   "catalog": null,
-  "plans": {}
+  "plans": {
+    "basico": {
+      "form_id": "49",
+      "amount": 242,
+      "saved_at": "2026-11-24T11:23:26.094Z"
+    },
+    "estandar": {
+      "form_id": "50",
+      "amount": 315,
+      "saved_at": "2026-11-24T11:23:26.094Z"
+    },
+    "premium": {
+      "form_id": "51",
+      "amount": 425,
+      "saved_at": "2026-11-24T11:23:26.094Z"
+    }
+  }
 }
