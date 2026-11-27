@@ -34,9 +34,10 @@ producción.
 - **Qué cambió en la web:** los IDs reales son los valores por defecto, así que el modo simulado
   (y su aviso «Modo de prueba») no se activa nunca con ellos; `?acciogest_mock` no hace nada con
   IDs reales y `?acciogest_debug=1` solo escribe en la consola. Se quitaron los comentarios
-  pendientes de AccioGest ya resueltos. El marcador del alojamiento pasa a ser `{ALOJAMIENTO}`
-  (el alojamiento no es Netlify y aún no está decidido): `npm run check:publish` falla mientras
-  siga.
+  pendientes de AccioGest ya resueltos. Publicada el 27-11-2026 (PR #1, fusionada a las 18:36) con
+  alojamiento en Netlify, Inc. (Estados Unidos) (`HOSTING` en `src/data/legal.ts`). Si se cambia
+  de alojamiento, se actualiza `HOSTING`; con el nombre vacío se muestra `{ALOJAMIENTO}` y
+  `npm run check:publish` falla mientras siga.
 - **Pruebas en real:** no enviar formularios, reservas ni pagos de prueba contra
   `api.acciogest.com` (la tarjeta 4242 se rechaza). En pruebas automáticas, interceptar los POST a
   AccioGest y responder con un 201 falso.
@@ -539,8 +540,9 @@ Aplicada tal cual (`docs/revision-legal-acciogest-2026-11-24.txt`):
   (sin cabecera, pie ni botones). Regenerarlo cada vez que cambie el texto.
 - **Antes de publicar:** `npm run check:publish` falla mientras quede `{ALOJAMIENTO}` o el PDF
   sea más antiguo que la página.
-- **Alojamiento:** la web no irá en Netlify. En el nuevo alojamiento hay que reproducir lo que hoy
-  hace `netlify.toml`: cabeceras (`Referrer-Policy: strict-origin-when-cross-origin`, cachés de
+- **Alojamiento:** al final se queda en Netlify (27-11-2026). Si algún día se cambia, en el nuevo
+  alojamiento hay que reproducir lo que hoy hace
+  `netlify.toml`: cabeceras (`Referrer-Policy: strict-origin-when-cross-origin`, cachés de
   `/_astro/*`), la redirección 301 de `/dubai/` a `/apertura-de-empresas/` y el comando de
   compilación (`npm run build`, carpeta `dist/`). `astro.config.mjs` usa
   `https://dggestoresyabogados.com` fuera de las vistas previas de Netlify.

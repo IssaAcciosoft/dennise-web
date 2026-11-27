@@ -154,9 +154,9 @@ de producción son los valores por defecto de `src/config/acciogest.ts` (las var
 - Qué cambió: el modo simulado y su aviso «Modo de prueba» ya no se activan con los IDs
   configurados (solo con valores de ejemplo, en desarrollo); `?acciogest_mock` no hace nada con
   IDs reales y `?acciogest_debug=1` solo escribe en la consola. Fuera los comentarios pendientes
-  de AccioGest ya resueltos. El alojamiento aún no está decidido (no es Netlify): la política de
-  privacidad muestra `{ALOJAMIENTO}` y `npm run check:publish` falla hasta rellenar `HOSTING` en
-  `src/data/legal.ts`. Las menciones a Netlify de este README son de la configuración anterior.
+  de AccioGest ya resueltos. Publicada el 27-11-2026 (PR #1). Alojamiento: Netlify, Inc. (Estados Unidos), en `HOSTING` de
+  `src/data/legal.ts` (si se cambia de alojamiento, actualizarlo; con `HOSTING.name` vacío la
+  política muestra `{ALOJAMIENTO}` y `npm run check:publish` falla).
 - **No** enviar formularios, reservas ni pagos de prueba a `api.acciogest.com` (la tarjeta 4242
   se rechaza). En pruebas automáticas, interceptar los POST a AccioGest y responder con un 201
   falso.
@@ -547,16 +547,16 @@ De la cliente (ver `docs/contenido.md` §7):
 3. Alertas de la web anterior (`docs/web-anterior.md` §9): fiscalidad en Dubái (frases matizadas
    marcadas como pendientes de revisión legal), cifra «más de 1000» (no publicada), permiso del
    testimonio de Jose, nacionalidad «por matrimonio o descendencia».
-4. Permiso del equipo (Everardo Corona, Stephanie González, Mishell A. González) y de los
-   partners (Poplavsky, De la Flor Abogados, Espiga Exports, Ariel Noriega) para publicar; una
-   foto mejor de Stephanie si existe; nombre y descripción de «Bienvenido / Welcome!» (proyecto
-   de Everardo Corona, PENDIENTE); originales de los logos de Empoderando Voces sin recortar.
+4. Permiso del equipo (Everardo Corona, Stephanie González) y de los partners (Poplavsky, De la
+   Flor Abogados, Madrazo & Rosales, Espiga Exports, Ariel Noriega) para publicar; una foto mejor
+   de Stephanie si existe; nombre y descripción de «Bienvenido / Welcome!» (proyecto de Ariel
+   Noriega, PENDIENTE).
 5. ~~AccioGest: IDs, `acciogest_id` y revisión legal~~ → en real desde el 27-11-2026 (README →
-   «Estado 27-11-2026»). Falta: el proveedor de alojamiento (`{ALOJAMIENTO}`, `HOSTING` en
-   `src/data/legal.ts`) y, de la cliente, el proceso tras la compra de un plan.
-6. Logotipo: el original dice «Gonzalez» sin tilde y así se ha reproducido; confirmar.
-7. Confirmar si los precios de las asesorías (60/80 €, 30/50 €, 45/65 €) incluyen IVA. Hoy solo
-   se indica «IVA incluido» en los planes.
+   «Estado 27-11-2026»), publicada el 27-11 en Netlify. Falta, de la cliente, el proceso tras la
+   compra de un plan.
+6. ~~Logotipo~~ → la web usa «Gestores y Abogados» junto al monograma (24-11-2026).
+7. ~~IVA de las asesorías~~ → todos los precios incluyen el IVA (21 %), como dicen el aviso legal
+   y las condiciones.
 8. Idiomas de atención y zona en la que presta servicio (JSON-LD `knowsLanguage`, `areaServed`).
 9. Validar la transcripción del artículo «8 de marzo — Voces que se unen».
 10. ~~Dominio definitivo~~: `https://dggestoresyabogados.com` (AccioGest, 19-11). Conectarlo en
