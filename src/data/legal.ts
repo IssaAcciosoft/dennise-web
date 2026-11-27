@@ -32,6 +32,6 @@ export const LEGAL_ID = {
  * decidido (revisión legal de AccioGest, 24-11-2026). Mientras `name` esté vacío se muestra el
  * marcador {ALOJAMIENTO} y `npm run check:publish` falla: no se publica con el marcador.
  */
-export const HOSTING: { name: string; country: string } = { name: '', country: '' };
+export const HOSTING: { name: string; country: string } = { name: 'Netlify, Inc.', country: 'Estados Unidos' };
 export const HOSTING_PLACEHOLDER = '{ALOJAMIENTO}';
 export const HOSTING_LABEL = HOSTING.name ? `${HOSTING.name}${HOSTING.country ? ` (${HOSTING.country})` : ''}` : HOSTING_PLACEHOLDER;
